@@ -13,10 +13,10 @@
     "@iden3/iden3": "0.0.27",
     "@types/node": "^12.12.0",
     "big-integer": "^1.6.44",
-    "circom": "0.0.30",
-    "circomlib": "0.0.18",
+    "circom": "0.0.35",
+    "circomlib": "0.0.21",
     "eslint-plugin-mocha": "^6.1.0",
-    "snarkjs": "^0.1.17"
+    "snarkjs": "^0.1.20"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
