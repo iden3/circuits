@@ -15,26 +15,43 @@ template BuildClaimAuthKSignBBJJ() {
 	signal output hv;
 
 	component e0 = Bits2Num(256);
-	for (var i=0; i<64; i++) {
-		e0.in[256-64+i] <== (CLAIM_TYPE >> i) & 1; // As go-iden3-core/core/claims/claim.go:100 uses BigEndian
+	for (var i=0; i<64-8+1; i++) {
+		e0.in[64-8-i] <== (CLAIM_TYPE >> i) & 1;
 	}
-	for (var i=0; i<256-64; i++) {
+	for (var i=64-8+1; i<256; i++) {
 		e0.in[i] <== 0;
 	}
+
+	// SWAPPED e0
+	// for (var i=0; i<64; i++) {
+	// 	e0.in[256-64+i] <== (CLAIM_TYPE >> i) & 1; // As go-iden3-core/core/claims/claim.go:100 uses BigEndian
+	// }
+	// for (var i=0; i<256-64; i++) {
+	// 	e0.in[i] <== 0;
+	// }
 
 	// component versionBits = Num2Bits(32);
 	// versionBits.in <== VERSION;
 	
 	component e1 = Bits2Num(256);
-
 	component signBits = Num2Bits(8);
 	signBits.in <== sign;
 	for (var i=0; i<8; i++) {
-		e1.in[256-8+i] <== signBits.out[i];
+		e1.in[i] <== signBits.out[i];
 	}
-	for (var i=0; i<256-8; i++) {
+	for (var i=8; i<256; i++) {
 		e1.in[i] <== 0;
 	}
+
+	// SWAPPED e1
+	// component signBits = Num2Bits(8);
+	// signBits.in <== sign;
+	// for (var i=0; i<8; i++) {
+	// 	e1.in[256-8+i] <== signBits.out[i];
+	// }
+	// for (var i=0; i<256-8; i++) {
+	// 	e1.in[i] <== 0;
+	// }
 	
 
 	// Hi
