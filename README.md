@@ -1,4 +1,5 @@
-# circuits
+# circuits [![Build Status](https://travis-ci.org/iden3/circuits.svg?branch=master)](https://travis-ci.org/iden3/circuits)
+
 Circuits used by the iden3 core protocol.
 
 [WIP]
