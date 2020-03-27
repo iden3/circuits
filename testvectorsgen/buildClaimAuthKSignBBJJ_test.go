@@ -15,6 +15,7 @@ import (
 )
 
 func TestPoseidon(t *testing.T) {
+	fmt.Println("\n-------\nPoseidon test vectors:")
 	z := big.NewInt(0)
 	r, err := poseidon.PoseidonHash([poseidon.T]*big.Int{z, z, z, z, z, z})
 	assert.Nil(t, err)
@@ -37,9 +38,11 @@ func TestPoseidon(t *testing.T) {
 	r, err = poseidon.PoseidonHash([poseidon.T]*big.Int{big.NewInt(2), big.NewInt(3), big.NewInt(4), z, z, z})
 	assert.Nil(t, err)
 	fmt.Println("PoseidonHash [2, 3, 4]", r)
+	fmt.Println("\nEnd of Poseidon test vectors\n-----")
 }
 
-func TestGenTestVector(t *testing.T) {
+func TestBuildClaimAuthKSignBabyJubJub(t *testing.T) {
+	fmt.Println("\n-------\nBuildClaimAuthKSignBabyJubJub test vectors:")
 	privKHex := "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69f"
 	// Create new claim
 	var k babyjub.PrivateKey
@@ -91,4 +94,5 @@ func TestGenTestVector(t *testing.T) {
 	// assert.Equal(t, c0.Metadata(), c1.Metadata())
 	// assert.Equal(t, c0, c2)
 	// assert.True(t, merkletree.CheckEntryInField(*e))
+	fmt.Println("\nEnd of BuildClaimAuthKSignBabyJub test vectors\n-----")
 }

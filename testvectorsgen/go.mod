@@ -2,7 +2,7 @@ module vectorsGen
 
 go 1.13
 
-replace github.com/iden3/go-iden3-core => ../../../go-iden3-core
+replace github.com/iden3/go-iden3-core => ../../go-iden3-core
 
 require (
 	github.com/iden3/go-iden3-core v0.0.7
