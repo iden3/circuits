@@ -54,9 +54,9 @@ func TestIdStateInputs(t *testing.T) {
 
 	claimKOp := claims.NewClaimAuthorizeKSignBabyJub(pk)
 
-	clt, err := merkletree.NewMerkleTree(db.NewMemoryStorage(), 140)
+	clt, err := merkletree.NewMerkleTree(db.NewMemoryStorage(), 3)
 	assert.Nil(t, err)
-	rot, err := merkletree.NewMerkleTree(db.NewMemoryStorage(), 140)
+	rot, err := merkletree.NewMerkleTree(db.NewMemoryStorage(), 3)
 	assert.Nil(t, err)
 
 	id, err := genesis.CalculateIdGenesisMT(clt, rot, claimKOp, []merkletree.Entrier{})
@@ -75,8 +75,27 @@ func TestIdStateInputs(t *testing.T) {
 	for _, s := range proof.Siblings {
 		fmt.Println("s", s)
 	}
+	fmt.Println("claimsTreeRoot", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(clt.RootKey()))) // internally SwapsEndianness of the bytes
 	// mtp := ProofToMTP(proof)
 	// fmt.Println(mtp)
 
 	fmt.Println("\nEnd of IdState test vectors\n-----")
 }
+
+// func ProofToMTP(p *merkletree.Proof) []byte {
+//         var siblings [][]byte
+//
+//         bsLen := merkletree.ProofFlagsLen + len(p.NotEmpties) + merkletree.ElemBytesLen*len(p.Siblings)
+//         fmt.Println(bsLen)
+//         // if p.NodeAux != nil {
+//         //         bsLen += 2 * merkletree.ElemBytesLen
+//         // }
+//         // bs := make([]byte, bsLen)
+//         //
+//         // for i, k := range p.Siblings {
+//         //
+//         // }
+//
+//         siblings = append(siblings, []byte{0}) // circom leaf protection
+//         return []byte{}
+// }
