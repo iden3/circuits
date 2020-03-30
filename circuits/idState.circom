@@ -47,18 +47,16 @@ include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "buildClaimAuthKSignBBJJ.circom";
 
 template IdState(nLevels) {
-	signal input nullifier;
+	signal input nullifier; // not used yet
 	signal input oldIdState;
 	signal private input userPrivateKey;
 	signal private input pbkSign;
 	signal private input pbkAy;
 	signal private input mtp[nLevels];
 	signal input claimsTreeRoot;
-	signal input revTreeRoot;
-	signal input rootsTreeRoot;
+	signal input revTreeRoot; // not used yet
+	signal input rootsTreeRoot; // not used yet
 	signal input newIdState;
-
-	signal output out; // TMP
 
 	// check newIdState is not zero
 	component idStateIsZero = IsZero();
@@ -79,7 +77,24 @@ template IdState(nLevels) {
 	claim.sign <== pbkSign;
 	claim.ay <== pbkAy;
 
-	out <== claim.hi; // TMP
+
+	// check claim existance
+	component smtClaimExists = SMTVerifier(nLevels);
+	smtClaimExists.enabled <== 1;
+	smtClaimExists.fnc <== 0;
+	smtClaimExists.root <== claimsTreeRoot;
+	for (var i=0; i<nLevels; i++) {
+		smtClaimExists.siblings[i] <== mtp[i];
+	}
+	smtClaimExists.oldKey <== 0;
+	smtClaimExists.oldValue <== 0;
+	smtClaimExists.isOld0 <== 0;
+	smtClaimExists.key <== claim.hi;
+	smtClaimExists.value <== claim.hv;
 
 	// WIP
+
+	// check claim not revokated (not in this version)
+
+	// nullifier
 }
