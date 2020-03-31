@@ -62,6 +62,7 @@ func TestIdStateInputs(t *testing.T) {
 	id, err := genesis.CalculateIdGenesisMT(clt, rot, claimKOp, []merkletree.Entrier{})
 	assert.Nil(t, err)
 	fmt.Println("id", id)
+	fmt.Println("id", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
 
 	// get claimproof
 	hi, err := claimKOp.Entry().HIndex()
@@ -75,9 +76,29 @@ func TestIdStateInputs(t *testing.T) {
 	for _, s := range proof.Siblings {
 		fmt.Println("s", s)
 	}
+	fmt.Println("claimsTreeRoot", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
 	fmt.Println("claimsTreeRoot", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(clt.RootKey()))) // internally SwapsEndianness of the bytes
+	fmt.Println("rootsTreeRoot", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(rot.RootKey())))
 	// mtp := ProofToMTP(proof)
 	// fmt.Println(mtp)
+
+	fmt.Println("--- copy & paste into idState.test.js ---")
+	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
+	fmt.Printf(`nullifier: "%s",`+"\n", "0")
+	fmt.Printf(`oldIdState: "%s",`+"\n", "0")
+	fmt.Printf(`userPrivateKey: "%s",`+"\n", skToBigInt(&k))
+	if babyjub.PointCoordSign(pk.X) {
+		fmt.Printf(`pbkSign: "1",` + "\n")
+	} else {
+		fmt.Printf(`pbkSign: "0",` + "\n")
+	}
+	fmt.Printf(`pbkAy: "%s",`+"\n", pk.Y)
+	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP
+	fmt.Printf(`claimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
+	fmt.Printf(`revTreeRoot: "0",` + "\n") // TMP
+	fmt.Printf(`rootsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
+	fmt.Printf(`newIdState: "1"` + "\n") // TMP
+	fmt.Println("--- end of copy & paste to idState.test.js ---")
 
 	fmt.Println("\nEnd of IdState test vectors\n-----")
 }

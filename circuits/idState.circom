@@ -24,7 +24,7 @@ PRI_UserPrivateKey+----->+          |                                  +--------
                          |          |                                                           |
 PUB_OldIdState+--------->+ Poseidon |                                  +---------+              |
                          |          +<----------+        +----+        |         +<-------------+
-                         |          |           |        | == +<-------+         |
+PUB_NewIdState+--------->+          |           |        | == +<-------+         |
                          +----+-----+           |        +-+--+        |  ID     +<------------+PUB_RevTreeRoot
                               |                 |          ^           |  State  |
                               v                 |          |           |         +<------------+PUB_RootsTreeRoot
@@ -32,8 +32,9 @@ PUB_OldIdState+--------->+ Poseidon |                                  +--------
       PUB_Nullifier+------->+ == |              |          |           +---------+
                             +----+              |          |
                                                 |          +                 +----+
-                                                +----+PUB_NewIdState+------->+ != +<------+0
+                                                +------+PUB_ID+------------->+ != +<------+0
                                                                              +----+
+
 
 
 */
@@ -46,7 +47,37 @@ include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "buildClaimAuthKSignBBJJ.circom";
 
+
+template cutId() {
+	signal input in;
+	signal output out;
+
+	component idBits = Num2Bits(256);
+	idBits.in <== in;
+
+	component cutted = Bits2Num(256-16-16-8);
+	for (var i=16; i<256-16-8; i++) {
+		cutted.in[i-16] <== idBits.out[i];
+	}
+	out <== cutted.out
+}
+
+template cutState() {
+	signal input in;
+	signal output out;
+
+	component stateBits = Num2Bits(256);
+	stateBits.in <== in;
+
+	component cutted = Bits2Num(256-16-16-8);
+	for (var i=0; i<256-16-16-8; i++) {
+		cutted.in[i] <== stateBits.out[i+16+16+8];
+	}
+	out <== cutted.out
+}
+
 template IdState(nLevels) {
+	signal input id;
 	signal input nullifier; // not used yet
 	signal input oldIdState;
 	signal private input userPrivateKey;
@@ -92,9 +123,27 @@ template IdState(nLevels) {
 	smtClaimExists.key <== claim.hi;
 	smtClaimExists.value <== claim.hv;
 
+	// check identity state
+	// note that the Type & Checksum on this version is not verified
+	component calcIdState = Poseidon(3, 6, 8, 57);
+	calcIdState.inputs[0] <== claimsTreeRoot;
+	calcIdState.inputs[1] <== revTreeRoot;
+	calcIdState.inputs[2] <== rootsTreeRoot;
+
+	component cuttedState = cutState();
+	cuttedState.in <== calcIdState.out;
+	
+	component cuttedId = cutId();
+	cuttedId.in <== id;
+
+	component checkIdState = IsEqual();
+	checkIdState.in[0] <== cuttedState.out;
+	checkIdState.in[1] <== cuttedId.out;
+	checkIdState.out === 1;
+
 	// WIP
 
 	// check claim not revokated (not in this version)
 
-	// nullifier
+	// nullifier checks
 }
