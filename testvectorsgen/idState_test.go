@@ -12,6 +12,7 @@ import (
 	"github.com/iden3/go-iden3-core/db"
 	"github.com/iden3/go-iden3-core/merkletree"
 	"github.com/iden3/go-iden3-crypto/babyjub"
+	"github.com/iden3/go-iden3-crypto/poseidon"
 	cryptoUtils "github.com/iden3/go-iden3-crypto/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -82,9 +83,26 @@ func TestIdStateInputs(t *testing.T) {
 	// mtp := ProofToMTP(proof)
 	// fmt.Println(mtp)
 
+	// newIdState
+	newIdState := new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes()))
+
+	var zero32 [32]byte
+	oldIdState := zero32[:]
+	// nullifier
+	bi := [poseidon.T]*big.Int{
+		skToBigInt(&k),
+		new(big.Int).SetBytes(oldIdState),
+		newIdState,
+		big.NewInt(0),
+		big.NewInt(0),
+		big.NewInt(0),
+	}
+	nullifier, err := poseidon.PoseidonHash(bi)
+	assert.Nil(t, err)
+
 	fmt.Println("--- copy & paste into idState.test.js ---")
 	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
-	fmt.Printf(`nullifier: "%s",`+"\n", "0")
+	fmt.Printf(`nullifier: "%s",`+"\n", nullifier)
 	fmt.Printf(`oldIdState: "%s",`+"\n", "0")
 	fmt.Printf(`userPrivateKey: "%s",`+"\n", skToBigInt(&k))
 	if babyjub.PointCoordSign(pk.X) {
@@ -97,7 +115,7 @@ func TestIdStateInputs(t *testing.T) {
 	fmt.Printf(`claimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
 	fmt.Printf(`revTreeRoot: "0",` + "\n") // TMP
 	fmt.Printf(`rootsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
-	fmt.Printf(`newIdState: "1"` + "\n") // TMP
+	fmt.Printf(`newIdState: "%s"`+"\n", newIdState) // TMP
 	fmt.Println("--- end of copy & paste to idState.test.js ---")
 
 	fmt.Println("\nEnd of IdState test vectors\n-----")

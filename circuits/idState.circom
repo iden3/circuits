@@ -146,4 +146,13 @@ template IdState(nLevels) {
 	// check claim not revokated (not in this version)
 
 	// nullifier checks
+	component nullifierHash = Poseidon(3, 6, 8, 57);
+	nullifierHash.inputs[0] <== userPrivateKey;
+	nullifierHash.inputs[1] <== oldIdState;
+	nullifierHash.inputs[2] <== newIdState;
+	
+	component checkNullifier = IsEqual();
+	checkNullifier.in[0] <== nullifierHash.out;
+	checkNullifier.in[1] <== nullifier;
+	checkNullifier.out === 1;
 }
