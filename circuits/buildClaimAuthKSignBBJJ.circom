@@ -2,6 +2,7 @@ include "../node_modules/circomlib/circuits/babyjub.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
+include "./utils.circom";
 
 template BuildClaimAuthKSignBBJJ() {
 	var CLAIM_TYPE  = 1;
@@ -15,10 +16,11 @@ template BuildClaimAuthKSignBBJJ() {
 	signal output hv;
 
 	component e0 = Bits2Num(256);
-	for (var i=0; i<64-8+1; i++) {
-		e0.in[64-8-i] <== (CLAIM_TYPE >> i) & 1;
+	var claimType = bigEndian(CLAIM_TYPE, 64);
+	for (var i=0; i<64; i++) {
+		e0.in[i] <== claimType[i];
 	}
-	for (var i=64-8+1; i<256; i++) {
+	for (var i=64; i<256; i++) {
 		e0.in[i] <== 0;
 	}
 
