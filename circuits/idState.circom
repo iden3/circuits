@@ -53,9 +53,9 @@ template IdState(nLevels) {
 	signal input newIdState;
 
 	// check newIdState is not zero
-	component idStateIsZero = IsZero();
-	idStateIsZero.in <==newIdState;
-	idStateIsZero.out === 0;
+	component idStateIsNotZero = IsZero();
+	idStateIsNotZero.in <==newIdState;
+	idStateIsNotZero.out === 0;
 
 	// nullifier checks
 	component nullifierHash = Poseidon(3, 6, 8, 57);

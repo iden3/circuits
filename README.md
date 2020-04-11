@@ -10,3 +10,5 @@ Circuits:
 - [Identity Ownership](circuits/idOwnership.circom): circuit used to verify that the prover is the owner of the Identity
 - [Identity State Update](circuits/idState.circom): circuit used to verify validity when updating an Identity State
 - [BuildClaimAuthKSignBBJJ](circuits/buildClaimAuthKSignBBJJ.circom): circuit used build ClaimAuthKSignBabyJub 
+- [BuildClaimBasicAboutId](circuits/buildClaimBasicAboutId.circom): circuit used build ClaimBasic about a specific Id 
+- [Credential](circuits/credential.circom): circuit used to verify a Credential. This means that the prover is the owner of the identity, which identity is inside a ClaimBasic, and that claim is inside the MerkleTree of the Issuer identity
