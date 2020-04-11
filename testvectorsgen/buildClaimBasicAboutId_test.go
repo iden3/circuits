@@ -20,7 +20,7 @@ func TestBuildClaimBasicAboutId(t *testing.T) {
 
 	var indexSlot [claims.IndexSlotLen]byte
 	var valueSlot [claims.ValueSlotLen]byte
-	copy(indexSlot[(152/8):], id.Bytes())
+	copy(indexSlot[(152/8):], common3.SwapEndianness(id.Bytes()))
 	c0 := claims.NewClaimBasic(indexSlot, valueSlot)
 	fmt.Println(c0.Entry().Bytes())
 

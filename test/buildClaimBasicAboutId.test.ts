@@ -20,14 +20,14 @@ describe("buildClaimBasicAboutId test", function () {
         const circuit = new snarkjs.Circuit(compiledCircuit);
 
         const witness = circuit.calculateWitness({
-            id: "1526306386667696699751338020294850047314334048323423451965519591836440"
+            id: "42480995223634099390927232964573436282320794921974209609166261920409845760",
         });
         assert(circuit.checkWitness(witness));
     
         const rHi = witness[circuit.getSignalIdx("main.hi")];
         const rHv = witness[circuit.getSignalIdx("main.hv")];
 
-        assert.equal(rHi.toString(), "12734049711055761433488870890598520976407418887645073210334330682303276431766", "not equal");
+        assert.equal(rHi.toString(), "11770565937244736673039893150560708502121956760806969885324016670732649350750", "not equal");
         assert.equal(rHv.toString(), "951383894958571821976060584138905353883650994872035011055912076785884444545", "not equal");
      });
 });

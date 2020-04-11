@@ -17,8 +17,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const nLevels = 3
-
 func pruneBuffer(buf *[32]byte) *[32]byte {
 	buf[0] = buf[0] & 0xF8
 	buf[31] = buf[31] & 0x7F
@@ -40,6 +38,8 @@ func skToBigInt(k *babyjub.PrivateKey) *big.Int {
 func TestIdStateInputs(t *testing.T) {
 	fmt.Println("\n-------\nIdState test vectors:")
 
+	nLevels := 3
+
 	privKHex := "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69f"
 	// Create new claim
 	var k babyjub.PrivateKey
@@ -55,9 +55,9 @@ func TestIdStateInputs(t *testing.T) {
 
 	claimKOp := claims.NewClaimAuthorizeKSignBabyJub(pk)
 
-	clt, err := merkletree.NewMerkleTree(db.NewMemoryStorage(), 3)
+	clt, err := merkletree.NewMerkleTree(db.NewMemoryStorage(), nLevels)
 	assert.Nil(t, err)
-	rot, err := merkletree.NewMerkleTree(db.NewMemoryStorage(), 3)
+	rot, err := merkletree.NewMerkleTree(db.NewMemoryStorage(), nLevels)
 	assert.Nil(t, err)
 
 	id, err := genesis.CalculateIdGenesisMT(clt, rot, claimKOp, []merkletree.Entrier{})
