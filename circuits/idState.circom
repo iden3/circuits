@@ -6,10 +6,11 @@ Circuit to check:
 - nullifier check
 - [in the future] that the identity state transition is correct
 
+
                                    +-------------+
-PUB_ClaimsTreeRoot+--------------->+             +<--------------+PRI_PbkSign
+PUB_ClaimsTreeRoot+--------------->+             |
                                    |             |
-PUB_RevTreeRoot+------------------>+             +<--------------+PRI_PbkAy
+PUB_RevTreeRoot+------------------>+             |
                                    | idOwnership |
 PUB_RootsTreeRoot+---------------->+             +<--------------+PRI_MTP
                                    |             |
@@ -44,8 +45,6 @@ template IdState(nLevels) {
 	signal input nullifier;
 	signal input oldIdState;
 	signal private input userPrivateKey;
-	signal private input pbkSign;
-	signal private input pbkAy;
 	signal private input mtp[nLevels];
 	signal input claimsTreeRoot;
 	signal input revTreeRoot;
@@ -71,8 +70,6 @@ template IdState(nLevels) {
 	component checkIdOwnership = IdOwnership(nLevels);
 	checkIdOwnership.id <== id;
 	checkIdOwnership.userPrivateKey <== userPrivateKey;
-	checkIdOwnership.pbkSign <== pbkSign;
-	checkIdOwnership.pbkAy <== pbkAy;
 	for (var i=0; i<nLevels; i++) {
 		checkIdOwnership.mtp[i] <== mtp[i];
 	}

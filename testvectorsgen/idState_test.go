@@ -105,18 +105,21 @@ func TestIdStateInputs(t *testing.T) {
 	fmt.Printf(`nullifier: "%s",`+"\n", nullifier)
 	fmt.Printf(`oldIdState: "%s",`+"\n", "0")
 	fmt.Printf(`userPrivateKey: "%s",`+"\n", skToBigInt(&k))
-	if babyjub.PointCoordSign(pk.X) {
-		fmt.Printf(`pbkSign: "1",` + "\n")
-	} else {
-		fmt.Printf(`pbkSign: "0",` + "\n")
-	}
-	fmt.Printf(`pbkAy: "%s",`+"\n", pk.Y)
 	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`claimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
 	fmt.Printf(`revTreeRoot: "0",` + "\n") // TMP
 	fmt.Printf(`rootsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
 	fmt.Printf(`newIdState: "%s"`+"\n", newIdState) // TMP
 	fmt.Println("--- end of copy & paste to idState.test.js ---")
+
+	fmt.Println("--- copy & paste into idOwnership.test.js ---")
+	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
+	fmt.Printf(`userPrivateKey: "%s",`+"\n", skToBigInt(&k))
+	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP
+	fmt.Printf(`claimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
+	fmt.Printf(`revTreeRoot: "0",` + "\n") // TMP
+	fmt.Printf(`rootsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
+	fmt.Println("--- end of copy & paste to idOwnership.test.js ---")
 
 	fmt.Println("\nEnd of IdState test vectors\n-----")
 }

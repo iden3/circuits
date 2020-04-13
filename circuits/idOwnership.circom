@@ -5,28 +5,29 @@ Circuit to check that the prover is the owner of the identity
 - prover is owner of the private key
 - prover public key is in a ClaimKAuthBBJJ that is inside the Genesis Identity State
 
-+---------------------+                          +----------+
-|                     |    +----------+          |          +<---------+PRI_MTP
-| buildClaimAuthKBBJJ +--->+          |hi +----->+          |
-|                     |    | Poseidon |          | SMT      |
-+-----+--+------------+    |          |hv +----->+ Poseidon |
-      ^  ^                 +----------+          | Verifier +<---------+PUB_ClaimsTreeRoot
-      |  |                                       |          |             +
-      |  +--+PRI_PbkSign                         |          |             |
-      |                                          +----------+             |
-      +-----+PRI_PbkAy                                                    |
-                 +                               +---------+              |
-                 |                  +----+       |         +<-------------+
-                 |     +----+       | == +<------+         |
-                 +---->+ == |       +-+--+       |  ID     +<------------+PUB_RevTreeRoot
-                       +-+--+         ^          |  State  |
-                         ^            |          |         +<------------+PUB_RootsTreeRoot
-   PRI_UserPrivateKey    |            |          |         |
-            +            |            |          +---------+
-            |       +----+----+       |
-            +------>+ BabyPbk |       +                +----+
-                    +---------+    PUB_ID+------------>+ != +<------+0
+                                                 +----------+
++---------------------+    +----------+          |          +<---------+PRI_MTP
+|                     |    |          |hi +----->+          |
+| buildClaimAuthKBBJJ +--->+ Poseidon |          | SMT      |
+|                     |    |          |hv +----->+ Poseidon |
++----------+----------+    +----------+          | Verifier +<---------+PUB_ClaimsTreeRoot
+           ^                                     |          |             +
+           |                                     |          |             |
+           |                                     +----------+             |
+      +----+----+                                                         |
+      | pvk2pbk |                                +---------+              |
+      +----+----+                   +----+       |         +<-------------+
+           ^                        | == +<------+         |
+           |                        +-+--+       |  ID     +<------------+PUB_RevTreeRoot
+           |                          ^          |  State  |
+           +                          |          |         +<------------+PUB_RootsTreeRoot
+   PRI_UserPrivateKey                 |          |         |
+                                      |          +---------+
+                                      |
+                                      +                +----+
+                                   PUB_ID+------------>+ != +<------+0
                                                        +----+
+
 
 */
 
@@ -70,8 +71,6 @@ template cutState() {
 template IdOwnership(nLevels) {
 	signal input id;
 	signal private input userPrivateKey;
-	signal private input pbkSign;
-	signal private input pbkAy;
 	signal private input mtp[nLevels];
 	signal input claimsTreeRoot;
 	signal input revTreeRoot;
@@ -82,15 +81,10 @@ template IdOwnership(nLevels) {
 	component babyPbk = BabyPbk();
 	babyPbk.in <== userPrivateKey;
 	
-	component pbkCheck = IsEqual();
-	pbkCheck.in[0] <== babyPbk.Ay;
-	pbkCheck.in[1] <== pbkAy;
-	pbkCheck.out === 1;
-
 	// build ClaimAuthKSignBBJJ
 	component claim = BuildClaimAuthKSignBBJJ();
-	claim.sign <== pbkSign;
-	claim.ay <== pbkAy;
+	claim.ax <== babyPbk.Ax;
+	claim.ay <== babyPbk.Ay;
 
 
 	// check claim existance
