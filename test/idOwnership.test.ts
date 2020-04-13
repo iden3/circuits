@@ -12,8 +12,8 @@ describe("idOwnership test", function () {
 
     it("Test IdOwnership", async () => {
         const compiledCircuit = await compiler(
-                    path.join(__dirname, "circuits", "idOwnership.circom"),
-                    { reduceConstraints: false }
+            path.join(__dirname, "circuits", "idOwnership.circom"),
+            { reduceConstraints: false }
         );
         const circuit = new snarkjs.Circuit(compiledCircuit);
 
@@ -21,15 +21,15 @@ describe("idOwnership test", function () {
 
         // input data generated with circuits/testvectorsgen/idState_test.go, which uses go-iden3-core
         const witness = circuit.calculateWitness({
-            id: "42480995223634099390927232964573436282320794921974209609166261920409845760",
-            userPrivateKey: privKStr,
-            pbkSign: "1",
+            id: "90379192157127074746780252349470665474172144646890885515776838193381376",
+            userPrivateKey: "6190793965647866647574058687473278714480561351424348391693421151024369116465",
+            pbkAx: "17640206035128972995519606214765283372613874593503528180869261482403155458945",
             pbkAy: "20634138280259599560273310290025659992320584624461316485434108770067472477956",
-            mtp: ["0", "0", "0", "0"], // extra 0 at the end, circom leaf protection
-            claimsTreeRoot: "6963859623793454942121025237799996624720342105089146156138614533550950268330",
+            mtp: ["0", "0", "0", "0"],
+            claimsTreeRoot: "7752817182466821024912691617317281994168382184623539399016584393749253197138",
             revTreeRoot: "0",
-            rootsTreeRoot: "11557043531030918784902190516497945231385453453624054983601946230075316333252",
+            rootsTreeRoot: "16040558507799920458961815866533497687655590061696007002153111557294098590818",
         });
         assert(circuit.checkWitness(witness));
-     });
+    });
 });

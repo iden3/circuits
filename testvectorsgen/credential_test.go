@@ -48,6 +48,7 @@ func TestCredential(t *testing.T) {
 	// get claimproof
 	hi, err := claimKOp.Entry().HIndex()
 	assert.Nil(t, err)
+	fmt.Println("claim hi", new(big.Int).SetBytes(common3.SwapEndianness(hi[:])))
 	fmt.Println("claim hi", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(hi)))
 	oProof, err := clt.GenerateProof(hi, nil)
 	assert.Nil(t, err)
@@ -69,9 +70,11 @@ func TestCredential(t *testing.T) {
 	// build ClaimBasic about Id
 	var indexSlot [claims.IndexSlotLen]byte
 	var valueSlot [claims.ValueSlotLen]byte
+	// copy(indexSlot[(152/8):], common3.SwapEndianness(id.Bytes()))
 	copy(indexSlot[(152/8):], id.Bytes())
 	claimAboutId := claims.NewClaimBasic(indexSlot, valueSlot)
-	// hiClaimAboutId, _ := claimAboutId.Entry().HIndex()
+	hiClaimAboutId, _ := claimAboutId.Entry().HIndex()
+	fmt.Println("ClaimAboutId hi", new(big.Int).SetBytes(common3.SwapEndianness(hiClaimAboutId[:])))
 	// hvClaimAboutId, _ := claimAboutId.Entry().HValue()
 	// add ClaimAboutId to issuerTree
 	err = issuerTree.AddClaim(claimAboutId)
@@ -82,15 +85,11 @@ func TestCredential(t *testing.T) {
 	fmt.Println("--- copy & paste into idState.test.js ---")
 	fmt.Printf(`issuerRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(issuerTree.RootKey().Bytes())))
 	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP
-	// fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
-	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(id.Bytes()))
+	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
+	fmt.Printf(`// id: "%s",`+"\n", new(big.Int).SetBytes(id.Bytes()))
 
 	fmt.Printf(`oUserPrivateKey: "%s",`+"\n", skToBigInt(&k))
-	if babyjub.PointCoordSign(pk.X) {
-		fmt.Printf(`oPbkSign: "1",` + "\n")
-	} else {
-		fmt.Printf(`oPbkSign: "0",` + "\n")
-	}
+	fmt.Printf(`oPbkAx: "%s",`+"\n", pk.X)
 	fmt.Printf(`oPbkAy: "%s",`+"\n", pk.Y)
 	fmt.Printf(`oMtp: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`oClaimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))

@@ -105,11 +105,7 @@ func TestIdStateInputs(t *testing.T) {
 	fmt.Printf(`nullifier: "%s",`+"\n", nullifier)
 	fmt.Printf(`oldIdState: "%s",`+"\n", "0")
 	fmt.Printf(`userPrivateKey: "%s",`+"\n", skToBigInt(&k))
-	if babyjub.PointCoordSign(pk.X) {
-		fmt.Printf(`pbkSign: "1",` + "\n")
-	} else {
-		fmt.Printf(`pbkSign: "0",` + "\n")
-	}
+	fmt.Printf(`pbkAx: "%s",`+"\n", pk.X)
 	fmt.Printf(`pbkAy: "%s",`+"\n", pk.Y)
 	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`claimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))

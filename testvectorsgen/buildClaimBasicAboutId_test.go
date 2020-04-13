@@ -14,13 +14,16 @@ import (
 func TestBuildClaimBasicAboutId(t *testing.T) {
 	fmt.Println("\n-------\nBuildClaimBasicAboutId test vectors:")
 
-	id, ok := new(big.Int).SetString("42480995223634099390927232964573436282320794921974209609166261920409845760", 10)
+	id, ok := new(big.Int).SetString("90379192157127074746780252349470665474172144646890885515776838193381376", 10)
 	assert.True(t, ok)
 	fmt.Println("id: swap(id)", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
 
 	var indexSlot [claims.IndexSlotLen]byte
 	var valueSlot [claims.ValueSlotLen]byte
+	fmt.Println("id val", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
+	fmt.Println("id noswap", new(big.Int).SetBytes(id.Bytes()))
 	copy(indexSlot[(152/8):], common3.SwapEndianness(id.Bytes()))
+	// copy(indexSlot[(152/8):], id.Bytes())
 	c0 := claims.NewClaimBasic(indexSlot, valueSlot)
 	fmt.Println(c0.Entry().Bytes())
 
@@ -41,5 +44,9 @@ func TestBuildClaimBasicAboutId(t *testing.T) {
 
 	fmt.Println("hv string", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(hv)))
 
-	fmt.Println("\nEnd of BuildClaimAuthKSignBabyJub test vectors\n-----")
+	fmt.Println("Expected outputs:")
+	fmt.Println("hi:", new(big.Int).SetBytes(common3.SwapEndianness(hi[:])))
+	fmt.Println("hv:", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(hv)))
+
+	fmt.Println("\nEnd of BuildClaimBasicAboutId test vectors\n-----")
 }

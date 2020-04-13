@@ -10,36 +10,7 @@ import (
 	"github.com/iden3/go-iden3-core/core/claims"
 	"github.com/iden3/go-iden3-core/merkletree"
 	"github.com/iden3/go-iden3-crypto/babyjub"
-	"github.com/iden3/go-iden3-crypto/poseidon"
-	"github.com/stretchr/testify/assert"
 )
-
-func TestPoseidon(t *testing.T) {
-	fmt.Println("\n-------\nPoseidon test vectors:")
-	z := big.NewInt(0)
-	r, err := poseidon.PoseidonHash([poseidon.T]*big.Int{z, z, z, z, z, z})
-	assert.Nil(t, err)
-	fmt.Println("PoseidonHash [0]", r)
-
-	r, err = poseidon.Hash([]*big.Int{z, z, z, z})
-	assert.Nil(t, err)
-	fmt.Println("Hash [0]", r)
-
-	o := big.NewInt(1)
-	r, err = poseidon.PoseidonHash([poseidon.T]*big.Int{o, z, z, z, z, z})
-	assert.Nil(t, err)
-	fmt.Println("PoseidonHash [1, 0]", r)
-
-	o = big.NewInt(2)
-	r, err = poseidon.PoseidonHash([poseidon.T]*big.Int{o, z, z, z, z, z})
-	assert.Nil(t, err)
-	fmt.Println("PoseidonHash [2, 0]", r)
-
-	r, err = poseidon.PoseidonHash([poseidon.T]*big.Int{big.NewInt(2), big.NewInt(3), big.NewInt(4), z, z, z})
-	assert.Nil(t, err)
-	fmt.Println("PoseidonHash [2, 3, 4]", r)
-	fmt.Println("\nEnd of Poseidon test vectors\n-----")
-}
 
 func TestBuildClaimAuthKSignBabyJubJub(t *testing.T) {
 	fmt.Println("\n-------\nBuildClaimAuthKSignBabyJubJub test vectors:")
@@ -83,6 +54,15 @@ func TestBuildClaimAuthKSignBabyJubJub(t *testing.T) {
 	fmt.Println("hi bytes noswp", new(big.Int).SetBytes(hi[:]))
 
 	fmt.Println("hv string", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(hv)))
+
+	fmt.Println("--- copy & paste into claimAuthKSignBabyJubJub.test.js ---")
+	fmt.Printf(`ax: "%s",`+"\n", pk.X)
+	fmt.Printf(`ay: "%s"`+"\n", pk.Y)
+	fmt.Println("--- end of copy & paste to claimAuthKSignBabyJubJub.test.js ---")
+
+	fmt.Println("Expected outputs:")
+	fmt.Println("hi:", new(big.Int).SetBytes(common3.SwapEndianness(hi[:])))
+	fmt.Println("hv:", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(hv)))
 
 	// c0.Metadata().RevNonce = 5678
 	// assert.True(t, merkletree.CheckEntryInField(*c0.Entry()))

@@ -7,27 +7,31 @@ const assert = chai.assert;
 
 export {};
 
-describe("buildClaimBasicAboutId test", function () {
+describe("buildClaimKeyBBJJ test", function () {
     this.timeout(200000);
 
     const levels : number = 3;
 
-    it("Test BuildClaimBasicAboutId", async () => {
+    it("Test BuildClaimAuthKSignBBJJ", async () => {
         const compiledCircuit = await compiler(
-                    path.join(__dirname, "circuits", "buildClaimBasicAboutId.circom"),
+                    path.join(__dirname, "circuits", "buildClaimKeyBBJJ.circom"),
                     { reduceConstraints: false }
         );
         const circuit = new snarkjs.Circuit(compiledCircuit);
 
+        const ay = "20634138280259599560273310290025659992320584624461316485434108770067472477956";
+        // const ay = "2006343756953729302788634646776432144113870616756499754430019488750560779821"; // SwapEndianness
+
         const witness = circuit.calculateWitness({
-            id: "90379192157127074746780252349470665474172144646890885515776838193381376",
+            ax: "17640206035128972995519606214765283372613874593503528180869261482403155458945",
+            ay: "20634138280259599560273310290025659992320584624461316485434108770067472477956"
         });
         assert(circuit.checkWitness(witness));
     
         const rHi = witness[circuit.getSignalIdx("main.hi")];
         const rHv = witness[circuit.getSignalIdx("main.hv")];
 
-        assert.equal(rHi.toString(), "8108938826288806943654937928392056767304451246257809977892029122345121642608", "not equal");
+        assert.equal(rHi.toString(), "20288932742723159246222434380118235624366713807206412689738088047710631971322", "not equal");
         assert.equal(rHv.toString(), "951383894958571821976060584138905353883650994872035011055912076785884444545", "not equal");
      });
 });
