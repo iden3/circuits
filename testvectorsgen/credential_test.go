@@ -82,20 +82,18 @@ func TestCredential(t *testing.T) {
 	// proof, err := clt.GenerateProof(hiClaimAboutId, nil)
 	// assert.Nil(t, err)
 
-	fmt.Println("--- copy & paste into idState.test.js ---")
+	fmt.Println("--- copy & paste into credential.test.js ---")
 	fmt.Printf(`issuerRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(issuerTree.RootKey().Bytes())))
 	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
 	fmt.Printf(`// id: "%s",`+"\n", new(big.Int).SetBytes(id.Bytes()))
 
 	fmt.Printf(`oUserPrivateKey: "%s",`+"\n", skToBigInt(&k))
-	fmt.Printf(`oPbkAx: "%s",`+"\n", pk.X)
-	fmt.Printf(`oPbkAy: "%s",`+"\n", pk.Y)
 	fmt.Printf(`oMtp: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`oClaimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
 	fmt.Printf(`oRevTreeRoot: "0",` + "\n") // TMP
 	fmt.Printf(`oRootsTreeRoot: "%s"`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
-	fmt.Println("--- end of copy & paste to idState.test.js ---")
+	fmt.Println("--- end of copy & paste to credential.test.js ---")
 
 	fmt.Println("\nEnd of Credential test vectors\n-----")
 }

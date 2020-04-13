@@ -6,10 +6,11 @@ Circuit to check:
 - the prover identity is in a ClaimBasic about the identity
 - the ClaimBasic is in the MerkleTree of the Issuer identity
 
+
                                    +-------------+
-PUB_OClaimsTreeRoot+-------------->+             +<--------------+PRI_OPbkSign
+PUB_OClaimsTreeRoot+-------------->+             |
                                    |             |
-PUB_ORevTreeRoot+----------------->+             +<--------------+PRI_OPbkAy
+PUB_ORevTreeRoot+----------------->+             |
                                    | idOwnership |
 PUB_ORootsTreeRoot+--------------->+             +<--------------+PRI_OMTP
                                    |             |
@@ -50,8 +51,6 @@ template Credential(nLevels, oNLevels) {
 
 	// signals for idOwnership, all the related signals start with 'o' of 'ownership'
 	signal private input oUserPrivateKey;
-	signal private input oPbkAx;
-	signal private input oPbkAy;
 	signal private input oMtp[oNLevels];
 	signal input oClaimsTreeRoot;
 	signal input oRevTreeRoot;
@@ -60,8 +59,6 @@ template Credential(nLevels, oNLevels) {
 	component idOwnershipCheck = IdOwnership(oNLevels);
 	idOwnershipCheck.id <== id;
 	idOwnershipCheck.userPrivateKey <== oUserPrivateKey;
-	idOwnershipCheck.pbkAx <== oPbkAx;
-	idOwnershipCheck.pbkAy <== oPbkAy;
 	for (var i=0; i<oNLevels; i++) {
 		idOwnershipCheck.mtp[i] <== oMtp[i];
 	}
