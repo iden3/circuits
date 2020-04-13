@@ -44,7 +44,7 @@ template IdState(nLevels) {
 	signal input nullifier;
 	signal input oldIdState;
 	signal private input userPrivateKey;
-	signal private input pbkSign;
+	signal private input pbkAx;
 	signal private input pbkAy;
 	signal private input mtp[nLevels];
 	signal input claimsTreeRoot;
@@ -71,7 +71,7 @@ template IdState(nLevels) {
 	component checkIdOwnership = IdOwnership(nLevels);
 	checkIdOwnership.id <== id;
 	checkIdOwnership.userPrivateKey <== userPrivateKey;
-	checkIdOwnership.pbkSign <== pbkSign;
+	checkIdOwnership.pbkAx <== pbkAx;
 	checkIdOwnership.pbkAy <== pbkAy;
 	for (var i=0; i<nLevels; i++) {
 		checkIdOwnership.mtp[i] <== mtp[i];

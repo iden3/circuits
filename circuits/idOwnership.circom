@@ -70,7 +70,7 @@ template cutState() {
 template IdOwnership(nLevels) {
 	signal input id;
 	signal private input userPrivateKey;
-	signal private input pbkSign;
+	signal private input pbkAx;
 	signal private input pbkAy;
 	signal private input mtp[nLevels];
 	signal input claimsTreeRoot;
@@ -89,7 +89,7 @@ template IdOwnership(nLevels) {
 
 	// build ClaimAuthKSignBBJJ
 	component claim = BuildClaimAuthKSignBBJJ();
-	claim.sign <== pbkSign;
+	claim.ax <== pbkAx;
 	claim.ay <== pbkAy;
 
 

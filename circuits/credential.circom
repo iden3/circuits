@@ -50,7 +50,7 @@ template Credential(nLevels, oNLevels) {
 
 	// signals for idOwnership, all the related signals start with 'o' of 'ownership'
 	signal private input oUserPrivateKey;
-	signal private input oPbkSign;
+	signal private input oPbkAx;
 	signal private input oPbkAy;
 	signal private input oMtp[oNLevels];
 	signal input oClaimsTreeRoot;
@@ -60,7 +60,7 @@ template Credential(nLevels, oNLevels) {
 	component idOwnershipCheck = IdOwnership(oNLevels);
 	idOwnershipCheck.id <== id;
 	idOwnershipCheck.userPrivateKey <== oUserPrivateKey;
-	idOwnershipCheck.pbkSign <== oPbkSign;
+	idOwnershipCheck.pbkAx <== oPbkAx;
 	idOwnershipCheck.pbkAy <== oPbkAy;
 	for (var i=0; i<oNLevels; i++) {
 		idOwnershipCheck.mtp[i] <== oMtp[i];
