@@ -1,3 +1,3 @@
 include "../../circuits/buildClaimKeyBBJJ.circom";
 
-component main = BuildClaimKeyBBJJ(0);
+component main = BuildClaimKeyBBJJ(1);

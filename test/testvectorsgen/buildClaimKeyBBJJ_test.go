@@ -24,7 +24,7 @@ func TestBuildClaimKeyBabyJubJub(t *testing.T) {
 	fmt.Println("x", pk.X)
 	fmt.Println("y", pk.Y)
 
-	c0 := claims.NewClaimKeyBabyJub(pk)
+	c0 := claims.NewClaimKeyBabyJub(pk, 1)
 	fmt.Println(c0.Entry().Bytes())
 
 	hi, _ := c0.Entry().HIndex()

@@ -3,13 +3,13 @@
 
 Circuit to check that the prover is the owner of the identity
 - prover is owner of the private key
-- prover public key is in a ClaimKAuthBBJJ that is inside the Genesis Identity State
+- prover public key is in a ClaimKeyBBJJ that is inside the Genesis Identity State
 
                                                  +----------+
 +---------------------+    +----------+          |          +<---------+PRI_MTP
 |                     |    |          |hi +----->+          |
-| buildClaimAuthKBBJJ +--->+ Poseidon |          | SMT      |
-|                     |    |          |hv +----->+ Poseidon |
+|  buildClaimKeyBBJJ  +--->+ Poseidon |          | SMT      |
+|     (keyType 1)     |    |          |hv +----->+ Poseidon |
 +----------+----------+    +----------+          | Verifier +<---------+PUB_ClaimsTreeRoot
            ^                                     |          |             +
            |                                     |          |             |
@@ -37,7 +37,7 @@ include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
-include "buildClaimAuthKSignBBJJ.circom";
+include "buildClaimKeyBBJJ.circom";
 
 
 template cutId() {
@@ -81,8 +81,8 @@ template IdOwnership(nLevels) {
 	component babyPbk = BabyPbk();
 	babyPbk.in <== userPrivateKey;
 	
-	// build ClaimAuthKSignBBJJ
-	component claim = BuildClaimAuthKSignBBJJ();
+	// build ClaimKeyBBJJ
+	component claim = BuildClaimKeyBBJJ(1);
 	claim.ax <== babyPbk.Ax;
 	claim.ay <== babyPbk.Ay;
 

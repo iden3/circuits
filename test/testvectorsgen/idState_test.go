@@ -53,7 +53,7 @@ func TestIdStateInputs(t *testing.T) {
 	fmt.Println("sign", babyjub.PointCoordSign(pk.X))
 	fmt.Println("y", pk.Y)
 
-	claimKOp := claims.NewClaimAuthorizeKSignBabyJub(pk)
+	claimKOp := claims.NewClaimKeyBabyJub(pk, 1)
 
 	clt, err := merkletree.NewMerkleTree(db.NewMemoryStorage(), nLevels)
 	assert.Nil(t, err)

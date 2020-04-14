@@ -12,7 +12,7 @@ describe("buildClaimKeyBBJJ test", function () {
 
     const levels : number = 3;
 
-    it("Test BuildClaimAuthKSignBBJJ", async () => {
+    it("Test BuildClaimKeyBBJJ", async () => {
         const compiledCircuit = await compiler(
                     path.join(__dirname, "circuits", "buildClaimKeyBBJJ.circom"),
                     { reduceConstraints: false }
@@ -31,7 +31,7 @@ describe("buildClaimKeyBBJJ test", function () {
         const rHi = witness[circuit.getSignalIdx("main.hi")];
         const rHv = witness[circuit.getSignalIdx("main.hv")];
 
-        assert.equal(rHi.toString(), "20288932742723159246222434380118235624366713807206412689738088047710631971322", "not equal");
+        assert.equal(rHi.toString(), "13983541343321049801827232936939574644850750015280974697557168766727391751003", "not equal");
         assert.equal(rHv.toString(), "951383894958571821976060584138905353883650994872035011055912076785884444545", "not equal");
      });
 });

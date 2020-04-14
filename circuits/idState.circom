@@ -37,7 +37,6 @@ include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
-include "buildClaimAuthKSignBBJJ.circom";
 include "idOwnership.circom";
 
 template IdState(nLevels) {
