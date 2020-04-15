@@ -118,7 +118,7 @@ func TestIdStateInputs(t *testing.T) {
 	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`claimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
 	fmt.Printf(`revTreeRoot: "0",` + "\n") // TMP
-	fmt.Printf(`rootsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
+	fmt.Printf(`rootsTreeRoot: "%s"`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
 	fmt.Println("--- end of copy & paste to idOwnership.test.js ---")
 
 	fmt.Println("\nEnd of IdState test vectors\n-----")
