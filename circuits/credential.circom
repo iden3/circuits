@@ -8,11 +8,11 @@ Circuit to check:
 
 
                                    +-------------+
-PUB_OClaimsTreeRoot+-------------->+             |
+PRI_OClaimsTreeRoot+-------------->+             |
                                    |             |
-PUB_ORevTreeRoot+----------------->+             |
+PRI_ORevTreeRoot+----------------->+             |
                                    | idOwnership |
-PUB_ORootsTreeRoot+--------------->+             +<--------------+PRI_OMTP
+PRI_ORootsTreeRoot+--------------->+             +<--------------+PRI_OMTP
                                    |             |
 PRI_OUserPrivateKey+-------------->+             +<--------------+PRI_ID+----+
                                    +-------------+                           |
@@ -47,14 +47,14 @@ include "idOwnership.circom";
 template Credential(nLevels, oNLevels) {
 	signal input issuerRoot;
 	signal private input mtp[nLevels];
-	signal input id;
+	signal private input id;
 
 	// signals for idOwnership, all the related signals start with 'o' of 'ownership'
 	signal private input oUserPrivateKey;
 	signal private input oMtp[oNLevels];
-	signal input oClaimsTreeRoot;
-	signal input oRevTreeRoot;
-	signal input oRootsTreeRoot;
+	signal private input oClaimsTreeRoot;
+	signal private input oRevTreeRoot;
+	signal private input oRootsTreeRoot;
 
 	component idOwnershipCheck = IdOwnership(oNLevels);
 	idOwnershipCheck.id <== id;
@@ -82,6 +82,6 @@ template Credential(nLevels, oNLevels) {
 	smtClaimExists.isOld0 <== 0;
 	smtClaimExists.key <== claim.hi;
 	smtClaimExists.value <== claim.hv;
-	
+
 	// TODO nullifier
 }

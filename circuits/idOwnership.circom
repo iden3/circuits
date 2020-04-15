@@ -6,11 +6,11 @@ Circuit to check that the prover is the owner of the identity
 - prover public key is in a ClaimKeyBBJJ that is inside the Genesis Identity State
 
                                                  +----------+
-+---------------------+    +----------+          |          +<---------+PRI_MTP
++---------------------+    +----------+          |          +<---------+MTP
 |                     |    |          |hi +----->+          |
 |  buildClaimKeyBBJJ  +--->+ Poseidon |          | SMT      |
 |     (keyType 1)     |    |          |hv +----->+ Poseidon |
-+----------+----------+    +----------+          | Verifier +<---------+PUB_ClaimsTreeRoot
++----------+----------+    +----------+          | Verifier +<---------+ClaimsTreeRoot
            ^                                     |          |             +
            |                                     |          |             |
            |                                     +----------+             |
@@ -18,14 +18,14 @@ Circuit to check that the prover is the owner of the identity
       | pvk2pbk |                                +---------+              |
       +----+----+                   +----+       |         +<-------------+
            ^                        | == +<------+         |
-           |                        +-+--+       |  ID     +<------------+PUB_RevTreeRoot
+           |                        +-+--+       |  ID     +<------------+RevTreeRoot
            |                          ^          |  State  |
-           +                          |          |         +<------------+PUB_RootsTreeRoot
-   PRI_UserPrivateKey                 |          |         |
+           +                          |          |         +<------------+RootsTreeRoot
+     UserPrivateKey                   |          |         |
                                       |          +---------+
                                       |
                                       +                +----+
-                                   PUB_ID+------------>+ != +<------+0
+                                     ID+-------------->+ != +<------+0
                                                        +----+
 
 
@@ -70,8 +70,8 @@ template cutState() {
 
 template IdOwnership(nLevels) {
 	signal input id;
-	signal private input userPrivateKey;
-	signal private input mtp[nLevels];
+	signal input userPrivateKey;
+	signal input mtp[nLevels];
 	signal input claimsTreeRoot;
 	signal input revTreeRoot;
 	signal input rootsTreeRoot;

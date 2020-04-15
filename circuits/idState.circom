@@ -8,11 +8,11 @@ Circuit to check:
 
 
                                    +-------------+
-PUB_ClaimsTreeRoot+--------------->+             |
+PRI_ClaimsTreeRoot+--------------->+             |
                                    |             |
-PUB_RevTreeRoot+------------------>+             |
+PRI_RevTreeRoot+------------------>+             |
                                    | idOwnership |
-PUB_RootsTreeRoot+---------------->+             +<--------------+PRI_MTP
+PRI_RootsTreeRoot+---------------->+             +<--------------+PRI_MTP
                                    |             |
 PRI_UserPrivateKey+--------------->+             +<--------------+PUB_ID
          +                         +-------------+                  +
@@ -45,10 +45,10 @@ template IdState(nLevels) {
 	signal input oldIdState;
 	signal private input userPrivateKey;
 	signal private input mtp[nLevels];
-	signal input claimsTreeRoot;
-	signal input revTreeRoot;
-	signal input rootsTreeRoot;
-	signal input newIdState;
+	signal private input claimsTreeRoot;
+	signal private input revTreeRoot;
+	signal private input rootsTreeRoot;
+	signal private input newIdState;
 
 	// check newIdState is not zero
 	component idStateIsNotZero = IsZero();
