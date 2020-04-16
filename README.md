@@ -1,4 +1,4 @@
-# circuits [![Build Status](https://travis-ci.org/iden3/circuits.svg?branch=master)](https://travis-ci.org/iden3/circuits)
+# circuits [![Tests](https://github.com/iden3/circuits/workflows/Tests/badge.svg)](https://github.com/iden3/circuits/actions?query=workflow%3ATests)
 
 Circuits used by the iden3 core protocol.
 
