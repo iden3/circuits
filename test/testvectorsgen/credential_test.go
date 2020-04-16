@@ -64,8 +64,6 @@ func TestCredentialOnly1ClaimInTree(t *testing.T) {
 	fmt.Println("oClaimsTreeRoot", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
 	fmt.Println("oClaimsTreeRoot", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(clt.RootKey()))) // internally SwapsEndianness of the bytes
 	fmt.Println("oRootsTreeRoot", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(rot.RootKey())))
-	// oMtp := ProofToMTP(oProof)
-	// fmt.Println(oMtp)
 
 	// create Issuer tree
 	issuerTree, err := merkletree.NewMerkleTree(db.NewMemoryStorage(), 3)
@@ -87,15 +85,15 @@ func TestCredentialOnly1ClaimInTree(t *testing.T) {
 
 	fmt.Println("--- copy & paste into credential.test.js ---")
 	fmt.Printf(`issuerRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(issuerTree.RootKey().Bytes())))
-	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP
+	fmt.Printf(`siblings: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
 	fmt.Printf(`// id: "%s",`+"\n", new(big.Int).SetBytes(id.Bytes()))
 
 	fmt.Printf(`oUserPrivateKey: "%s",`+"\n", skToBigInt(&k))
-	fmt.Printf(`oMtp: ["0", "0", "0", "0"],` + "\n") // TMP
+	fmt.Printf(`oSiblings: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`oClaimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
-	fmt.Printf(`oRevTreeRoot: "0",` + "\n") // TMP
-	fmt.Printf(`oRootsTreeRoot: "%s"`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
+	fmt.Printf(`// oRevTreeRoot: "0",` + "\n") // TMP
+	fmt.Printf(`// oRootsTreeRoot: "%s"`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
 	fmt.Println("--- end of copy & paste to credential.test.js ---")
 
 	fmt.Println("\nEnd of Credential (simple tree) test vectors\n-----")
@@ -178,13 +176,13 @@ func TestCredentialMultipleClaimsInTree1(t *testing.T) {
 
 	fmt.Println("--- copy & paste into credential.test.js / multiple-claims-in-tree ---")
 	fmt.Printf(`issuerRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(issuerTree.RootKey().Bytes())))
-	fmt.Printf(`mtp: %s,`+"\n", jsonSiblings)
+	fmt.Printf(`siblings: %s,`+"\n", jsonSiblings)
 	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
 	fmt.Printf(`oUserPrivateKey: "%s",`+"\n", skToBigInt(&k))
-	fmt.Printf(`oMtp: ["0", "0", "0", "0"],` + "\n") // TMP
+	fmt.Printf(`oSiblings: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`oClaimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
-	fmt.Printf(`oRevTreeRoot: "0",` + "\n") // TMP
-	fmt.Printf(`oRootsTreeRoot: "%s"`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
+	fmt.Printf(`// oRevTreeRoot: "0",` + "\n") // TMP
+	fmt.Printf(`// oRootsTreeRoot: "%s"`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
 	fmt.Println("--- end of copy & paste to credential.test.js / multiple-claims-in-tree ---")
 
 	fmt.Println("\nEnd of Credential multiple claims in tree test vectors 1 \n-----")
@@ -257,13 +255,13 @@ func TestCredentialMultipleClaimsInTree2(t *testing.T) {
 
 	fmt.Println("--- copy & paste into credential.test.js / multiple-claims-in-tree ---")
 	fmt.Printf(`issuerRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(issuerTree.RootKey().Bytes())))
-	fmt.Printf(`mtp: %s,`+"\n", jsonSiblings)
+	fmt.Printf(`siblings: %s,`+"\n", jsonSiblings)
 	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
 	fmt.Printf(`oUserPrivateKey: "%s",`+"\n", skToBigInt(&k))
-	fmt.Printf(`oMtp: ["0", "0", "0", "0"],` + "\n") // TMP
+	fmt.Printf(`oSiblings: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`oClaimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
-	fmt.Printf(`oRevTreeRoot: "0",` + "\n") // TMP
-	fmt.Printf(`oRootsTreeRoot: "%s"`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
+	fmt.Printf(`// oRevTreeRoot: "0",` + "\n") // TMP
+	fmt.Printf(`// oRootsTreeRoot: "%s"`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
 	fmt.Println("--- end of copy & paste to credential.test.js / multiple-claims-in-tree ---")
 
 	fmt.Println("\nEnd of Credential multiple claims in tree test vectors 2 \n-----")

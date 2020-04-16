@@ -44,7 +44,7 @@ include "idOwnership.circom";
 template IdOwnershipGenesis(nLevels) {
 	signal input id;
 	signal input userPrivateKey;
-	signal input mtp[nLevels];
+	signal input siblings[nLevels];
 	signal input claimsTreeRoot;
 
 	component hi = Poseidon(1, 6, 8, 57);
@@ -60,7 +60,7 @@ template IdOwnershipGenesis(nLevels) {
 	idOwnershipCheck.id <== id;
 	idOwnershipCheck.userPrivateKey <== userPrivateKey;
 	for (var i=0; i<nLevels; i++) {
-		idOwnershipCheck.mtp[i] <== mtp[i];
+		idOwnershipCheck.siblings[i] <== siblings[i];
 	}
 	idOwnershipCheck.claimsTreeRoot <== claimsTreeRoot;
 	idOwnershipCheck.revTreeRoot <== 0;

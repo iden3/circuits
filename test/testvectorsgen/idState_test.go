@@ -121,26 +121,26 @@ func TestIdStateInputs(t *testing.T) {
 	// newIdState
 	newIdState := new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes()))
 
-	var zero32 [32]byte
-	oldIdState := zero32[:]
 	// nullifier
-	bi := [poseidon.T]*big.Int{
-		skToBigInt(&k),
-		new(big.Int).SetBytes(oldIdState),
-		newIdState,
-		big.NewInt(0),
-		big.NewInt(0),
-		big.NewInt(0),
-	}
-	nullifier, err := poseidon.PoseidonHash(bi)
-	assert.Nil(t, err)
+	// var zero32 [32]byte
+	// oldIdState := zero32[:]
+	// bi := [poseidon.T]*big.Int{
+	//         skToBigInt(&k),
+	//         new(big.Int).SetBytes(oldIdState),
+	//         newIdState,
+	//         big.NewInt(0),
+	//         big.NewInt(0),
+	//         big.NewInt(0),
+	// }
+	// nullifier, err := poseidon.PoseidonHash(bi)
+	// assert.Nil(t, err)
 
 	fmt.Println("--- copy & paste into idState.test.js ---")
 	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
 	// fmt.Printf(`nullifier: "%s",`+"\n", nullifier)
 	fmt.Printf(`oldIdState: "%s",`+"\n", "0")
 	fmt.Printf(`userPrivateKey: "%s",`+"\n", skToBigInt(&k))
-	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP
+	fmt.Printf(`siblings: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`claimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
 	fmt.Println("// revTreeRoot & rootsTreeRoot are not used in this implementation, as uses idOwnershipGenesis.circom")
 	fmt.Printf(`// revTreeRoot: "0",` + "\n") // TMP
@@ -151,7 +151,7 @@ func TestIdStateInputs(t *testing.T) {
 	fmt.Println("\n--- copy & paste into idOwnership.test.js ---")
 	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
 	fmt.Printf(`userPrivateKey: "%s",`+"\n", skToBigInt(&k))
-	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP
+	fmt.Printf(`siblings: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`claimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
 	fmt.Printf(`revTreeRoot: "0",` + "\n") // TMP
 	fmt.Printf(`rootsTreeRoot: "%s"`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(rot.RootKey().Bytes())))
@@ -159,7 +159,7 @@ func TestIdStateInputs(t *testing.T) {
 	fmt.Println("\n--- copy & paste into idOwnershipGenesis.test.js ---")
 	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
 	fmt.Printf(`userPrivateKey: "%s",`+"\n", skToBigInt(&k))
-	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP
+	fmt.Printf(`siblings: ["0", "0", "0", "0"],` + "\n") // TMP
 	fmt.Printf(`claimsTreeRoot: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
 	fmt.Println("--- end of copy & paste to idOwnershipGenesis.test.js ---")
 

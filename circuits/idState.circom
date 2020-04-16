@@ -45,7 +45,7 @@ template IdState(nLevels) {
 	signal input id;
 	signal input oldIdState;
 	signal private input userPrivateKey;
-	signal private input mtp[nLevels];
+	signal private input siblings[nLevels];
 	signal private input claimsTreeRoot;
 	/* signal private input revTreeRoot; */
 	/* signal private input rootsTreeRoot; */
@@ -70,7 +70,7 @@ template IdState(nLevels) {
 	checkIdOwnership.id <== id;
 	checkIdOwnership.userPrivateKey <== userPrivateKey;
 	for (var i=0; i<nLevels; i++) {
-		checkIdOwnership.mtp[i] <== mtp[i];
+		checkIdOwnership.siblings[i] <== siblings[i];
 	}
 	checkIdOwnership.claimsTreeRoot <== claimsTreeRoot;
 	/* checkIdOwnership.revTreeRoot <== revTreeRoot; */

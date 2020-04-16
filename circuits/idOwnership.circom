@@ -71,7 +71,7 @@ template cutState() {
 template IdOwnership(nLevels) {
 	signal input id;
 	signal input userPrivateKey;
-	signal input mtp[nLevels];
+	signal input siblings[nLevels];
 	signal input claimsTreeRoot;
 	signal input revTreeRoot;
 	signal input rootsTreeRoot;
@@ -93,7 +93,7 @@ template IdOwnership(nLevels) {
 	smtClaimExists.fnc <== 0;
 	smtClaimExists.root <== claimsTreeRoot;
 	for (var i=0; i<nLevels; i++) {
-		smtClaimExists.siblings[i] <== mtp[i];
+		smtClaimExists.siblings[i] <== siblings[i];
 	}
 	smtClaimExists.oldKey <== 0;
 	smtClaimExists.oldValue <== 0;
