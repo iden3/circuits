@@ -12,19 +12,18 @@ PRI_ClaimsTreeRoot+--------------->+             |
                                    |             |
 PRI_RevTreeRoot+------------------>+             |
                                    | idOwnership |
-PRI_RootsTreeRoot+---------------->+             +<--------------+PRI_MTP
+PRI_RootsTreeRoot+---------------->+   Genesis   +<--------------+PRI_MTP
                                    |             |
 PRI_UserPrivateKey+--------------->+             +<--------------+PUB_ID
-         +                         +-------------+                  +
-         |                                                          |
-         |                                                          |
-         |               +----------+                               |
-         +-------------->+          |                               |
-                         |          +<------------------------------+
-PUB_OldIdState+--------->+ Poseidon |
-                         |          |          +----+
-PUB_NewIdState+--------->+          +--------->+ == +<------+PUB_Nullifier
-                         +----------+          +----+
+                                   +-------------+
+                      +----+
+              +------>+ != +<----+PUB_OldIdState
+              +       +----+
+ PUB_NewIdState
+              +       +----+
+              +------>+ != +<----+0
+                      +----+
+
 
 *Note: RevTreeRoot & RootsTreeRoot are needed if is using idOwnership.circom. If is using idOwnershipGenesis.circom, are not needed.
 The current implementation of idState.circom uses idOwnershipGenesis.circom.
@@ -44,7 +43,6 @@ include "idOwnershipGenesis.circom";
 
 template IdState(nLevels) {
 	signal input id;
-	signal input nullifier;
 	signal input oldIdState;
 	signal private input userPrivateKey;
 	signal private input mtp[nLevels];
@@ -58,16 +56,15 @@ template IdState(nLevels) {
 	idStateIsNotZero.in <==newIdState;
 	idStateIsNotZero.out === 0;
 
-	// nullifier checks
-	component nullifierHash = Poseidon(3, 6, 8, 57);
-	nullifierHash.inputs[0] <== userPrivateKey;
-	nullifierHash.inputs[1] <== oldIdState;
-	nullifierHash.inputs[2] <== newIdState;
-	
-	component checkNullifier = IsEqual();
-	checkNullifier.in[0] <== nullifierHash.out;
-	checkNullifier.in[1] <== nullifier;
-	checkNullifier.out === 1;
+	// old & new idState checks
+	component oldNewNotEqual = IsEqual();
+	oldNewNotEqual.in[0] <== oldIdState;
+	oldNewNotEqual.in[1] <== newIdState;
+	oldNewNotEqual.out === 0;
+	component newNotZero = IsEqual();
+	newNotZero.in[0] <== newIdState;
+	newNotZero.in[1] <== 0;
+	newNotZero.out === 0;
 
 	component checkIdOwnership = IdOwnershipGenesis(nLevels);
 	checkIdOwnership.id <== id;

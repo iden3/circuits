@@ -137,7 +137,7 @@ func TestIdStateInputs(t *testing.T) {
 
 	fmt.Println("--- copy & paste into idState.test.js ---")
 	fmt.Printf(`id: "%s",`+"\n", new(big.Int).SetBytes(common3.SwapEndianness(id.Bytes())))
-	fmt.Printf(`nullifier: "%s",`+"\n", nullifier)
+	// fmt.Printf(`nullifier: "%s",`+"\n", nullifier)
 	fmt.Printf(`oldIdState: "%s",`+"\n", "0")
 	fmt.Printf(`userPrivateKey: "%s",`+"\n", skToBigInt(&k))
 	fmt.Printf(`mtp: ["0", "0", "0", "0"],` + "\n") // TMP

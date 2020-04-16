@@ -22,7 +22,6 @@ describe("idState test", function () {
         // input data generated with circuits/test/testvectorsgen/idState_test.go, which uses go-iden3-core
         const witness = circuit.calculateWitness({
             id: "418819843184716391854950027336187830212226236089582432322628806588929540096",
-            nullifier: "671692610057391772997248859095625772589813015124146528392458976400562382489",
             oldIdState: "0",
             userPrivateKey: "6190793965647866647574058687473278714480561351424348391693421151024369116465",
             mtp: ["0", "0", "0", "0"],
