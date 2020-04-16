@@ -8,13 +8,13 @@ Circuit to check:
 
 
                                    +-------------+
-PRI_OClaimsTreeRoot+-------------->+             |
+    OClaimsTreeRoot+-------------->+             |
                                    |             |
-PRI_ORevTreeRoot+----------------->+             |
+    ORevTreeRoot+----------------->+             |
                                    | idOwnership |
-PRI_ORootsTreeRoot+--------------->+             +<--------------+PRI_OMTP
+    ORootsTreeRoot+--------------->+             +<--------------+OMTP
                                    |             |
-PRI_OUserPrivateKey+-------------->+             +<--------------+PRI_ID+----+
+    OUserPrivateKey+-------------->+             +<--------------+ID+--------+
                                    +-------------+                           |
                                                                              |
                                     +----------+      +-----------------+    |
@@ -25,9 +25,9 @@ PRI_OUserPrivateKey+-------------->+             +<--------------+PRI_ID+----+
       |               +----------+     hi   hv        +-----------------+
       |               |          |      +   +
       +               |          |      |   |
-PUB_IssuerRoot+------>+ SMT      +<-----+   |
+    IssuerRoot+------>+ SMT      +<-----+   |
                       | Poseidon |          |
-       PRI_MTP+------>+ Verifier +<---------+
+           MTP+------>+ Verifier +<---------+
                       |          |
                       |          |
                       +----------+
@@ -46,15 +46,15 @@ include "idOwnership.circom";
 
 template Credential(nLevels, oNLevels) {
 	signal input issuerRoot;
-	signal private input mtp[nLevels];
-	signal private input id;
+	signal input mtp[nLevels];
+	signal input id;
 
 	// signals for idOwnership, all the related signals start with 'o' of 'ownership'
-	signal private input oUserPrivateKey;
-	signal private input oMtp[oNLevels];
-	signal private input oClaimsTreeRoot;
-	signal private input oRevTreeRoot;
-	signal private input oRootsTreeRoot;
+	signal input oUserPrivateKey;
+	signal input oMtp[oNLevels];
+	signal input oClaimsTreeRoot;
+	signal input oRevTreeRoot;
+	signal input oRootsTreeRoot;
 
 	component idOwnershipCheck = IdOwnership(oNLevels);
 	idOwnershipCheck.id <== id;

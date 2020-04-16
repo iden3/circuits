@@ -26,6 +26,8 @@ PUB_OldIdState+--------->+ Poseidon |
 PUB_NewIdState+--------->+          +--------->+ == +<------+PUB_Nullifier
                          +----------+          +----+
 
+*Note: RevTreeRoot & RootsTreeRoot are needed if is using idOwnership.circom. If is using idOwnershipGenesis.circom, are not needed.
+The current implementation of idState.circom uses idOwnershipGenesis.circom.
 
 
 
@@ -37,7 +39,8 @@ include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
-include "idOwnership.circom";
+/* include "idOwnership.circom"; */
+include "idOwnershipGenesis.circom";
 
 template IdState(nLevels) {
 	signal input id;
@@ -46,8 +49,8 @@ template IdState(nLevels) {
 	signal private input userPrivateKey;
 	signal private input mtp[nLevels];
 	signal private input claimsTreeRoot;
-	signal private input revTreeRoot;
-	signal private input rootsTreeRoot;
+	/* signal private input revTreeRoot; */
+	/* signal private input rootsTreeRoot; */
 	signal private input newIdState;
 
 	// check newIdState is not zero
@@ -66,13 +69,13 @@ template IdState(nLevels) {
 	checkNullifier.in[1] <== nullifier;
 	checkNullifier.out === 1;
 
-	component checkIdOwnership = IdOwnership(nLevels);
+	component checkIdOwnership = IdOwnershipGenesis(nLevels);
 	checkIdOwnership.id <== id;
 	checkIdOwnership.userPrivateKey <== userPrivateKey;
 	for (var i=0; i<nLevels; i++) {
 		checkIdOwnership.mtp[i] <== mtp[i];
 	}
 	checkIdOwnership.claimsTreeRoot <== claimsTreeRoot;
-	checkIdOwnership.revTreeRoot <== revTreeRoot;
-	checkIdOwnership.rootsTreeRoot <== rootsTreeRoot;
+	/* checkIdOwnership.revTreeRoot <== revTreeRoot; */
+	/* checkIdOwnership.rootsTreeRoot <== rootsTreeRoot; */
 }
