@@ -14,7 +14,8 @@ template BuildClaimBasicAboutId() {
 	signal output hv;
 
 	component e0 = Bits2Num(256);
-	var claimType = bigEndian(CLAIM_TYPE, 64);
+	var claimType[64];
+	claimType = bigEndian(CLAIM_TYPE, 64);
 	for (var i=0; i<64; i++) {
 		e0.in[i] <== claimType[i];
 	}
@@ -29,6 +30,7 @@ template BuildClaimBasicAboutId() {
 	hi <== hashHi.out;
 
 	// Hv
-	component hashHv = Poseidon(0, 6, 8, 57);
+	component hashHv = Poseidon(1, 6, 8, 57);
+	hashHv.inputs[0] <== 0;
 	hv <== hashHv.out;
 }
