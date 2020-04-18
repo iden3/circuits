@@ -49,7 +49,8 @@ template IdOwnershipGenesis(nLevels) {
 
 	component hi = Poseidon(1, 6, 8, 57);
 	hi.inputs[0] <== claimsTreeRoot;
-	component hv = Poseidon(0, 6, 8, 57);
+	component hv = Poseidon(1, 6, 8, 57);
+	hv.inputs[0] <== 0;
 	component rootsTreeRoot = Poseidon(3, 6, 8, 57);
 	rootsTreeRoot.inputs[0] <== hi.out;
 	rootsTreeRoot.inputs[1] <== hv.out;
