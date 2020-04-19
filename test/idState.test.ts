@@ -11,7 +11,8 @@ describe("idState test", function () {
 
     it("Test IdState", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "idState.circom")
+            path.join(__dirname, "circuits", "idState.circom"),
+            {reduceConstraints: false}
         );
 
         const privKStr = "6190793965647866647574058687473278714480561351424348391693421151024369116465";

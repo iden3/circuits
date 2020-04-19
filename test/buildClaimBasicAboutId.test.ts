@@ -12,7 +12,8 @@ describe("buildClaimBasicAboutId test", function () {
 
     it("Test BuildClaimBasicAboutId", async () => {
         const circuit = await tester(
-                    path.join(__dirname, "circuits", "buildClaimBasicAboutId.circom")
+            path.join(__dirname, "circuits", "buildClaimBasicAboutId.circom"),
+            {reduceConstraints: false}
         );
         const witness = await circuit.calculateWitness({
             id: "90379192157127074746780252349470665474172144646890885515776838193381376"

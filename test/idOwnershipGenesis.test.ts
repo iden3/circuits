@@ -11,7 +11,8 @@ describe("idOwnershipGenesis test", function () {
 
     it("Test IdOwnershipGenesis", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "idOwnershipGenesis.circom")
+            path.join(__dirname, "circuits", "idOwnershipGenesis.circom"),
+            {reduceConstraints: false}
         );
 
         const privKStr = "6190793965647866647574058687473278714480561351424348391693421151024369116465";
