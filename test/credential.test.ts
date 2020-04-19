@@ -12,7 +12,8 @@ describe("credential test", function () {
 
     it("Test Credential simple tree", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "credential-simpletree.circom")
+            path.join(__dirname, "circuits", "credential-simpletree.circom"),
+            {reduceConstraints: false}
         );
 
         // input data generated with circuits/test/testvectorsgen/credential_test.go, which uses go-iden3-core
@@ -29,9 +30,10 @@ describe("credential test", function () {
 
     it("Test Credential crowded tree", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "credential-crowdedtree.circom")
+            path.join(__dirname, "circuits", "credential-crowdedtree.circom"),
+            {reduceConstraints: false}
         );
-    
+
         // input data generated with circuits/testvectorsgen/credential_test.go, which uses go-iden3-core
         const witness = await circuit.calculateWitness({
             issuerRoot: "15797803252728443209616381990433131096640537982070147713338175380570298454976",
@@ -43,12 +45,13 @@ describe("credential test", function () {
         });
         await circuit.checkConstraints(witness);
     });
-    
+
     it("Test Credential crowded tree 2", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "credential-crowdedtree.circom")
+            path.join(__dirname, "circuits", "credential-crowdedtree.circom"),
+            {reduceConstraints: false}
         );
-    
+
         // input data generated with circuits/testvectorsgen/credential_test.go, which uses go-iden3-core
         const witness = await circuit.calculateWitness({
             issuerRoot: "2129482215913584500569008537045904456845658748821359635806813662925761769886",

@@ -10,7 +10,8 @@ describe("buildClaimKeyBBJJ test", function () {
     this.timeout(200000);
     it("Test BuildClaimKeyBBJJ", async () => {
         const circuit = await tester(
-                    path.join(__dirname, "circuits", "buildClaimKeyBBJJ.circom")
+            path.join(__dirname, "circuits", "buildClaimKeyBBJJ.circom"),
+            {reduceConstraints: false}
         );
 
         const ay = "20634138280259599560273310290025659992320584624461316485434108770067472477956";
