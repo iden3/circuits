@@ -53,7 +53,7 @@ template IdState(nLevels) {
 
 	// check newIdState is not zero
 	component idStateIsNotZero = IsZero();
-	idStateIsNotZero.in <==newIdState;
+	idStateIsNotZero.in <== newIdState;
 	idStateIsNotZero.out === 0;
 
 	// old & new idState checks
@@ -61,10 +61,6 @@ template IdState(nLevels) {
 	oldNewNotEqual.in[0] <== oldIdState;
 	oldNewNotEqual.in[1] <== newIdState;
 	oldNewNotEqual.out === 0;
-	component newNotZero = IsEqual();
-	newNotZero.in[0] <== newIdState;
-	newNotZero.in[1] <== 0;
-	newNotZero.out === 0;
 
 	component checkIdOwnership = IdOwnershipGenesis(nLevels);
 	checkIdOwnership.id <== id;
