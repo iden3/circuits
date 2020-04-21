@@ -10,9 +10,9 @@ Circuit to check:
                                    +-------------+
 PRI_ClaimsTreeRoot+--------------->+             |
                                    |             |
-PRI_RevTreeRoot+------------------>+             |
+(PRI_RevTreeRoot)+---------------->+             |
                                    | idOwnership |
-PRI_RootsTreeRoot+---------------->+   Genesis   +<--------------+PRI_MTP
+(PRI_RootsTreeRoot)+-------------->+   Genesis   +<--------------+PRI_MTP
                                    |             |
 PRI_UserPrivateKey+--------------->+             +<--------------+PUB_ID
                                    +-------------+
@@ -25,7 +25,7 @@ PRI_UserPrivateKey+--------------->+             +<--------------+PUB_ID
                       +----+
 
 
-*Note: RevTreeRoot & RootsTreeRoot are needed if is using idOwnership.circom. If is using idOwnershipGenesis.circom, are not needed.
+*Note: (RevTreeRoot) & (RootsTreeRoot) are needed if is using idOwnership.circom. If is using idOwnershipGenesis.circom, are not needed.
 The current implementation of idState.circom uses idOwnershipGenesis.circom.
 
 
@@ -49,7 +49,7 @@ template IdState(nLevels) {
 	signal private input claimsTreeRoot;
 	/* signal private input revTreeRoot; */
 	/* signal private input rootsTreeRoot; */
-	signal private input newIdState;
+	signal input newIdState;
 
 	// check newIdState is not zero
 	component idStateIsNotZero = IsZero();
