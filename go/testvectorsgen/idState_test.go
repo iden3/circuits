@@ -103,7 +103,7 @@ func TestIdStateInputs(t *testing.T) {
 	// get claimproof
 	hi, err := claimKOp.Entry().HIndex()
 	assert.Nil(t, err)
-	fmt.Println("claim hi", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(hi)))
+	fmt.Println("claim hi", hi.BigInt())
 	proof, err := clt.GenerateProof(hi, nil)
 	assert.Nil(t, err)
 	fmt.Println(proof)
@@ -112,9 +112,9 @@ func TestIdStateInputs(t *testing.T) {
 	for _, s := range proof.Siblings {
 		fmt.Println("s", s)
 	}
-	fmt.Println("claimsTreeRoot", new(big.Int).SetBytes(common3.SwapEndianness(clt.RootKey().Bytes())))
-	fmt.Println("claimsTreeRoot", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(clt.RootKey()))) // internally SwapsEndianness of the bytes
-	fmt.Println("rootsTreeRoot", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(rot.RootKey())))
+	fmt.Println("claimsTreeRoot", clt.RootKey().BigInt())
+	fmt.Println("claimsTreeRoot", clt.RootKey().BigInt()) // internally SwapsEndianness of the bytes
+	fmt.Println("rootsTreeRoot", rot.RootKey().BigInt())
 	// mtp := ProofToMTP(proof)
 	// fmt.Println(mtp)
 

@@ -8,7 +8,6 @@ import (
 
 	common3 "github.com/iden3/go-iden3-core/common"
 	"github.com/iden3/go-iden3-core/core/claims"
-	"github.com/iden3/go-iden3-core/merkletree"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 )
 
@@ -31,11 +30,11 @@ func TestBuildClaimKeyBabyJubJub(t *testing.T) {
 	hv, _ := c0.Entry().HValue()
 	fmt.Println(c0.Entry().Index())
 
-	fmt.Println("hi string", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(hi)))
+	fmt.Println("hi string", hi.BigInt())
 	fmt.Println("hi bytes swapp", new(big.Int).SetBytes(common3.SwapEndianness(hi[:])))
 	fmt.Println("hi bytes noswp", new(big.Int).SetBytes(hi[:]))
 
-	fmt.Println("hv string", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(hv)))
+	fmt.Println("hv string", hv.BigInt())
 
 	fmt.Println("--- copy & paste into claimKeyBabyJubJub.test.js ---")
 	fmt.Printf(`ax: "%s",`+"\n", pk.X)
@@ -43,8 +42,8 @@ func TestBuildClaimKeyBabyJubJub(t *testing.T) {
 	fmt.Println("--- end of copy & paste to claimKeyBabyJubJub.test.js ---")
 
 	fmt.Println("Expected outputs:")
-	fmt.Println("hi:", new(big.Int).SetBytes(common3.SwapEndianness(hi[:])))
-	fmt.Println("hv:", merkletree.ElemBytesToBigInt(*(*merkletree.ElemBytes)(hv)))
+	fmt.Println("hi:", hi.BigInt())
+	fmt.Println("hv:", hv.BigInt())
 
 	fmt.Println("\nEnd of BuildClaimKeyBabyJub test vectors\n-----")
 }
