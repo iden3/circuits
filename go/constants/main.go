@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/hex"
 	"fmt"
 	"math/big"
 
@@ -37,5 +36,4 @@ func main() {
 	claim := claims.NewClaimOtherIden(&id, indexBytes, valueBytes)
 	entry := claim.Entry()
 	fmt.Printf("Demo ClaimOtherIden i0 = %v\n", entry.Data[0].BigInt())
-	fmt.Printf("%v\n", hex.EncodeToString(entry.Data[0][:]))
 }
