@@ -1,3 +1,15 @@
+/*
+# credential.circom
+
+Circuit to check that the prover have received a claim from an issuer.
+The circuit checks:
+- idOwnersip: prover is the owner of the identity (knows the private key inside a claim inside the MerkleTree)
+- the claim subject == prover identity
+- the claim exists in the MerkleTree of the issuer
+- the proof is valid (and not revoked) for the given issuer-id-state
+
+*/
+
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "./idOwnershipGenesis.circom";

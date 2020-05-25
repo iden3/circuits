@@ -1,4 +1,4 @@
-# circuits [![Tests](https://github.com/iden3/circuits/workflows/Tests/badge.svg)](https://github.com/iden3/circuits/actions?query=workflow%3ATests)
+# circuits [![Tests](https://github.com/iden3/circuits/workflows/Tests/badge.svg)](https://github.com/iden3/circuits/actions?query=workflow%3ATests) [![npm](https://img.shields.io/npm/v/@iden3/circuits)](https://img.shields.io/npm/v/@iden3/circuits)
 
 Circuits used by the iden3 core protocol.
 

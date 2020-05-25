@@ -1,5 +1,5 @@
 {
-  "name": "circuits",
+  "name": "@iden3/circuits",
   "version": "0.0.1",
   "description": "iden3 circuits",
   "main": "index.js",

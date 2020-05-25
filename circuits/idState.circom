@@ -2,7 +2,7 @@
 # idState.circom
 
 Circuit to check:
-- idOwnership: prover is the owner of the identity
+- idOwnership: prover is the owner of the identity (knows the private key inside a Claim inside the MerkleTree)
 - nullifier check
 - [in the future] that the identity state transition is correct
 
