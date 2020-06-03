@@ -18,6 +18,8 @@ compile_and_ts() {
     time circom "$CIRCUIT_PATH" --r1cs circuit.r1cs --wasm circuit.wasm --sym circuit.sym
     snarkjs info -r circuit.r1cs
     time snarkjs setup -r circuit.r1cs --pk proving_key.json --vk verification_key.json
+    time node "${WASMSNARK_TOOLS}/buildpkey.js" -i proving_key.json -o proving_key.bin
+    time "${GO_PROVER_PATH}/cli" -convert -pk proving_key.json -pkbin proving_key.go.bin
     time snarkjs generateverifier --vk verification_key.json -v verifier.sol
     set +x
 
@@ -41,6 +43,13 @@ set -u
 
 CIRCUIT=`readlink -f "$1"`
 PATH=`pwd`/node_modules/.bin:$PATH
+WASMSNARK_TOOLS=`pwd`/node_modules/wasmsnark/tools
+GO_PROVER_PATH=`pwd`/../go-circom-prover-verifier/cli/
+
+OLD_PWD=`pwd`
+cd "$GO_PROVER_PATH"
+go build
+cd "$OLD_PWD"
 
 # npm ci
 mkdir -p build
