@@ -31,6 +31,13 @@ First install the npm dependencies:
 npm ci
 ```
 
+The compilation circuit converts the proving key to the
+`go-circom-prover-verifier` binary format with `.go.bin` extension.  For that,
+the
+[`go-circom-prover-verifier`](https://github.com/iden3/go-circom-prover-verifier)
+respository needs to be checked out in the same folder where the `circuits`
+repository is found.  `go` must be installed in the system as well.
+
 Then build the circuit and do the "trusted" setup:
 ```
 ./compile-circuit.sh CIRCUIT_PATH
