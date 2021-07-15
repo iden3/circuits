@@ -24,13 +24,13 @@ template BuildClaimBasicAboutId() {
 	}
 
 	// Hi
-	component hashHi = Poseidon(2, 6, 8, 57);
+	component hashHi = Poseidon(2);
 	hashHi.inputs[0] <== e0.out;
 	hashHi.inputs[1] <== id;
 	hi <== hashHi.out;
 
 	// Hv
-	component hashHv = Poseidon(1, 6, 8, 57);
+	component hashHv = Poseidon(1);
 	hashHv.inputs[0] <== 0;
 	hv <== hashHv.out;
 }

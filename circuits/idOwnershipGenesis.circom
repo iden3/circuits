@@ -47,11 +47,11 @@ template IdOwnershipGenesis(nLevels) {
 	signal input siblings[nLevels];
 	signal input claimsTreeRoot;
 
-	component hi = Poseidon(1, 6, 8, 57);
+	component hi = Poseidon(1);
 	hi.inputs[0] <== claimsTreeRoot;
-	component hv = Poseidon(1, 6, 8, 57);
+	component hv = Poseidon(1);
 	hv.inputs[0] <== 0;
-	component rootsTreeRoot = Poseidon(3, 6, 8, 57);
+	component rootsTreeRoot = Poseidon(3);
 	rootsTreeRoot.inputs[0] <== hi.out;
 	rootsTreeRoot.inputs[1] <== hv.out;
 	rootsTreeRoot.inputs[2] <== 1;
@@ -65,5 +65,5 @@ template IdOwnershipGenesis(nLevels) {
 	}
 	idOwnershipCheck.claimsTreeRoot <== claimsTreeRoot;
 	idOwnershipCheck.revTreeRoot <== 0;
-	idOwnershipCheck.rootsTreeRoot <== rootsTreeRoot.out;
+	idOwnershipCheck.rootsTreeRoot <== 0;
 }

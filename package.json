@@ -10,18 +10,18 @@
   },
   "license": "GPL-3.0",
   "dependencies": {
-    "circomlib": "0.2.2"
+    "circomlib": "^0.5.3"
   },
   "devDependencies": {
-    "@types/node": "^12.12.0",
-    "circom": "0.5.11",
-    "eslint-plugin-mocha": "^6.1.0",
-    "snarkjs": "^0.1.31",
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.6",
+    "@types/node": "^12.12.0",
     "chai": "^4.2.0",
-    "mocha": "^5.2.0",
+    "circom": "^0.5.45",
+    "eslint-plugin-mocha": "^6.1.0",
+    "mocha": "^9.0.2",
     "mocha-steps": "^1.3.0",
+    "snarkjs": "^0.4.6",
     "ts-node": "^7.0.1",
     "tslint": "^5.18.0",
     "typescript": "^3.5.3",

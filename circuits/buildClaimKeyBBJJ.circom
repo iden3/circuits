@@ -36,17 +36,18 @@ template BuildClaimKeyBBJJ(keytype) {
 	}
 
 	// Hi
-	component hashHi = Poseidon(6, 6, 8, 57);
+	component hashHi = Poseidon(4);
 	hashHi.inputs[0] <== e0.out;
 	hashHi.inputs[1] <== e1.out;
 	hashHi.inputs[2] <== ax;
 	hashHi.inputs[3] <== ay;
-	hashHi.inputs[4] <== 0;
-	hashHi.inputs[5] <== 0;
 	hi <== hashHi.out;
 
 	// Hv (TODO hardcode hv value as for this claim type will be always the Poseidon hash of 0)
-	component hashHv = Poseidon(1, 6, 8, 57);
+	component hashHv = Poseidon(4);
 	hashHv.inputs[0] <== 0;
+	hashHv.inputs[1] <== 0;
+	hashHv.inputs[2] <== 0;
+	hashHv.inputs[3] <== 0;
 	hv <== hashHv.out;
 }

@@ -84,7 +84,7 @@ template getClaimHiHv() {
 	signal output hi;
 	signal output hv;
 
-	component hashHi = Poseidon(6, 6, 8, 57);
+	component hashHi = Poseidon(6);
 	for (var i=0; i<4; i++) {
 		hashHi.inputs[i] <== claim[0*4 + i];
 	}
@@ -92,7 +92,7 @@ template getClaimHiHv() {
 	hashHi.inputs[5] <== 0;
 	hi <== hashHi.out;
 
-	component hashHv = Poseidon(6, 6, 8, 57);
+	component hashHv = Poseidon(6);
 	for (var i=0; i<4; i++) {
 		hashHv.inputs[i] <== claim[1*4 + i];
 	}
@@ -110,7 +110,7 @@ template getIdenState() {
 
 	signal output idenState;
 
-	component calcIdState = Poseidon(6, 6, 8, 57);
+	component calcIdState = Poseidon(6);
 	calcIdState.inputs[0] <== claimsTreeRoot;
 	calcIdState.inputs[1] <== revTreeRoot;
 	calcIdState.inputs[2] <== rootsTreeRoot;
@@ -131,7 +131,7 @@ template getRevNonceNoVerHiHv() {
 	signal output hi;
 	signal output hv;
 
-	component hashHi = Poseidon(6, 6, 8, 57);
+	component hashHi = Poseidon(6);
 	hashHi.inputs[0] <== revNonce;
 	for (var i=1; i<6; i++) {
 		hashHi.inputs[i] <== 0;
@@ -150,7 +150,7 @@ template getRootHiHv() {
 	signal output hi;
 	signal output hv;
 
-	component hashHi = Poseidon(6, 6, 8, 57);
+	component hashHi = Poseidon(6);
 	hashHi.inputs[0] <== root;
 	for (var i=1; i<6; i++) {
 		hashHi.inputs[i] <== 0;

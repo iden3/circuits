@@ -103,7 +103,7 @@ template IdOwnership(nLevels) {
 
 	// check identity state
 	// note that the Type & Checksum on this version is not verified
-	component calcIdState = Poseidon(3, 6, 8, 57);
+	component calcIdState = Poseidon(3);
 	calcIdState.inputs[0] <== claimsTreeRoot;
 	calcIdState.inputs[1] <== revTreeRoot;
 	calcIdState.inputs[2] <== rootsTreeRoot;
