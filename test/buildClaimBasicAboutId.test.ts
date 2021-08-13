@@ -7,7 +7,7 @@ const assert = chai.assert;
 
 export {};
 
-describe("buildClaimBasicAboutId test", function () {
+describe("buildClaimBasicAboutId test (old)", function () {
     this.timeout(200000);
 
     it("Test BuildClaimBasicAboutId", async () => {

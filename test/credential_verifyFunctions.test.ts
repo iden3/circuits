@@ -1,0 +1,98 @@
+const path = require("path");
+const tester = require("circom").tester;
+const circomlib = require("circomlib");
+const chai = require("chai");
+const assert = chai.assert;
+
+export {};
+
+const verifyCredentialSubject = {
+    claim: [
+        "21024475908144731912815848438102736712390369823686656",
+        "197990912273762023075897629417744831667514652778362723486029975898079821824",
+        "0",
+        "0",
+        "1330878123",
+        "0",
+        "0",
+        "0",
+    ],
+    id: "197990912273762023075897629417744831667514652778362723486029975898079821824", // 117twYCgGzxHUtMsAfjM3muCrypTXcu6oc7cSsuGHM
+}
+
+describe("credential verifyCredentialSubject test", function () {
+    this.timeout(200000);
+    it("Test credential verifyCredentialSubject", async () => {
+        const circuit = await tester(
+            path.join(__dirname, "circuits", "credential_verifyCredentialSubject.circom"),
+            {reduceConstraints: false},
+        );
+
+        const witness = await circuit.calculateWitness(verifyCredentialSubject, true);
+        await circuit.checkConstraints(witness);
+    });
+});
+
+const verifyCredentialMtp = {
+    "claim": [
+        "20654715993900013474510316175425517108417418890313728",
+        "40727245799613559019751726539717406914187024287975587258911930442547331072",
+        "0",
+        "0",
+        "3422259402",
+        "0",
+        "0",
+        "0"
+    ],
+    "isProofExistMtp": [
+        "8642944718030808750631174116590545595346699877855966554837410767850901050241",
+        "0",
+        "2559121857990624749645748723611740625389471552768523819941100032832108291070",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+    ],
+    "isProofExistClaimsTreeRoot": "8983046041355403090199265671506633595311694354613197795337389712944858482798"
+}
+
+describe("credential verifyCredentialMtp test", function () {
+    this.timeout(200000);
+    it("Test credential verifyCredentialMtp", async () => {
+        const circuit = await tester(
+            path.join(__dirname, "circuits", "credential_verifyCredentialMtp.circom"),
+            //{reduceConstraints: false},
+        );
+
+        const witness = await circuit.calculateWitness(verifyCredentialMtp, true);
+        await circuit.checkConstraints(witness);
+    });
+});
+
+describe("credential verifyIdenStateMatchesRoots test", function () {
+    this.timeout(200000);
+    it("Test credential verifyIdenStateMatchesRoots", async () => {
+        const circuit = await tester(
+            path.join(__dirname, "circuits", "credential_verifyIdenStateMatchesRoots.circom"),
+            //{reduceConstraints: false},
+        );
+
+        const witness = await circuit.calculateWitness({
+            "isProofValidClaimsTreeRoot": "5390978791160263927985161830452830346003784422812143177724675599288112176057",
+            "isProofValidRevTreeRoot": "0",
+            "isProofValidRootsTreeRoot": "0",
+            "isIdenState": "17685575544241839934776615609352503109564813484662571173826983469932580732343"
+        }, true);
+        await circuit.checkConstraints(witness);
+    });
+});

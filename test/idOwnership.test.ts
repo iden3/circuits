@@ -5,7 +5,7 @@ const assert = chai.assert;
 
 export {};
 
-describe("idOwnership test", function () {
+describe("idOwnership test (asserted values need to be fixed)", function () {
     this.timeout(200000);
 
 

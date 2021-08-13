@@ -136,7 +136,7 @@ const inputs2JSON = `
 }
 `;
 
-describe("credential test", function () {
+describe("credential test (old)", function () {
     this.timeout(200000);
 
     it("Test Credential", async () => {

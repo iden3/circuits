@@ -84,20 +84,16 @@ template getClaimHiHv() {
 	signal output hi;
 	signal output hv;
 
-	component hashHi = Poseidon(6);
+	component hashHi = Poseidon(4);
 	for (var i=0; i<4; i++) {
 		hashHi.inputs[i] <== claim[0*4 + i];
 	}
-	hashHi.inputs[4] <== 0;
-	hashHi.inputs[5] <== 0;
 	hi <== hashHi.out;
 
-	component hashHv = Poseidon(6);
+	component hashHv = Poseidon(4);
 	for (var i=0; i<4; i++) {
 		hashHv.inputs[i] <== claim[1*4 + i];
 	}
-	hashHv.inputs[4] <== 0;
-	hashHv.inputs[5] <== 0;
 	hv <== hashHv.out;
 }
 
@@ -110,13 +106,10 @@ template getIdenState() {
 
 	signal output idenState;
 
-	component calcIdState = Poseidon(6);
+	component calcIdState = Poseidon(3);
 	calcIdState.inputs[0] <== claimsTreeRoot;
 	calcIdState.inputs[1] <== revTreeRoot;
 	calcIdState.inputs[2] <== rootsTreeRoot;
-	for (var i=3; i<6; i++) {
-		calcIdState.inputs[i] <== 0;
-	}
 
 	idenState <== calcIdState.out;
 }
@@ -138,8 +131,17 @@ template getRevNonceNoVerHiHv() {
 	}
 	hi <== hashHi.out;
 
+	component hashHv = Poseidon(6);
+	hashHv.inputs[0] <== 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+	for (var i=1; i<6; i++) {
+		hashHv.inputs[i] <== 0;
+	}
+	hv <== hashHv.out;
+
 	// hv = Poseidon([0xffff_ffff, 0, 0, 0, 0)
-	hv <== 17142353815121200339963760108352696118925531835836661574604762966243856573359;
+	//hv <== Poseidon([0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 0, 0, 0, 0, 0])
+	//hv <== 17142353815121200339963760108352696118925531835836661574604762966243856573359;
+	//hv <== 8137207316649344643315856769015464323293372071975540252804619894838929375565; // new from go
 }
 
 // getRootHiHv calculates the hashes Hi and Hv of the leaf used in the roots
@@ -157,36 +159,57 @@ template getRootHiHv() {
 	}
 	hi <== hashHi.out;
 
-	// hv = Poseidon([0, 0, 0, 0, 0)
-	hv <== 951383894958571821976060584138905353883650994872035011055912076785884444545;
+	component hashHv = Poseidon(6);
+	for (var i=0; i<6; i++) {
+		hashHv.inputs[i] <== 0;
+	}
+	hv <== hashHv.out;
+
+	//hv <== Poseidon([0, 0, 0, 0, 0, 0])
+	//hv <== 951383894958571821976060584138905353883650994872035011055912076785884444545;
+	//hv <== 14408838593220040598588012778523101864903887657864399481915450526643617223637; // new from go
+}
+
+// getClaimSchema gets the schema of a claim
+template getClaimSchema() {
+	signal input claim[8];
+
+	signal output schema;
+
+ 	component i0Bits = Num2Bits(256);
+	i0Bits.in <== claim[0*4 + 0]
+
+	component schemaNum = Bits2Num(64);
+
+	for (var i=0; i<64; i++) {
+		schemaNum.in[i] <== i0Bits.out[i];
+	}
+	schema <== schemaNum.out;
 }
 
 // proveCredentialOwnership proves ownership of an identity (found in `claim[1]`) which
 // is contained in a claim (`claim`) issued by an identity that has a recent
 // identity state (`isIdenState`), while proving that the claim has not been
-// revoed as of the recent identity state.
+// revoked as of the recent identity state.
 template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
-	var idOwnershipLevels = IdOwnershipLevels + 1;
-	var issuerLevels = IssuerLevels + 1;
-
 	// A
 	signal input claim[8];
 
 	// B. holder proof of claimKOp in the genesis
 	signal input hoKOpSk;
-	signal input hoClaimKOpMtp[idOwnershipLevels];
+	signal input hoClaimKOpMtp[IdOwnershipLevels];
 	signal input hoClaimKOpClaimsTreeRoot;
 	// signal input hoClaimKOpRevTreeRoot;
 	// signal input hoClaimKOpRootsTreeRoot;
 
 	// C. issuer proof of claim existence
-	signal input isProofExistMtp[issuerLevels];
+	signal input isProofExistMtp[IssuerLevels];
 	signal input isProofExistClaimsTreeRoot;
 	// signal input isProofExistRevTreeRoot;
 	// signal input isProofExistRootsTreeRoot;
 
 	// D. issuer proof of claim validity
-	signal input isProofValidNotRevMtp[issuerLevels];
+	signal input isProofValidNotRevMtp[IssuerLevels];
 	signal input isProofValidNotRevMtpNoAux;
 	signal input isProofValidNotRevMtpAuxHi;
 	signal input isProofValidNotRevMtpAuxHv;
@@ -195,7 +218,7 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	signal input isProofValidRootsTreeRoot;
 
 	// E. issuer proof of Root (ExistClaimsTreeRoot)
-	signal input isProofRootMtp[issuerLevels];
+	signal input isProofRootMtp[IssuerLevels];
 
 	// F. issuer recent idenState
 	signal input isIdenState;
@@ -225,10 +248,10 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	//
 	// B. Prove ownership of the kOpSk associated with the holder identity
 	//
-	component idOwnership = IdOwnershipGenesis(idOwnershipLevels);
+	component idOwnership = IdOwnershipGenesis(IdOwnershipLevels);
 	idOwnership.id <== subjectOtherIden.id;
 	idOwnership.userPrivateKey <== hoKOpSk;
-	for (var i=0; i<idOwnershipLevels; i++) { idOwnership.siblings[i] <== hoClaimKOpMtp[i]; }
+	for (var i=0; i<IdOwnershipLevels; i++) { idOwnership.siblings[i] <== hoClaimKOpMtp[i]; }
 	idOwnership.claimsTreeRoot <== hoClaimKOpClaimsTreeRoot;
 	// idOwnership.revTreeRoot    <== hoClaimKOpRevTreeRoot;
 	// idOwnership.rootsTreeRoot  <== hoClaimKOpRootsTreeRoot;
@@ -236,11 +259,11 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	//
 	// C. Claim proof of existence (isProofExist)
 	//
-	component smtClaimExists = SMTVerifier(issuerLevels);
+	component smtClaimExists = SMTVerifier(IssuerLevels);
 	smtClaimExists.enabled <== 1;
 	smtClaimExists.fnc <== 0; // Inclusion
 	smtClaimExists.root <== isProofExistClaimsTreeRoot;
-	for (var i=0; i<issuerLevels; i++) { smtClaimExists.siblings[i] <== isProofExistMtp[i]; }
+	for (var i=0; i<IssuerLevels; i++) { smtClaimExists.siblings[i] <== isProofExistMtp[i]; }
 	smtClaimExists.oldKey <== 0;
 	smtClaimExists.oldValue <== 0;
 	smtClaimExists.isOld0 <== 0;
@@ -259,11 +282,11 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	component revNonceHiHv = getRevNonceNoVerHiHv();
 	revNonceHiHv.revNonce <== claimRevNonce.revNonce;
 
-	component smtClaimValid = SMTVerifier(issuerLevels);
+	component smtClaimValid = SMTVerifier(IssuerLevels);
 	smtClaimValid.enabled <== 1;
 	smtClaimValid.fnc <== 1; // Non-inclusion
 	smtClaimValid.root <== isProofValidRevTreeRoot;
-	for (var i=0; i<issuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNotRevMtp[i]; }
+	for (var i=0; i<IssuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNotRevMtp[i]; }
 	smtClaimValid.oldKey <== isProofValidNotRevMtpAuxHi;
 	smtClaimValid.oldValue <== isProofValidNotRevMtpAuxHv;
 	smtClaimValid.isOld0 <== isProofValidNotRevMtpNoAux;
@@ -277,16 +300,191 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	component rootHiHv = getRootHiHv();
 	rootHiHv.root <== isProofExistClaimsTreeRoot;
 
-	component smtRootValid = SMTVerifier(issuerLevels);
+	component smtRootValid = SMTVerifier(IssuerLevels);
 	smtRootValid.enabled <== 1;
 	smtRootValid.fnc <== 0; // Inclusion
 	smtRootValid.root <== isProofValidRootsTreeRoot;
-	for (var i=0; i<issuerLevels; i++) { smtRootValid.siblings[i] <== isProofRootMtp[i]; }
+	for (var i=0; i<IssuerLevels; i++) { smtRootValid.siblings[i] <== isProofRootMtp[i]; }
 	smtRootValid.oldKey <== 0;
 	smtRootValid.oldValue <== 0;
 	smtRootValid.isOld0 <== 0;
 	smtRootValid.key <== rootHiHv.hi;
 	smtRootValid.value <== rootHiHv.hv;
+
+	//
+	// F. Verify ValidIdenState == isIdenState
+	//
+	component isProofValidIdenState = getIdenState();
+	isProofValidIdenState.claimsTreeRoot <== isProofValidClaimsTreeRoot;
+	isProofValidIdenState.revTreeRoot <== isProofValidRevTreeRoot;
+	isProofValidIdenState.rootsTreeRoot <== isProofValidRootsTreeRoot;
+	// out: isProofValidIdenState.idenState
+
+	isProofValidIdenState.idenState === isIdenState;
+}
+
+
+
+
+
+
+// verifyCredentialSubject verifies that claim is issued to a specified identity
+template verifyCredentialSubject() {
+	signal input claim[8];
+	signal input id;
+
+	//
+	// A. Prove that the claim has subject OtherIden, and take the subject identity.
+	//
+	component header = getClaimHeader();
+	for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
+	// out: header.claimType
+	// out: header.claimFlags[32]
+
+    // TODO: add reading SubjectPos from claim (0 = index, 1 = value) and providing it to the following component
+	component subjectOtherIden = getClaimSubjectOtherIden(0);
+	for (var i=0; i<8; i++) { subjectOtherIden.claim[i] <== claim[i]; }
+	for (var i=0; i<32; i++) { subjectOtherIden.claimFlags[i] <== header.claimFlags[i]; }
+	// out: subjectOtherIden.id
+
+    subjectOtherIden.id === id;
+}
+
+// verifyCredentialSchema verifies that claim matches provided schema
+template verifyCredentialSchema() {
+	signal input claim[8];
+	signal input schema;
+
+	component claimSchema = getClaimHeader();
+
+	isProofValidIdenState.idenState === isIdenState;
+}
+
+// verifyCredentialNotRevoked verifies that claim is not included into the revocation tree
+// TODO: how do we get all of these params and why do we need them at all?
+template verifyCredentialNotRevoked(IssuerLevels) {
+	signal input claim[8];
+
+	// D. issuer proof of claim validity
+	signal input isProofValidNotRevMtp[IssuerLevels];
+	signal input isProofValidNotRevMtpNoAux;
+	signal input isProofValidNotRevMtpAuxHi;
+	signal input isProofValidNotRevMtpAuxHv;
+	signal input isProofValidRevTreeRoot;
+
+
+	component claimRevNonce = getClaimRevNonce();
+	for (var i=0; i<8; i++) { claimRevNonce.claim[i] <== claim[i]; }
+	// out: claimRevNonce.revNonce
+
+	//
+	// D. Claim proof of non revocation (validity)
+	//
+	component revNonceHiHv = getRevNonceNoVerHiHv();
+	revNonceHiHv.revNonce <== claimRevNonce.revNonce;
+
+	component smtClaimValid = SMTVerifier(IssuerLevels);
+	smtClaimValid.enabled <== 1;
+	smtClaimValid.fnc <== 1; // Non-inclusion
+	smtClaimValid.root <== isProofValidRevTreeRoot;
+	for (var i=0; i<IssuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNotRevMtp[i]; }
+	smtClaimValid.oldKey <== isProofValidNotRevMtpAuxHi;
+	smtClaimValid.oldValue <== isProofValidNotRevMtpAuxHv;
+	smtClaimValid.isOld0 <== isProofValidNotRevMtpNoAux;
+	smtClaimValid.key <== revNonceHiHv.hi;
+	smtClaimValid.value <== 0;
+}
+
+// verifyCredentialMtp verifies that claim is issued by the issuer and included into the claim tree root
+template verifyCredentialMtp(IssuerLevels) {
+	signal input claim[8];
+
+	// C. issuer proof of claim existence
+	// TODO: rename signals
+	signal input isProofExistMtp[IssuerLevels]; // issuerClaimMtp
+	signal input isProofExistClaimsTreeRoot;    // issuerClaimTreeRoot
+	// signal input isProofExistRevTreeRoot;    // issuerRevTreeRoot
+	// signal input isProofExistRootsTreeRoot;  // issuerRootsTreeRoot
+
+	component claimHiHv = getClaimHiHv();
+	for (var i=0; i<8; i++) { claimHiHv.claim[i] <== claim[i]; }
+	// out: claimHiHv.hi
+	// out: claimHiHv.hv
+
+	//
+	// C. Claim proof of existence (isProofExist)
+	//
+	component smtClaimExists = SMTVerifier(IssuerLevels);
+	smtClaimExists.enabled <== 1;
+	smtClaimExists.fnc <== 0; // Inclusion
+	smtClaimExists.root <== isProofExistClaimsTreeRoot;
+	for (var i=0; i<IssuerLevels; i++) { smtClaimExists.siblings[i] <== isProofExistMtp[i]; }
+	smtClaimExists.oldKey <== 0;
+	smtClaimExists.oldValue <== 0;
+	smtClaimExists.isOld0 <== 0;
+	smtClaimExists.key <== claimHiHv.hi;
+	smtClaimExists.value <== claimHiHv.hv;
+}
+
+// verifyCredentialMtp verifies that claim is issued by the issuer and included into the claim tree root
+template verifyCredentialMtpHiHv(IssuerLevels) {
+	signal input hi;
+	signal input hv;
+
+	signal input isProofExistMtp[IssuerLevels]; // issuerClaimMtp
+	signal input isProofExistClaimsTreeRoot;    // issuerClaimTreeRoot
+	// signal input isProofExistRevTreeRoot;    // issuerRevTreeRoot
+	// signal input isProofExistRootsTreeRoot;  // issuerRootsTreeRoot
+
+	component smtClaimExists = SMTVerifier(IssuerLevels);
+	smtClaimExists.enabled <== 1;
+	smtClaimExists.fnc <== 0; // Inclusion
+	smtClaimExists.root <== isProofExistClaimsTreeRoot;
+	for (var i=0; i<IssuerLevels; i++) { smtClaimExists.siblings[i] <== isProofExistMtp[i]; }
+	smtClaimExists.oldKey <== 0;
+	smtClaimExists.oldValue <== 0;
+	smtClaimExists.isOld0 <== 0;
+	smtClaimExists.key <== hi;
+	smtClaimExists.value <== hv;
+}
+
+// verifyClaimsTreeRoot verifies that claim is issued by the issuer and included into the claim tree root
+// TODO: what is this check doing? Is it checking inclusion of claim tree root to the roots tree for indirect identities?
+// TODO: Or it should be included to the roots tree for direct identities too?
+template verifyClaimsTreeRoot(IssuerLevels) {
+	signal input isProofExistClaimsTreeRoot;    // issuerClaimTreeRoot
+	signal input isProofValidRootsTreeRoot;
+
+	// E. issuer proof of Root (ExistClaimsTreeRoot)
+	signal input isProofRootMtp[IssuerLevels];
+
+	//
+	// E. Claim proof of root
+	//
+	component rootHiHv = getRootHiHv();
+	rootHiHv.root <== isProofExistClaimsTreeRoot;
+
+	component smtRootValid = SMTVerifier(IssuerLevels);
+	smtRootValid.enabled <== 1;
+	smtRootValid.fnc <== 0; // Inclusion
+	smtRootValid.root <== isProofValidRootsTreeRoot;
+	for (var i=0; i<IssuerLevels; i++) { smtRootValid.siblings[i] <== isProofRootMtp[i]; }
+	smtRootValid.oldKey <== 0;
+	smtRootValid.oldValue <== 0;
+	smtRootValid.isOld0 <== 0;
+	smtRootValid.key <== rootHiHv.hi;
+	smtRootValid.value <== rootHiHv.hv;
+}
+
+// verifyCredentialExistence verifies that claim is issued by the issuer
+// is contained in a claim (`claim`) issued by an identity that has a recent
+// identity state (`isIdenState`), while proving that the claim has not been
+// revoked as of the recent identity state.
+template verifyIdenStateMatchesRoots() {
+	signal input isProofValidClaimsTreeRoot;
+	signal input isProofValidRevTreeRoot;
+	signal input isProofValidRootsTreeRoot;
+	signal input isIdenState;
 
 	//
 	// F. Verify ValidIdenState == isIdenState
