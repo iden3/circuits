@@ -87,7 +87,7 @@ template IdOwnership(nLevels) {
 	claim.ay <== babyPbk.Ay;
 
 
-	// check claim existance
+	// check claim existence
 	component smtClaimExists = SMTVerifier(nLevels);
 	smtClaimExists.enabled <== 1;
 	smtClaimExists.fnc <== 0;

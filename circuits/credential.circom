@@ -60,6 +60,23 @@ template getClaimHeader() {
 	}
 }
 
+// getClaimSchema gets the schema of a claim
+template getClaimSchema() {
+	signal input claim[8];
+
+	signal output schema;
+
+ 	component i0Bits = Num2Bits(256);
+	i0Bits.in <== claim[0*4 + 0];
+
+	component schemaNum = Bits2Num(64);
+
+	for (var i=0; i<64; i++) {
+		schemaNum.in[i] <== i0Bits.out[i];
+	}
+	schema <== schemaNum.out;
+}
+
 // getClaimRevNonce gets the revocation nonce out of a claim outputing it as an integer.
 template getClaimRevNonce() {
 	signal input claim[8];
@@ -170,22 +187,6 @@ template getRootHiHv() {
 	//hv <== 14408838593220040598588012778523101864903887657864399481915450526643617223637; // new from go
 }
 
-// getClaimSchema gets the schema of a claim
-template getClaimSchema() {
-	signal input claim[8];
-
-	signal output schema;
-
- 	component i0Bits = Num2Bits(256);
-	i0Bits.in <== claim[0*4 + 0]
-
-	component schemaNum = Bits2Num(64);
-
-	for (var i=0; i<64; i++) {
-		schemaNum.in[i] <== i0Bits.out[i];
-	}
-	schema <== schemaNum.out;
-}
 
 // proveCredentialOwnership proves ownership of an identity (found in `claim[1]`) which
 // is contained in a claim (`claim`) issued by an identity that has a recent
@@ -355,9 +356,10 @@ template verifyCredentialSchema() {
 	signal input claim[8];
 	signal input schema;
 
-	component claimSchema = getClaimHeader();
+	component claimSchema = getClaimSchema();
+	for (var i=0; i<8; i++) { claimSchema.claim[i] <== claim[i]; }
 
-	isProofValidIdenState.idenState === isIdenState;
+	claimSchema.schema === schema;
 }
 
 // verifyCredentialNotRevoked verifies that claim is not included into the revocation tree
@@ -496,4 +498,28 @@ template verifyIdenStateMatchesRoots() {
 	// out: isProofValidIdenState.idenState
 
 	isProofValidIdenState.idenState === isIdenState;
+}
+
+// verifyClaimIssuance verifies that claim is issued by the issuer
+template verifyClaimIssuance(IssuerLevels) {
+	signal private input claim[8];
+	signal private input claimIssuanceMtp[IssuerLevels];
+	signal private input claimIssuanceClaimsTreeRoot;
+	signal private input claimIssuanceRevTreeRoot;
+	signal private input claimIssuanceRootsTreeRoot;
+	signal input claimIssuanceIdenState;
+
+    // verify country claim is included in claims tree root
+    component claimIssuanceCheck = verifyCredentialMtp(IssuerLevels);
+    for (var i=0; i<8; i++) { claimIssuanceCheck.claim[i] <== claim[i]; }
+    for (var i=0; i<IssuerLevels; i++) { claimIssuanceCheck.isProofExistMtp[i] <== claimIssuanceMtp[i]; }
+    claimIssuanceCheck.isProofExistClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
+
+    // verify issuer state includes country claim
+    component verifyCountryClaimIssuanceIdenState = verifyIdenStateMatchesRoots()
+    verifyCountryClaimIssuanceIdenState.isProofValidClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
+    verifyCountryClaimIssuanceIdenState.isProofValidRevTreeRoot <== claimIssuanceRevTreeRoot;
+    verifyCountryClaimIssuanceIdenState.isProofValidRootsTreeRoot <== claimIssuanceRootsTreeRoot;
+    verifyCountryClaimIssuanceIdenState.isIdenState <== claimIssuanceIdenState;
+
 }

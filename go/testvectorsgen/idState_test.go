@@ -10,10 +10,10 @@ import (
 	"github.com/iden3/go-iden3-core/core/claims"
 	"github.com/iden3/go-iden3-core/core/genesis"
 	"github.com/iden3/go-iden3-core/db"
-	"github.com/iden3/go-iden3-core/merkletree"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	cryptoUtils "github.com/iden3/go-iden3-crypto/utils"
+	"github.com/iden3/go-merkletree-sql"
 	"github.com/stretchr/testify/assert"
 )
 
