@@ -11,6 +11,7 @@ The circuit checks:
 */
 
 include "../node_modules/circomlib/circuits/bitify.circom";
+include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "./idOwnershipGenesis.circom";
 
@@ -112,6 +113,22 @@ template getClaimHiHv() {
 		hashHv.inputs[i] <== claim[1*4 + i];
 	}
 	hv <== hashHv.out;
+}
+
+//  getClaimHash calculates the hash a claim
+template getClaimHash() {
+	signal input claim[8];
+	signal output hash;
+
+    component hihv = getClaimHiHv();
+	for (var i=0; i<8; i++) {
+		hihv.claim[i] <== claim[i];
+	}
+
+	component hashAll = Poseidon(2);
+	hashAll.inputs[0] <== hihv.hi;
+	hashAll.inputs[1] <== hihv.hv;
+	hash <== hashAll.out;
 }
 
 // getIdenState caclulates the Identity state out of the claims tree root,
@@ -522,4 +539,29 @@ template verifyClaimIssuance(IssuerLevels) {
     verifyCountryClaimIssuanceIdenState.isProofValidRootsTreeRoot <== claimIssuanceRootsTreeRoot;
     verifyCountryClaimIssuanceIdenState.isIdenState <== claimIssuanceIdenState;
 
+}
+// verifyClaimSignature verifies that claim is signed with the provided public key
+template verifyClaimSignature() {
+	signal input claim[8];
+	signal input sigR8x;
+	signal input sigR8y;
+	signal input sigS;
+	signal input pubKeyX;
+	signal input pubKeyY;
+
+    component hash = getClaimHash();
+    for (var i=0; i<8; i++) { hash.claim[i] <== claim[i]; }
+
+    // signature verification
+    component sigVerifier = EdDSAPoseidonVerifier();
+    sigVerifier.enabled <== 1;
+
+    sigVerifier.Ax <== pubKeyX;
+    sigVerifier.Ay <== pubKeyY;
+
+    sigVerifier.S <== sigS;
+    sigVerifier.R8x <== sigR8x;
+    sigVerifier.R8y <== sigR8y;
+
+    sigVerifier.M <== hash.hash;
 }
