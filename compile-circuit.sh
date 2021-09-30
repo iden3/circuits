@@ -58,12 +58,12 @@ fi
 
 set -u
 
-CIRCUIT=`readlink -f "$1"`
-PATH=`pwd`/node_modules/.bin:$PATH
-WASMSNARK_TOOLS=`pwd`/node_modules/wasmsnark/tools
-GO_PROVER_PATH=`pwd`/../go-circom-prover-verifier/cli/
+CIRCUIT="$(pwd)/$1"
+PATH="$(pwd)/node_modules/.bin:$PATH"
+WASMSNARK_TOOLS="$(pwd)/node_modules/wasmsnark/tools"
+GO_PROVER_PATH="$(pwd)/../go-circom-prover-verifier/cli/"
 
-OLD_PWD=`pwd`
+OLD_PWD="$(pwd)"
 cd "$GO_PROVER_PATH"
 go build
 cd "$OLD_PWD"
