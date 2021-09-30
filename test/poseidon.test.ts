@@ -11,7 +11,7 @@ export {};
 describe("poseidon test", function () {
     this.timeout(200000);
 
-    it("Test poseidon compatibility with circomlib/poseidon", async () => {
+    it("Test poseidon compatibility with circomlib/poseidon. 3 inputs", async () => {
         const circuit = await tester(
                     path.join(__dirname, "circuits", "poseidon.circom"),
                     { reduceConstraints: false }
@@ -49,7 +49,35 @@ describe("poseidon test", function () {
         // check circomlib javascript poseidon output
         jsOut = circomlib.poseidon(testValues).toString();
         assert.equal(jsOut, "3135714887432857880402997813814046724922969450336546007917491784497158924950", "not equal");
-        
-     });
+    });
+
+    it("Test poseidon compatibility with circomlib/poseidon. 14 inputs", async () => {
+
+        // poseidon with 14 inputs
+        const circuit = await tester(
+            path.join(__dirname, "circuits", "poseidon14.circom"),
+            { reduceConstraints: false }
+        );
+
+        let witness = await circuit.calculateWitness({
+            in: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]
+        });
+        await circuit.checkConstraints(witness);
+        await circuit.assertOut(witness, {out: "8354478399926161176778659061636406690034081872658507739535256090879947077494"});
+
+        // check circomlib javascript poseidon output
+        let jsOut = circomlib.poseidon([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]).toString();
+        assert.equal(jsOut, "8354478399926161176778659061636406690034081872658507739535256090879947077494", "not equal");
+
+        witness = await circuit.calculateWitness({
+            in: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "0", "0", "0", "0"]
+        });
+        await circuit.checkConstraints(witness);
+        await circuit.assertOut(witness, {out: "5540388656744764564518487011617040650780060800286365721923524861648744699539"});
+
+        // check circomlib javascript poseidon output
+        jsOut = circomlib.poseidon([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0]).toString();
+        assert.equal(jsOut, "5540388656744764564518487011617040650780060800286365721923524861648744699539", "not equal");
+    });
 });
 
