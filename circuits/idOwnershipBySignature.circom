@@ -1,5 +1,5 @@
 /*
-# idOwnership.circom
+# idOwnershipBySignature.circom
 
 Circuit to check that the prover is the owner of the identity
 - prover is owner of the private key
@@ -13,15 +13,15 @@ Circuit to check that the prover is the owner of the identity
 +----------+----------+    +----------+          | Verifier +<---------+ClaimsTreeRoot
            ^                                     |          |             +
            |                                     |          |             |
-           |                                     +----------+             |
-      +----+----+                                                         |
-      | pvk2pbk |                                +---------+              |
-      +----+----+                   +----+       |         +<-------------+
-           ^                        | == +<------+         |
-           |                        +-+--+       |  ID     +<------------+RevTreeRoot
-           |                          ^          |  State  |
-           +                          |          |         +<------------+RootsTreeRoot
-     UserPrivateKey                   |          |         |
+           +                                     +----------+             |
+     UserPublicKey                                                        |
+                                                 +---------+              |
+                                    +----+       |         +<-------------+
+                                    | == +<------+         |
+                                    +-+--+       |  ID     +<------------+RevTreeRoot
+                                      ^          |  State  |
+                                      |          |         +<------------+RootsTreeRoot
+                                      |          |         |
                                       |          +---------+
                                       |
                                       +                +----+
@@ -36,24 +36,25 @@ include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
-include "verifyClaimKeyBBJJ.circom";
+include "buildClaimKeyBBJJ.circom";
 include "cutIdState.circom";
 
-template IdOwnership(nLevels) {
+template IdOwnershipBySignature(nLevels) {
 	signal input id;
-	signal input userPrivateKey;
+	signal input userPublicKeyAx;
+	signal input userPublicKeyAy;
 	signal input siblings[nLevels];
 	signal input claimsTreeRoot;
 	signal input revTreeRoot;
 	signal input rootsTreeRoot;
+	signal input challenge;
+	signal input challengeSignatureR8x;
+	signal input challengeSignatureR8y;
+	signal input challengeSignatureS;
 
-	// privateKey & publicKey
-	component babyPbk = BabyPbk();
-	babyPbk.in <== userPrivateKey;
-	
-    component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJ(nLevels)
-	verifyClaimKeyBBJJ.BBJAx <== babyPbk.Ax;
-	verifyClaimKeyBBJJ.BBJAy <== babyPbk.Ay;
+    component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels)
+	verifyClaimKeyBBJJ.BBJAx <== userPublicKeyAx;
+	verifyClaimKeyBBJJ.BBJAy <== userPublicKeyAy;
 	for (var i=0; i<nLevels; i++) {
 		verifyClaimKeyBBJJ.siblings[i] <== siblings[i];
 	}
@@ -68,7 +69,7 @@ template IdOwnership(nLevels) {
 
 	component calcCutState = cutState();
 	calcCutState.in <== calcIdState.out;
-
+	
 	component calcCutId = cutId();
 	calcCutId.in <== id;
 
@@ -78,4 +79,18 @@ template IdOwnership(nLevels) {
 	checkIdState.out === 1;
 
 	// TODO: check claim not revoked
+
+    // signature verification
+    component sigVerifier = EdDSAPoseidonVerifier();
+    sigVerifier.enabled <== 1;
+
+    sigVerifier.Ax <== userPublicKeyAx;
+    sigVerifier.Ay <== userPublicKeyAy;
+
+    sigVerifier.S <== challengeSignatureS;
+    sigVerifier.R8x <== challengeSignatureR8x;
+    sigVerifier.R8y <== challengeSignatureR8y;
+
+    sigVerifier.M <== challenge;
+
 }
