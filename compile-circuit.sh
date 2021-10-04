@@ -22,9 +22,9 @@ compile_and_ts() {
 #    time snarkjs setup -r circuit.r1cs --pk proving_key.json --vk verification_key.json
     time snarkjs groth16 setup circuit.r1cs ../powersOfTau28_hez_final_15.ptau circuit_0000.zkey
 
-    ENTROPY1=$(head -c 1024 /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 128)
-    ENTROPY2=$(head -c 1024 /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 128)
-    ENTROPY3=$(head -c 1024 /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 128)
+    ENTROPY1=$(head -c 1024 /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 128)
+    ENTROPY2=$(head -c 1024 /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 128)
+    ENTROPY3=$(head -c 1024 /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 128)
 
     time snarkjs zkey contribute circuit_0000.zkey circuit_0001.zkey --name="1st Contribution" -v -e="$ENTROPY1"
     time snarkjs zkey contribute circuit_0001.zkey circuit_0002.zkey --name="2nd Contribution" -v -e="$ENTROPY2"
