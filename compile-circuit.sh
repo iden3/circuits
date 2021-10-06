@@ -5,13 +5,17 @@ set -e
 compile_and_ts() {
     CIRCUIT_PATH="$1"
     CIRCUIT=`basename "$CIRCUIT" .circom`
-    CONTRACT=`python -c "print(\"${CIRCUIT}\".capitalize())"`
 
     mkdir -p "$CIRCUIT"
     cd "$CIRCUIT"
 
-    echo "Built at `date`" > info.txt
-    git show --summary >> info.txt
+    if command -v git
+    then
+        echo "Built at `date`" > info.txt
+        git show --summary >> info.txt
+    fi
+
+
     cp "$CIRCUIT_PATH" circuit.circom
 
     set -x
@@ -35,19 +39,8 @@ compile_and_ts() {
     time snarkjs zkey export verificationkey circuit_final.zkey verification_key.json
     time snarkjs zkey export json circuit_final.zkey circuit_final.zkey.json
 
-    #time node "${WASMSNARK_TOOLS}/buildpkey.js" -i proving_key.json -o proving_key.bin
-    #time "${GO_PROVER_PATH}/cli" -convert -pk proving_key.json -pkbin proving_key.go.bin
     time snarkjs zkey export solidityverifier circuit_final.zkey verifier.sol
     set +x
-
-    #sed -i 's/null/["0","0","0"]/g' proving_key.json
-
-    #sed -i "s/solidity ^0.5.0/solidity ^0.6.0/g" verifier.sol
-    #sed -i "s/gas/gas()/g" verifier.sol
-    #sed -i "s/return the sum/return r the sum/g" verifier.sol
-    #sed -i "s/return the product/return r the product/g" verifier.sol
-    #sed -i "s/contract Verifier/contract ${CONTRACT}Verifier/g" verifier.sol
-    #sed -i "s/Pairing/${CONTRACT}Pairing/g" verifier.sol
 }
 
 if [ "$#" -ne 1 ]
@@ -60,13 +53,6 @@ set -u
 
 CIRCUIT="$(pwd)/$1"
 PATH="$(pwd)/node_modules/.bin:$PATH"
-WASMSNARK_TOOLS="$(pwd)/node_modules/wasmsnark/tools"
-GO_PROVER_PATH="$(pwd)/../go-circom-prover-verifier/cli/"
-
-OLD_PWD="$(pwd)"
-cd "$GO_PROVER_PATH"
-go build
-cd "$OLD_PWD"
 
 # npm ci
 mkdir -p build
