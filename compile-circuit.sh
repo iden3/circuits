@@ -9,11 +9,11 @@ compile_and_ts() {
     mkdir -p "$CIRCUIT"
     cd "$CIRCUIT"
 
-    if command -v git
-    then
-        echo "Built at `date`" > info.txt
-        git show --summary >> info.txt
-    fi
+#    if command -v git
+#    then
+#        echo "Built at `date`" > info.txt
+#        git show --summary >> info.txt
+#    fi
 
 
     cp "$CIRCUIT_PATH" circuit.circom
