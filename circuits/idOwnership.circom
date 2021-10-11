@@ -51,7 +51,7 @@ template IdOwnership(nLevels) {
 	component babyPbk = BabyPbk();
 	babyPbk.in <== userPrivateKey;
 	
-    component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJ(nLevels)
+    component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels)
 	verifyClaimKeyBBJJ.BBJAx <== babyPbk.Ax;
 	verifyClaimKeyBBJJ.BBJAy <== babyPbk.Ay;
 	for (var i=0; i<nLevels; i++) {
