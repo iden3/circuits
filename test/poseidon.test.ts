@@ -79,5 +79,34 @@ describe("poseidon test", function () {
         jsOut = circomlib.poseidon([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0]).toString();
         assert.equal(jsOut, "5540388656744764564518487011617040650780060800286365721923524861648744699539", "not equal");
     });
+
+    it("Test poseidon compatibility with circomlib/poseidon. 16 inputs", async () => {
+
+        // poseidon with 16 inputs
+        const circuit = await tester(
+            path.join(__dirname, "circuits", "poseidon16.circom"),
+            { reduceConstraints: false }
+        );
+
+        let witness = await circuit.calculateWitness({
+            in: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"]
+        });
+        await circuit.checkConstraints(witness);
+        await circuit.assertOut(witness, {out: "9989051620750914585850546081941653841776809718687451684622678807385399211877"});
+
+        // check circomlib javascript poseidon output
+        // let jsOut = circomlib.poseidon([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]).toString();
+        // assert.equal(jsOut, "9989051620750914585850546081941653841776809718687451684622678807385399211877", "not equal");
+
+        witness = await circuit.calculateWitness({
+            in: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "0", "0", "0", "0", "0", "0"]
+        });
+        await circuit.checkConstraints(witness);
+        await circuit.assertOut(witness, {out: "11882816200654282475720830292386643970958445617880627439994635298904836126497"});
+
+        // check circomlib javascript poseidon output
+        // jsOut = circomlib.poseidon([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0]).toString();
+        // assert.equal(jsOut, "11882816200654282475720830292386643970958445617880627439994635298904836126497", "not equal");
+    });
 });
 
