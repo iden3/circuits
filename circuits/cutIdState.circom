@@ -11,7 +11,7 @@ template cutId() {
 	for (var i=16; i<256-16-8; i++) {
 		cutted.in[i-16] <== idBits.out[i];
 	}
-	out <== cutted.out
+	out <== cutted.out;
 }
 
 template cutState() {
@@ -25,5 +25,5 @@ template cutState() {
 	for (var i=0; i<256-16-16-8; i++) {
 		cutted.in[i] <== stateBits.out[i+16+16+8];
 	}
-	out <== cutted.out
+	out <== cutted.out;
 }

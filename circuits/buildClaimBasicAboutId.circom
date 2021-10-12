@@ -14,10 +14,10 @@ template BuildClaimBasicAboutId() {
 	signal output hv;
 
 	component e0 = Bits2Num(256);
-	var claimType[64];
-	claimType = bigEndian(CLAIM_TYPE, 64);
+	component claimTypeBE = bigEndian(64);
+	claimTypeBE.in <== CLAIM_TYPE;
 	for (var i=0; i<64; i++) {
-		e0.in[i] <== claimType[i];
+		e0.in[i] <== claimTypeBE.out[i];
 	}
 	for (var i=64; i<256; i++) {
 		e0.in[i] <== 0;

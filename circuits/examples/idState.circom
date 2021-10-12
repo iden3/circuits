@@ -1,3 +1,3 @@
 include "../idState.circom";
 
-component main = IdState(4);
+component main {public [id,oldIdState,newIdState]} = IdState(4);

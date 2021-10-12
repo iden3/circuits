@@ -19,9 +19,12 @@ compile_and_ts() {
     cp "$CIRCUIT_PATH" circuit.circom
 
     set -x
-    time circom "$CIRCUIT_PATH" --r1cs circuit.r1cs --wasm circuit.wasm --sym circuit.sym
+    time circom --r1cs --wasm --sym "$CIRCUIT_PATH"
+    mv "${CIRCUIT}.r1cs" circuit.r1cs
+    mv "${CIRCUIT}_js/${CIRCUIT}.wasm" circuit.wasm
+    mv "${CIRCUIT}.sym" circuit.sym
     snarkjs r1cs info circuit.r1cs
-    snarkjs r1cs export json circuit.r1cs circuit.r1cs.json
+    #snarkjs r1cs export json circuit.r1cs circuit.r1cs.json
 
 #    time snarkjs setup -r circuit.r1cs --pk proving_key.json --vk verification_key.json
     time snarkjs groth16 setup circuit.r1cs "$PTAU" circuit_0000.zkey

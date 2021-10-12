@@ -1,4 +1,4 @@
-include "credential.circom"
+include "credential.circom";
 
 // verifyKYCCredentials proves ownership and validity of Country of Residence Claim
 // and Birthday Claim and verifies they have allowed values (age >= 18 and country
@@ -6,35 +6,35 @@ include "credential.circom"
 template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistLength) {
 
     /* id ownership signals */
-	signal private input id;
-	signal private input userPrivateKey;
-	signal private input BBJClaimMtp[IdOwnershipLevels];
-	signal private input BBJClaimClaimsTreeRoot;
-	// signal private input BBJClaimRevTreeRoot;
-	// signal private input BBJClaimRootsTreeRoot;
+	signal input id;
+	signal input userPrivateKey;
+	signal input BBJClaimMtp[IdOwnershipLevels];
+	signal input BBJClaimClaimsTreeRoot;
+	// signal input BBJClaimRevTreeRoot;
+	// signal input BBJClaimRootsTreeRoot;
 
     /* country claim signals */
-	signal private input countryClaim[8];
-	signal private input countryClaimIssuanceMtp[IssuerLevels];
-	signal private input countryClaimIssuanceClaimsTreeRoot;
-	signal private input countryClaimIssuanceRevTreeRoot;
-	signal private input countryClaimIssuanceRootsTreeRoot;
+	signal input countryClaim[8];
+	signal input countryClaimIssuanceMtp[IssuerLevels];
+	signal input countryClaimIssuanceClaimsTreeRoot;
+	signal input countryClaimIssuanceRevTreeRoot;
+	signal input countryClaimIssuanceRootsTreeRoot;
 	signal input countryClaimIssuanceIdenState;
 
-    signal input countryBlacklist[CountryBlacklistLength]
+    signal input countryBlacklist[CountryBlacklistLength];
 
     // TODO: add non revocation checks
-    //	signal private input countryClaimNotRevMtp[IssuerLevels];
-    //	signal private input countryClaimNotRevMtpNoAux;
-    //	signal private input countryClaimNotRevMtpAuxHi;
-    //	signal private input countryClaimNotRevMtpAuxHv;
+    //	signal input countryClaimNotRevMtp[IssuerLevels];
+    //	signal input countryClaimNotRevMtpNoAux;
+    //	signal input countryClaimNotRevMtpAuxHi;
+    //	signal input countryClaimNotRevMtpAuxHv;
 
     /* birthday claim signals */
-	signal private input birthdayClaim[8];
-	signal private input birthdayClaimIssuanceMtp[IssuerLevels];
-	signal private input birthdayClaimIssuanceClaimsTreeRoot;
-	signal private input birthdayClaimIssuanceRevTreeRoot;
-	signal private input birthdayClaimIssuanceRootsTreeRoot;
+	signal input birthdayClaim[8];
+	signal input birthdayClaimIssuanceMtp[IssuerLevels];
+	signal input birthdayClaimIssuanceClaimsTreeRoot;
+	signal input birthdayClaimIssuanceRevTreeRoot;
+	signal input birthdayClaimIssuanceRootsTreeRoot;
 	signal input birthdayClaimIssuanceIdenState;
 
     signal input currentYear;
@@ -44,10 +44,10 @@ template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistL
     signal input challenge;
 
     // TODO: add non revocation checks
-    //	signal private input birthdayClaimNotRevMtp[IssuerLevels];
-    //	signal private input birthdayClaimNotRevMtpNoAux;
-    //	signal private input birthdayClaimNotRevMtpAuxHi;
-    //	signal private input birthdayClaimNotRevMtpAuxHv;
+    //	signal input birthdayClaimNotRevMtp[IssuerLevels];
+    //	signal input birthdayClaimNotRevMtpNoAux;
+    //	signal input birthdayClaimNotRevMtpAuxHi;
+    //	signal input birthdayClaimNotRevMtpAuxHv;
 
     /*
         Id ownership check
@@ -83,10 +83,10 @@ template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistL
     //country.country === 31
     component eq[CountryBlacklistLength];
     for (var i=0; i<CountryBlacklistLength; i++) {
-        eq[i] = IsEqual()
-        eq[i].in[0] <== country.country
-        eq[i].in[1] <== countryBlacklist[i]
-        eq[i].out === 0
+        eq[i] = IsEqual();
+        eq[i].in[0] <== country.country;
+        eq[i].in[1] <== countryBlacklist[i];
+        eq[i].out === 0;
     }
 
     /*
@@ -234,7 +234,7 @@ template calculateAge() {
     validCurDate.month <== CurMonth;
     validCurDate.day <== CurDay;
 
-    component gteY = GreaterEqThan(32)
+    component gteY = GreaterEqThan(32);
     gteY.in[0] <== CurYear;
     gteY.in[1] <== DOBYear;
     gteY.out === 1;

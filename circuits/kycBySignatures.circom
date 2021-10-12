@@ -1,6 +1,6 @@
-include "kyc.circom"
-include "idOwnershipBySignature.circom"
-include "utils.circom"
+include "kyc.circom";
+include "idOwnershipBySignature.circom";
+include "utils.circom";
 include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 
 // verifyKYCSignedCredentials proves validity of Country of Residence Claim
@@ -10,54 +10,54 @@ include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistLength) {
 
     /* id ownership signals */
-	signal private input id;
-	signal private input BBJAx;
-	signal private input BBJAy;
-	signal private input BBJClaimMtp[IdOwnershipLevels];
-	signal private input BBJClaimClaimsTreeRoot;
-	signal private input BBJClaimRevTreeRoot;
-	signal private input BBJClaimRootsTreeRoot;
+	signal input id;
+	signal input BBJAx;
+	signal input BBJAy;
+	signal input BBJClaimMtp[IdOwnershipLevels];
+	signal input BBJClaimClaimsTreeRoot;
+	signal input BBJClaimRevTreeRoot;
+	signal input BBJClaimRootsTreeRoot;
 	signal input challenge;
-	signal private input challengeSignatureR8x;
-	signal private input challengeSignatureR8y;
-	signal private input challengeSignatureS;
+	signal input challengeSignatureR8x;
+	signal input challengeSignatureR8y;
+	signal input challengeSignatureS;
 
     /* country claim signals */
-	signal private input countryClaim[8];
+	signal input countryClaim[8];
 	signal input countryClaimIssuerId;
-	signal private input countryClaimIssuerBBJAx;
-	signal private input countryClaimIssuerBBJAy;
-	signal private input countryClaimIssuerBBJClaimMtp[IssuerLevels];
-	signal private input countryClaimIssuerBBJClaimClaimsTreeRoot;
-	signal private input countryClaimIssuerBBJClaimRevTreeRoot;
-	signal private input countryClaimIssuerBBJClaimRootsTreeRoot;
+	signal input countryClaimIssuerBBJAx;
+	signal input countryClaimIssuerBBJAy;
+	signal input countryClaimIssuerBBJClaimMtp[IssuerLevels];
+	signal input countryClaimIssuerBBJClaimClaimsTreeRoot;
+	signal input countryClaimIssuerBBJClaimRevTreeRoot;
+	signal input countryClaimIssuerBBJClaimRootsTreeRoot;
 	signal input countryClaimIssuerBBJIdenState;
-	signal private input countryClaimSignatureR8x;
-	signal private input countryClaimSignatureR8y;
-	signal private input countryClaimSignatureS;
+	signal input countryClaimSignatureR8x;
+	signal input countryClaimSignatureR8y;
+	signal input countryClaimSignatureS;
     // TODO: add non revocation check for issuer Public Key
 
-    signal input countryBlacklist[CountryBlacklistLength]
+    signal input countryBlacklist[CountryBlacklistLength];
 
     // TODO: add non revocation checks
-    //	signal private input countryClaimNotRevMtp[IssuerLevels];
-    //	signal private input countryClaimNotRevMtpNoAux;
-    //	signal private input countryClaimNotRevMtpAuxHi;
-    //	signal private input countryClaimNotRevMtpAuxHv;
+    //	signal input countryClaimNotRevMtp[IssuerLevels];
+    //	signal input countryClaimNotRevMtpNoAux;
+    //	signal input countryClaimNotRevMtpAuxHi;
+    //	signal input countryClaimNotRevMtpAuxHv;
 
     /* birthday claim signals */
-	signal private input birthdayClaim[8];
+	signal input birthdayClaim[8];
 	signal input birthdayClaimIssuerId;
-	signal private input birthdayClaimIssuerBBJAx;
-	signal private input birthdayClaimIssuerBBJAy;
-	signal private input birthdayClaimIssuerBBJClaimMtp[IssuerLevels];
-	signal private input birthdayClaimIssuerBBJClaimClaimsTreeRoot;
-	signal private input birthdayClaimIssuerBBJClaimRevTreeRoot;
-	signal private input birthdayClaimIssuerBBJClaimRootsTreeRoot;
+	signal input birthdayClaimIssuerBBJAx;
+	signal input birthdayClaimIssuerBBJAy;
+	signal input birthdayClaimIssuerBBJClaimMtp[IssuerLevels];
+	signal input birthdayClaimIssuerBBJClaimClaimsTreeRoot;
+	signal input birthdayClaimIssuerBBJClaimRevTreeRoot;
+	signal input birthdayClaimIssuerBBJClaimRootsTreeRoot;
 	signal input birthdayClaimIssuerBBJIdenState;
-	signal private input birthdayClaimSignatureR8x;
-	signal private input birthdayClaimSignatureR8y;
-	signal private input birthdayClaimSignatureS;
+	signal input birthdayClaimSignatureR8x;
+	signal input birthdayClaimSignatureR8y;
+	signal input birthdayClaimSignatureS;
     // TODO: add non revocation check for issuer Public Key
 
     signal input currentYear;
@@ -65,10 +65,10 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
     signal input currentDay;
 
     // TODO: add non revocation checks
-    //	signal private input birthdayClaimNotRevMtp[IssuerLevels];
-    //	signal private input birthdayClaimNotRevMtpNoAux;
-    //	signal private input birthdayClaimNotRevMtpAuxHi;
-    //	signal private input birthdayClaimNotRevMtpAuxHv;
+    //	signal input birthdayClaimNotRevMtp[IssuerLevels];
+    //	signal input birthdayClaimNotRevMtpNoAux;
+    //	signal input birthdayClaimNotRevMtpAuxHi;
+    //	signal input birthdayClaimNotRevMtpAuxHv;
 
     /*
         Id ownership check
@@ -101,7 +101,7 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
     // TODO: add schema check
 
     // check that country claim with issuer public key is in it's identity state
-    component verifyCountryClaimIssuerClaimKeyBBJJ = VerifyClaimKeyBBJJinIdState(IssuerLevels)
+    component verifyCountryClaimIssuerClaimKeyBBJJ = VerifyClaimKeyBBJJinIdState(IssuerLevels);
 	verifyCountryClaimIssuerClaimKeyBBJJ.BBJAx <== countryClaimIssuerBBJAx;
 	verifyCountryClaimIssuerClaimKeyBBJJ.BBJAy <== countryClaimIssuerBBJAy;
 	for (var i=0; i<IssuerLevels; i++) {
@@ -145,7 +145,7 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
     // TODO: add schema check
 
     // check that birthday claim with issuer public key is in it's identity state
-    component verifyBirthdayClaimIssuerClaimKeyBBJJ = VerifyClaimKeyBBJJinIdState(IssuerLevels)
+    component verifyBirthdayClaimIssuerClaimKeyBBJJ = VerifyClaimKeyBBJJinIdState(IssuerLevels);
 	verifyBirthdayClaimIssuerClaimKeyBBJJ.BBJAx <== birthdayClaimIssuerBBJAx;
 	verifyBirthdayClaimIssuerClaimKeyBBJJ.BBJAy <== birthdayClaimIssuerBBJAy;
 	for (var i=0; i<IssuerLevels; i++) {

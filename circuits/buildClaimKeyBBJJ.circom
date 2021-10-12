@@ -16,21 +16,31 @@ template BuildClaimKeyBBJJ(keytype) {
 	signal output hv;
 
 	component e0 = Bits2Num(256);
-	var claimType[64];
+	var claimType[256];
 	claimType = bigEndian(CLAIM_TYPE, 64);
 	for (var i=0; i<64; i++) {
 		e0.in[i] <== claimType[i];
 	}
+//	component claimTypeBE = bigEndian(64);
+//	claimTypeBE.in <== CLAIM_TYPE;
+//	for (var i=0; i<64; i++) {
+//		e0.in[i] <== claimTypeBE.out[i];
+//	}
 	for (var i=64; i<256; i++) {
 		e0.in[i] <== 0;
 	}
 	
 	component e1 = Bits2Num(256);
-	var keytypeBE[64];
+	var keytypeBE[256];
 	keytypeBE = bigEndian(keytype, 64);
 	for (var i=0; i<64; i++) {
 		e1.in[i] <== keytypeBE[i];
 	}
+//	component keytypeBE = bigEndian(64);
+//	keytypeBE.in <== keytype;
+//	for (var i=0; i<64; i++) {
+//		e1.in[i] <== keytypeBE.out[i];
+//	}
 	for (var i=64; i<256; i++) {
 		e1.in[i] <== 0;
 	}

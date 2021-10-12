@@ -44,10 +44,10 @@ template getClaimHeader() {
 	signal input claim[8];
 
 	signal output claimType;
-	signal output claimFlags[32]
+	signal output claimFlags[32];
 
  	component i0Bits = Num2Bits(256);
-	i0Bits.in <== claim[0*4 + 0]
+	i0Bits.in <== claim[0*4 + 0];
 
 	component claimTypeNum = Bits2Num(64);
 
@@ -87,7 +87,7 @@ template getClaimRevNonce() {
 	component claimRevNonce = Bits2Num(32);
 
  	component v0Bits = Num2Bits(256);
-	v0Bits.in <== claim[1*4 + 0]
+	v0Bits.in <== claim[1*4 + 0];
 	for (var i=0; i<32; i++) {
 		claimRevNonce.in[i] <== v0Bits.out[i];
 	}
@@ -519,11 +519,11 @@ template verifyIdenStateMatchesRoots() {
 
 // verifyClaimIssuance verifies that claim is issued by the issuer
 template verifyClaimIssuance(IssuerLevels) {
-	signal private input claim[8];
-	signal private input claimIssuanceMtp[IssuerLevels];
-	signal private input claimIssuanceClaimsTreeRoot;
-	signal private input claimIssuanceRevTreeRoot;
-	signal private input claimIssuanceRootsTreeRoot;
+	signal input claim[8];
+	signal input claimIssuanceMtp[IssuerLevels];
+	signal input claimIssuanceClaimsTreeRoot;
+	signal input claimIssuanceRevTreeRoot;
+	signal input claimIssuanceRootsTreeRoot;
 	signal input claimIssuanceIdenState;
 
     // verify country claim is included in claims tree root
@@ -533,7 +533,7 @@ template verifyClaimIssuance(IssuerLevels) {
     claimIssuanceCheck.isProofExistClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
 
     // verify issuer state includes country claim
-    component verifyCountryClaimIssuanceIdenState = verifyIdenStateMatchesRoots()
+    component verifyCountryClaimIssuanceIdenState = verifyIdenStateMatchesRoots();
     verifyCountryClaimIssuanceIdenState.isProofValidClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
     verifyCountryClaimIssuanceIdenState.isProofValidRevTreeRoot <== claimIssuanceRevTreeRoot;
     verifyCountryClaimIssuanceIdenState.isProofValidRootsTreeRoot <== claimIssuanceRootsTreeRoot;

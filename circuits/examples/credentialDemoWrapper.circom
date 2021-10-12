@@ -1,4 +1,4 @@
-include "../credential.circom"
+include "../credential.circom";
 
 // buildClaimOtherIdenDemo builds a ClaimOtherIden (an example claim which has
 // Subject = OtherIden, SubjectPos = Index).  The IndexSlot bytes in i0 and the
