@@ -64,6 +64,8 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
     signal input currentMonth;
     signal input currentDay;
 
+    signal input minAge;
+
     // TODO: add non revocation checks
     //	signal private input birthdayClaimNotRevMtp[IssuerLevels];
     //	signal private input birthdayClaimNotRevMtpNoAux;
@@ -165,26 +167,26 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
 	verifyBirthdayClaimSignature.pubKeyX <== birthdayClaimIssuerBBJAx;
 	verifyBirthdayClaimSignature.pubKeyY <== birthdayClaimIssuerBBJAy;
 
-//    // get birthday value
-//    component birthday = getBirthday();
-//    for (var i=0; i<8; i++) { birthday.claim[i] <== birthdayClaim[i]; }
-//
-//    // calculate age
-//	component age = calculateAge();
-//	age.DOBYear <== birthday.year;
-//	age.DOBMonth <== birthday.month;
-//	age.DOBDay <== birthday.day;
-//	age.CurYear <== currentYear;
-//	age.CurMonth <== currentMonth;
-//	age.CurDay <== currentDay;
+    // get birthday value
+    component birthday = getBirthday();
+    for (var i=0; i<8; i++) { birthday.claim[i] <== birthdayClaim[i]; }
 
-    component age = getAge();
-    for (var i=0; i<8; i++) { age.claim[i] <== birthdayClaim[i]; }
+    // calculate age
+	component age = calculateAge();
+	age.DOBYear <== birthday.year;
+	age.DOBMonth <== birthday.month;
+	age.DOBDay <== birthday.day;
+	age.CurYear <== currentYear;
+	age.CurMonth <== currentMonth;
+	age.CurDay <== currentDay;
 
-    // verify age > 18
+//    component age = getAge();
+//    for (var i=0; i<8; i++) { age.claim[i] <== birthdayClaim[i]; }
+
+    // verify age > minAge
     component gte18 = GreaterEqThan(32);
     gte18.in[0] <== age.age;
-    gte18.in[1] <== 18;
+    gte18.in[1] <== minAge;
     gte18.out === 1;
 
 }
