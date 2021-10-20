@@ -41,6 +41,8 @@ template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistL
     signal input currentMonth;
     signal input currentDay;
 
+    signal input minAge;
+
     signal input challenge;
 
     // TODO: add non revocation checks
@@ -107,26 +109,26 @@ template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistL
     verifyBirthdayClaimIssuance.claimIssuanceRootsTreeRoot <== birthdayClaimIssuanceRootsTreeRoot;
     verifyBirthdayClaimIssuance.claimIssuanceIdenState <== birthdayClaimIssuanceIdenState;
 
-//    // get birthday value
-//    component birthday = getBirthday();
-//    for (var i=0; i<8; i++) { birthday.claim[i] <== birthdayClaim[i]; }
+    // get birthday value
+    component birthday = getBirthday();
+    for (var i=0; i<8; i++) { birthday.claim[i] <== birthdayClaim[i]; }
 //
 //    // calculate age
-//	component age = calculateAge();
-//	age.DOBYear <== birthday.year;
-//	age.DOBMonth <== birthday.month;
-//	age.DOBDay <== birthday.day;
-//	age.CurYear <== currentYear;
-//	age.CurMonth <== currentMonth;
-//	age.CurDay <== currentDay;
+	component age = calculateAge();
+	age.DOBYear <== birthday.year;
+	age.DOBMonth <== birthday.month;
+	age.DOBDay <== birthday.day;
+	age.CurYear <== currentYear;
+	age.CurMonth <== currentMonth;
+	age.CurDay <== currentDay;
 
-    component age = getAge();
-    for (var i=0; i<8; i++) { age.claim[i] <== birthdayClaim[i]; }
+//    component age = getAge();
+//    for (var i=0; i<8; i++) { age.claim[i] <== birthdayClaim[i]; }
 
-    // verify age > 18
+    // verify age > minAge
     component gte18 = GreaterEqThan(32);
     gte18.in[0] <== age.age;
-    gte18.in[1] <== 18;
+    gte18.in[1] <== minAge;
     gte18.out === 1;
 
 }
