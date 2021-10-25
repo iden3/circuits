@@ -51,15 +51,15 @@ template getClaimHeader() {
  	component i0Bits = Num2Bits(256);
 	i0Bits.in <== claim[0*4 + 0];
 
-	component claimTypeNum = Bits2Num(64);
+	component claimTypeNum = Bits2Num(128);
 
-	for (var i=0; i<64; i++) {
+	for (var i=0; i<128; i++) {
 		claimTypeNum.in[i] <== i0Bits.out[i];
 	}
 	claimType <== claimTypeNum.out;
 
 	for (var i=0; i<32; i++) {
-		claimFlags[i] <== i0Bits.out[64 + i];
+		claimFlags[i] <== i0Bits.out[128 + i];
 	}
 }
 
@@ -72,9 +72,9 @@ template getClaimSchema() {
  	component i0Bits = Num2Bits(256);
 	i0Bits.in <== claim[0*4 + 0];
 
-	component schemaNum = Bits2Num(64);
+	component schemaNum = Bits2Num(128);
 
-	for (var i=0; i<64; i++) {
+	for (var i=0; i<128; i++) {
 		schemaNum.in[i] <== i0Bits.out[i];
 	}
 	schema <== schemaNum.out;
