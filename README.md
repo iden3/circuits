@@ -11,7 +11,6 @@ Circuits:
 - [Identity Ownership Genesis](circuits/idOwnershipGenesis.circom): wrapper on top of idOwnership.circom to check the ownership only for a Genesis Id state
 - [Identity State Update](circuits/idState.circom): circuit used to verify validity when updating an Identity State
 - [BuildClaimKeyBBJJ](circuits/buildClaimKeyBBJJ.circom): circuit used build ClaimKeyBabyJubJub
-- [BuildClaimBasicAboutId](circuits/buildClaimBasicAboutId.circom): circuit used build ClaimBasic about a specific Id 
 - [Credential](circuits/credential.circom): circuit used to verify a
   Credential. This means that the prover is the owner of the identity, and the
   identity is inside a claim with Subject OtherIden, and that claim is inside
