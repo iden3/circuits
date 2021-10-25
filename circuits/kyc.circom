@@ -1,3 +1,5 @@
+pragma circom 2.0.0;
+
 include "credential.circom";
 
 // verifyKYCCredentials proves ownership and validity of Country of Residence Claim

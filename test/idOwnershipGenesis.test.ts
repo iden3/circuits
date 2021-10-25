@@ -1,5 +1,5 @@
 const path = require("path");
-const tester = require("circom").tester;
+const tester = require("circom_tester").wasm;
 const chai = require("chai");
 const assert = chai.assert;
 

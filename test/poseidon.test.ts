@@ -1,8 +1,6 @@
-
 const path = require("path");
-const snarkjs = require("snarkjs");
-const tester = require("circom").tester;
-const circomlib = require("circomlib");
+const tester = require("circom_tester").wasm;
+const circomlibjs = require("circomlibjs");
 const chai = require("chai");
 const assert = chai.assert;
 
@@ -30,7 +28,7 @@ describe("poseidon test", function () {
         await circuit.assertOut(witness, {out: "16319005924338521988144249782199320915969277491928916027259324394544057385749"});
 
         // check circomlib javascript poseidon output
-        let jsOut = circomlib.poseidon([1, 0, 0]).toString();
+        let jsOut = circomlibjs.poseidon([1, 0, 0]).toString();
         assert.equal(jsOut, "16319005924338521988144249782199320915969277491928916027259324394544057385749", "not equal");
 
         witness = await circuit.calculateWitness({
@@ -47,7 +45,7 @@ describe("poseidon test", function () {
         await circuit.assertOut(witness, {out: "3135714887432857880402997813814046724922969450336546007917491784497158924950"});
 
         // check circomlib javascript poseidon output
-        jsOut = circomlib.poseidon(testValues).toString();
+        jsOut = circomlibjs.poseidon(testValues).toString();
         assert.equal(jsOut, "3135714887432857880402997813814046724922969450336546007917491784497158924950", "not equal");
     });
 
@@ -66,7 +64,7 @@ describe("poseidon test", function () {
         await circuit.assertOut(witness, {out: "8354478399926161176778659061636406690034081872658507739535256090879947077494"});
 
         // check circomlib javascript poseidon output
-        let jsOut = circomlib.poseidon([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]).toString();
+        let jsOut = circomlibjs.poseidon([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]).toString();
         assert.equal(jsOut, "8354478399926161176778659061636406690034081872658507739535256090879947077494", "not equal");
 
         witness = await circuit.calculateWitness({
@@ -76,7 +74,7 @@ describe("poseidon test", function () {
         await circuit.assertOut(witness, {out: "5540388656744764564518487011617040650780060800286365721923524861648744699539"});
 
         // check circomlib javascript poseidon output
-        jsOut = circomlib.poseidon([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0]).toString();
+        jsOut = circomlibjs.poseidon([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0]).toString();
         assert.equal(jsOut, "5540388656744764564518487011617040650780060800286365721923524861648744699539", "not equal");
     });
 

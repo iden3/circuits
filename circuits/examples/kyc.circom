@@ -1,3 +1,5 @@
+pragma circom 2.0.0;
+
 include "../kyc.circom";
 
 // verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistLength)

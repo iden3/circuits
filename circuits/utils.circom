@@ -1,3 +1,5 @@
+pragma circom 2.0.0;
+
 // bigEntian turns the value v into a bit array of len bits in big endian
 function bigEndian(v, len) {
 	var res[256];
