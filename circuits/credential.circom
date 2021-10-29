@@ -49,7 +49,7 @@ template getClaimHeader() {
 	signal output claimFlags[32];
 
  	component i0Bits = Num2Bits(256);
-	i0Bits.in <== claim[0*4 + 0];
+	i0Bits.in <== claim[0];
 
 	component claimTypeNum = Bits2Num(128);
 
@@ -70,7 +70,7 @@ template getClaimSchema() {
 	signal output schema;
 
  	component i0Bits = Num2Bits(256);
-	i0Bits.in <== claim[0*4 + 0];
+	i0Bits.in <== claim[0];
 
 	component schemaNum = Bits2Num(128);
 
@@ -89,7 +89,7 @@ template getClaimRevNonce() {
 	component claimRevNonce = Bits2Num(32);
 
  	component v0Bits = Num2Bits(256);
-	v0Bits.in <== claim[1*4 + 0];
+	v0Bits.in <== claim[4];
 	for (var i=0; i<32; i++) {
 		claimRevNonce.in[i] <== v0Bits.out[i];
 	}
@@ -106,13 +106,13 @@ template getClaimHiHv() {
 
 	component hashHi = Poseidon(4);
 	for (var i=0; i<4; i++) {
-		hashHi.inputs[i] <== claim[0*4 + i];
+		hashHi.inputs[i] <== claim[i];
 	}
 	hi <== hashHi.out;
 
 	component hashHv = Poseidon(4);
 	for (var i=0; i<4; i++) {
-		hashHv.inputs[i] <== claim[1*4 + i];
+		hashHv.inputs[i] <== claim[4 + i];
 	}
 	hv <== hashHv.out;
 }
@@ -121,6 +121,8 @@ template getClaimHiHv() {
 template getClaimHash() {
 	signal input claim[8];
 	signal output hash;
+	signal output hi;
+	signal output hv;
 
     component hihv = getClaimHiHv();
 	for (var i=0; i<8; i++) {
@@ -131,6 +133,8 @@ template getClaimHash() {
 	hashAll.inputs[0] <== hihv.hi;
 	hashAll.inputs[1] <== hihv.hv;
 	hash <== hashAll.out;
+	hi <== hihv.hi;
+	hv <== hihv.hv;
 }
 
 // getIdenState caclulates the Identity state out of the claims tree root,

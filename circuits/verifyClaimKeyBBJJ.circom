@@ -14,7 +14,7 @@ template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
 	signal input claimsTreeRoot;
 
 	// build ClaimKeyBBJJ
-	component claim = BuildClaimKeyBBJJ(1);
+	component claim = BuildClaimKeyBBJJ();
 	claim.ax <== BBJAx;
 	claim.ay <== BBJAy;
 

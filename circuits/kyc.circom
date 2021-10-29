@@ -140,17 +140,14 @@ template getCountry() {
 	signal input claim[8];
 	signal output country;
 
- 	component i0 = Num2Bits(256);
-	i0.in <== claim[0];
+ 	component i2 = Num2Bits(253);
+	i2.in <== claim[2];
 
-	component num = Bits2Num(256);
+	component num = Bits2Num(32);
 
-    // copy 32 bits starting from position 160 (should be 96?)
+    // copy 32 bits starting from position 0
 	for (var i=0; i<32; i++) {
-		num.in[i] <== i0.out[i+160];
-	}
-	for (var i=32; i<256; i++) {
-		num.in[i] <== 0;
+		num.in[i] <== i2.out[i];
 	}
 	country <== num.out;
 }
@@ -162,39 +159,30 @@ template getBirthday() {
 	signal output month;
 	signal output day;
 
- 	component i0 = Num2Bits(256);
-	i0.in <== claim[0];
+ 	component i2 = Num2Bits(253);
+	i2.in <== claim[2];
 
-	component numY = Bits2Num(256);
+	component numY = Bits2Num(32);
 
-    // copy 32 bits starting from position 160 (should be 96?)
+    // copy 32 bits starting from position 0
 	for (var i=0; i<32; i++) {
-		numY.in[i] <== i0.out[i+160];
-	}
-	for (var i=32; i<256; i++) {
-		numY.in[i] <== 0;
+		numY.in[i] <== i2.out[i+0];
 	}
 	year <== numY.out;
 	
-	component numM = Bits2Num(256);
+	component numM = Bits2Num(32);
 
-    // copy 32 bits starting from position 160 (should be 96?)
+    // copy 32 bits starting from position 32
 	for (var i=0; i<32; i++) {
-		numM.in[i] <== i0.out[i+192];
-	}
-	for (var i=32; i<256; i++) {
-		numM.in[i] <== 0;
+		numM.in[i] <== i2.out[i+32];
 	}
 	month <== numM.out;
 	
-	component numD = Bits2Num(256);
+	component numD = Bits2Num(32);
 
-    // copy 32 bits starting from position 160 (should be 96?)
+    // copy 32 bits starting from position 64
 	for (var i=0; i<32; i++) {
-		numD.in[i] <== i0.out[i+224];
-	}
-	for (var i=32; i<256; i++) {
-		numD.in[i] <== 0;
+		numD.in[i] <== i2.out[i+64];
 	}
 	day <== numD.out;
 }
@@ -204,17 +192,14 @@ template getAge() {
 	signal input claim[8];
 	signal output age;
 
- 	component i0 = Num2Bits(256);
-	i0.in <== claim[0];
+ 	component i2 = Num2Bits(253);
+	i2.in <== claim[2];
 
-	component numY = Bits2Num(256);
+	component numY = Bits2Num(32);
 
-    // copy 32 bits starting from position 160 (should be 96?)
+    // copy 32 bits starting from position 0
 	for (var i=0; i<32; i++) {
-		numY.in[i] <== i0.out[i+160];
-	}
-	for (var i=32; i<256; i++) {
-		numY.in[i] <== 0;
+		numY.in[i] <== i2.out[i];
 	}
 	age <== numY.out;
 }
