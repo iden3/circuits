@@ -1,11 +1,11 @@
 include "../node_modules/circomlib/circuits/babyjub.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
-include "../node_modules/circomlib/circuits/bitify.circom";
-include "utils.circom";
+//include "../node_modules/circomlib/circuits/bitify.circom";
+//include "utils.circom";
 
 template BuildClaimKeyBBJJ() {
-	var CLAIM_TYPE  = 164867201768971999401702181843803888060;
+	var CLAIM_TYPE  = 251025091000101825075425831481271126140; // swapped from 164867201768971999401702181843803888060
 
 	signal input ax;
 	signal input ay;
@@ -13,19 +13,19 @@ template BuildClaimKeyBBJJ() {
 	signal output hi;
 	signal output hv;
 
-	component e0 = Bits2Num(256);
-	var claimType[128];
-	claimType = bigEndian(CLAIM_TYPE, 128);
-	for (var i=0; i<128; i++) {
-		e0.in[i] <== claimType[i];
-	}
-	for (var i=128; i<256; i++) {
-		e0.in[i] <== 0;
-	}
+//	component e0 = Bits2Num(256);
+//	var claimType[128];
+//	claimType = bigEndian(CLAIM_TYPE, 128);
+//	for (var i=0; i<128; i++) {
+//		e0.in[i] <== claimType[i];
+//	}
+//	for (var i=128; i<256; i++) {
+//		e0.in[i] <== 0;
+//	}
 
 	// Hi
 	component hashHi = Poseidon(4);
-	hashHi.inputs[0] <== e0.out;
+	hashHi.inputs[0] <== CLAIM_TYPE;
 	hashHi.inputs[1] <== 0;
 	hashHi.inputs[2] <== ax;
 	hashHi.inputs[3] <== ay;
