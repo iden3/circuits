@@ -19,7 +19,7 @@ compile_and_ts() {
     cp "$CIRCUIT_PATH" circuit.circom
 
     set -x
-    time circom "$CIRCUIT_PATH" --r1cs circuit.r1cs --wasm circuit.wasm --sym circuit.sym
+    time npx circom "$CIRCUIT_PATH" --r1cs circuit.r1cs --wasm circuit.wasm --sym circuit.sym
     snarkjs r1cs info circuit.r1cs
     snarkjs r1cs export json circuit.r1cs circuit.r1cs.json
 
