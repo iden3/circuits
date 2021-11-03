@@ -230,20 +230,16 @@ template calculateAge() {
 
     var yearDiff = CurYear - DOBYear;
 
-    // TODO: changing yearDiff inside if was not working, ask Jordi why
-    signal tmp_age;
-    if ((CurMonth < DOBMonth) || ((CurMonth == DOBMonth) && (CurDay < DOBDay))) {
-        tmp_age <-- yearDiff - 1;
-    } else {
-        tmp_age <-- yearDiff;
-    }
+    component ltM = LessThan(32);
+    ltM.in[0] <== CurMonth * 100 + CurDay;
+    ltM.in[1] <== DOBMonth * 100 + DOBDay;
 
     component gte0 = GreaterEqThan(32);
-    gte0.in[0] <== tmp_age;
+    gte0.in[0] <== yearDiff - ltM.out;
     gte0.in[1] <== 0;
     gte0.out === 1;
 
-    age <== tmp_age;
+    age <== yearDiff - ltM.out;
 }
 
 template validateDate() {
