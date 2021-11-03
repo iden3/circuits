@@ -2,6 +2,7 @@ const path = require("path");
 const tester = require("circom").tester;
 const chai = require("chai");
 const assert = chai.assert;
+const expect = chai.expect;
 
 export {};
 
@@ -64,7 +65,7 @@ describe("kyc calculateAge test", function () {
         await circuit.assertOut(witness, {age: "19"});
     });
 
-    it("Test kyc calculateAge 4 - expected to fail", async () => {
+    it("Test kyc calculateAge 4", async () => {
         const circuit = await tester(
             path.join(__dirname, "circuits", "kyc_calculateAge.circom"),
             {reduceConstraints: false},
@@ -78,9 +79,37 @@ describe("kyc calculateAge test", function () {
             "CurDay": "9",
         };
 
-        const witness = await circuit.calculateWitness(inputs, true);
-        // add method to expect constraint check fail
-        await circuit.checkConstraints(witness);
-        //await circuit.assertOut(witness, {age: "-1"});
+        let err;
+        try {
+            await circuit.calculateWitness(inputs, true);
+        } catch (e) {
+            err = e;
+        }
+        expect(err).to.be.an('Error');
+        expect(err.toString()).to.contain('Constraint doesn\'t match 0 != 1');
+    });
+
+    it("Test kyc calculateAge 5", async () => {
+        const circuit = await tester(
+            path.join(__dirname, "circuits", "kyc_calculateAge.circom"),
+            {reduceConstraints: false},
+        );
+        const inputs = {
+            "DOBYear": "2000",
+            "DOBMonth": "10",
+            "DOBDay": "9",
+            "CurYear": "2000",
+            "CurMonth": "10",
+            "CurDay": "8",
+        };
+
+        let err;
+        try {
+            await circuit.calculateWitness(inputs, true);
+        } catch (e) {
+            err = e;
+        }
+        expect(err).to.be.an('Error');
+        expect(err.toString()).to.contain('Constraint doesn\'t match 0 != 1');
     });
 });
