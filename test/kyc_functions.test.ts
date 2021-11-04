@@ -86,7 +86,7 @@ describe("kyc calculateAge test", function () {
             err = e;
         }
         expect(err).to.be.an('Error');
-        expect(err.toString()).to.contain('Constraint doesn\'t match 0 != 1');
+        expect(err.toString()).to.contain('Assert Failed');
     });
 
     it("Test kyc calculateAge 5", async () => {
@@ -110,6 +110,6 @@ describe("kyc calculateAge test", function () {
             err = e;
         }
         expect(err).to.be.an('Error');
-        expect(err.toString()).to.contain('Constraint doesn\'t match 0 != 1');
+        expect(err.toString()).to.contain('Assert Failed');
     });
 });
