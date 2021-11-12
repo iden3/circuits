@@ -10,7 +10,7 @@ include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistLength) {
 
     /* id ownership signals */
-	signal private input id;
+	signal input id;
 	signal private input BBJAx;
 	signal private input BBJAy;
 	signal private input BBJClaimMtp[IdOwnershipLevels];

@@ -6,7 +6,7 @@ include "credential.circom"
 template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistLength) {
 
     /* id ownership signals */
-	signal private input id;
+	signal input id;
 	signal private input userPrivateKey;
 	signal private input BBJClaimMtp[IdOwnershipLevels];
 	signal private input BBJClaimClaimsTreeRoot;
