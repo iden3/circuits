@@ -40,6 +40,8 @@ include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "buildClaimKeyBBJJ.circom";
 include "cutIdState.circom";
+include "verifyClaimKeyBBJJ.circom";
+include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 
 template IdOwnershipBySignature(nLevels) {
 	signal input id;
