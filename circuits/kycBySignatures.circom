@@ -37,13 +37,16 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
 	signal private input countryClaimSignatureS;
     // TODO: add non revocation check for issuer Public Key
 
-    signal input countryBlacklist[CountryBlacklistLength]
+    signal input countryBlacklist[CountryBlacklistLength];
 
-    // TODO: add non revocation checks
-    //	signal private input countryClaimNotRevMtp[IssuerLevels];
-    //	signal private input countryClaimNotRevMtpNoAux;
-    //	signal private input countryClaimNotRevMtpAuxHi;
-    //	signal private input countryClaimNotRevMtpAuxHv;
+    signal private input countryClaimNotRevMtp[IssuerLevels];
+    signal private input countryClaimNotRevMtpNoAux;
+    signal private input countryClaimNotRevMtpAuxHi;
+    signal private input countryClaimNotRevMtpAuxHv;
+    signal input countryClaimNonRevIssuerState;
+    signal private input countryClaimNonRevIssuerClaimsTreeRoot;
+    signal private input countryClaimNonRevIssuerRevTreeRoot;
+    signal private input countryClaimNonRevIssuerRootsTreeRoot;
 
     /* birthday claim signals */
 	signal private input birthdayClaim[8];
@@ -66,15 +69,18 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
 
     signal input minAge;
 
-    // TODO: add non revocation checks
-    //	signal private input birthdayClaimNotRevMtp[IssuerLevels];
-    //	signal private input birthdayClaimNotRevMtpNoAux;
-    //	signal private input birthdayClaimNotRevMtpAuxHi;
-    //	signal private input birthdayClaimNotRevMtpAuxHv;
+    signal private input birthdayClaimNotRevMtp[IssuerLevels];
+    signal private input birthdayClaimNotRevMtpNoAux;
+    signal private input birthdayClaimNotRevMtpAuxHi;
+    signal private input birthdayClaimNotRevMtpAuxHv;
+    signal input birthdayClaimNonRevIssuerState;
+    signal private input birthdayClaimNonRevIssuerClaimsTreeRoot;
+    signal private input birthdayClaimNonRevIssuerRevTreeRoot;
+    signal private input birthdayClaimNonRevIssuerRootsTreeRoot;
 
-    /*
+    /*****************************
         Id ownership check
-    */
+    ******************************/
 
     //var challengeBE = bigEndian(challenge, 256);
 
@@ -92,18 +98,12 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
     userIdOwnership.challengeSignatureS <== challengeSignatureS;
 
 
-    /*
+    /*****************************
         Country claim checks
-    */
-    // check country claim is issued to provided identity
-    component countryClaimIdCheck = verifyCredentialSubject();
-    for (var i=0; i<8; i++) { countryClaimIdCheck.claim[i] <== countryClaim[i]; }
-    countryClaimIdCheck.id <== id;
-
-    // TODO: add schema check
+    ******************************/
 
     // check that country claim with issuer public key is in it's identity state
-    component verifyCountryClaimIssuerClaimKeyBBJJ = VerifyClaimKeyBBJJinIdState(IssuerLevels)
+    component verifyCountryClaimIssuerClaimKeyBBJJ = VerifyClaimKeyBBJJinIdState(IssuerLevels);
 	verifyCountryClaimIssuerClaimKeyBBJJ.BBJAx <== countryClaimIssuerBBJAx;
 	verifyCountryClaimIssuerClaimKeyBBJJ.BBJAy <== countryClaimIssuerBBJAy;
 	for (var i=0; i<IssuerLevels; i++) {
@@ -114,15 +114,28 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
 	verifyCountryClaimIssuerClaimKeyBBJJ.rootsTreeRoot <== countryClaimIssuerBBJClaimRootsTreeRoot;
     verifyCountryClaimIssuerClaimKeyBBJJ.idState <== countryClaimIssuerBBJIdenState;
 
-    // check country claim signature
-    component verifyCountryClaimSignature = verifyClaimSignature();
-    for (var i=0; i<8; i++) { verifyCountryClaimSignature.claim[i] <== countryClaim[i]; }
-	verifyCountryClaimSignature.sigR8x <== countryClaimSignatureR8x;
-	verifyCountryClaimSignature.sigR8y <== countryClaimSignatureR8y;
-	verifyCountryClaimSignature.sigS <== countryClaimSignatureS;
-	verifyCountryClaimSignature.pubKeyX <== countryClaimIssuerBBJAx;
-	verifyCountryClaimSignature.pubKeyY <== countryClaimIssuerBBJAy;
+    // verify that claim is signed with the provided public key, 
+    // claim is not revoked and revocation root is in issuer's state
+    component verifyCountryClaim = verifyClaimIssuanceNonRevBySignature(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyCountryClaim.claim[i] <== countryClaim[i]; }
+    verifyCountryClaim.id <== id;
+    verifyCountryClaim.sigR8x <== countryClaimSignatureR8x;
+    verifyCountryClaim.sigR8y <== countryClaimSignatureR8y;
+    verifyCountryClaim.sigS <== countryClaimSignatureS;
+    verifyCountryClaim.pubKeyX <== countryClaimIssuerBBJAx;
+    verifyCountryClaim.pubKeyY <== countryClaimIssuerBBJAy;
+    for (var i=0; i<IssuerLevels; i++) {
+        verifyCountryClaim.claimNotRevMtp[i] <== countryClaimNotRevMtp[i];
+    }
+    verifyCountryClaim.claimNotRevMtpNoAux <== countryClaimNotRevMtpNoAux;
+    verifyCountryClaim.claimNotRevMtpAuxHi <== countryClaimNotRevMtpAuxHi;
+    verifyCountryClaim.claimNotRevMtpAuxHv <== countryClaimNotRevMtpAuxHv;
+    verifyCountryClaim.claimNonRevIssuerClaimsTreeRoot <== countryClaimNonRevIssuerRevTreeRoot;
+    verifyCountryClaim.claimNonRevIssuerRevTreeRoot <== countryClaimNonRevIssuerClaimsTreeRoot;
+    verifyCountryClaim.claimNonRevIssuerRootsTreeRoot <== countryClaimNonRevIssuerRootsTreeRoot;
+    verifyCountryClaim.claimNonRevIssuerState <== countryClaimNonRevIssuerState;
 
+    // TODO: add schema check
 
     // get country value
     component country = getCountry();
@@ -136,15 +149,9 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
         eq[i].out === 0;
     }
 
-    /*
+    /*****************************
         Birthday claim checks
-    */
-    // check birthday claim is issued to provided identity
-    component birthdayClaimIdCheck = verifyCredentialSubject();
-    for (var i=0; i<8; i++) { birthdayClaimIdCheck.claim[i] <== birthdayClaim[i]; }
-    birthdayClaimIdCheck.id <== id;
-
-    // TODO: add schema check
+    ******************************/
 
     // check that birthday claim with issuer public key is in it's identity state
     component verifyBirthdayClaimIssuerClaimKeyBBJJ = VerifyClaimKeyBBJJinIdState(IssuerLevels)
@@ -158,14 +165,28 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
 	verifyBirthdayClaimIssuerClaimKeyBBJJ.rootsTreeRoot <== birthdayClaimIssuerBBJClaimRootsTreeRoot;
     verifyBirthdayClaimIssuerClaimKeyBBJJ.idState <== birthdayClaimIssuerBBJIdenState;
 
-    // check birthday claim signature
-    component verifyBirthdayClaimSignature = verifyClaimSignature();
-    for (var i=0; i<8; i++) { verifyBirthdayClaimSignature.claim[i] <== birthdayClaim[i]; }
-	verifyBirthdayClaimSignature.sigR8x <== birthdayClaimSignatureR8x;
-	verifyBirthdayClaimSignature.sigR8y <== birthdayClaimSignatureR8y;
-	verifyBirthdayClaimSignature.sigS <== birthdayClaimSignatureS;
-	verifyBirthdayClaimSignature.pubKeyX <== birthdayClaimIssuerBBJAx;
-	verifyBirthdayClaimSignature.pubKeyY <== birthdayClaimIssuerBBJAy;
+    // verify that claim is signed with the provided public key, 
+    // claim is not revoked and revocation root is in issuer's state
+    component verifyBirthdayClaim = verifyClaimIssuanceNonRevBySignature(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyBirthdayClaim.claim[i] <== birthdayClaim[i]; }
+    verifyBirthdayClaim.id <== id;
+    verifyBirthdayClaim.sigR8x <== birthdayClaimSignatureR8x;
+    verifyBirthdayClaim.sigR8y <== birthdayClaimSignatureR8y;
+    verifyBirthdayClaim.sigS <== birthdayClaimSignatureS;
+    verifyBirthdayClaim.pubKeyX <== birthdayClaimIssuerBBJAx;
+    verifyBirthdayClaim.pubKeyY <== birthdayClaimIssuerBBJAy;
+    for (var i=0; i<IssuerLevels; i++) {
+        verifyBirthdayClaim.claimNotRevMtp[i] <== birthdayClaimNotRevMtp[i];
+    }
+    verifyBirthdayClaim.claimNotRevMtpNoAux <== birthdayClaimNotRevMtpNoAux;
+    verifyBirthdayClaim.claimNotRevMtpAuxHi <== birthdayClaimNotRevMtpAuxHi;
+    verifyBirthdayClaim.claimNotRevMtpAuxHv <== birthdayClaimNotRevMtpAuxHv;
+    verifyBirthdayClaim.claimNonRevIssuerClaimsTreeRoot <== birthdayClaimNonRevIssuerRevTreeRoot;
+    verifyBirthdayClaim.claimNonRevIssuerRevTreeRoot <== birthdayClaimNonRevIssuerClaimsTreeRoot;
+    verifyBirthdayClaim.claimNonRevIssuerRootsTreeRoot <== birthdayClaimNonRevIssuerRootsTreeRoot;
+    verifyBirthdayClaim.claimNonRevIssuerState <== birthdayClaimNonRevIssuerState;
+
+    // TODO: add schema check
 
     // get birthday value
     component birthday = getBirthday();
