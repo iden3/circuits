@@ -41,10 +41,10 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
 
     signal input countryBlacklist[CountryBlacklistLength];
 
-    signal input countryClaimNotRevMtp[IssuerLevels];
-    signal input countryClaimNotRevMtpNoAux;
-    signal input countryClaimNotRevMtpAuxHi;
-    signal input countryClaimNotRevMtpAuxHv;
+    signal input countryClaimNonRevMtp[IssuerLevels];
+    signal input countryClaimNonRevMtpNoAux;
+    signal input countryClaimNonRevMtpAuxHi;
+    signal input countryClaimNonRevMtpAuxHv;
     signal input countryClaimNonRevIssuerState;
     signal input countryClaimNonRevIssuerClaimsTreeRoot;
     signal input countryClaimNonRevIssuerRevTreeRoot;
@@ -71,10 +71,10 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
 
     signal input minAge;
 
-    signal input birthdayClaimNotRevMtp[IssuerLevels];
-    signal input birthdayClaimNotRevMtpNoAux;
-    signal input birthdayClaimNotRevMtpAuxHi;
-    signal input birthdayClaimNotRevMtpAuxHv;
+    signal input birthdayClaimNonRevMtp[IssuerLevels];
+    signal input birthdayClaimNonRevMtpNoAux;
+    signal input birthdayClaimNonRevMtpAuxHi;
+    signal input birthdayClaimNonRevMtpAuxHv;
     signal input birthdayClaimNonRevIssuerState;
     signal input birthdayClaimNonRevIssuerClaimsTreeRoot;
     signal input birthdayClaimNonRevIssuerRevTreeRoot;
@@ -127,13 +127,13 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
     verifyCountryClaim.pubKeyX <== countryClaimIssuerBBJAx;
     verifyCountryClaim.pubKeyY <== countryClaimIssuerBBJAy;
     for (var i=0; i<IssuerLevels; i++) {
-        verifyCountryClaim.claimNotRevMtp[i] <== countryClaimNotRevMtp[i];
+        verifyCountryClaim.claimNonRevMtp[i] <== countryClaimNonRevMtp[i];
     }
-    verifyCountryClaim.claimNotRevMtpNoAux <== countryClaimNotRevMtpNoAux;
-    verifyCountryClaim.claimNotRevMtpAuxHi <== countryClaimNotRevMtpAuxHi;
-    verifyCountryClaim.claimNotRevMtpAuxHv <== countryClaimNotRevMtpAuxHv;
-    verifyCountryClaim.claimNonRevIssuerClaimsTreeRoot <== countryClaimNonRevIssuerRevTreeRoot;
-    verifyCountryClaim.claimNonRevIssuerRevTreeRoot <== countryClaimNonRevIssuerClaimsTreeRoot;
+    verifyCountryClaim.claimNonRevMtpNoAux <== countryClaimNonRevMtpNoAux;
+    verifyCountryClaim.claimNonRevMtpAuxHi <== countryClaimNonRevMtpAuxHi;
+    verifyCountryClaim.claimNonRevMtpAuxHv <== countryClaimNonRevMtpAuxHv;
+    verifyCountryClaim.claimNonRevIssuerClaimsTreeRoot <== countryClaimNonRevIssuerClaimsTreeRoot;
+    verifyCountryClaim.claimNonRevIssuerRevTreeRoot <== countryClaimNonRevIssuerRevTreeRoot;
     verifyCountryClaim.claimNonRevIssuerRootsTreeRoot <== countryClaimNonRevIssuerRootsTreeRoot;
     verifyCountryClaim.claimNonRevIssuerState <== countryClaimNonRevIssuerState;
 
@@ -178,13 +178,13 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
     verifyBirthdayClaim.pubKeyX <== birthdayClaimIssuerBBJAx;
     verifyBirthdayClaim.pubKeyY <== birthdayClaimIssuerBBJAy;
     for (var i=0; i<IssuerLevels; i++) {
-        verifyBirthdayClaim.claimNotRevMtp[i] <== birthdayClaimNotRevMtp[i];
+        verifyBirthdayClaim.claimNonRevMtp[i] <== birthdayClaimNonRevMtp[i];
     }
-    verifyBirthdayClaim.claimNotRevMtpNoAux <== birthdayClaimNotRevMtpNoAux;
-    verifyBirthdayClaim.claimNotRevMtpAuxHi <== birthdayClaimNotRevMtpAuxHi;
-    verifyBirthdayClaim.claimNotRevMtpAuxHv <== birthdayClaimNotRevMtpAuxHv;
-    verifyBirthdayClaim.claimNonRevIssuerClaimsTreeRoot <== birthdayClaimNonRevIssuerRevTreeRoot;
-    verifyBirthdayClaim.claimNonRevIssuerRevTreeRoot <== birthdayClaimNonRevIssuerClaimsTreeRoot;
+    verifyBirthdayClaim.claimNonRevMtpNoAux <== birthdayClaimNonRevMtpNoAux;
+    verifyBirthdayClaim.claimNonRevMtpAuxHi <== birthdayClaimNonRevMtpAuxHi;
+    verifyBirthdayClaim.claimNonRevMtpAuxHv <== birthdayClaimNonRevMtpAuxHv;
+    verifyBirthdayClaim.claimNonRevIssuerClaimsTreeRoot <== birthdayClaimNonRevIssuerClaimsTreeRoot;
+    verifyBirthdayClaim.claimNonRevIssuerRevTreeRoot <== birthdayClaimNonRevIssuerRevTreeRoot;
     verifyBirthdayClaim.claimNonRevIssuerRootsTreeRoot <== birthdayClaimNonRevIssuerRootsTreeRoot;
     verifyBirthdayClaim.claimNonRevIssuerState <== birthdayClaimNonRevIssuerState;
 

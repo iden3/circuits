@@ -25,11 +25,14 @@ template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistL
 
     signal input countryBlacklist[CountryBlacklistLength];
 
-    // TODO: add non revocation checks
-    //	signal input countryClaimNotRevMtp[IssuerLevels];
-    //	signal input countryClaimNotRevMtpNoAux;
-    //	signal input countryClaimNotRevMtpAuxHi;
-    //	signal input countryClaimNotRevMtpAuxHv;
+    signal input countryClaimNonRevMtp[IssuerLevels];
+    signal input countryClaimNonRevMtpNoAux;
+    signal input countryClaimNonRevMtpAuxHi;
+    signal input countryClaimNonRevMtpAuxHv;
+    signal input countryClaimNonRevIssuerState;
+    signal input countryClaimNonRevIssuerClaimsTreeRoot;
+    signal input countryClaimNonRevIssuerRevTreeRoot;
+    signal input countryClaimNonRevIssuerRootsTreeRoot;
 
     /* birthday claim signals */
 	signal input birthdayClaim[8];
@@ -47,12 +50,14 @@ template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistL
 
     signal input challenge;
 
-    // TODO: add non revocation checks
-    //	signal input birthdayClaimNotRevMtp[IssuerLevels];
-    //	signal input birthdayClaimNotRevMtpNoAux;
-    //	signal input birthdayClaimNotRevMtpAuxHi;
-    //	signal input birthdayClaimNotRevMtpAuxHv;
-
+    signal input birthdayClaimNonRevMtp[IssuerLevels];
+    signal input birthdayClaimNonRevMtpNoAux;
+    signal input birthdayClaimNonRevMtpAuxHi;
+    signal input birthdayClaimNonRevMtpAuxHv;
+    signal input birthdayClaimNonRevIssuerState;
+    signal input birthdayClaimNonRevIssuerClaimsTreeRoot;
+    signal input birthdayClaimNonRevIssuerRevTreeRoot;
+    signal input birthdayClaimNonRevIssuerRootsTreeRoot;
     /*
         Id ownership check
     */
@@ -73,13 +78,24 @@ template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistL
 
     // TODO: add schema check
 
-    component verifyCountryClaimIssuance = verifyClaimIssuance(IssuerLevels);
+    component verifyCountryClaimIssuance = verifyClaimIssuanceNonRev(IssuerLevels);
     for (var i=0; i<8; i++) { verifyCountryClaimIssuance.claim[i] <== countryClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) { verifyCountryClaimIssuance.claimIssuanceMtp[i] <== countryClaimIssuanceMtp[i]; }
     verifyCountryClaimIssuance.claimIssuanceClaimsTreeRoot <== countryClaimIssuanceClaimsTreeRoot;
     verifyCountryClaimIssuance.claimIssuanceRevTreeRoot <== countryClaimIssuanceRevTreeRoot;
     verifyCountryClaimIssuance.claimIssuanceRootsTreeRoot <== countryClaimIssuanceRootsTreeRoot;
     verifyCountryClaimIssuance.claimIssuanceIdenState <== countryClaimIssuanceIdenState;
+
+    for (var i=0; i<IssuerLevels; i++) {
+        verifyCountryClaimIssuance.claimNonRevMtp[i] <== countryClaimNonRevMtp[i];
+    }
+    verifyCountryClaimIssuance.claimNonRevMtpNoAux <== countryClaimNonRevMtpNoAux;
+    verifyCountryClaimIssuance.claimNonRevMtpAuxHi <== countryClaimNonRevMtpAuxHi;
+    verifyCountryClaimIssuance.claimNonRevMtpAuxHv <== countryClaimNonRevMtpAuxHv;
+    verifyCountryClaimIssuance.claimNonRevIssuerClaimsTreeRoot <== countryClaimNonRevIssuerClaimsTreeRoot;
+    verifyCountryClaimIssuance.claimNonRevIssuerRevTreeRoot <== countryClaimNonRevIssuerRevTreeRoot;
+    verifyCountryClaimIssuance.claimNonRevIssuerRootsTreeRoot <== countryClaimNonRevIssuerRootsTreeRoot;
+    verifyCountryClaimIssuance.claimNonRevIssuerState <== countryClaimNonRevIssuerState;
 
     // get country value
     component country = getCountry();
@@ -103,13 +119,24 @@ template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistL
 
     // TODO: add schema check
 
-    component verifyBirthdayClaimIssuance = verifyClaimIssuance(IssuerLevels);
+    component verifyBirthdayClaimIssuance = verifyClaimIssuanceNonRev(IssuerLevels);
     for (var i=0; i<8; i++) { verifyBirthdayClaimIssuance.claim[i] <== birthdayClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) { verifyBirthdayClaimIssuance.claimIssuanceMtp[i] <== birthdayClaimIssuanceMtp[i]; }
     verifyBirthdayClaimIssuance.claimIssuanceClaimsTreeRoot <== birthdayClaimIssuanceClaimsTreeRoot;
     verifyBirthdayClaimIssuance.claimIssuanceRevTreeRoot <== birthdayClaimIssuanceRevTreeRoot;
     verifyBirthdayClaimIssuance.claimIssuanceRootsTreeRoot <== birthdayClaimIssuanceRootsTreeRoot;
     verifyBirthdayClaimIssuance.claimIssuanceIdenState <== birthdayClaimIssuanceIdenState;
+    for (var i=0; i<IssuerLevels; i++) {
+        verifyBirthdayClaimIssuance.claimNonRevMtp[i] <== birthdayClaimNonRevMtp[i];
+    }
+    verifyBirthdayClaimIssuance.claimNonRevMtpNoAux <== birthdayClaimNonRevMtpNoAux;
+    verifyBirthdayClaimIssuance.claimNonRevMtpAuxHi <== birthdayClaimNonRevMtpAuxHi;
+    verifyBirthdayClaimIssuance.claimNonRevMtpAuxHv <== birthdayClaimNonRevMtpAuxHv;
+    verifyBirthdayClaimIssuance.claimNonRevIssuerClaimsTreeRoot <== birthdayClaimNonRevIssuerClaimsTreeRoot;
+    verifyBirthdayClaimIssuance.claimNonRevIssuerRevTreeRoot <== birthdayClaimNonRevIssuerRevTreeRoot;
+    verifyBirthdayClaimIssuance.claimNonRevIssuerRootsTreeRoot <== birthdayClaimNonRevIssuerRootsTreeRoot;
+    verifyBirthdayClaimIssuance.claimNonRevIssuerState <== birthdayClaimNonRevIssuerState;
+
 
     // get birthday value
     component birthday = getBirthday();
