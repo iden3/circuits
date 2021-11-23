@@ -80,9 +80,9 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
     signal input birthdayClaimNonRevIssuerRevTreeRoot;
     signal input birthdayClaimNonRevIssuerRootsTreeRoot;
 
-    /*****************************
+    /*
         Id ownership check
-    ******************************/
+    */
 
     //var challengeBE = bigEndian(challenge, 256);
 
@@ -100,9 +100,9 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
     userIdOwnership.challengeSignatureS <== challengeSignatureS;
 
 
-    /*****************************
+    /*
         Country claim checks
-    ******************************/
+    */
 
     // check that country claim with issuer public key is in it's identity state
     component verifyCountryClaimIssuerClaimKeyBBJJ = VerifyClaimKeyBBJJinIdState(IssuerLevels);
@@ -151,9 +151,9 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
         eq[i].out === 0;
     }
 
-    /*****************************
+    /*
         Birthday claim checks
-    ******************************/
+    */
 
     // check that birthday claim with issuer public key is in it's identity state
     component verifyBirthdayClaimIssuerClaimKeyBBJJ = VerifyClaimKeyBBJJinIdState(IssuerLevels);
