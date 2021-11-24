@@ -51,7 +51,7 @@ func main() {
 	}
 
 	entry := authClaim.TreeEntry()
-	claimsTree.AddEntry(ctx, &entry)
+	claimsTree.AddEntry(ctx, &entry) // add claim to the MT
 
 	fmt.Println("Claims claimsTree root Hex", claimsTree.Root().Hex())
 	fmt.Println("Claims claimsTree root BigInt swapped", claimsTree.Root().BigInt())
@@ -73,6 +73,24 @@ func main() {
 	}
 
 	fmt.Println("Identifier", identifier)
+
+	authEntry := authClaim.TreeEntry()
+	index, err := authEntry.HIndex()
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+
+	//MTP
+	proof, _, err := claimsTree.GenerateProof(ctx, index.BigInt(), claimsTree.Root())
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+
+	fmt.Println("%+v", proof)
+	fmt.Println("%+v", proof.AllSiblings())
+
 	// Test signature
 	bjjSigner := primitive.NewBJJSigner(&k)
 	signature, err := bjjSigner.Sign(big.NewInt(1).Bytes())
