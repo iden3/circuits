@@ -66,7 +66,7 @@ export SECRET_ACCESS_KEY=...
 
 `s3_util.js` was written for:
 
-- Uploading circuits which are located in`./built` folder to S3 bucket in zip file. Next example uploads to S3 bucket (default bucket is `iden3-circuits-bucket`) with name `v1.zip`.
+- Uploading circuits which are located in`./build` folder to S3 bucket in zip file. Next example uploads to S3 bucket (default bucket is `iden3-circuits-bucket`) with name `v1.zip`.
 
 ```bash
 node s3_util.js add v1
