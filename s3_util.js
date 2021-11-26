@@ -10,7 +10,6 @@ const OPERATIONS = ['add', 'rm', 'zip'];
 function main() {
     const [operation, zipName] = parseArgs();
     processOperation(operation, zipName);
-    // console.log(operation, zipName)
 }
 
 main();
