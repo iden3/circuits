@@ -9,14 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 12.x ]
+        node-version: [ 14.x ]
 
     steps:
     - uses: actions/checkout@v2
     - name: Use Nodejs
       uses: actions/setup-node@v1
       with:
-          node-version: '12'
+          node-version: '14'
     - name: Install node_modules
       run: npm install
     - name: Test circom circuits
