@@ -189,13 +189,13 @@ template getBirthday() {
  	component i2 = Num2Bits(253);
 	i2.in <== claim[2];
 
-	component numY = Bits2Num(32);
+	component numD = Bits2Num(32);
 
     // copy 32 bits starting from position 0
 	for (var i=0; i<32; i++) {
-		numY.in[i] <== i2.out[i+0];
+		numD.in[i] <== i2.out[i+0];
 	}
-	year <== numY.out;
+	day <== numD.out;
 	
 	component numM = Bits2Num(32);
 
@@ -205,13 +205,13 @@ template getBirthday() {
 	}
 	month <== numM.out;
 	
-	component numD = Bits2Num(32);
+	component numY = Bits2Num(32);
 
     // copy 32 bits starting from position 64
 	for (var i=0; i<32; i++) {
-		numD.in[i] <== i2.out[i+64];
+		numY.in[i] <== i2.out[i+64];
 	}
-	day <== numD.out;
+	year <== numY.out;
 }
 
 // getAge gets age from an age claim
