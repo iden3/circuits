@@ -1,3 +1,5 @@
-include "../authentication.circom"
+pragma circom 2.0.0;
 
-component main = VerifyAuthenticationInformation(4);
+include "../authentication.circom";
+
+component main {public [id,challenge,state]} = VerifyAuthenticationInformation(4);

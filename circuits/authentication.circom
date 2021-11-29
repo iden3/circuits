@@ -1,19 +1,21 @@
-include "idOwnershipBySignature.circom"
+pragma circom 2.0.0;
+
+include "idOwnershipBySignature.circom";
 
 template VerifyAuthenticationInformation(IdOwnershipLevels) {
 
     /* id ownership signals */
 	signal input id;
-	signal private input BBJAx;
-	signal private input BBJAy;
-	signal private input BBJClaimMtp[IdOwnershipLevels];
-	signal private input BBJClaimClaimsTreeRoot;
-	signal private input BBJClaimRevTreeRoot;
-	signal private input BBJClaimRootsTreeRoot;
+	signal input BBJAx;
+	signal input BBJAy;
+	signal input BBJClaimMtp[IdOwnershipLevels];
+	signal input BBJClaimClaimsTreeRoot;
+	signal input BBJClaimRevTreeRoot;
+	signal input BBJClaimRootsTreeRoot;
 	signal input challenge;
-	signal private input challengeSignatureR8x;
-	signal private input challengeSignatureR8y;
-	signal private input challengeSignatureS;
+	signal input challengeSignatureR8x;
+	signal input challengeSignatureR8y;
+	signal input challengeSignatureS;
     signal input state;
 
 
