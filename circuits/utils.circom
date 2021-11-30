@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-// bigEntian turns the value v into a bit array of len bits in big endian
+// bigEndian turns the value v into a bit array of len bits in big endian
 function bigEndian(v, len) {
 	var res[256];
 	for (var i=0; i<len/8; i++) {
@@ -11,7 +11,7 @@ function bigEndian(v, len) {
 	return res;
 }
 
-// bigEntian turns the value in into a bit array of len bits in big endian
+// bigEndian turns the value in into a bit array of len bits in big endian
 template bigEndianT(len) {
     signal input in;
 	signal output out[len];
