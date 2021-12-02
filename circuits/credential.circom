@@ -15,6 +15,7 @@ pragma circom 2.0.0;
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
+include "../node_modules/circomlib/circuits/mux3.circom";
 include "./idOwnershipGenesis.circom";
 
 // getClaimSubjectOtherIden checks that a claim Subject is OtherIden and
@@ -523,7 +524,7 @@ template verifyIdenStateMatchesRoots() {
 	isProofValidIdenState.idenState === isIdenState;
 }
 
-// verifyClaimIssuance verifies that claim is issued by the issuer
+// verifyClaimIssuance verifies that claim is issued by the issuer and not revoked
 template verifyClaimIssuanceNonRev(IssuerLevels) {
 	signal input claim[8];
 	signal input claimIssuanceMtp[IssuerLevels];
@@ -649,4 +650,24 @@ template verifyClaimIssuanceNonRevBySignature(IssuerLevels) {
     verifyClaimNonRevIssuerState.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
     verifyClaimNonRevIssuerState.isProofValidRootsTreeRoot <== claimNonRevIssuerRootsTreeRoot;
     verifyClaimNonRevIssuerState.isIdenState <== claimNonRevIssuerState;
+}
+
+// getValueByIndex select slot from claim by given index
+template getValueByIndex(){
+  signal input claim[8];
+  signal input index;
+  signal output value; // value from the selected slot claim[index]
+
+  component mux = Mux3();
+  component n2b = Num2Bits(8);
+  n2b.in <== index;
+  for(var i=0;i<8;i++){
+    mux.c[i] <== claim[i];
+  }
+
+  mux.s[0] <== n2b.out[0];
+  mux.s[1] <== n2b.out[1];
+  mux.s[2] <== n2b.out[2];
+
+  value <== mux.out;
 }
