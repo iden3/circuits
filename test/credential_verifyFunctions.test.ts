@@ -7,11 +7,11 @@ export {};
 
 const verifyCredentialSubject = {
     claim: [
-        "21024475908144731912815848438102736712390369823686656",
+        "700576110560149417265602648140262015232",
         "197990912273762023075897629417744831667514652778362723486029975898079821824",
         "0",
         "0",
-        "1330878123",
+        "123",
         "0",
         "0",
         "0",
@@ -21,8 +21,7 @@ const verifyCredentialSubject = {
 
 describe("credential verifyCredentialSubject test", function () {
     this.timeout(200000);
-    // TODO fix this test
-    xit("Test credential verifyCredentialSubject", async () => {
+    it("Test credential verifyCredentialSubject", async () => {
         const circuit = await tester(
             path.join(__dirname, "circuits", "credential_verifyCredentialSubject.circom"),
             {reduceConstraints: false},
