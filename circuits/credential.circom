@@ -671,3 +671,42 @@ template getValueByIndex(){
 
   value <== mux.out;
 }
+
+// verify that the claim has expiration time and it is less then timestamp
+template verifyExpirationTime() {
+	signal input claim[8];
+	signal input timestamp;
+
+	//
+	// A. Prove that the claim has expiration time and it is less then time stamp.
+	//
+	component header = getClaimHeader();
+	for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
+	// out: header.claimType
+	// out: header.claimFlags[32]
+
+  component expirationComp =  getClaimExpiration();
+  for (var i=0; i<8; i++) { expirationComp.claim[i] <== claim[i]; }
+
+  component lt = LessThan(252);
+  lt.in[0] <== expirationComp.expiration;
+  lt.in[1] <== timestamp;
+
+  lt.out === 0;
+}
+
+// getClaimExpiration extract expiration date from claim
+template getClaimExpiration() {
+	signal input claim[8];
+
+	signal output expiration;
+
+	component expirationBits = Bits2Num(64);
+
+ 	component v0Bits = Num2Bits(256);
+	v0Bits.in <== claim[4];
+	for (var i=0; i<64; i++) {
+		expirationBits.in[i] <== v0Bits.out[i+64];
+	}
+	expiration <== expirationBits.out;
+}
