@@ -1,5 +1,5 @@
 pragma circom 2.0.0;
 
-include "../credential.circom";
+include "../../../circuits/credential.circom";
 
 component main = getValueByIndex();
