@@ -69,7 +69,7 @@ describe("test claim query", function () {
             claimNonRevIssuerRootsTreeRoot:"0",
             claimNonRevIssuerState:"7250774806265342444670050834809653548010854890881205160371587352728471237096",
 
-            fieldIndex:"3",
+            slotIndex:"3",
             value:"1",
             operator:"0",
             timestamp:"1638533435"
@@ -78,7 +78,7 @@ describe("test claim query", function () {
         const expOut = {challenge: "18446744073709551615",
                         id: "318143161927515226538633402626308472116169082888716969971233931702195126272",
                         claimSchema:"49",
-                        fieldIndex:"3",
+                        slotIndex:"3",
                         operator:"0",
                         value:"1",
                         timestamp:"1638533435"}

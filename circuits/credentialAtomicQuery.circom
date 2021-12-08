@@ -56,7 +56,7 @@ template AtomicQuery(IdOwnershipLevels, IssuerLevels) {
 		signal input claimNonRevIssuerState;
 
 		/** Query */
-		signal input fieldIndex;
+		signal input slotIndex;
     signal input value;
     signal input operator;
     signal output queryOut;
@@ -122,7 +122,7 @@ template AtomicQuery(IdOwnershipLevels, IssuerLevels) {
 		// Query
 	  component getClaimValue = getValueByIndex();
     for (var i=0; i<8; i++) { getClaimValue.claim[i] <== claim[i]; }
-    getClaimValue.index <== fieldIndex;
+    getClaimValue.index <== slotIndex;
 
     component query = Query();
 		query.in <== getClaimValue.value;
