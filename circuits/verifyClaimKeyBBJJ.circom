@@ -5,18 +5,25 @@ include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "buildClaimKeyBBJJ.circom";
+include "credential.circom";
 
-// VerifyClaimKeyBBJJinClaimsTreeRoot - Circuit to check that claim with the provided public key is in ClaimsTreeRoot
+// VerifyClaimKeyBBJJinClaimsTreeRoot:
+// circuit to check that claim with the provided public key is in ClaimsTreeRoot
+// and its revocation nonce is not in RevTreeRoot
 template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
-	signal input BBJAx;
-	signal input BBJAy;
+    signal input claim[8];
 	signal input siblings[nLevels];
 	signal input claimsTreeRoot;
 
-	// build ClaimKeyBBJJ
-	component claim = BuildClaimKeyBBJJ();
-	claim.ax <== BBJAx;
-	claim.ay <== BBJAy;
+	//todo use not rev?
+	signal input revTreeRoot;
+    signal input siblingsRevTree[nLevels]; //TODO not revMTP?
+    signal input revMtpNoAux;
+    signal input revMtpAuxHv;
+    signal input revMtpAuxHi;
+
+	component claimHiHv = getClaimHiHv();
+	for (var i=0; i<8; i++) { claimHiHv.claim[i] <== claim[i]; }
 
 	// check claim existence
 	component smtClaimExists = SMTVerifier(nLevels);
@@ -29,8 +36,24 @@ template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
 	smtClaimExists.oldKey <== 0;
 	smtClaimExists.oldValue <== 0;
 	smtClaimExists.isOld0 <== 0;
-	smtClaimExists.key <== claim.hi;
-	smtClaimExists.value <== claim.hv;
+	smtClaimExists.key <== claimHiHv.hi;
+	smtClaimExists.value <== claimHiHv.hv;
+
+    // check claim is not revoked
+    component claimRevNonce = getClaimRevNonce();
+    for (var i=0; i<8; i++) {
+        claimRevNonce.claim[i] <== claim[i];
+    }
+    component smtClaimNotRevoked = SMTVerifier(nLevels);
+    smtClaimNotRevoked.enabled <== 1;
+    smtClaimNotRevoked.fnc <== 1; // Non-inclusion
+    smtClaimNotRevoked.root <== revTreeRoot;
+    for (var i=0; i<nLevels; i++) { smtClaimNotRevoked.siblings[i] <== siblingsRevTree[i]; }
+    smtClaimNotRevoked.isOld0 <== revMtpNoAux;
+    smtClaimNotRevoked.oldKey <== revMtpAuxHi;
+    smtClaimNotRevoked.oldValue <== revMtpAuxHv;
+    smtClaimNotRevoked.key <== claimRevNonce.revNonce;
+    smtClaimNotRevoked.value <== 0;
 }
 
 // VerifyClaimKeyBBJJinClaimsTreeRoot - Circuit to check that claim with the provided public key is in ClaimsTreeRoot
