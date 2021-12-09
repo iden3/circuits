@@ -233,10 +233,10 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	// signal input isProofExistRootsTreeRoot;
 
 	// D. issuer proof of claim validity
-	signal input isProofValidNotRevMtp[IssuerLevels];
-	signal input isProofValidNotRevMtpNoAux;
-	signal input isProofValidNotRevMtpAuxHi;
-	signal input isProofValidNotRevMtpAuxHv;
+	signal input isProofValidNonRevMtp[IssuerLevels];
+	signal input isProofValidNonRevMtpNoAux;
+	signal input isProofValidNonRevMtpAuxHi;
+	signal input isProofValidNonRevMtpAuxHv;
 	signal input isProofValidClaimsTreeRoot;
 	signal input isProofValidRevTreeRoot;
 	signal input isProofValidRootsTreeRoot;
@@ -310,10 +310,10 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	smtClaimValid.enabled <== 1;
 	smtClaimValid.fnc <== 1; // Non-inclusion
 	smtClaimValid.root <== isProofValidRevTreeRoot;
-	for (var i=0; i<IssuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNotRevMtp[i]; }
-	smtClaimValid.oldKey <== isProofValidNotRevMtpAuxHi;
-	smtClaimValid.oldValue <== isProofValidNotRevMtpAuxHv;
-	smtClaimValid.isOld0 <== isProofValidNotRevMtpNoAux;
+	for (var i=0; i<IssuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNonRevMtp[i]; }
+	smtClaimValid.oldKey <== isProofValidNonRevMtpAuxHi;
+	smtClaimValid.oldValue <== isProofValidNonRevMtpAuxHv;
+	smtClaimValid.isOld0 <== isProofValidNonRevMtpNoAux;
 	smtClaimValid.key <== revNonceHiHv.hi;
 	smtClaimValid.value <== 0;
 
@@ -391,10 +391,10 @@ template verifyCredentialNotRevoked(IssuerLevels) {
 	signal input claim[8];
 
 	// D. issuer proof of claim validity
-	signal input isProofValidNotRevMtp[IssuerLevels];
-	signal input isProofValidNotRevMtpNoAux;
-	signal input isProofValidNotRevMtpAuxHi;
-	signal input isProofValidNotRevMtpAuxHv;
+	signal input isProofValidNonRevMtp[IssuerLevels];
+	signal input isProofValidNonRevMtpNoAux;
+	signal input isProofValidNonRevMtpAuxHi;
+	signal input isProofValidNonRevMtpAuxHv;
 	signal input isProofValidRevTreeRoot;
 
 
@@ -412,10 +412,10 @@ template verifyCredentialNotRevoked(IssuerLevels) {
 	smtClaimValid.enabled <== 1;
 	smtClaimValid.fnc <== 1; // Non-inclusion
 	smtClaimValid.root <== isProofValidRevTreeRoot;
-	for (var i=0; i<IssuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNotRevMtp[i]; }
-	smtClaimValid.oldKey <== isProofValidNotRevMtpAuxHi;
-	smtClaimValid.oldValue <== isProofValidNotRevMtpAuxHv;
-	smtClaimValid.isOld0 <== isProofValidNotRevMtpNoAux;
+	for (var i=0; i<IssuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNonRevMtp[i]; }
+	smtClaimValid.oldKey <== isProofValidNonRevMtpAuxHi;
+	smtClaimValid.oldValue <== isProofValidNonRevMtpAuxHv;
+	smtClaimValid.isOld0 <==  isProofValidNonRevMtpNoAux;
 	smtClaimValid.key <== revNonceHiHv.hi;
 	smtClaimValid.value <== 0;
 }
@@ -524,13 +524,22 @@ template verifyIdenStateMatchesRoots() {
 }
 
 // verifyClaimIssuance verifies that claim is issued by the issuer
-template verifyClaimIssuance(IssuerLevels) {
+template verifyClaimIssuanceNonRev(IssuerLevels) {
 	signal input claim[8];
 	signal input claimIssuanceMtp[IssuerLevels];
 	signal input claimIssuanceClaimsTreeRoot;
 	signal input claimIssuanceRevTreeRoot;
 	signal input claimIssuanceRootsTreeRoot;
 	signal input claimIssuanceIdenState;
+
+	signal input claimNonRevMtp[IssuerLevels];
+	signal input claimNonRevMtpNoAux;
+	signal input claimNonRevMtpAuxHi;
+	signal input claimNonRevMtpAuxHv;
+	signal input claimNonRevIssuerClaimsTreeRoot;
+	signal input claimNonRevIssuerRevTreeRoot;
+	signal input claimNonRevIssuerRootsTreeRoot;
+	signal input claimNonRevIssuerState;
 
     // verify country claim is included in claims tree root
     component claimIssuanceCheck = verifyCredentialMtp(IssuerLevels);
@@ -539,13 +548,31 @@ template verifyClaimIssuance(IssuerLevels) {
     claimIssuanceCheck.isProofExistClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
 
     // verify issuer state includes country claim
-    component verifyCountryClaimIssuanceIdenState = verifyIdenStateMatchesRoots();
-    verifyCountryClaimIssuanceIdenState.isProofValidClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
-    verifyCountryClaimIssuanceIdenState.isProofValidRevTreeRoot <== claimIssuanceRevTreeRoot;
-    verifyCountryClaimIssuanceIdenState.isProofValidRootsTreeRoot <== claimIssuanceRootsTreeRoot;
-    verifyCountryClaimIssuanceIdenState.isIdenState <== claimIssuanceIdenState;
+    component verifyClaimIssuanceIdenState = verifyIdenStateMatchesRoots();
+    verifyClaimIssuanceIdenState.isProofValidClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
+    verifyClaimIssuanceIdenState.isProofValidRevTreeRoot <== claimIssuanceRevTreeRoot;
+    verifyClaimIssuanceIdenState.isProofValidRootsTreeRoot <== claimIssuanceRootsTreeRoot;
+    verifyClaimIssuanceIdenState.isIdenState <== claimIssuanceIdenState;
 
+    // check non-revocation proof for claim
+    component verifyClaimNotRevoked = verifyCredentialNotRevoked(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== claim[i]; }
+    for (var i=0; i<IssuerLevels; i++) {
+        verifyClaimNotRevoked.isProofValidNonRevMtp[i] <== claimNonRevMtp[i];
+    }
+    verifyClaimNotRevoked.isProofValidNonRevMtpNoAux <== claimNonRevMtpNoAux;
+    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHi <== claimNonRevMtpAuxHi;
+    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHv <== claimNonRevMtpAuxHv;
+    verifyClaimNotRevoked.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
+
+    // check issuer state matches for non-revocation proof
+    component verifyClaimNonRevIssuerState = verifyIdenStateMatchesRoots();
+    verifyClaimNonRevIssuerState.isProofValidClaimsTreeRoot <== claimNonRevIssuerClaimsTreeRoot;
+    verifyClaimNonRevIssuerState.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
+    verifyClaimNonRevIssuerState.isProofValidRootsTreeRoot <== claimNonRevIssuerRootsTreeRoot;
+    verifyClaimNonRevIssuerState.isIdenState <== claimNonRevIssuerState;
 }
+
 // verifyClaimSignature verifies that claim is signed with the provided public key
 template verifyClaimSignature() {
 	signal input claim[8];
@@ -570,4 +597,56 @@ template verifyClaimSignature() {
     sigVerifier.R8y <== sigR8y;
 
     sigVerifier.M <== hash.hash;
+}
+
+// verifyClaimIssuanceNonRevBySignature verifies that claim is signed with the provided public key,
+// claim is not revoked and revocation root is in issuer's state
+template verifyClaimIssuanceNonRevBySignature(IssuerLevels) {
+	signal input claim[8];
+	signal input id;
+	signal input sigR8x;
+	signal input sigR8y;
+	signal input sigS;
+	signal input pubKeyX;
+	signal input pubKeyY;
+	signal input claimNonRevMtp[IssuerLevels];
+	signal input claimNonRevMtpNoAux;
+	signal input claimNonRevMtpAuxHi;
+	signal input claimNonRevMtpAuxHv;
+	signal input claimNonRevIssuerClaimsTreeRoot;
+	signal input claimNonRevIssuerRevTreeRoot;
+	signal input claimNonRevIssuerRootsTreeRoot;
+	signal input claimNonRevIssuerState;
+
+    // check claim is issued to provided identity
+    component claimIdCheck = verifyCredentialSubject();
+    for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== claim[i]; }
+    claimIdCheck.id <== id;
+
+    // check claim signature
+    component claimSignature = verifyClaimSignature();
+    for (var i=0; i<8; i++) { claimSignature.claim[i] <== claim[i]; }
+	claimSignature.sigR8x <== sigR8x;
+	claimSignature.sigR8y <== sigR8y;
+	claimSignature.sigS <== sigS;
+	claimSignature.pubKeyX <== pubKeyX;
+	claimSignature.pubKeyY <== pubKeyY;
+
+    // check non-revocation proof for claim
+    component verifyClaimNotRevoked = verifyCredentialNotRevoked(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== claim[i]; }
+    for (var i=0; i<IssuerLevels; i++) {
+        verifyClaimNotRevoked.isProofValidNonRevMtp[i] <== claimNonRevMtp[i];
+    }
+    verifyClaimNotRevoked.isProofValidNonRevMtpNoAux <== claimNonRevMtpNoAux;
+    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHi <== claimNonRevMtpAuxHi;
+    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHv <== claimNonRevMtpAuxHv;
+    verifyClaimNotRevoked.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
+
+    // check issuer state matches for non-revocation proof
+    component verifyClaimNonRevIssuerState = verifyIdenStateMatchesRoots();
+    verifyClaimNonRevIssuerState.isProofValidClaimsTreeRoot <== claimNonRevIssuerClaimsTreeRoot;
+    verifyClaimNonRevIssuerState.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
+    verifyClaimNonRevIssuerState.isProofValidRootsTreeRoot <== claimNonRevIssuerRootsTreeRoot;
+    verifyClaimNonRevIssuerState.isIdenState <== claimNonRevIssuerState;
 }

@@ -57,7 +57,7 @@ template IdOwnershipBySignature(nLevels) {
 	signal input challengeSignatureR8x;
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
-	
+
 	//todo use not rev?
     signal input siblingsRevTree[nLevels]; //TODO not revMTP?
     signal input revMtpNoAux;

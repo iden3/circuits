@@ -135,23 +135,23 @@ const inputs2JSON = `
 }
 `;
 
-describe("credential test (old)", function () {
-    this.timeout(200000);
-
-    it("Test Credential", async () => {
-        const circuit = await tester(
-            path.join(__dirname, "circuits", "credential.circom"),
-            {reduceConstraints: false}
-        );
-
-        // input data generated with
-        // circuits/test/testvectorsgen/credential_test.go, which uses
-        // go-iden3-core
-
-        const witness1 = await circuit.calculateWitness(JSON.parse(inputs1JSON));
-        await circuit.checkConstraints(witness1);
-
-        const witness2 = await circuit.calculateWitness(JSON.parse(inputs2JSON));
-        await circuit.checkConstraints(witness2);
-    });
-});
+// describe("credential test (old)", function () {
+//     this.timeout(200000);
+//
+//     it("Test Credential", async () => {
+//         const circuit = await tester(
+//             path.join(__dirname, "circuits", "credential.circom"),
+//             {reduceConstraints: false}
+//         );
+//
+//         // input data generated with
+//         // circuits/test/testvectorsgen/credential_test.go, which uses
+//         // go-iden3-core
+//
+//         const witness1 = await circuit.calculateWitness(JSON.parse(inputs1JSON));
+//         await circuit.checkConstraints(witness1);
+//
+//         const witness2 = await circuit.calculateWitness(JSON.parse(inputs2JSON));
+//         await circuit.checkConstraints(witness2);
+//     });
+// });
