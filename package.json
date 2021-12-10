@@ -26,7 +26,6 @@
     "snarkjs": "^0.4.10",
     "ts-node": "^7.0.1",
     "tslint": "^5.18.0",
-    "typescript": "^3.9.10",
-    "wasmsnark": "0.0.10"
+    "typescript": "^3.9.10"
   }
 }

@@ -15,6 +15,7 @@ pragma circom 2.0.0;
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
+include "../node_modules/circomlib/circuits/mux3.circom";
 include "./idOwnershipGenesis.circom";
 
 // getClaimSubjectOtherIden checks that a claim Subject is OtherIden and
@@ -523,7 +524,7 @@ template verifyIdenStateMatchesRoots() {
 	isProofValidIdenState.idenState === isIdenState;
 }
 
-// verifyClaimIssuance verifies that claim is issued by the issuer
+// verifyClaimIssuance verifies that claim is issued by the issuer and not revoked
 template verifyClaimIssuanceNonRev(IssuerLevels) {
 	signal input claim[8];
 	signal input claimIssuanceMtp[IssuerLevels];
@@ -649,4 +650,63 @@ template verifyClaimIssuanceNonRevBySignature(IssuerLevels) {
     verifyClaimNonRevIssuerState.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
     verifyClaimNonRevIssuerState.isProofValidRootsTreeRoot <== claimNonRevIssuerRootsTreeRoot;
     verifyClaimNonRevIssuerState.isIdenState <== claimNonRevIssuerState;
+}
+
+// getValueByIndex select slot from claim by given index
+template getValueByIndex(){
+  signal input claim[8];
+  signal input index;
+  signal output value; // value from the selected slot claim[index]
+
+  component mux = Mux3();
+  component n2b = Num2Bits(8);
+  n2b.in <== index;
+  for(var i=0;i<8;i++){
+    mux.c[i] <== claim[i];
+  }
+
+  mux.s[0] <== n2b.out[0];
+  mux.s[1] <== n2b.out[1];
+  mux.s[2] <== n2b.out[2];
+
+  value <== mux.out;
+}
+
+// verify that the claim has expiration time and it is less then timestamp
+template verifyExpirationTime() {
+	signal input claim[8];
+	signal input timestamp;
+
+	//
+	// A. Prove that the claim has expiration time and it is less then time stamp.
+	//
+	component header = getClaimHeader();
+	for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
+	// out: header.claimType
+	// out: header.claimFlags[32]
+
+  component expirationComp =  getClaimExpiration();
+  for (var i=0; i<8; i++) { expirationComp.claim[i] <== claim[i]; }
+
+  component lt = LessThan(252);
+  lt.in[0] <== expirationComp.expiration;
+  lt.in[1] <== timestamp;
+
+  lt.out === 0;
+}
+
+// getClaimExpiration extract expiration date from claim
+template getClaimExpiration() {
+	signal input claim[8];
+
+	signal output expiration;
+
+	component expirationBits = Bits2Num(64);
+
+ 	component v0Bits = Num2Bits(256);
+	v0Bits.in <== claim[4];
+	for (var i=0; i<64; i++) {
+		expirationBits.in[i] <== v0Bits.out[i+64];
+	}
+	expiration <== expirationBits.out;
 }
