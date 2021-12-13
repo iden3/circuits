@@ -16,7 +16,7 @@ include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../node_modules/circomlib/circuits/mux3.circom";
-include "./idOwnershipGenesis.circom";
+include "./idOwnershipBySignature.circom";
 
 // getClaimSubjectOtherIden checks that a claim Subject is OtherIden and
 // outputs the identity within.  Parameter index is bool:  0 if SubjectPos is
@@ -220,12 +220,26 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	// A
 	signal input claim[8];
 
-	// B. holder proof of claimKOp in the genesis
-	signal input hoKOpSk;
-	signal input hoClaimKOpMtp[IdOwnershipLevels];
-	signal input hoClaimKOpClaimsTreeRoot;
-	// signal input hoClaimKOpRevTreeRoot;
-	// signal input hoClaimKOpRootsTreeRoot;
+	// B. holder proof that private key signing the challenge is in his identity state and not revoked
+    signal input hoId;
+    signal input hoIdenState;
+
+    signal input claimsTreeRoot;
+    signal input siblingsClaimTree[IdOwnershipLevels];
+    signal input authClaim[8];
+
+    signal input revTreeRoot;
+    signal input siblingsRevTree[IdOwnershipLevels];
+    signal input revMtpNoAux;
+    signal input revMtpAuxHv;
+    signal input revMtpAuxHi;
+
+    signal input rootsTreeRoot;
+
+    signal input challenge;
+    signal input challengeSignatureR8x;
+    signal input challengeSignatureR8y;
+    signal input challengeSignatureS;
 
 	// C. issuer proof of claim existence
 	signal input isProofExistMtp[IssuerLevels];
@@ -271,15 +285,30 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	// out: claimHiHv.hv
 
 	//
-	// B. Prove ownership of the kOpSk associated with the holder identity
+	// B. // B. holder proof that private key signing the challenge is in his identity state and not revoked
 	//
-	component idOwnership = IdOwnershipGenesis(IdOwnershipLevels);
-	idOwnership.id <== subjectOtherIden.id;
-	idOwnership.userPrivateKey <== hoKOpSk;
-	for (var i=0; i<IdOwnershipLevels; i++) { idOwnership.siblings[i] <== hoClaimKOpMtp[i]; }
-	idOwnership.claimsTreeRoot <== hoClaimKOpClaimsTreeRoot;
-	// idOwnership.revTreeRoot    <== hoClaimKOpRevTreeRoot;
-	// idOwnership.rootsTreeRoot  <== hoClaimKOpRootsTreeRoot;
+	component checkIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
+	checkIdOwnership.id <== subjectOtherIden.id;
+	checkIdOwnership.hoId <== hoId;
+	checkIdOwnership.hoIdenState <== hoIdenState;
+
+	checkIdOwnership.claimsTreeRoot <== claimsTreeRoot;
+	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.siblingsClaimTree[i] <== siblingsClaimTree[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.claim[i] <== authClaim[i]; }
+
+	checkIdOwnership.revTreeRoot <== revTreeRoot;
+	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.siblingsRevTree[i] <== siblingsRevTree[i]; }
+	checkIdOwnership.revMtpNoAux <== revMtpNoAux;
+	checkIdOwnership.revMtpAuxHv <== revMtpAuxHv;
+	checkIdOwnership.revMtpAuxHi <== revMtpAuxHi;
+
+	checkIdOwnership.rootsTreeRoot <== rootsTreeRoot;
+
+    //todo for now it will use the challenge from input but should use the hash of all the inputs
+    checkIdOwnership.challenge <== challenge;
+    checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
+    checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
+    checkIdOwnership.challengeSignatureS <== challengeSignatureS;
 
 	//
 	// C. Claim proof of existence (isProofExist)

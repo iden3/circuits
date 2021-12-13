@@ -12,7 +12,7 @@ include "credential.circom";
 // and its revocation nonce is not in RevTreeRoot
 template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
     signal input claim[8];
-	signal input siblings[nLevels];
+	signal input siblingsClaimsTree[nLevels];
 	signal input claimsTreeRoot;
 
 	//todo use not rev?
@@ -31,7 +31,7 @@ template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
 	smtClaimExists.fnc <== 0;
 	smtClaimExists.root <== claimsTreeRoot;
 	for (var i=0; i<nLevels; i++) {
-		smtClaimExists.siblings[i] <== siblings[i];
+		smtClaimExists.siblings[i] <== siblingsClaimsTree[i];
 	}
 	smtClaimExists.oldKey <== 0;
 	smtClaimExists.oldValue <== 0;

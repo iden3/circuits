@@ -1,13 +1,10 @@
 const path = require("path");
 const tester = require("circom_tester").wasm;
-const chai = require("chai");
-const assert = chai.assert;
 
 export {};
 
-const inputs1JSON = `
-{
-  "claim": [
+const inputs1JSON = {
+  claim: [
     "5229058725978483884509395681280",
     "289859737856552242459908064039047479872297983795219456858471895981296582656",
     "0",
@@ -15,20 +12,39 @@ const inputs1JSON = `
     "287762808833",
     "0",
     "0",
-    "0"
+    "0",
   ],
-  "hoClaimKOpClaimsTreeRoot": "7946780746749119737347824328380716888185847167350706156852781411110671384281",
-  "hoClaimKOpMtp": [
+
+  hoId: "323416925264666217617288569742564703632850816035761084002720090377353297920",
+  hoIdenState: "18311560525383319719311394957064820091354976310599818797157189568621466950811",
+
+  claimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
+  siblingsClaimTree: ["0", "0", "0", "0"],
+  authClaim : [
+    "251025091000101825075425831481271126140",
+    "0",
+    "17640206035128972995519606214765283372613874593503528180869261482403155458945",
+    "20634138280259599560273310290025659992320584624461316485434108770067472477956",
+    "15930428023331155902",
     "0",
     "0",
     "0",
-    "0",
-    "0"
   ],
-  "hoKOpSk": "4311558182412267067793656453445268895647366823536826824741896295264034954945",
-  "isIdenState": "10057995389383596935758563115193565434731801882563552942619957272940535425051",
-  "isProofExistClaimsTreeRoot": "2098429289195041877503796573672809381611283942089313719658676448183592072210",
-  "isProofExistMtp": [
+
+  revTreeRoot: "0",
+  siblingsRevTree: ["0", "0", "0", "0"],
+  revMtpNoAux: "1",
+  revMtpAuxHi: "0",
+  revMtpAuxHv: "0",
+
+  rootsTreeRoot: "0",
+
+  challenge: "1",
+  challengeSignatureR8x: "8553678144208642175027223770335048072652078621216414881653012537434846327449",
+  challengeSignatureR8y: "5507837342589329113352496188906367161790372084365285966741761856353367255709",
+  challengeSignatureS: "2093461910575977345603199789919760192811763972089699387324401771367839603655",
+
+  isProofExistMtp: [
     "1057889796422815837190757694830636547632657717350193461241702298517508497145",
     "0",
     "0",
@@ -37,9 +53,29 @@ const inputs1JSON = `
     "0",
     "0",
     "0",
-    "0"
+    "0",
   ],
-  "isProofRootMtp": [
+  isProofExistClaimsTreeRoot: "2098429289195041877503796573672809381611283942089313719658676448183592072210",
+
+  isProofValidNonRevMtp: [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+  ],
+  isProofValidNonRevMtpNoAux: "1",
+  isProofValidNonRevMtpAuxHi: "0",
+  isProofValidNonRevMtpAuxHv: "0",
+  isProofValidClaimsTreeRoot: "13565340421349544257305398433609531500708391603118390376670593177205469141435",
+  isProofValidRevTreeRoot: "0",
+  isProofValidRootsTreeRoot: "17188596390270522907483680627414241804681789552543934045200460119611154301405",
+
+  isProofRootMtp: [
     "17808600532503449533631993614276023258818174848078940374531685668578047172141",
     "0",
     "4384706921277752443651310638204899155127465281135248749515595423118486077645",
@@ -48,27 +84,11 @@ const inputs1JSON = `
     "0",
     "0",
     "0",
-    "0"
+    "0",
   ],
-  "isProofValidClaimsTreeRoot": "13565340421349544257305398433609531500708391603118390376670593177205469141435",
-  "isProofValidNotRevMtp": [
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0",
-    "0"
-  ],
-  "isProofValidNotRevMtpAuxHi": "0",
-  "isProofValidNotRevMtpAuxHv": "0",
-  "isProofValidNotRevMtpNoAux": "1",
-  "isProofValidRevTreeRoot": "0",
-  "isProofValidRootsTreeRoot": "17188596390270522907483680627414241804681789552543934045200460119611154301405"
-}
-`;
+
+  isIdenState: "10057995389383596935758563115193565434731801882563552942619957272940535425051",
+};
 
 const inputs2JSON = `
 {
@@ -116,7 +136,7 @@ const inputs2JSON = `
     "0"
   ],
   "isProofValidClaimsTreeRoot": "17665117150036429725233582371439065135093098130527802028343707261927599056119",
-  "isProofValidNotRevMtp": [
+  "isProofValidNonRevMtp": [
     "0",
     "0",
     "0",
@@ -127,31 +147,33 @@ const inputs2JSON = `
     "0",
     "0"
   ],
-  "isProofValidNotRevMtpAuxHi": "2279272124503809695177170942549831206840003426178943720957919922723804431629",
-  "isProofValidNotRevMtpAuxHv": "17142353815121200339963760108352696118925531835836661574604762966243856573359",
-  "isProofValidNotRevMtpNoAux": "0",
+  "isProofValidNonRevMtpAuxHi": "2279272124503809695177170942549831206840003426178943720957919922723804431629",
+  "isProofValidNonRevMtpAuxHv": "17142353815121200339963760108352696118925531835836661574604762966243856573359",
+  "isProofValidNonRevMtpNoAux": "0",
   "isProofValidRevTreeRoot": "4454658387766047782454182155475896417150299786255944499255969748476496678707",
   "isProofValidRootsTreeRoot": "4841043515306036220150012978888021939114827061162154552792352686672729465626"
 }
 `;
 
-// describe("credential test (old)", function () {
-//     this.timeout(200000);
-//
-//     it("Test Credential", async () => {
-//         const circuit = await tester(
-//             path.join(__dirname, "circuits", "credential.circom"),
-//             {reduceConstraints: false}
-//         );
-//
-//         // input data generated with
-//         // circuits/test/testvectorsgen/credential_test.go, which uses
-//         // go-iden3-core
-//
-//         const witness1 = await circuit.calculateWitness(JSON.parse(inputs1JSON));
-//         await circuit.checkConstraints(witness1);
-//
-//         const witness2 = await circuit.calculateWitness(JSON.parse(inputs2JSON));
-//         await circuit.checkConstraints(witness2);
-//     });
-// });
+describe("credential test (old)", function() {
+    this.timeout(600000);
+
+    it("Test Credential", async () => {
+        const circuit = await tester(
+            path.join(__dirname, "circuits", "credential.circom"),
+            {
+              outputOptions: {
+                basePath: path.join(__dirname, "circuits", "build"),
+                recompile: false,
+              },
+              reduceConstraints: false,
+            },
+        );
+
+        const witness1 = await circuit.calculateWitness(inputs1JSON);
+        await circuit.checkConstraints(witness1);
+
+        // const witness2 = await circuit.calculateWitness(JSON.parse(inputs2JSON));
+        // await circuit.checkConstraints(witness2);
+    });
+});

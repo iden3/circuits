@@ -53,13 +53,14 @@ template IdOwnershipBySignature(nLevels) {
 	signal input claimsTreeRoot;
 	signal input revTreeRoot;
 	signal input rootsTreeRoot;
+
 	signal input challenge;
 	signal input challengeSignatureR8x;
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
 	//todo use not rev?
-    signal input siblingsRevTree[nLevels]; //TODO not revMTP?
+    signal input siblingsRevTree[nLevels];
     signal input revMtpNoAux;
     signal input revMtpAuxHv;
     signal input revMtpAuxHi;
@@ -71,7 +72,7 @@ template IdOwnershipBySignature(nLevels) {
         verifyClaimKeyBBJJ.claim[i] <== claim[i];
     }
 	for (var i=0; i<nLevels; i++) {
-	    verifyClaimKeyBBJJ.siblings[i] <== siblingsClaimTree[i];
+	    verifyClaimKeyBBJJ.siblingsClaimsTree[i] <== siblingsClaimTree[i];
     }
 	verifyClaimKeyBBJJ.claimsTreeRoot <== claimsTreeRoot;
 	verifyClaimKeyBBJJ.revTreeRoot <== revTreeRoot;
