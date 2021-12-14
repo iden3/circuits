@@ -7,7 +7,7 @@ include "../node_modules/circomlib/circuits/poseidon.circom";
 //include "utils.circom";
 
 template BuildClaimKeyBBJJ() {
-	var CLAIM_TYPE  = 251025091000101825075425831481271126140; // swapped from 164867201768971999401702181843803888060
+	var CLAIM_TYPE  = 164867201768971999401702181843803888060 ; // swapped from 251025091000101825075425831481271126140
 
 	signal input ax;
 	signal input ay;
