@@ -1,7 +1,8 @@
-package main
+package utils
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
@@ -20,7 +21,7 @@ func ExtractPubXY(privKHex string) (key *babyjub.PrivateKey, x, y *big.Int) {
 	return &k, pk.X, pk.Y
 }
 
-func exitOnError(err error) {
+func ExitOnError(err error) {
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -37,16 +38,20 @@ func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 		core.WithRevocationNonce(uint64(0)))
 }
 
-func SignatureInputs(key *babyjub.PrivateKey, sigInput []byte) (*babyjub.Signature, error) {
+func SignBBJJ(key *babyjub.PrivateKey, sigInput []byte) (*babyjub.Signature, error) {
 	bjjSigner := primitive.NewBJJSigner(key)
 	signature, err := bjjSigner.Sign(sigInput)
-	exitOnError(err)
+	ExitOnError(err)
 
 	var sig [64]byte
 	copy(sig[:], signature)
 
-	fmt.Println("Sig")
-	fmt.Println(hex.EncodeToString(sig[:]))
-
 	return new(babyjub.Signature).Decompress(sig)
+}
+
+func PrintMap(inputs map[string]string) {
+	json, err := json.Marshal(inputs)
+	ExitOnError(err)
+
+	fmt.Println(string(json))
 }
