@@ -59,7 +59,6 @@ template AtomicQuery(IdOwnershipLevels, IssuerLevels) {
 		signal input slotIndex;
     signal input value;
     signal input operator;
-//    signal output queryOut;
 
     /* current time */
     signal input timestamp;
@@ -82,21 +81,15 @@ template AtomicQuery(IdOwnershipLevels, IssuerLevels) {
 		userIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
 		userIdOwnership.challengeSignatureS <== challengeSignatureS;
 
-
-
 		// Check claim is issued to provided identity
 		component claimIdCheck = verifyCredentialSubject();
 		for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== claim[i]; }
 		claimIdCheck.id <== id;
 
-
-
 		// Verify claim schema
     component claimSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== claim[i]; }
     claimSchemaCheck.schema <== claimSchema;
-
-
 
 		// verify claim issued and not revoked
 		component vci = verifyClaimIssuanceNonRev(IssuerLevels);
