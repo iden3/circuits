@@ -59,7 +59,7 @@ template AtomicQuery(IdOwnershipLevels, IssuerLevels) {
 		signal input slotIndex;
     signal input value;
     signal input operator;
-    signal output queryOut;
+//    signal output queryOut;
 
     /* current time */
     signal input timestamp;
@@ -129,6 +129,6 @@ template AtomicQuery(IdOwnershipLevels, IssuerLevels) {
     query.value <== value;
     query.operator <== operator;
 
-    query.out ==> queryOut;
+    query.out === 1;
 
 }
