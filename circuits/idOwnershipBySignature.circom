@@ -56,7 +56,7 @@ template IdOwnershipBySignature(nLevels) {
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
-    component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels);
+  component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels);
 	verifyClaimKeyBBJJ.BBJAx <== userPublicKeyAx;
 	verifyClaimKeyBBJJ.BBJAy <== userPublicKeyAy;
 	for (var i=0; i<nLevels; i++) {
@@ -73,7 +73,7 @@ template IdOwnershipBySignature(nLevels) {
 
 	component calcCutState = cutState();
 	calcCutState.in <== calcIdState.out;
-	
+
 	component calcCutId = cutId();
 	calcCutId.in <== id;
 
