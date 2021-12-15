@@ -16,7 +16,7 @@ template VerifyAuthenticationInformation(IdOwnershipLevels) {
 	signal input challengeSignatureR8x;
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
-    signal input state;
+  signal input state;
 
 
 
