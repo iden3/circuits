@@ -44,14 +44,22 @@ include "cutIdState.circom";
 include "verifyClaimKeyBBJJ.circom";
 
 template IdOwnershipBySignature(nLevels) {
-	signal input id;
-    signal input hoId;
+// todo remove it
+//	signal input id;
+//    signal input hoId;
 
-	signal input claim[8];
+    signal input hoIdenState;
 
-	signal input siblingsClaimTree[nLevels];
 	signal input claimsTreeRoot;
+	signal input siblingsClaimTree[nLevels];
+	signal input authClaim[8];
+
 	signal input revTreeRoot;
+    signal input siblingsRevTree[nLevels];
+    signal input revMtpNoAux;
+    signal input revMtpAuxHv;
+    signal input revMtpAuxHi;
+
 	signal input rootsTreeRoot;
 
 	signal input challenge;
@@ -59,17 +67,9 @@ template IdOwnershipBySignature(nLevels) {
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
-	//todo use not rev?
-    signal input siblingsRevTree[nLevels];
-    signal input revMtpNoAux;
-    signal input revMtpAuxHv;
-    signal input revMtpAuxHi;
-
-    signal input hoIdenState;
-
     component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels);
     for (var i=0; i<8; i++) {
-        verifyClaimKeyBBJJ.claim[i] <== claim[i];
+        verifyClaimKeyBBJJ.claim[i] <== authClaim[i];
     }
 	for (var i=0; i<nLevels; i++) {
 	    verifyClaimKeyBBJJ.siblingsClaimsTree[i] <== siblingsClaimTree[i];
@@ -98,15 +98,16 @@ template IdOwnershipBySignature(nLevels) {
     // signature verification
     component sigVerifier = EdDSAPoseidonVerifier();
     sigVerifier.enabled <== 1;
-    sigVerifier.Ax <== claim[2];
-    sigVerifier.Ay <== claim[3];
+    sigVerifier.Ax <== authClaim[2];
+    sigVerifier.Ay <== authClaim[3];
     sigVerifier.S <== challengeSignatureS;
     sigVerifier.R8x <== challengeSignatureR8x;
     sigVerifier.R8y <== challengeSignatureR8y;
     sigVerifier.M <== challenge;
 
-    component checkHoId = IsEqual();
-    checkHoId.in[0] <== id;
-    checkHoId.in[1] <== hoId;
-    checkHoId.out === 1;
+// todo remove it
+//    component checkHoId = IsEqual();
+//    checkHoId.in[0] <== id;
+//    checkHoId.in[1] <== hoId;
+//    checkHoId.out === 1;
 }

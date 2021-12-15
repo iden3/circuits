@@ -11,13 +11,12 @@ include "credential.circom";
 // circuit to check that claim with the provided public key is in ClaimsTreeRoot
 // and its revocation nonce is not in RevTreeRoot
 template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
-    signal input claim[8];
-	signal input siblingsClaimsTree[nLevels];
 	signal input claimsTreeRoot;
+	signal input siblingsClaimsTree[nLevels];
+    signal input claim[8];
 
-	//todo use not rev?
 	signal input revTreeRoot;
-    signal input siblingsRevTree[nLevels]; //TODO not revMTP?
+    signal input siblingsRevTree[nLevels];
     signal input revMtpNoAux;
     signal input revMtpAuxHv;
     signal input revMtpAuxHi;

@@ -38,13 +38,14 @@ include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "idOwnershipBySignature.circom";
 
 template IdState(nLevels) {
-	signal input id;
+// todo remove it
+//	signal input id;
 	signal input oldIdState;
 	signal input newIdState;
 
 	signal input claimsTreeRoot;
 	signal input siblingsClaimTree[nLevels];
-	signal input claim[8];
+	signal input authClaim[8];
 
 	signal input revTreeRoot;
     signal input siblingsRevTree[nLevels];
@@ -54,7 +55,8 @@ template IdState(nLevels) {
 
     signal input rootsTreeRoot;
 
-	signal input challenge;
+//todo remove it
+//	signal input challenge;
 	signal input challengeSignatureR8x;
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
@@ -73,14 +75,19 @@ template IdState(nLevels) {
 	oldNewNotEqual.out === 0;
 
 
-    // check id ownership by signature of all the inputs
+    // check id ownership by correct signature of a hash of old state and new state
+    component challenge = Poseidon(2);
+    challenge.inputs[0] <== oldIdState;
+    challenge.inputs[1] <== newIdState;
+
 	component checkIdOwnership = IdOwnershipBySignature(nLevels);
-	checkIdOwnership.id <== id;
-	checkIdOwnership.hoId <== id;
+    //todo remove it
+//	checkIdOwnership.id <== id;
+//	checkIdOwnership.hoId <== id;
 
 	checkIdOwnership.claimsTreeRoot <== claimsTreeRoot;
 	for (var i=0; i<nLevels; i++) { checkIdOwnership.siblingsClaimTree[i] <== siblingsClaimTree[i]; }
-    for (var i=0; i<8; i++) { checkIdOwnership.claim[i] <== claim[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.authClaim[i] <== authClaim[i]; }
 
 	checkIdOwnership.revTreeRoot <== revTreeRoot;
 	for (var i=0; i<nLevels; i++) { checkIdOwnership.siblingsRevTree[i] <== siblingsRevTree[i]; }
@@ -90,8 +97,8 @@ template IdState(nLevels) {
 
 	checkIdOwnership.rootsTreeRoot <== rootsTreeRoot;
 
-    //todo for now it will use the challenge from input but should use the hash of all the inputs
-    checkIdOwnership.challenge <== challenge;
+    // it is enough to use old id state as a challenge for security guarantees
+    checkIdOwnership.challenge <== challenge.out;
     checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
     checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
     checkIdOwnership.challengeSignatureS <== challengeSignatureS;
