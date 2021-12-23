@@ -41,7 +41,7 @@ describe('Test getClaimExpiration:', async function() {
                     "0",
                     "0"]
             },
-            expOut: {expiration: 9223372036854775807}
+            expOut: {expiration: "9223372036854775807"}
         },
 
         {
@@ -56,7 +56,7 @@ describe('Test getClaimExpiration:', async function() {
                     "0",
                     "0"]
             },
-            expOut: {expiration: 9223372036854775807}
+            expOut: {expiration: "9223372036854775807"}
         }
 
 
