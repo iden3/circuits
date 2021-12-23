@@ -82,9 +82,9 @@ describe("Test simpleQuery",  function() {
 
         it("#LESS - 9 < 10 ", async () => {
             const w2 = await circuit.calculateWitness({
-                in: "9",
+                in: "10",
                 operator:  LESS,
-                value: "10",
+                value: "9",
             }, true);
 
             await circuit.assertOut(w2, {out: 0});
