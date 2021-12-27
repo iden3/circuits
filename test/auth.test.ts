@@ -1,0 +1,24 @@
+const path = require("path");
+const tester = require("circom_tester").wasm;
+const chai = require("chai");
+const assert = chai.assert;
+
+export {};
+
+describe("auth test", function () {
+    this.timeout(200000);
+
+    it("Test Auth", async () => {
+        const circuit = await tester(
+            path.join(__dirname, "circuits", "auth.circom"),
+            {reduceConstraints: false}
+        );
+
+        // input data generated with circuits/test/testvectorsgen/idState_test.go, which uses go-iden3-core
+        const witness = await circuit.calculateWitness(
+            {"BBJAx":"21293424947375383982389393614012508686131238764507830962167322403690693519627","BBJAy":"16598508602523319544157021146196633816724804268958683601720561163654916282271","BBJClaimClaimsTreeRoot":"20554237286409735067431599927785586172790530292725728679114269239512014723026","BBJClaimMtp":["0","0","0","0"],"BBJClaimRevTreeRoot":"0","BBJClaimRootsTreeRoot":"0","challenge":"12345","challengeSignatureR8x":"16860174036902244256104674167072183274610068074238677290884913730756513190577","challengeSignatureR8y":"326442332208888422237100058622311240286780945155390934232808034772471332948","challengeSignatureS":"1544566991663309777969185762263569084242157516252959158357266521174928119074","id":"288080072193943372832556802534124228514018653169991403332943485887956910080","state":"15683801318497632203100523443287756879812316361757309549093021254194216616235"}
+        );
+        await circuit.checkConstraints(witness);
+        await circuit.assertOut(witness, {id: "288080072193943372832556802534124228514018653169991403332943485887956910080", challenge: "12345", state: "15683801318497632203100523443287756879812316361757309549093021254194216616235"});
+    });
+});

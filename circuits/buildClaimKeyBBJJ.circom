@@ -7,7 +7,7 @@ include "../node_modules/circomlib/circuits/poseidon.circom";
 //include "utils.circom";
 
 template BuildClaimKeyBBJJ() {
-	var CLAIM_TYPE  = 251025091000101825075425831481271126140; // swapped from 164867201768971999401702181843803888060
+	var AUTH_SCHEMA_HASH  = 164867201768971999401702181843803888060;
 
 	signal input ax;
 	signal input ay;
@@ -27,7 +27,7 @@ template BuildClaimKeyBBJJ() {
 
 	// Hi
 	component hashHi = Poseidon(4);
-	hashHi.inputs[0] <== CLAIM_TYPE;
+	hashHi.inputs[0] <== AUTH_SCHEMA_HASH;
 	hashHi.inputs[1] <== 0;
 	hashHi.inputs[2] <== ax;
 	hashHi.inputs[3] <== ay;

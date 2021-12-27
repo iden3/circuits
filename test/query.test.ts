@@ -16,14 +16,14 @@ describe("Test simpleQuery",  function() {
     let circuit;
 
     before(async function() {
-        circuit = await wasm_tester(path.join(__dirname, "../circuits", "simpleQuery_test.circom"));
+        circuit = await wasm_tester(path.join(__dirname, "./circuits", "simpleQuery_test.circom"));
     });
 
     describe("#IsEqual", function (){
         it("#IsEqual - true", async () => {
             const inputs = {
-                field: "10",
-                sign:  EQUALS,
+                in: "10",
+                operator:  EQUALS,
                 value: "11",
             }
 
@@ -35,14 +35,14 @@ describe("Test simpleQuery",  function() {
 
         it("#IsEqual - false", async () => {
             const inputs = {
-                field: "10",
-                sign:  EQUALS,
+                in: "10",
+                operator:  EQUALS,
                 value: "11",
             }
 
             const w = await circuit.calculateWitness({
-                field: "10",
-                sign:  "0",
+                in: "10",
+                operator:  "0",
                 value: "10",
             }, true);
             await circuit.assertOut(w, {out: 1});
@@ -60,8 +60,8 @@ describe("Test simpleQuery",  function() {
     describe("#LessThan", function (){
         it("#LessThan - 10 > 11", async () => {
             let w = await circuit.calculateWitness({
-                field: "10",
-                sign: LESS,
+                in: "10",
+                operator: LESS,
                 value: "11",
             }, true);
 
@@ -72,18 +72,18 @@ describe("Test simpleQuery",  function() {
 
 
             const w1 = await circuit.calculateWitness({
-                field: "10",
-                sign: LESS,
+                in: "10",
+                operator: LESS,
                 value: "10",
             }, true);
 
             await circuit.assertOut(w1, {out: 0});
         });
 
-        it("#LessThan - 10 > 9", async () => {
+        it("#LESS - 9 < 10 ", async () => {
             const w2 = await circuit.calculateWitness({
-                field: "10",
-                sign:  LESS,
+                in: "10",
+                operator:  LESS,
                 value: "9",
             }, true);
 
@@ -96,6 +96,19 @@ describe("Test simpleQuery",  function() {
         it.skip("#LessThan - MaxValue", async ()=>{
             // TODO:
         })
+
+
+        it("#Eq = 980 = 940", async () => {
+
+
+            const w1 = await circuit.calculateWitness({
+                in: "980",
+                operator: EQUALS,
+                value: "940",
+            }, true);
+
+            await circuit.assertOut(w1, {out: 0});
+        });
     });
 
     describe("#GreaterThan", function (){
