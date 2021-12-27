@@ -45,8 +45,8 @@ const inputs1JSON = {
   challengeSignatureS: "2093461910575977345603199789919760192811763972089699387324401771367839603655",
 
   isProofExistMtp: [
-    "1057889796422815837190757694830636547632657717350193461241702298517508497145",
     "0",
+    "4648350302718598839424502774166524253703556728225603109003078358379460427828",
     "0",
     "0",
     "0",
@@ -55,7 +55,7 @@ const inputs1JSON = {
     "0",
     "0",
   ],
-  isProofExistClaimsTreeRoot: "2098429289195041877503796573672809381611283942089313719658676448183592072210",
+  isProofExistClaimsTreeRoot: "17407121758413764391346350792948448964948972579431187577791014366226706238414",
 
   isProofValidNonRevMtp: [
     "0",
@@ -71,9 +71,9 @@ const inputs1JSON = {
   isProofValidNonRevMtpNoAux: "1",
   isProofValidNonRevMtpAuxHi: "0",
   isProofValidNonRevMtpAuxHv: "0",
-  isProofValidClaimsTreeRoot: "13565340421349544257305398433609531500708391603118390376670593177205469141435",
-  isProofValidRevTreeRoot: "0",
-  isProofValidRootsTreeRoot: "17188596390270522907483680627414241804681789552543934045200460119611154301405",
+  isProofValidClaimsTreeRoot: "17407121758413764391346350792948448964948972579431187577791014366226706238414",
+  isProofValidRevTreeRoot: "17407121758413764391346350792948448964948972579431187577791014366226706238414",
+  isProofValidRootsTreeRoot: "0",
 
   isProofRootMtp: [
     "17808600532503449533631993614276023258818174848078940374531685668578047172141",
@@ -87,7 +87,7 @@ const inputs1JSON = {
     "0",
   ],
 
-  isIdenState: "10057995389383596935758563115193565434731801882563552942619957272940535425051",
+  isIdenState: "17721684325306851802139324713590439155611221797053963991879853724782603432536",
 };
 
 const inputs2JSON = `
@@ -162,10 +162,8 @@ describe("credential test (old)", function() {
         const circuit = await tester(
             path.join(__dirname, "circuits", "credential.circom"),
             {
-              outputOptions: {
-                basePath: path.join(__dirname, "circuits", "build"),
-                recompile: false,
-              },
+              output: path.join(__dirname, "circuits", "build"),
+              recompile: true,
               reduceConstraints: false,
             },
         );

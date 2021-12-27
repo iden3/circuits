@@ -10,10 +10,8 @@ describe("idState", function() {
         const circuit = await tester(
             path.join(__dirname, "circuits", "idState.circom"),
             {
-                outputOptions: {
-                    basePath: path.join(__dirname, "circuits", "build"),
-                    recompile: false,
-                },
+                output: path.join(__dirname, "circuits", "build"),
+                recompile: false,
                 reduceConstraints: false,
             },
         );

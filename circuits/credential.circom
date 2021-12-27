@@ -253,7 +253,9 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	signal input isProofValidNonRevMtpAuxHi;
 	signal input isProofValidNonRevMtpAuxHv;
 	signal input isProofValidClaimsTreeRoot;
+
 	signal input isProofValidRevTreeRoot;
+
 	signal input isProofValidRootsTreeRoot;
 
 	// E. issuer proof of Root (ExistClaimsTreeRoot)
@@ -287,14 +289,18 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	//
 	// B. // B. holder proof that private key signing the challenge is in his identity state and not revoked
 	//
+	//todo make sure if we need this equality at all
+    component checkHoId = IsEqual();
+    checkHoId.in[0] <== subjectOtherIden.id;
+    checkHoId.in[1] <== hoId;
+    checkHoId.out === 1;
+
 	component checkIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
-	checkIdOwnership.id <== subjectOtherIden.id;
-	checkIdOwnership.hoId <== hoId;
 	checkIdOwnership.hoIdenState <== hoIdenState;
 
 	checkIdOwnership.claimsTreeRoot <== claimsTreeRoot;
 	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.siblingsClaimTree[i] <== siblingsClaimTree[i]; }
-    for (var i=0; i<8; i++) { checkIdOwnership.claim[i] <== authClaim[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.authClaim[i] <== authClaim[i]; }
 
 	checkIdOwnership.revTreeRoot <== revTreeRoot;
 	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.siblingsRevTree[i] <== siblingsRevTree[i]; }
@@ -304,7 +310,7 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 
 	checkIdOwnership.rootsTreeRoot <== rootsTreeRoot;
 
-    //todo for now it will use the challenge from input but should use the hash of all the inputs
+    //todo for now it will use the challenge from input but should use the hash of all the inputs (or something else as secure)
     checkIdOwnership.challenge <== challenge;
     checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
     checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
