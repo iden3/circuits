@@ -17,6 +17,7 @@ include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../node_modules/circomlib/circuits/mux3.circom";
 include "./idOwnershipGenesis.circom";
+include "../node_modules/circomlib/circuits/mux1.circom";
 
 // getClaimSubjectOtherIden checks that a claim Subject is OtherIden and
 // outputs the identity within.  Parameter index is bool:  0 if SubjectPos is
@@ -685,14 +686,20 @@ template verifyExpirationTime() {
 	// out: header.claimType
 	// out: header.claimFlags[32]
 
+
   component expirationComp =  getClaimExpiration();
   for (var i=0; i<8; i++) { expirationComp.claim[i] <== claim[i]; }
 
-  component lt = LessThan(252);
-  lt.in[0] <== expirationComp.expiration;
-  lt.in[1] <== timestamp;
+  component lt = LessEqThan(252); // timestamp < expirationComp.expiration
+  lt.in[0] <== timestamp;
+  lt.in[1] <== expirationComp.expiration;
 
-  lt.out === 0;
+  component res = Mux1();
+  res.c[0] <== 1;
+  res.c[1] <== lt.out;
+  res.s <== header.claimFlags[3];
+
+  res.out === 1;
 }
 
 // getClaimExpiration extract expiration date from claim
