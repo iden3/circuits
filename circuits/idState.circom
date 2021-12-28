@@ -32,6 +32,8 @@ The current implementation of idState.circom uses idOwnershipGenesis.circom.
 
 */
 
+pragma circom 2.0.0;
+
 include "../node_modules/circomlib/circuits/babyjub.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
@@ -44,11 +46,11 @@ include "idOwnershipGenesis.circom";
 template IdState(nLevels) {
 	signal input id;
 	signal input oldIdState;
-	signal private input userPrivateKey;
-	signal private input siblings[nLevels];
-	signal private input claimsTreeRoot;
-	/* signal private input revTreeRoot; */
-	/* signal private input rootsTreeRoot; */
+	signal input userPrivateKey;
+	signal input siblings[nLevels];
+	signal input claimsTreeRoot;
+	/* signal input revTreeRoot; */
+	/* signal input rootsTreeRoot; */
 	signal input newIdState;
 
 	// check newIdState is not zero

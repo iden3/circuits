@@ -14,7 +14,7 @@ func main() {
 	for i := range zeroes {
 		zeroes[i] = new(big.Int)
 	}
-	hZeroes, err := poseidon.PoseidonHash(zeroes)
+	hZeroes, err := poseidon.Hash(zeroes[:])
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +25,7 @@ func main() {
 		ffZeroes[i] = new(big.Int)
 	}
 	ffZeroes[0].SetUint64(0xffff_ffff)
-	hffZeroes, err := poseidon.PoseidonHash(ffZeroes)
+	hffZeroes, err := poseidon.Hash(ffZeroes[:])
 	if err != nil {
 		panic(err)
 	}

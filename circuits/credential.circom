@@ -10,9 +10,14 @@ The circuit checks:
 
 */
 
+pragma circom 2.0.0;
+
 include "../node_modules/circomlib/circuits/bitify.circom";
+include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
+include "../node_modules/circomlib/circuits/mux3.circom";
 include "./idOwnershipGenesis.circom";
+include "../node_modules/circomlib/circuits/mux1.circom";
 
 // getClaimSubjectOtherIden checks that a claim Subject is OtherIden and
 // outputs the identity within.  Parameter index is bool:  0 if SubjectPos is
@@ -43,21 +48,38 @@ template getClaimHeader() {
 	signal input claim[8];
 
 	signal output claimType;
-	signal output claimFlags[32]
+	signal output claimFlags[32];
 
  	component i0Bits = Num2Bits(256);
-	i0Bits.in <== claim[0*4 + 0]
+	i0Bits.in <== claim[0];
 
-	component claimTypeNum = Bits2Num(64);
+	component claimTypeNum = Bits2Num(128);
 
-	for (var i=0; i<64; i++) {
+	for (var i=0; i<128; i++) {
 		claimTypeNum.in[i] <== i0Bits.out[i];
 	}
 	claimType <== claimTypeNum.out;
 
 	for (var i=0; i<32; i++) {
-		claimFlags[i] <== i0Bits.out[64 + i];
+		claimFlags[i] <== i0Bits.out[128 + i];
 	}
+}
+
+// getClaimSchema gets the schema of a claim
+template getClaimSchema() {
+	signal input claim[8];
+
+	signal output schema;
+
+ 	component i0Bits = Num2Bits(256);
+	i0Bits.in <== claim[0];
+
+	component schemaNum = Bits2Num(128);
+
+	for (var i=0; i<128; i++) {
+		schemaNum.in[i] <== i0Bits.out[i];
+	}
+	schema <== schemaNum.out;
 }
 
 // getClaimRevNonce gets the revocation nonce out of a claim outputing it as an integer.
@@ -69,7 +91,7 @@ template getClaimRevNonce() {
 	component claimRevNonce = Bits2Num(32);
 
  	component v0Bits = Num2Bits(256);
-	v0Bits.in <== claim[1*4 + 0]
+	v0Bits.in <== claim[4];
 	for (var i=0; i<32; i++) {
 		claimRevNonce.in[i] <== v0Bits.out[i];
 	}
@@ -86,15 +108,35 @@ template getClaimHiHv() {
 
 	component hashHi = Poseidon(4);
 	for (var i=0; i<4; i++) {
-		hashHi.inputs[i] <== claim[0*4 + i];
+		hashHi.inputs[i] <== claim[i];
 	}
 	hi <== hashHi.out;
 
 	component hashHv = Poseidon(4);
 	for (var i=0; i<4; i++) {
-		hashHv.inputs[i] <== claim[1*4 + i];
+		hashHv.inputs[i] <== claim[4 + i];
 	}
 	hv <== hashHv.out;
+}
+
+//  getClaimHash calculates the hash a claim
+template getClaimHash() {
+	signal input claim[8];
+	signal output hash;
+	signal output hi;
+	signal output hv;
+
+    component hihv = getClaimHiHv();
+	for (var i=0; i<8; i++) {
+		hihv.claim[i] <== claim[i];
+	}
+
+	component hashAll = Poseidon(2);
+	hashAll.inputs[0] <== hihv.hi;
+	hashAll.inputs[1] <== hihv.hv;
+	hash <== hashAll.out;
+	hi <== hihv.hi;
+	hv <== hihv.hv;
 }
 
 // getIdenState caclulates the Identity state out of the claims tree root,
@@ -170,22 +212,6 @@ template getRootHiHv() {
 	//hv <== 14408838593220040598588012778523101864903887657864399481915450526643617223637; // new from go
 }
 
-// getClaimSchema gets the schema of a claim
-template getClaimSchema() {
-	signal input claim[8];
-
-	signal output schema;
-
- 	component i0Bits = Num2Bits(256);
-	i0Bits.in <== claim[0*4 + 0]
-
-	component schemaNum = Bits2Num(64);
-
-	for (var i=0; i<64; i++) {
-		schemaNum.in[i] <== i0Bits.out[i];
-	}
-	schema <== schemaNum.out;
-}
 
 // proveCredentialOwnership proves ownership of an identity (found in `claim[1]`) which
 // is contained in a claim (`claim`) issued by an identity that has a recent
@@ -209,10 +235,10 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	// signal input isProofExistRootsTreeRoot;
 
 	// D. issuer proof of claim validity
-	signal input isProofValidNotRevMtp[IssuerLevels];
-	signal input isProofValidNotRevMtpNoAux;
-	signal input isProofValidNotRevMtpAuxHi;
-	signal input isProofValidNotRevMtpAuxHv;
+	signal input isProofValidNonRevMtp[IssuerLevels];
+	signal input isProofValidNonRevMtpNoAux;
+	signal input isProofValidNonRevMtpAuxHi;
+	signal input isProofValidNonRevMtpAuxHv;
 	signal input isProofValidClaimsTreeRoot;
 	signal input isProofValidRevTreeRoot;
 	signal input isProofValidRootsTreeRoot;
@@ -286,10 +312,10 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	smtClaimValid.enabled <== 1;
 	smtClaimValid.fnc <== 1; // Non-inclusion
 	smtClaimValid.root <== isProofValidRevTreeRoot;
-	for (var i=0; i<IssuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNotRevMtp[i]; }
-	smtClaimValid.oldKey <== isProofValidNotRevMtpAuxHi;
-	smtClaimValid.oldValue <== isProofValidNotRevMtpAuxHv;
-	smtClaimValid.isOld0 <== isProofValidNotRevMtpNoAux;
+	for (var i=0; i<IssuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNonRevMtp[i]; }
+	smtClaimValid.oldKey <== isProofValidNonRevMtpAuxHi;
+	smtClaimValid.oldValue <== isProofValidNonRevMtpAuxHv;
+	smtClaimValid.isOld0 <== isProofValidNonRevMtpNoAux;
 	smtClaimValid.key <== revNonceHiHv.hi;
 	smtClaimValid.value <== 0;
 
@@ -355,9 +381,10 @@ template verifyCredentialSchema() {
 	signal input claim[8];
 	signal input schema;
 
-	component claimSchema = getClaimHeader();
+	component claimSchema = getClaimSchema();
+	for (var i=0; i<8; i++) { claimSchema.claim[i] <== claim[i]; }
 
-	isProofValidIdenState.idenState === isIdenState;
+	claimSchema.schema === schema;
 }
 
 // verifyCredentialNotRevoked verifies that claim is not included into the revocation tree
@@ -366,10 +393,10 @@ template verifyCredentialNotRevoked(IssuerLevels) {
 	signal input claim[8];
 
 	// D. issuer proof of claim validity
-	signal input isProofValidNotRevMtp[IssuerLevels];
-	signal input isProofValidNotRevMtpNoAux;
-	signal input isProofValidNotRevMtpAuxHi;
-	signal input isProofValidNotRevMtpAuxHv;
+	signal input isProofValidNonRevMtp[IssuerLevels];
+	signal input isProofValidNonRevMtpNoAux;
+	signal input isProofValidNonRevMtpAuxHi;
+	signal input isProofValidNonRevMtpAuxHv;
 	signal input isProofValidRevTreeRoot;
 
 
@@ -387,10 +414,10 @@ template verifyCredentialNotRevoked(IssuerLevels) {
 	smtClaimValid.enabled <== 1;
 	smtClaimValid.fnc <== 1; // Non-inclusion
 	smtClaimValid.root <== isProofValidRevTreeRoot;
-	for (var i=0; i<IssuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNotRevMtp[i]; }
-	smtClaimValid.oldKey <== isProofValidNotRevMtpAuxHi;
-	smtClaimValid.oldValue <== isProofValidNotRevMtpAuxHv;
-	smtClaimValid.isOld0 <== isProofValidNotRevMtpNoAux;
+	for (var i=0; i<IssuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNonRevMtp[i]; }
+	smtClaimValid.oldKey <== isProofValidNonRevMtpAuxHi;
+	smtClaimValid.oldValue <== isProofValidNonRevMtpAuxHv;
+	smtClaimValid.isOld0 <==  isProofValidNonRevMtpNoAux;
 	smtClaimValid.key <== revNonceHiHv.hi;
 	smtClaimValid.value <== 0;
 }
@@ -496,4 +523,197 @@ template verifyIdenStateMatchesRoots() {
 	// out: isProofValidIdenState.idenState
 
 	isProofValidIdenState.idenState === isIdenState;
+}
+
+// verifyClaimIssuance verifies that claim is issued by the issuer and not revoked
+template verifyClaimIssuanceNonRev(IssuerLevels) {
+	signal input claim[8];
+	signal input claimIssuanceMtp[IssuerLevels];
+	signal input claimIssuanceClaimsTreeRoot;
+	signal input claimIssuanceRevTreeRoot;
+	signal input claimIssuanceRootsTreeRoot;
+	signal input claimIssuanceIdenState;
+
+	signal input claimNonRevMtp[IssuerLevels];
+	signal input claimNonRevMtpNoAux;
+	signal input claimNonRevMtpAuxHi;
+	signal input claimNonRevMtpAuxHv;
+	signal input claimNonRevIssuerClaimsTreeRoot;
+	signal input claimNonRevIssuerRevTreeRoot;
+	signal input claimNonRevIssuerRootsTreeRoot;
+	signal input claimNonRevIssuerState;
+
+    // verify country claim is included in claims tree root
+    component claimIssuanceCheck = verifyCredentialMtp(IssuerLevels);
+    for (var i=0; i<8; i++) { claimIssuanceCheck.claim[i] <== claim[i]; }
+    for (var i=0; i<IssuerLevels; i++) { claimIssuanceCheck.isProofExistMtp[i] <== claimIssuanceMtp[i]; }
+    claimIssuanceCheck.isProofExistClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
+
+    // verify issuer state includes country claim
+    component verifyClaimIssuanceIdenState = verifyIdenStateMatchesRoots();
+    verifyClaimIssuanceIdenState.isProofValidClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
+    verifyClaimIssuanceIdenState.isProofValidRevTreeRoot <== claimIssuanceRevTreeRoot;
+    verifyClaimIssuanceIdenState.isProofValidRootsTreeRoot <== claimIssuanceRootsTreeRoot;
+    verifyClaimIssuanceIdenState.isIdenState <== claimIssuanceIdenState;
+
+    // check non-revocation proof for claim
+    component verifyClaimNotRevoked = verifyCredentialNotRevoked(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== claim[i]; }
+    for (var i=0; i<IssuerLevels; i++) {
+        verifyClaimNotRevoked.isProofValidNonRevMtp[i] <== claimNonRevMtp[i];
+    }
+    verifyClaimNotRevoked.isProofValidNonRevMtpNoAux <== claimNonRevMtpNoAux;
+    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHi <== claimNonRevMtpAuxHi;
+    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHv <== claimNonRevMtpAuxHv;
+    verifyClaimNotRevoked.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
+
+    // check issuer state matches for non-revocation proof
+    component verifyClaimNonRevIssuerState = verifyIdenStateMatchesRoots();
+    verifyClaimNonRevIssuerState.isProofValidClaimsTreeRoot <== claimNonRevIssuerClaimsTreeRoot;
+    verifyClaimNonRevIssuerState.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
+    verifyClaimNonRevIssuerState.isProofValidRootsTreeRoot <== claimNonRevIssuerRootsTreeRoot;
+    verifyClaimNonRevIssuerState.isIdenState <== claimNonRevIssuerState;
+}
+
+// verifyClaimSignature verifies that claim is signed with the provided public key
+template verifyClaimSignature() {
+	signal input claim[8];
+	signal input sigR8x;
+	signal input sigR8y;
+	signal input sigS;
+	signal input pubKeyX;
+	signal input pubKeyY;
+
+    component hash = getClaimHash();
+    for (var i=0; i<8; i++) { hash.claim[i] <== claim[i]; }
+
+    // signature verification
+    component sigVerifier = EdDSAPoseidonVerifier();
+    sigVerifier.enabled <== 1;
+
+    sigVerifier.Ax <== pubKeyX;
+    sigVerifier.Ay <== pubKeyY;
+
+    sigVerifier.S <== sigS;
+    sigVerifier.R8x <== sigR8x;
+    sigVerifier.R8y <== sigR8y;
+
+    sigVerifier.M <== hash.hash;
+}
+
+// verifyClaimIssuanceNonRevBySignature verifies that claim is signed with the provided public key,
+// claim is not revoked and revocation root is in issuer's state
+template verifyClaimIssuanceNonRevBySignature(IssuerLevels) {
+	signal input claim[8];
+	signal input id;
+	signal input sigR8x;
+	signal input sigR8y;
+	signal input sigS;
+	signal input pubKeyX;
+	signal input pubKeyY;
+	signal input claimNonRevMtp[IssuerLevels];
+	signal input claimNonRevMtpNoAux;
+	signal input claimNonRevMtpAuxHi;
+	signal input claimNonRevMtpAuxHv;
+	signal input claimNonRevIssuerClaimsTreeRoot;
+	signal input claimNonRevIssuerRevTreeRoot;
+	signal input claimNonRevIssuerRootsTreeRoot;
+	signal input claimNonRevIssuerState;
+
+    // check claim is issued to provided identity
+    component claimIdCheck = verifyCredentialSubject();
+    for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== claim[i]; }
+    claimIdCheck.id <== id;
+
+    // check claim signature
+    component claimSignature = verifyClaimSignature();
+    for (var i=0; i<8; i++) { claimSignature.claim[i] <== claim[i]; }
+	claimSignature.sigR8x <== sigR8x;
+	claimSignature.sigR8y <== sigR8y;
+	claimSignature.sigS <== sigS;
+	claimSignature.pubKeyX <== pubKeyX;
+	claimSignature.pubKeyY <== pubKeyY;
+
+    // check non-revocation proof for claim
+    component verifyClaimNotRevoked = verifyCredentialNotRevoked(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== claim[i]; }
+    for (var i=0; i<IssuerLevels; i++) {
+        verifyClaimNotRevoked.isProofValidNonRevMtp[i] <== claimNonRevMtp[i];
+    }
+    verifyClaimNotRevoked.isProofValidNonRevMtpNoAux <== claimNonRevMtpNoAux;
+    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHi <== claimNonRevMtpAuxHi;
+    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHv <== claimNonRevMtpAuxHv;
+    verifyClaimNotRevoked.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
+
+    // check issuer state matches for non-revocation proof
+    component verifyClaimNonRevIssuerState = verifyIdenStateMatchesRoots();
+    verifyClaimNonRevIssuerState.isProofValidClaimsTreeRoot <== claimNonRevIssuerClaimsTreeRoot;
+    verifyClaimNonRevIssuerState.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
+    verifyClaimNonRevIssuerState.isProofValidRootsTreeRoot <== claimNonRevIssuerRootsTreeRoot;
+    verifyClaimNonRevIssuerState.isIdenState <== claimNonRevIssuerState;
+}
+
+// getValueByIndex select slot from claim by given index
+template getValueByIndex(){
+  signal input claim[8];
+  signal input index;
+  signal output value; // value from the selected slot claim[index]
+
+  component mux = Mux3();
+  component n2b = Num2Bits(8);
+  n2b.in <== index;
+  for(var i=0;i<8;i++){
+    mux.c[i] <== claim[i];
+  }
+
+  mux.s[0] <== n2b.out[0];
+  mux.s[1] <== n2b.out[1];
+  mux.s[2] <== n2b.out[2];
+
+  value <== mux.out;
+}
+
+// verify that the claim has expiration time and it is less then timestamp
+template verifyExpirationTime() {
+	signal input claim[8];
+	signal input timestamp;
+
+	//
+	// A. Prove that the claim has expiration time and it is less then time stamp.
+	//
+	component header = getClaimHeader();
+	for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
+	// out: header.claimType
+	// out: header.claimFlags[32]
+
+
+  component expirationComp =  getClaimExpiration();
+  for (var i=0; i<8; i++) { expirationComp.claim[i] <== claim[i]; }
+
+  component lt = LessEqThan(252); // timestamp < expirationComp.expiration
+  lt.in[0] <== timestamp;
+  lt.in[1] <== expirationComp.expiration;
+
+  component res = Mux1();
+  res.c[0] <== 1;
+  res.c[1] <== lt.out;
+  res.s <== header.claimFlags[3];
+
+  res.out === 1;
+}
+
+// getClaimExpiration extract expiration date from claim
+template getClaimExpiration() {
+	signal input claim[8];
+
+	signal output expiration;
+
+	component expirationBits = Bits2Num(64);
+
+ 	component v0Bits = Num2Bits(256);
+	v0Bits.in <== claim[4];
+	for (var i=0; i<64; i++) {
+		expirationBits.in[i] <== v0Bits.out[i+64];
+	}
+	expiration <== expirationBits.out;
 }
