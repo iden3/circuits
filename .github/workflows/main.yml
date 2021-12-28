@@ -22,7 +22,7 @@ jobs:
 
     - name: Install rust
       run: |
-        curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+        curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh -s -- -y
 
     - name: Install circom
       run: | 
