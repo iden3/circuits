@@ -1,6 +1,8 @@
 pragma circom 2.0.0;
 
 include "credential.circom";
+include "ageCalculation.circom";
+
 
 // verifyKYCCredentials proves ownership and validity of Country of Residence Claim
 // and Birthday Claim and verifies they have allowed values (age >= 18 and country
@@ -139,20 +141,15 @@ template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistL
 
 
     // get birthday value
-    component birthday = getBirthday();
-    for (var i=0; i<8; i++) { birthday.claim[i] <== birthdayClaim[i]; }
-//
-//    // calculate age
-	component age = calculateAge();
-	age.DOBYear <== birthday.year;
-	age.DOBMonth <== birthday.month;
-	age.DOBDay <== birthday.day;
-	age.CurYear <== currentYear;
-	age.CurMonth <== currentMonth;
-	age.CurDay <== currentDay;
+    component getBirthdayField = getBirthdayField();
+    for (var i=0; i<8; i++) { getBirthdayField.claim[i] <== birthdayClaim[i]; }
 
-//    component age = getAge();
-//    for (var i=0; i<8; i++) { age.claim[i] <== birthdayClaim[i]; }
+    // calculate age
+	component age = calculateAgeFromYYYYMMDD();
+	age.yyyymmdd <== getBirthdayField.birthday;
+	age.currentYear <== currentYear;
+	age.currentMonth <== currentMonth;
+	age.currentDay <== currentDay;
 
     // verify age > minAge
     component gte18 = GreaterEqThan(32);
@@ -161,7 +158,6 @@ template verifyKYCCredentials(IdOwnershipLevels, IssuerLevels, CountryBlacklistL
     gte18.out === 1;
 
 }
-
 // getBirthday gets the country from a country claim
 template getCountry() {
 	signal input claim[8];
@@ -179,128 +175,19 @@ template getCountry() {
 	country <== num.out;
 }
 
-// getBirthday gets the country from a country claim
-template getBirthday() {
+// getBirthdayField gets the birthday from a birthday claim
+template getBirthdayField() {
 	signal input claim[8];
-	signal output year;
-	signal output month;
-	signal output day;
+	signal output birthday;
 
  	component i2 = Num2Bits(253);
 	i2.in <== claim[2];
 
-	component numD = Bits2Num(32);
+	component num = Bits2Num(32);
 
     // copy 32 bits starting from position 0
-	for (var i=0; i<32; i++) {
-		numD.in[i] <== i2.out[i+0];
-	}
-	day <== numD.out;
-	
-	component numM = Bits2Num(32);
-
-    // copy 32 bits starting from position 32
-	for (var i=0; i<32; i++) {
-		numM.in[i] <== i2.out[i+32];
-	}
-	month <== numM.out;
-	
-	component numY = Bits2Num(32);
-
-    // copy 32 bits starting from position 64
-	for (var i=0; i<32; i++) {
-		numY.in[i] <== i2.out[i+64];
-	}
-	year <== numY.out;
-}
-
-// getAge gets age from an age claim
-template getAge() {
-	signal input claim[8];
-	signal output age;
-
- 	component i2 = Num2Bits(253);
-	i2.in <== claim[2];
-
-	component numY = Bits2Num(32);
-
-    // copy 32 bits starting from position 0
-	for (var i=0; i<32; i++) {
-		numY.in[i] <== i2.out[i];
-	}
-	age <== numY.out;
-}
-
-template calculateAge() {
-	signal input DOBYear;
-	signal input DOBMonth;
-	signal input DOBDay;
-	signal input CurYear;
-	signal input CurMonth;
-	signal input CurDay;
-	signal output age;
-
-    component validDOB = validateDate();
-    validDOB.year <== DOBYear;
-    validDOB.month <== DOBMonth;
-    validDOB.day <== DOBDay;
-
-    component validCurDate = validateDate();
-    validCurDate.year <== CurYear;
-    validCurDate.month <== CurMonth;
-    validCurDate.day <== CurDay;
-
-    component gteY = GreaterEqThan(32);
-    gteY.in[0] <== CurYear;
-    gteY.in[1] <== DOBYear;
-    gteY.out === 1;
-
-    var yearDiff = CurYear - DOBYear;
-
-    component ltM = LessThan(32);
-    ltM.in[0] <== CurMonth * 100 + CurDay;
-    ltM.in[1] <== DOBMonth * 100 + DOBDay;
-
-    component gte0 = GreaterEqThan(32);
-    gte0.in[0] <== yearDiff - ltM.out;
-    gte0.in[1] <== 0;
-    gte0.out === 1;
-
-    age <== yearDiff - ltM.out;
-}
-
-template validateDate() {
-    signal input year;
-    signal input month;
-    signal input day;
-
-    component yearGte1900 = GreaterEqThan(32);
-    yearGte1900.in[0] <== year;
-    yearGte1900.in[1] <== 1900;
-    yearGte1900.out === 1;
-
-    component yearLte2100 = LessEqThan(32);
-    yearLte2100.in[0] <== year;
-    yearLte2100.in[1] <== 2100;
-    yearLte2100.out === 1;
-
-    component monthGte1 = GreaterEqThan(32);
-    monthGte1.in[0] <== month;
-    monthGte1.in[1] <== 1;
-    monthGte1.out === 1;
-
-    component monthLte12 = LessEqThan(32);
-    monthLte12.in[0] <== month;
-    monthLte12.in[1] <== 12;
-    monthLte12.out === 1;
-
-    component dayGte1 = GreaterEqThan(32);
-    dayGte1.in[0] <== day;
-    dayGte1.in[1] <== 1;
-    dayGte1.out === 1;
-
-    component dayLte31 = LessEqThan(32);
-    dayLte31.in[0] <== day;
-    dayLte31.in[1] <== 31;
-    dayLte31.out === 1;
+    for (var i=0; i<32; i++) {
+    	num.in[i] <== i2.out[i];
+    }
+    birthday <== num.out;
 }
