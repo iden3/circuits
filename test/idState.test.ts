@@ -11,12 +11,13 @@ describe("idState", function() {
             path.join(__dirname, "circuits", "idState.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
-                recompile: false,
+                recompile: true,
                 reduceConstraints: false,
             },
         );
 
         const inputs = {
+            id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
             oldIdState: "18311560525383319719311394957064820091354976310599818797157189568621466950811",
             newIdState: "6243262098189365110173326120466238114783380459336290130750689570190357902007",
 

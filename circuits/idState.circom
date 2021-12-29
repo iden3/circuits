@@ -38,6 +38,9 @@ include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "idOwnershipBySignature.circom";
 
 template IdState(nLevels) {
+	// we have no constraints for "id" in this circuit, however we introduce "id" input here
+	// as it serves as public input which should be the same for prover and verifier
+	signal input id;
 	signal input oldIdState;
 	signal input newIdState;
 
