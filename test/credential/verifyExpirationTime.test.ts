@@ -16,8 +16,8 @@ describe("Test verifyExpirationTime",  function() {
         await circuit.assertOut(w, testData.expOut);
     })
 
-    it("#success", async () => {
-        const claim = ["2722258935367507707706996859454145691697",
+    it("#success claim with expiration time", async () => {
+        const claim = ["8166776806102523123120990578362437074969", // claim type = 25, expiration flag 1
             "0",
             "0",
             "0",
@@ -26,7 +26,35 @@ describe("Test verifyExpirationTime",  function() {
             "0",
             "0"];
 
-        testData.in = {claim: claim, timestamp: 1669884010};
+        testData.in = {claim: claim, timestamp: 1669884009};
+        testData.expOut = {};
+    });
+
+    it("#success expiration flag 0", async () => {
+        const claim = ["5444517870735015415413993718908291383321", // claim type = 25, expiration flag 0, expiration 0
+            "0",
+            "0",
+            "0",
+            "18446744073709551615", // expiration 0
+            "0",
+            "0",
+            "0"];
+
+        testData.in = {claim: claim, timestamp: 1669884009};
+        testData.expOut = {};
+    });
+
+    it("#success expiration flag 1, timestamp equal to expiration", async () => {
+        const claim = ["2722258935367507707706996859454145691673", // claim type = 25, expiration flag 1
+            "0",
+            "0",
+            "0",
+            "30802373438747650025492316159", // expiration 1669800009
+            "0",
+            "0",
+            "0"];
+
+        testData.in = {claim: claim, timestamp: 1669800009};
         testData.expOut = {};
     });
 

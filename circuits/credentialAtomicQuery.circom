@@ -91,6 +91,12 @@ template AtomicQuery(IdOwnershipLevels, IssuerLevels) {
     for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== claim[i]; }
     claimSchemaCheck.schema <== claimSchema;
 
+    // verify claim expiration time
+    component claimExpirationCheck = verifyExpirationTime();
+    for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== claim[i]; }
+    claimExpirationCheck.timestamp <== timestamp;
+
+
 		// verify claim issued and not revoked
 		component vci = verifyClaimIssuanceNonRev(IssuerLevels);
 		for (var i=0; i<8; i++) { vci.claim[i] <== claim[i]; }

@@ -9,7 +9,7 @@ export {};
 
 const Q = "21888242871839275222246405745257275088548364400416034343698204186575808495616";
 
-describe("Test getValueByIndex",  function() {
+describe("credential#getValueByIndex",  function() {
     let circuit;
     let testData = {in:{},expOut:{}};
     const claim =["0",
@@ -22,7 +22,7 @@ describe("Test getValueByIndex",  function() {
         "7"];
 
     before(async function() {
-        circuit = await wasm_tester(path.join(__dirname, "../circuits/test", "credential_GetValueByIndex.circom"));
+        circuit = await wasm_tester(path.join(__dirname, "circuits/credential", "credential_GetValueByIndex.circom"));
     });
 
     afterEach( async ()=>{

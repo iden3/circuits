@@ -2,7 +2,7 @@ package utils
 
 import (
 	"encoding/hex"
-	"encoding/json"
+	json "encoding/json"
 	"fmt"
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
@@ -54,4 +54,19 @@ func PrintMap(inputs map[string]string) {
 	ExitOnError(err)
 
 	fmt.Println(string(json))
+}
+
+func ClaimToString(claim *core.Claim) (string, error) {
+	slots := make([]*big.Int, 0)
+	entry := claim.TreeEntry()
+	indexes := entry.Index()
+	values := entry.Value()
+	for _, index := range indexes {
+		slots = append(slots, index.BigInt())
+	}
+	for _, value := range values {
+		slots = append(slots, value.BigInt())
+	}
+	json, err := json.Marshal(slots)
+	return string(json), err
 }

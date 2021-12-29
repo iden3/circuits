@@ -58,7 +58,7 @@ describe("Test simpleQuery",  function() {
     });
 
     describe("#LessThan", function (){
-        it("#LessThan - 10 > 11", async () => {
+        it("#LessThan - 10 < 11", async () => {
             let w = await circuit.calculateWitness({
                 in: "10",
                 operator: LESS,
@@ -80,11 +80,11 @@ describe("Test simpleQuery",  function() {
             await circuit.assertOut(w1, {out: 0});
         });
 
-        it("#LESS - 9 < 10 ", async () => {
+        it("#LESS - 10 < 9 ", async () => {
             const w2 = await circuit.calculateWitness({
-                in: "9",
+                in: "10",
                 operator:  LESS,
-                value: "10",
+                value: "9",
             }, true);
 
             await circuit.assertOut(w2, {out: 0});
