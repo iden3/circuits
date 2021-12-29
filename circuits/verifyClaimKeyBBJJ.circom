@@ -12,14 +12,14 @@ include "credential.circom";
 // and its revocation nonce is not in RevTreeRoot
 template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
 	signal input claimsTreeRoot;
-	signal input siblingsClaimsTree[nLevels];
+	signal input authClaimMtp[nLevels];
     signal input claim[8];
 
 	signal input revTreeRoot;
-    signal input siblingsRevTree[nLevels];
-    signal input revMtpNoAux;
-    signal input revMtpAuxHv;
-    signal input revMtpAuxHi;
+    signal input authClaimNonRevMtp[nLevels];
+    signal input authClaimNonRevMtpNoAux;
+    signal input authClaimNonRevMtpAuxHv;
+    signal input authClaimNonRevMtpAuxHi;
 
 	component claimHiHv = getClaimHiHv();
 	for (var i=0; i<8; i++) { claimHiHv.claim[i] <== claim[i]; }
@@ -30,7 +30,7 @@ template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
 	smtClaimExists.fnc <== 0;
 	smtClaimExists.root <== claimsTreeRoot;
 	for (var i=0; i<nLevels; i++) {
-		smtClaimExists.siblings[i] <== siblingsClaimsTree[i];
+		smtClaimExists.siblings[i] <== authClaimNonRevMtp[i];
 	}
 	smtClaimExists.oldKey <== 0;
 	smtClaimExists.oldValue <== 0;
@@ -47,10 +47,10 @@ template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
     smtClaimNotRevoked.enabled <== 1;
     smtClaimNotRevoked.fnc <== 1; // Non-inclusion
     smtClaimNotRevoked.root <== revTreeRoot;
-    for (var i=0; i<nLevels; i++) { smtClaimNotRevoked.siblings[i] <== siblingsRevTree[i]; }
-    smtClaimNotRevoked.isOld0 <== revMtpNoAux;
-    smtClaimNotRevoked.oldKey <== revMtpAuxHi;
-    smtClaimNotRevoked.oldValue <== revMtpAuxHv;
+    for (var i=0; i<nLevels; i++) { smtClaimNotRevoked.siblings[i] <== authClaimNonRevMtp[i]; }
+    smtClaimNotRevoked.isOld0 <== authClaimNonRevMtpNoAux;
+    smtClaimNotRevoked.oldKey <== authClaimNonRevMtpAuxHi;
+    smtClaimNotRevoked.oldValue <== authClaimNonRevMtpAuxHv;
     smtClaimNotRevoked.key <== claimRevNonce.revNonce;
     smtClaimNotRevoked.value <== 0;
 }

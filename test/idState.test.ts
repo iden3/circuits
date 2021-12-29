@@ -17,12 +17,11 @@ describe("idState", function() {
         );
 
         const inputs = {
-            // id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
             oldIdState: "18311560525383319719311394957064820091354976310599818797157189568621466950811",
             newIdState: "6243262098189365110173326120466238114783380459336290130750689570190357902007",
 
             claimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
-            siblingsClaimTree: ["0", "0", "0", "0"],
+            authClaimMtp: ["0", "0", "0", "0"],
             authClaim : [
                 "251025091000101825075425831481271126140",
                 "0",
@@ -35,17 +34,16 @@ describe("idState", function() {
             ],
 
             revTreeRoot: "0",
-            siblingsRevTree: ["0", "0", "0", "0"],
-            revMtpNoAux: "1",
-            revMtpAuxHi: "0",
-            revMtpAuxHv: "0",
+            authClaimNonRevMtp: ["0", "0", "0", "0"],
+            authClaimNonRevMtpNoAux: "1",
+            authClaimNonRevMtpAuxHv: "0",
+            authClaimNonRevMtpAuxHi: "0",
 
             rootsTreeRoot: "0",
 
-            // challenge: "1",
-            challengeSignatureR8x: "11075012579941724482110814276848025919659518812841198498785625658594849865723",
-            challengeSignatureR8y: "5397153531138549045310069778129455516182753644379535707118963304821960685553",
-            challengeSignatureS: "994528294951187360742259972174181258886964968450592514979671695886540429602",
+            signatureR8x: "11075012579941724482110814276848025919659518812841198498785625658594849865723",
+            signatureR8y: "5397153531138549045310069778129455516182753644379535707118963304821960685553",
+            signatureS: "994528294951187360742259972174181258886964968450592514979671695886540429602",
         };
         const witness = await circuit.calculateWitness(inputs);
         await circuit.checkConstraints(witness);

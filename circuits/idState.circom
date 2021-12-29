@@ -38,35 +38,29 @@ include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "idOwnershipBySignature.circom";
 
 template IdState(nLevels) {
-// todo remove it
-//	signal input id;
 	signal input oldIdState;
 	signal input newIdState;
 
 	signal input claimsTreeRoot;
-	signal input siblingsClaimTree[nLevels];
+	signal input authClaimMtp[nLevels];
 	signal input authClaim[8];
 
 	signal input revTreeRoot;
-    signal input siblingsRevTree[nLevels];
-    signal input revMtpNoAux;
-    signal input revMtpAuxHv;
-    signal input revMtpAuxHi;
+    signal input authClaimNonRevMtp[nLevels];
+    signal input authClaimNonRevMtpNoAux;
+    signal input authClaimNonRevMtpAuxHv;
+    signal input authClaimNonRevMtpAuxHi;
 
     signal input rootsTreeRoot;
 
-//todo remove it
-//	signal input challenge;
-	signal input challengeSignatureR8x;
-	signal input challengeSignatureR8y;
-	signal input challengeSignatureS;
-
+	signal input signatureR8x;
+	signal input signatureR8y;
+	signal input signatureS;
 
 	// check newIdState is not zero
 	component idStateIsNotZero = IsZero();
 	idStateIsNotZero.in <== newIdState;
 	idStateIsNotZero.out === 0;
-
 
 	// old & new idState checks
 	component oldNewNotEqual = IsEqual();
@@ -74,34 +68,29 @@ template IdState(nLevels) {
 	oldNewNotEqual.in[1] <== newIdState;
 	oldNewNotEqual.out === 0;
 
-
     // check id ownership by correct signature of a hash of old state and new state
     component challenge = Poseidon(2);
     challenge.inputs[0] <== oldIdState;
     challenge.inputs[1] <== newIdState;
 
 	component checkIdOwnership = IdOwnershipBySignature(nLevels);
-    //todo remove it
-//	checkIdOwnership.id <== id;
-//	checkIdOwnership.hoId <== id;
 
 	checkIdOwnership.claimsTreeRoot <== claimsTreeRoot;
-	for (var i=0; i<nLevels; i++) { checkIdOwnership.siblingsClaimTree[i] <== siblingsClaimTree[i]; }
+	for (var i=0; i<nLevels; i++) { checkIdOwnership.authClaimMtp[i] <== authClaimMtp[i]; }
     for (var i=0; i<8; i++) { checkIdOwnership.authClaim[i] <== authClaim[i]; }
 
 	checkIdOwnership.revTreeRoot <== revTreeRoot;
-	for (var i=0; i<nLevels; i++) { checkIdOwnership.siblingsRevTree[i] <== siblingsRevTree[i]; }
-	checkIdOwnership.revMtpNoAux <== revMtpNoAux;
-	checkIdOwnership.revMtpAuxHv <== revMtpAuxHv;
-	checkIdOwnership.revMtpAuxHi <== revMtpAuxHi;
+	for (var i=0; i<nLevels; i++) { checkIdOwnership.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
+	checkIdOwnership.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
+	checkIdOwnership.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
+	checkIdOwnership.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
 
 	checkIdOwnership.rootsTreeRoot <== rootsTreeRoot;
 
-    // it is enough to use old id state as a challenge for security guarantees
     checkIdOwnership.challenge <== challenge.out;
-    checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
-    checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
-    checkIdOwnership.challengeSignatureS <== challengeSignatureS;
+    checkIdOwnership.challengeSignatureR8x <== signatureR8x;
+    checkIdOwnership.challengeSignatureR8y <== signatureR8y;
+    checkIdOwnership.challengeSignatureS <== signatureS;
 
 	checkIdOwnership.hoIdenState <== oldIdState;
 }

@@ -44,21 +44,17 @@ include "cutIdState.circom";
 include "verifyClaimKeyBBJJ.circom";
 
 template IdOwnershipBySignature(nLevels) {
-// todo remove it
-//	signal input id;
-//    signal input hoId;
-
     signal input hoIdenState;
 
 	signal input claimsTreeRoot;
-	signal input siblingsClaimTree[nLevels];
+	signal input authClaimMtp[nLevels];
 	signal input authClaim[8];
 
 	signal input revTreeRoot;
-    signal input siblingsRevTree[nLevels];
-    signal input revMtpNoAux;
-    signal input revMtpAuxHv;
-    signal input revMtpAuxHi;
+    signal input authClaimNonRevMtp[nLevels];
+    signal input authClaimNonRevMtpNoAux;
+    signal input authClaimNonRevMtpAuxHi;
+    signal input authClaimNonRevMtpAuxHv;
 
 	signal input rootsTreeRoot;
 
@@ -72,16 +68,16 @@ template IdOwnershipBySignature(nLevels) {
         verifyClaimKeyBBJJ.claim[i] <== authClaim[i];
     }
 	for (var i=0; i<nLevels; i++) {
-	    verifyClaimKeyBBJJ.siblingsClaimsTree[i] <== siblingsClaimTree[i];
+	    verifyClaimKeyBBJJ.authClaimMtp[i] <== authClaimMtp[i];
     }
 	verifyClaimKeyBBJJ.claimsTreeRoot <== claimsTreeRoot;
 	verifyClaimKeyBBJJ.revTreeRoot <== revTreeRoot;
 	for (var i=0; i<nLevels; i++) {
-	    verifyClaimKeyBBJJ.siblingsRevTree[i] <== siblingsRevTree[i];
+	    verifyClaimKeyBBJJ.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i];
     }
-	verifyClaimKeyBBJJ.revMtpNoAux <== revMtpNoAux;
-	verifyClaimKeyBBJJ.revMtpAuxHv <== revMtpAuxHv;
-	verifyClaimKeyBBJJ.revMtpAuxHi <== revMtpAuxHi;
+	verifyClaimKeyBBJJ.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
+	verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
+	verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
 
 	// check identity state
 	// note that the Type & Checksum on this version is not verified
@@ -104,10 +100,4 @@ template IdOwnershipBySignature(nLevels) {
     sigVerifier.R8x <== challengeSignatureR8x;
     sigVerifier.R8y <== challengeSignatureR8y;
     sigVerifier.M <== challenge;
-
-// todo remove it
-//    component checkHoId = IsEqual();
-//    checkHoId.in[0] <== id;
-//    checkHoId.in[1] <== hoId;
-//    checkHoId.out === 1;
 }
