@@ -6,6 +6,7 @@ import (
 	"fmt"
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
+	"github.com/iden3/go-merkletree-sql"
 	"math/big"
 	"os"
 	"test/crypto/primitive"
@@ -54,6 +55,14 @@ func PrintMap(inputs map[string]string) {
 	ExitOnError(err)
 
 	fmt.Println(string(json))
+}
+
+func PrintSiblings(name string, siblings []*merkletree.Hash) {
+	json, err := json.Marshal(siblings)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(name, string(json))
 }
 
 func ClaimToString(claim *core.Claim) (string, error) {

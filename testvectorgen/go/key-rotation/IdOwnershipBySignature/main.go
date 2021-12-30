@@ -9,9 +9,8 @@ import (
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql"
 	"github.com/iden3/go-merkletree-sql/db/memory"
-	"log"
 	"math/big"
-	"os"
+	"test/utils"
 
 	"test/crypto/primitive"
 )
@@ -21,23 +20,21 @@ func main() {
 
 	privKeysHex := []string{
 		"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69f",
-		//"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e",
-		//"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d",
-		//"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69c",
-		//"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69b",
-		//"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69a",
+		"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e",
+		"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d",
 	}
 
-	numberOfFirstClaimsToRevoke := 0
+	numberOfKeys := 1
+	numberOfFirstClaimsToRevoke := 1
 	signingKeyIndex := 0
 
-	claimSchema, _ := big.NewInt(0).SetString("251025091000101825075425831481271126140", 10)
+	//claimSchema, _ := big.NewInt(0).SetString("251025091000101825075425831481271126140", 10)
 
-	fmt.Println()
-	fmt.Println("signing with key ", signingKeyIndex)
-	fmt.Println("numberOfFirstClaimsToRevoke ", numberOfFirstClaimsToRevoke)
+	fmt.Println("Number of keys:", numberOfKeys)
+	fmt.Println("Signing key index:", signingKeyIndex)
+	fmt.Println("Number of first keys to revoke:", numberOfFirstClaimsToRevoke)
 
-	privKeys := createPrivateKeys(privKeysHex)
+	privKeys := createPrivateKeys(privKeysHex[:numberOfKeys])
 	authClaims := createAuthClaims(privKeys)
 
 	for i, v := range privKeys {
@@ -52,22 +49,16 @@ func main() {
 
 		authEntry := authClaims[i].TreeEntry()
 		hIndex, err := authEntry.HIndex()
-		if err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
+		utils.ExitOnError(err)
 		hValue, err := authEntry.HValue()
-		if err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
+		utils.ExitOnError(err)
 
 		fmt.Println()
 		fmt.Println("Claim info: ")
 		fmt.Println(fmt.Sprintf("    Public key: %v, isSigningKey: %t, isRevokedKey: %t", i, isSigningKey, isRevokedKey))
 		fmt.Println("    HIndex: ", hIndex.BigInt())
 		fmt.Println("    HValue: ", hValue.BigInt())
-		fmt.Println("    Schema: ", claimSchema)
+		//fmt.Println("    Schema: ", claimSchema)
 		fmt.Println("    x", v.Public().X)
 		fmt.Println("    y", v.Public().Y)
 		fmt.Println("    Revocation nonce: ", authClaims[i].GetRevocationNonce())
@@ -78,90 +69,66 @@ func main() {
 	ctx := context.Background()
 	identifier, claimsTree, revTree, currentState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke)
 
-	fmt.Println()
-	fmt.Println("id", identifier.BigInt())
-	fmt.Println("hoIdenState", currentState.BigInt())
-	fmt.Println()
-	fmt.Println("claimsTreeRoot", claimsTree.Root().BigInt())
-
-	authEntry := authClaims[signingKeyIndex].TreeEntry()
-	hIndex, err := authEntry.HIndex()
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	fmt.Println("\nid:", identifier.BigInt())
+	fmt.Println("hoIdenState:", currentState.BigInt())
 	//MTP Claim
+	fmt.Println("\nclaimsTreeRoot:", claimsTree.Root().BigInt())
+	signingAuthClaim := authClaims[signingKeyIndex]
+	authEntry := signingAuthClaim.TreeEntry()
+	hIndex, err := authEntry.HIndex()
+	utils.ExitOnError(err)
 	proof, _, err := claimsTree.GenerateProof(ctx, hIndex.BigInt(), claimsTree.Root())
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	utils.ExitOnError(err)
 	allSiblingsClaimsTree := proof.AllSiblings()
-	fmt.Println("MTP proof all siblings: ")
-	for _, v := range allSiblingsClaimsTree {
-		fmt.Println("     ", v.BigInt())
-	}
+	utils.PrintSiblings("authClaimMtp", allSiblingsClaimsTree)
+	fmt.Println("authClaim:")
+	utils.PrintClaim(signingAuthClaim)
 
-	//MTP Revoke
-	revNonce := authClaims[signingKeyIndex].GetRevocationNonce()
+	//MTP Claim not revoked
+	revNonce := signingAuthClaim.GetRevocationNonce()
 	hi := new(big.Int).SetUint64(revNonce)
 	proofNotRevoke, _, err := revTree.GenerateProof(ctx, hi, revTree.Root())
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	utils.ExitOnError(err)
 
-	fmt.Println()
-	fmt.Println("revTreeRoot", revTree.Root().BigInt())
-	fmt.Println("Rev nonce hIndex: ", hi)
-	allSiblingsRevTree := proofNotRevoke.AllSiblings()
-	if proofNotRevoke.NodeAux != nil {
-		fmt.Println("revMtpAuxHi: ", proofNotRevoke.NodeAux.Key.BigInt())
-		fmt.Println("revMtpAuxHv: ", proofNotRevoke.NodeAux.Value.BigInt())
+	fmt.Println("\nrevTreeRoot", revTree.Root().BigInt())
+	utils.PrintSiblings("authClaimNonRevMtp:", proofNotRevoke.AllSiblings())
+	if proofNotRevoke.NodeAux == nil {
+		fmt.Println("authClaimNonRevMtpNoAux: 1")
+		fmt.Println("authClaimNonRevMtpAuxHi: 0")
+		fmt.Println("authClaimNonRevMtpAuxHv: 0")
 	} else {
-		fmt.Println("revMtpAuxHi: 0")
-		fmt.Println("revMtpAuxHv: 0")
-	}
-	fmt.Println("MTP proof not revoke all siblings: ")
-	for _, v := range allSiblingsRevTree {
-		fmt.Println("    ", v.BigInt())
+		fmt.Println("authClaimNonRevMtpNoAux: 0")
+		fmt.Println("authClaimNonRevMtpAuxHi: ", proofNotRevoke.NodeAux.Key.BigInt())
+		fmt.Println("authClaimNonRevMtpAuxHv: ", proofNotRevoke.NodeAux.Value.BigInt())
 	}
 
 	fmt.Println()
 	fmt.Println("rootsTreeRoot 0")
 
-	// Test signature
-	// todo this is hardcoded state for: 2 auth claims, 0 revoked claims
-	newStateBigInt := big.NewInt(0)
-	newStateBigInt.SetString("6243262098189365110173326120466238114783380459336290130750689570190357902007", 10)
-	challenge, err := poseidon.Hash([]*big.Int{currentState.BigInt(), newStateBigInt})
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	// this is hardcoded state for: 2 auth claims, 0 revoked claims
+	//newStateBigInt := big.NewInt(0)
+	//newStateBigInt.SetString("6243262098189365110173326120466238114783380459336290130750689570190357902007", 10)
+	//challenge, err := poseidon.Hash([]*big.Int{currentState.BigInt(), newStateBigInt})
+	//utils.ExitOnError(err)
 
+	// Test signature
+	challenge := big.NewInt(1)
 	bjjSigner := primitive.NewBJJSigner(&privKeys[signingKeyIndex])
 	signature, err := bjjSigner.Sign(challenge.Bytes())
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	utils.ExitOnError(err)
 	var sig [64]byte
 	copy(sig[:], signature)
 	var decompressedSig *babyjub.Signature
 	decompressedSig, err = new(babyjub.Signature).Decompress(sig)
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	utils.ExitOnError(err)
 
 	fmt.Println()
-	fmt.Println("old state:", currentState.BigInt())
-	fmt.Println("new state:", newStateBigInt)
+	//fmt.Println("old state:", currentState.BigInt())
+	//fmt.Println("new state:", newStateBigInt)
 	fmt.Println("challenge:", challenge)
-	fmt.Println("challengeSignatureR8x:", decompressedSig.R8.X.String())
-	fmt.Println("challengeSignatureR8y", decompressedSig.R8.Y.String())
-	fmt.Println("challengeSignatureS", decompressedSig.S.String())
+	fmt.Println("challengeSignatureR8x:", decompressedSig.R8.X)
+	fmt.Println("challengeSignatureR8y", decompressedSig.R8.Y)
+	fmt.Println("challengeSignatureS", decompressedSig.S)
 }
 
 func createIdentityMultiAuthClaims(
@@ -169,26 +136,17 @@ func createIdentityMultiAuthClaims(
 	*core.ID, *merkletree.MerkleTree, *merkletree.MerkleTree, *merkletree.Hash) {
 	claimTreeStorage := memory.NewMemoryStorage()
 	claimsTree, err := merkletree.NewMerkleTree(ctx, claimTreeStorage, 4)
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	utils.ExitOnError(err)
 
 	var identifier *core.ID
 
 	for i, claim := range authClaims {
 		entry := claim.TreeEntry()
 		err := claimsTree.AddEntry(ctx, &entry)
-		if err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
+		utils.ExitOnError(err)
 		if i == 0 {
 			identifier, err = core.CalculateGenesisID(claimsTree.Root())
-			if err != nil {
-				log.Println(err)
-				os.Exit(1)
-			}
+			utils.ExitOnError(err)
 		}
 	}
 
@@ -198,10 +156,7 @@ func createIdentityMultiAuthClaims(
 		claimsTree.Root().BigInt(),
 		revTree.Root().BigInt(),
 		merkletree.HashZero.BigInt())
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	utils.ExitOnError(err)
 
 	return identifier, claimsTree, revTree, state
 }
@@ -213,10 +168,7 @@ func createAuthClaims(privKeys []babyjub.PrivateKey) []*core.Claim {
 		// We don't use random number here because this test vectors will be used for tests
 		// and have randomization inside tests is usually a bad idea
 		revNonce, err := poseidon.Hash([]*big.Int{v.Public().X})
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		utils.ExitOnError(err)
 		claims[i] = createAuthClaim(v, revNonce.Uint64())
 	}
 	return claims
@@ -235,10 +187,7 @@ func createAuthClaim(privKey babyjub.PrivateKey, revNonce uint64) *core.Claim {
 		core.WithIndexDataInts(pubKey.X, pubKey.Y),
 		//nolint:gosec //reason: no need for security
 		core.WithRevocationNonce(revNonce))
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	utils.ExitOnError(err)
 	return authClaim
 }
 
@@ -261,10 +210,7 @@ func createPrivateKey(privKeyHex string) babyjub.PrivateKey {
 func createRevTree(ctx context.Context, authClaims []*core.Claim) *merkletree.MerkleTree {
 	treeStorage := memory.NewMemoryStorage()
 	tree, err := merkletree.NewMerkleTree(ctx, treeStorage, 4)
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	utils.ExitOnError(err)
 
 	for _, v := range authClaims {
 		var err error
@@ -272,10 +218,7 @@ func createRevTree(ctx context.Context, authClaims []*core.Claim) *merkletree.Me
 		revNonce := v.GetRevocationNonce()
 
 		err = tree.Add(ctx, new(big.Int).SetUint64(revNonce), big.NewInt(0))
-		if err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
+		utils.ExitOnError(err)
 	}
 
 	return tree
