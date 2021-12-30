@@ -30,7 +30,7 @@ template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
 	smtClaimExists.fnc <== 0;
 	smtClaimExists.root <== claimsTreeRoot;
 	for (var i=0; i<nLevels; i++) {
-		smtClaimExists.siblings[i] <== authClaimNonRevMtp[i];
+		smtClaimExists.siblings[i] <== authClaimMtp[i];
 	}
 	smtClaimExists.oldKey <== 0;
 	smtClaimExists.oldValue <== 0;
@@ -53,6 +53,7 @@ template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
     smtClaimNotRevoked.oldValue <== authClaimNonRevMtpAuxHv;
     smtClaimNotRevoked.key <== claimRevNonce.revNonce;
     smtClaimNotRevoked.value <== 0;
+
 }
 
 // VerifyClaimKeyBBJJinClaimsTreeRoot - Circuit to check that claim with the provided public key is in ClaimsTreeRoot
