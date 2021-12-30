@@ -19,5 +19,17 @@ jobs:
           node-version: '14'
     - name: Install node_modules
       run: npm install
+
+    - name: Install rust
+      run: |
+        curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh -s -- -y
+
+    - name: Install circom
+      run: | 
+        git clone https://github.com/iden3/circom.git && 
+        cd circom && 
+        cargo build --release &&
+        cargo install --path circom
+
     - name: Test circom circuits
       run: npm run test
