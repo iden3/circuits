@@ -30,7 +30,7 @@ template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
 	smtClaimExists.fnc <== 0;
 	smtClaimExists.root <== claimsTreeRoot;
 	for (var i=0; i<nLevels; i++) {
-		smtClaimExists.siblings[i] <== authClaimNonRevMtp[i];
+		smtClaimExists.siblings[i] <== authClaimMtp[i];
 	}
 	smtClaimExists.oldKey <== 0;
 	smtClaimExists.oldValue <== 0;

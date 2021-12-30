@@ -14,24 +14,19 @@ describe("idOwnershipBySignature", function() {
         circuit = await tester(
             path.join(__dirname, "circuits", "idOwnershipBySignatures.circom"),
             {
-                outputOptions: {
-                    basePath: path.join(__dirname, "circuits", "build"),
-                    recompile: false,
-                },
+                output: path.join(__dirname, "circuits", "build"),
+                recompile: true,
                 reduceConstraints: false,
             },
         );
     });
 
-    it("Ownership should be ok. Claims total: 1. Signed by: 1st claim. Revoked: none", async () => {
+    it("Ownership should be ok. Auth claims total: 1. Signed by: 1st claim. Revoked: none", async () => {
         const inputs = {
-            // id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
-            // hoId: "323416925264666217617288569742564703632850816035761084002720090377353297920",
-
             hoIdenState: "18311560525383319719311394957064820091354976310599818797157189568621466950811",
 
             claimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
-            siblingsClaimTree: ["0", "0", "0", "0"],
+            authClaimMtp: ["0", "0", "0", "0"],
             authClaim : [
                 "251025091000101825075425831481271126140",
                 "0",
@@ -44,10 +39,10 @@ describe("idOwnershipBySignature", function() {
             ],
 
             revTreeRoot: "0",
-            siblingsRevTree: ["0", "0", "0", "0"],
-            revMtpNoAux: "1",
-            revMtpAuxHi: "0",
-            revMtpAuxHv: "0",
+            authClaimNonRevMtp: ["0", "0", "0", "0"],
+            authClaimNonRevMtpNoAux: "1",
+            authClaimNonRevMtpAuxHi: "0",
+            authClaimNonRevMtpAuxHv: "0",
 
             rootsTreeRoot: "0",
 
@@ -63,12 +58,10 @@ describe("idOwnershipBySignature", function() {
 
     it(`Ownership should be ok. Claims total: 2. Signed by: 2nd claim. Revoked: none`, async () => {
         const inputs = {
-            // id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
-            // hoId: "323416925264666217617288569742564703632850816035761084002720090377353297920",
             hoIdenState: "6243262098189365110173326120466238114783380459336290130750689570190357902007",
 
             claimsTreeRoot: "15354310380648059701373215284168790999686007389864108825597474513976128684735",
-            siblingsClaimTree: ["14501975351413460283779241106398661838785725538630637996477950952692691051377", "0", "0", "0"],
+            authClaimMtp: ["14501975351413460283779241106398661838785725538630637996477950952692691051377", "0", "0", "0"],
             authClaim : [
                 "251025091000101825075425831481271126140",
                 "0",
@@ -81,10 +74,10 @@ describe("idOwnershipBySignature", function() {
             ],
 
             revTreeRoot: "0",
-            siblingsRevTree: ["0", "0", "0", "0"],
-            revMtpNoAux: "1",
-            revMtpAuxHi: "0",
-            revMtpAuxHv: "0",
+            authClaimNonRevMtp: ["0", "0", "0", "0"],
+            authClaimNonRevMtpNoAux: "1",
+            authClaimNonRevMtpAuxHi: "0",
+            authClaimNonRevMtpAuxHv: "0",
 
             rootsTreeRoot: "0",
 
@@ -101,13 +94,10 @@ describe("idOwnershipBySignature", function() {
     it(`Ownership should be ok. Claims total: 2. Signed by: 2nd claim. Revoked: 1st claim`, async () => {
 
         const inputs = {
-            // id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
-            // hoId: "323416925264666217617288569742564703632850816035761084002720090377353297920",
-
             hoIdenState: "21766477599468142028922103113527130977705138013698789903179651260910260107586",
 
             claimsTreeRoot: "15354310380648059701373215284168790999686007389864108825597474513976128684735",
-            siblingsClaimTree: ["14501975351413460283779241106398661838785725538630637996477950952692691051377", "0", "0", "0"],
+            authClaimMtp: ["14501975351413460283779241106398661838785725538630637996477950952692691051377", "0", "0", "0"],
             authClaim : [
                 "251025091000101825075425831481271126140",
                 "0",
@@ -120,10 +110,10 @@ describe("idOwnershipBySignature", function() {
             ],
 
             revTreeRoot: "9572161194792737168173461511232528826921561251689921703982232129896045083154",
-            siblingsRevTree: ["0", "0", "0", "0"],
-            revMtpNoAux: "0",
-            revMtpAuxHi: "15930428023331155902",
-            revMtpAuxHv: "0",
+            authClaimNonRevMtp: ["0", "0", "0", "0"],
+            authClaimNonRevMtpNoAux: "0",
+            authClaimNonRevMtpAuxHi: "15930428023331155902",
+            authClaimNonRevMtpAuxHv: "0",
 
             rootsTreeRoot: "0",
 
@@ -140,12 +130,10 @@ describe("idOwnershipBySignature", function() {
     it(`Ownership should fail. Claims total: 1. Signed by: 1st claim. Revoked: 1st claim`, async () => {
 
         const inputs = {
-            // id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
-            // hoId: "323416925264666217617288569742564703632850816035761084002720090377353297920",
             hoIdenState: "14259000198854891184065240409087970244942582321666208572498086205906796945878",
 
             claimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
-            siblingsClaimTree: ["0", "0", "0", "0"],
+            authClaimMtp: ["0", "0", "0", "0"],
             authClaim : [
                 "251025091000101825075425831481271126140",
                 "0",
@@ -158,10 +146,10 @@ describe("idOwnershipBySignature", function() {
             ],
 
             revTreeRoot: "9572161194792737168173461511232528826921561251689921703982232129896045083154",
-            siblingsRevTree: ["0", "0", "0", "0"],
-            revMtpNoAux: "0",
-            revMtpAuxHi: "0",
-            revMtpAuxHv: "0",
+            authClaimNonRevMtp: ["0", "0", "0", "0"],
+            authClaimNonRevMtpNoAux: "1",
+            authClaimNonRevMtpAuxHi: "0",
+            authClaimNonRevMtpAuxHv: "0",
 
             rootsTreeRoot: "0",
 
@@ -182,12 +170,10 @@ describe("idOwnershipBySignature", function() {
     it(`Ownership should fail. Claims total: 2. Signed by: 2nd claim. Revoked: 2nd claim`, async () => {
 
         const inputs = {
-            // id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
-            // hoId: "323416925264666217617288569742564703632850816035761084002720090377353297920",
             hoIdenState: "16747519459565752629047138551807347113144675856294452502987443819850627139518",
 
             claimsTreeRoot: "15354310380648059701373215284168790999686007389864108825597474513976128684735",
-            siblingsClaimTree: ["14501975351413460283779241106398661838785725538630637996477950952692691051377", "0", "0", "0"],
+            authClaimMtp: ["14501975351413460283779241106398661838785725538630637996477950952692691051377", "0", "0", "0"],
             authClaim : [
                 "251025091000101825075425831481271126140",
                 "0",
@@ -200,10 +186,10 @@ describe("idOwnershipBySignature", function() {
             ],
 
             revTreeRoot: "19457836367977756683788174626344746000647215586327462959978582532138667631896",
-            siblingsRevTree: ["9572161194792737168173461511232528826921561251689921703982232129896045083154", "0", "0", "0"],
-            revMtpNoAux: "0",
-            revMtpAuxHi: "0",
-            revMtpAuxHv: "0",
+            authClaimNonRevMtp: ["9572161194792737168173461511232528826921561251689921703982232129896045083154", "0", "0", "0"],
+            authClaimNonRevMtpNoAux: "1",
+            authClaimNonRevMtpAuxHi: "0",
+            authClaimNonRevMtpAuxHv: "0",
 
             rootsTreeRoot: "0",
 
