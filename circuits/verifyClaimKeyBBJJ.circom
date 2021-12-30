@@ -53,6 +53,7 @@ template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
     smtClaimNotRevoked.oldValue <== authClaimNonRevMtpAuxHv;
     smtClaimNotRevoked.key <== claimRevNonce.revNonce;
     smtClaimNotRevoked.value <== 0;
+
 }
 
 // VerifyClaimKeyBBJJinClaimsTreeRoot - Circuit to check that claim with the provided public key is in ClaimsTreeRoot
