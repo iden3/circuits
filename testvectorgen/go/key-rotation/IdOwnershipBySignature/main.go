@@ -6,7 +6,6 @@ import (
 	"fmt"
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
-	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql"
 	"github.com/iden3/go-merkletree-sql/db/memory"
 	"math/big"
@@ -25,7 +24,7 @@ func main() {
 	}
 
 	numberOfKeys := 1
-	numberOfFirstClaimsToRevoke := 1
+	numberOfFirstClaimsToRevoke := 0
 	signingKeyIndex := 0
 
 	//claimSchema, _ := big.NewInt(0).SetString("251025091000101825075425831481271126140", 10)
@@ -164,31 +163,12 @@ func createIdentityMultiAuthClaims(
 func createAuthClaims(privKeys []babyjub.PrivateKey) []*core.Claim {
 	claims := make([]*core.Claim, len(privKeys))
 	for i, v := range privKeys {
-		// NOTE: We take nonce as hash of public key to make it random
-		// We don't use random number here because this test vectors will be used for tests
-		// and have randomization inside tests is usually a bad idea
-		revNonce, err := poseidon.Hash([]*big.Int{v.Public().X})
+		pubKey := v.Public()
+		claim, err := utils.AuthClaimFromPubKey(pubKey.X, pubKey.Y)
 		utils.ExitOnError(err)
-		claims[i] = createAuthClaim(v, revNonce.Uint64())
+		claims[i] = claim
 	}
 	return claims
-}
-
-func createAuthClaim(privKey babyjub.PrivateKey, revNonce uint64) *core.Claim {
-	// Extract pubKey
-	pubKey := privKey.Public()
-
-	// Create auth claim
-	var schemaHash core.SchemaHash
-	schemaEncodedBytes, _ := hex.DecodeString("7c0844a075a9ddc7fcbdfb4f88acd9bc")
-	copy(schemaHash[:], schemaEncodedBytes)
-
-	authClaim, err := core.NewClaim(schemaHash,
-		core.WithIndexDataInts(pubKey.X, pubKey.Y),
-		//nolint:gosec //reason: no need for security
-		core.WithRevocationNonce(revNonce))
-	utils.ExitOnError(err)
-	return authClaim
 }
 
 func createPrivateKeys(privKeysHex []string) []babyjub.PrivateKey {

@@ -4,8 +4,9 @@ include "../credentialAtomicQuery.circom";
 
 component main{public [challenge,
                         id,
+                        hoIdenState,
                         claimSchema,
                         slotIndex,
                         operator,
                         value,
-                        timestamp]} = AtomicQuery(40, 40);
+                        timestamp]} = AtomicQuery(4, 40);
