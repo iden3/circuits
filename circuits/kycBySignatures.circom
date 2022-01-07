@@ -3,6 +3,7 @@ pragma circom 2.0.0;
 include "kyc.circom";
 include "idOwnershipBySignature.circom";
 include "utils.circom";
+include "ageCalculation.circom";
 include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 
 // verifyKYCSignedCredentials proves validity of Country of Residence Claim
@@ -190,21 +191,15 @@ template VerifyKYCSignedCredentials(IdOwnershipLevels, IssuerLevels, CountryBlac
 
     // TODO: add schema check
 
-    // get birthday value
-    component birthday = getBirthday();
-    for (var i=0; i<8; i++) { birthday.claim[i] <== birthdayClaim[i]; }
+    component getBirthdayField = getBirthdayField();
+    for (var i=0; i<8; i++) { getBirthdayField.claim[i] <== birthdayClaim[i]; }
 
-    // calculate age
-	component age = calculateAge();
-	age.DOBYear <== birthday.year;
-	age.DOBMonth <== birthday.month;
-	age.DOBDay <== birthday.day;
-	age.CurYear <== currentYear;
-	age.CurMonth <== currentMonth;
-	age.CurDay <== currentDay;
-
-//    component age = getAge();
-//    for (var i=0; i<8; i++) { age.claim[i] <== birthdayClaim[i]; }
+      // calculate age
+  	component age = calculateAgeFromYYYYMMDD();
+  	age.yyyymmdd <== getBirthdayField.birthday;
+	age.currentYear <== currentYear;
+	age.currentMonth <== currentMonth;
+	age.currentDay <== currentDay;
 
     // verify age > minAge
     component gte18 = GreaterEqThan(32);
