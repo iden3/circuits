@@ -25,17 +25,17 @@ template AtomicQuery(IdOwnershipLevels, IssuerLevels) {
   	signal input id;
     signal input hoIdenState;
 
-	signal input authClaimsTreeRoot;
+	signal input hoClaimsTreeRoot;
 	signal input authClaimMtp[IdOwnershipLevels];
 	signal input authClaim[8];
 
-	signal input authClaimRevTreeRoot;
+	signal input hoRevTreeRoot;
     signal input authClaimNonRevMtp[IdOwnershipLevels];
     signal input authClaimNonRevMtpNoAux;
     signal input authClaimNonRevMtpAuxHi;
     signal input authClaimNonRevMtpAuxHv;
 
-	signal input authClaimRootsTreeRoot;
+	signal input hoRootsTreeRoot;
 
   	/* signature*/
 	signal input challenge;
@@ -77,17 +77,17 @@ template AtomicQuery(IdOwnershipLevels, IssuerLevels) {
     /* Id ownership check*/
     component userIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
 
-    userIdOwnership.claimsTreeRoot <== authClaimsTreeRoot;
+    userIdOwnership.claimsTreeRoot <== hoClaimsTreeRoot; // currentHolderStateClaimsTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.authClaimMtp[i] <== authClaimMtp[i]; }
     for (var i=0; i<8; i++) { userIdOwnership.authClaim[i] <== authClaim[i]; }
 
-    userIdOwnership.revTreeRoot <== authClaimRevTreeRoot;
+    userIdOwnership.revTreeRoot <== hoRevTreeRoot;  // currentHolderStateClaimsRevTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
     userIdOwnership.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
     userIdOwnership.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
     userIdOwnership.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
 
-    userIdOwnership.rootsTreeRoot <== authClaimRootsTreeRoot;
+    userIdOwnership.rootsTreeRoot <== hoRootsTreeRoot; // currentHolderStateClaimsRootsTreeRoot
 
     userIdOwnership.challenge <== challenge;
     userIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;

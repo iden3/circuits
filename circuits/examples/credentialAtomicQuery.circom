@@ -9,4 +9,4 @@ component main{public [challenge,
                         slotIndex,
                         operator,
                         value,
-                        timestamp]} = AtomicQuery(4, 40);
+                        timestamp]} = AtomicQuery(40, 40);
