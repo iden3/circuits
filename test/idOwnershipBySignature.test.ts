@@ -13,11 +13,7 @@ describe("idOwnershipBySignature", function() {
     before(async () => {
         circuit = await tester(
             path.join(__dirname, "circuits", "idOwnershipBySignatures.circom"),
-            {
-                output: path.join(__dirname, "circuits", "build"),
-                recompile: true,
-                reduceConstraints: false,
-            },
+            {reduceConstraints: false}
         );
     });
 
