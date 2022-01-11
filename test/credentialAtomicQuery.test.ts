@@ -34,7 +34,7 @@ describe("test claim query", function() {
             id: "318143161927515226538633402626308472116169082888716969971233931702195126272",
             hoIdenState: "18311560525383319719311394957064820091354976310599818797157189568621466950811",
 
-            authClaimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
+            hoClaimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
             authClaimMtp: ["0", "0", "0", "0"],
             authClaim : [
                 "251025091000101825075425831481271126140",
@@ -47,13 +47,13 @@ describe("test claim query", function() {
                 "0",
             ],
 
-            authClaimRevTreeRoot: "0",
+            hoRevTreeRoot: "0",
             authClaimNonRevMtp: ["0", "0", "0", "0"],
             authClaimNonRevMtpNoAux: "1",
             authClaimNonRevMtpAuxHi: "0",
             authClaimNonRevMtpAuxHv: "0",
 
-            authClaimRootsTreeRoot: "0",
+            hoRootsTreeRoot: "0",
 
             challenge: "1",
             challengeSignatureR8x: "8553678144208642175027223770335048072652078621216414881653012537434846327449",
@@ -206,8 +206,8 @@ describe("test claim query", function() {
             "authClaimNonRevMtpAuxHi": "0",
             "authClaimNonRevMtpAuxHv": "0",
             "authClaimNonRevMtpNoAux": "1",
-            "authClaimRevTreeRoot": "0",
-            "authClaimRootsTreeRoot": "0",
+            "hoRevTreeRoot": "0",
+            "hoRootsTreeRoot": "0",
             "challenge": "84239",
             "challengeSignatureR8x": "10297751443687340001464148676187251951363118116982140693372785835337030824197",
             "challengeSignatureR8y": "5188724465855403281326665438269244489188871034956182205768315414226961367241",
