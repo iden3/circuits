@@ -16,7 +16,7 @@ include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../node_modules/circomlib/circuits/mux3.circom";
-include "./idOwnershipGenesis.circom";
+include "./idOwnershipBySignature.circom";
 include "../node_modules/circomlib/circuits/mux1.circom";
 
 // getClaimSubjectOtherIden checks that a claim Subject is OtherIden and
@@ -218,29 +218,43 @@ template getRootHiHv() {
 // identity state (`isIdenState`), while proving that the claim has not been
 // revoked as of the recent identity state.
 template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
-	// A
+	// A Prove that the claim has subject OtherIden, and take the subject identity.
 	signal input claim[8];
 
-	// B. holder proof of claimKOp in the genesis
-	signal input hoKOpSk;
-	signal input hoClaimKOpMtp[IdOwnershipLevels];
-	signal input hoClaimKOpClaimsTreeRoot;
-	// signal input hoClaimKOpRevTreeRoot;
-	// signal input hoClaimKOpRootsTreeRoot;
+	// B. holder proof that private key signing the challenge is in his identity state and not revoked
+    signal input hoId;
+    signal input hoIdenState;
+
+    signal input hoClaimsTreeRoot;
+    signal input hoAuthClaimMtp[IdOwnershipLevels];
+    signal input hoAuthClaim[8];
+
+    signal input hoRevTreeRoot;
+    signal input hoAuthClaimNonRevMtp[IdOwnershipLevels];
+    signal input hoAuthClaimNonRevMtpNoAux;
+    signal input hoAuthClaimNonRevMtpAuxHv;
+    signal input hoAuthClaimNonRevMtpAuxHi;
+
+    signal input hoRootsTreeRoot;
+
+    signal input hoChallenge;
+    signal input hoChallengeSignatureR8x;
+    signal input hoChallengeSignatureR8y;
+    signal input hoChallengeSignatureS;
 
 	// C. issuer proof of claim existence
-	signal input isProofExistMtp[IssuerLevels];
 	signal input isProofExistClaimsTreeRoot;
-	// signal input isProofExistRevTreeRoot;
-	// signal input isProofExistRootsTreeRoot;
+	signal input isProofExistMtp[IssuerLevels];
 
 	// D. issuer proof of claim validity
+	signal input isProofValidRevTreeRoot;
 	signal input isProofValidNonRevMtp[IssuerLevels];
 	signal input isProofValidNonRevMtpNoAux;
 	signal input isProofValidNonRevMtpAuxHi;
 	signal input isProofValidNonRevMtpAuxHv;
+
 	signal input isProofValidClaimsTreeRoot;
-	signal input isProofValidRevTreeRoot;
+
 	signal input isProofValidRootsTreeRoot;
 
 	// E. issuer proof of Root (ExistClaimsTreeRoot)
@@ -271,16 +285,32 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	// out: claimHiHv.hi
 	// out: claimHiHv.hv
 
+    component checkHoId = IsEqual();
+    checkHoId.in[0] <== subjectOtherIden.id;
+    checkHoId.in[1] <== hoId;
+    checkHoId.out === 1;
+
 	//
-	// B. Prove ownership of the kOpSk associated with the holder identity
+	// B. Proof that private key signing the challenge is in holder identity state and not revoked
 	//
-	component idOwnership = IdOwnershipGenesis(IdOwnershipLevels);
-	idOwnership.id <== subjectOtherIden.id;
-	idOwnership.userPrivateKey <== hoKOpSk;
-	for (var i=0; i<IdOwnershipLevels; i++) { idOwnership.siblings[i] <== hoClaimKOpMtp[i]; }
-	idOwnership.claimsTreeRoot <== hoClaimKOpClaimsTreeRoot;
-	// idOwnership.revTreeRoot    <== hoClaimKOpRevTreeRoot;
-	// idOwnership.rootsTreeRoot  <== hoClaimKOpRootsTreeRoot;
+
+	component checkIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
+	checkIdOwnership.hoIdenState <== hoIdenState;
+	checkIdOwnership.claimsTreeRoot <== hoClaimsTreeRoot;
+	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.authClaimMtp[i] <== hoAuthClaimMtp[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.authClaim[i] <== hoAuthClaim[i]; }
+	checkIdOwnership.revTreeRoot <== hoRevTreeRoot;
+	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.authClaimNonRevMtp[i] <== hoAuthClaimNonRevMtp[i]; }
+	checkIdOwnership.authClaimNonRevMtpNoAux <== hoAuthClaimNonRevMtpNoAux;
+	checkIdOwnership.authClaimNonRevMtpAuxHi <== hoAuthClaimNonRevMtpAuxHv;
+	checkIdOwnership.authClaimNonRevMtpAuxHv <== hoAuthClaimNonRevMtpAuxHi;
+
+	checkIdOwnership.rootsTreeRoot <== hoRootsTreeRoot;
+
+    checkIdOwnership.challenge <== hoChallenge;
+    checkIdOwnership.challengeSignatureR8x <== hoChallengeSignatureR8x;
+    checkIdOwnership.challengeSignatureR8y <== hoChallengeSignatureR8y;
+    checkIdOwnership.challengeSignatureS <== hoChallengeSignatureS;
 
 	//
 	// C. Claim proof of existence (isProofExist)
@@ -296,17 +326,9 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	smtClaimExists.key <== claimHiHv.hi;
 	smtClaimExists.value <== claimHiHv.hv;
 
-	// component isProofExistIdenState = getIdenState();
-	// isProofExistIdenState.claimsTreeRoot <== isProofExistClaimsTreeRoot;
-	// isProofExistIdenState.revTreeRoot <== isProofExistRevTreeRoot;
-	// isProofExistIdenState.rootsTreeRoot <== isProofExistRootsTreeRoot;
-	// out: isProofExistIdenState.idenState
-
 	//
 	// D. Claim proof of non revocation (validity)
 	//
-	component revNonceHiHv = getRevNonceNoVerHiHv();
-	revNonceHiHv.revNonce <== claimRevNonce.revNonce;
 
 	component smtClaimValid = SMTVerifier(IssuerLevels);
 	smtClaimValid.enabled <== 1;
@@ -316,16 +338,13 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	smtClaimValid.oldKey <== isProofValidNonRevMtpAuxHi;
 	smtClaimValid.oldValue <== isProofValidNonRevMtpAuxHv;
 	smtClaimValid.isOld0 <== isProofValidNonRevMtpNoAux;
-	smtClaimValid.key <== revNonceHiHv.hi;
+	smtClaimValid.key <== claimRevNonce.revNonce;
 	smtClaimValid.value <== 0;
 
 
 	//
 	// E. Claim proof of root
 	//
-	component rootHiHv = getRootHiHv();
-	rootHiHv.root <== isProofExistClaimsTreeRoot;
-
 	component smtRootValid = SMTVerifier(IssuerLevels);
 	smtRootValid.enabled <== 1;
 	smtRootValid.fnc <== 0; // Inclusion
@@ -334,8 +353,8 @@ template proveCredentialOwnership(IdOwnershipLevels, IssuerLevels) {
 	smtRootValid.oldKey <== 0;
 	smtRootValid.oldValue <== 0;
 	smtRootValid.isOld0 <== 0;
-	smtRootValid.key <== rootHiHv.hi;
-	smtRootValid.value <== rootHiHv.hv;
+	smtRootValid.key <== isProofExistClaimsTreeRoot;
+	smtRootValid.value <== 0;
 
 	//
 	// F. Verify ValidIdenState == isIdenState

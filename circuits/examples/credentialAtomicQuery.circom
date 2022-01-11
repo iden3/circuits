@@ -4,6 +4,7 @@ include "../credentialAtomicQuery.circom";
 
 component main{public [challenge,
                         id,
+                        hoIdenState,
                         claimSchema,
                         slotIndex,
                         operator,

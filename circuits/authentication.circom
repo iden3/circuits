@@ -5,38 +5,51 @@ include "idOwnershipBySignature.circom";
 template VerifyAuthenticationInformation(IdOwnershipLevels) {
 
     /* id ownership signals */
-	signal input id;
-	signal input BBJAx;
-	signal input BBJAy;
-	signal input BBJClaimMtp[IdOwnershipLevels];
-	signal input BBJClaimClaimsTreeRoot;
-	signal input BBJClaimRevTreeRoot;
-	signal input BBJClaimRootsTreeRoot;
+	signal input claimsTreeRoot;
+	signal input authClaimMtp[IdOwnershipLevels];
+	signal input authClaim[8];
+
+	signal input revTreeRoot;
+    signal input authClaimNonRevMtp[IdOwnershipLevels];
+    signal input authClaimNonRevMtpNoAux;
+    signal input authClaimNonRevMtpAuxHv;
+    signal input authClaimNonRevMtpAuxHi;
+
+	signal input rootsTreeRoot;
+
 	signal input challenge;
 	signal input challengeSignatureR8x;
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
-  signal input state;
+	
+    signal input state;
 
-
+    // we have no constraints for "id" in this circuit, however we introduce "id" input here
+    // as it serves as public input which should be the same for prover and verifier
+    signal input id;
 
     /*
         Id ownership check
     */
 
-    component userIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
-    userIdOwnership.id <== id;
-    userIdOwnership.userPublicKeyAx <== BBJAx;
-    userIdOwnership.userPublicKeyAy <== BBJAy;
-    for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.siblings[i] <== BBJClaimMtp[i]; }
-    userIdOwnership.claimsTreeRoot <== BBJClaimClaimsTreeRoot;
-    userIdOwnership.revTreeRoot <== BBJClaimRevTreeRoot;
-    userIdOwnership.rootsTreeRoot <== BBJClaimRootsTreeRoot;
-    userIdOwnership.challenge <== challenge;
-    userIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
-    userIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
-    userIdOwnership.challengeSignatureS <== challengeSignatureS;
+    component checkIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
 
+	checkIdOwnership.claimsTreeRoot <== claimsTreeRoot;
+	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.authClaimMtp[i] <== authClaimMtp[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.authClaim[i] <== authClaim[i]; }
 
-    // TODO: add non revocation check for identity public key
+	checkIdOwnership.revTreeRoot <== revTreeRoot;
+	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
+	checkIdOwnership.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
+	checkIdOwnership.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
+	checkIdOwnership.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
+
+    checkIdOwnership.rootsTreeRoot <== rootsTreeRoot;
+
+    checkIdOwnership.challenge <== challenge;
+    checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
+    checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
+    checkIdOwnership.challengeSignatureS <== challengeSignatureS;
+    
+    checkIdOwnership.hoIdenState <== state;
 }

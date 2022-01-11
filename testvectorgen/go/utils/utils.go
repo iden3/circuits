@@ -6,6 +6,8 @@ import (
 	"fmt"
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
+	"github.com/iden3/go-iden3-crypto/poseidon"
+	"github.com/iden3/go-merkletree-sql"
 	"math/big"
 	"os"
 	"test/crypto/primitive"
@@ -33,9 +35,15 @@ func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 	schemaEncodedBytes, _ := hex.DecodeString("7c0844a075a9ddc7fcbdfb4f88acd9bc")
 	copy(schemaHash[:], schemaEncodedBytes)
 
+	// NOTE: We take nonce as hash of public key to make it random
+	// We don't use random number here because this test vectors will be used for tests
+	// and have randomization inside tests is usually a bad idea
+	revNonce, err := poseidon.Hash([]*big.Int{X})
+	ExitOnError(err)
+
 	return core.NewClaim(schemaHash,
 		core.WithIndexDataInts(X, Y),
-		core.WithRevocationNonce(uint64(0)))
+		core.WithRevocationNonce(revNonce.Uint64()))
 }
 
 func SignBBJJ(key *babyjub.PrivateKey, sigInput []byte) (*babyjub.Signature, error) {
@@ -54,6 +62,14 @@ func PrintMap(inputs map[string]string) {
 	ExitOnError(err)
 
 	fmt.Println(string(json))
+}
+
+func PrintSiblings(name string, siblings []*merkletree.Hash) {
+	json, err := json.Marshal(siblings)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(name, string(json))
 }
 
 func ClaimToString(claim *core.Claim) (string, error) {
