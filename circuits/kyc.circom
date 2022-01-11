@@ -2,7 +2,7 @@ pragma circom 2.0.0;
 
 include "credential.circom";
 include "ageCalculation.circom";
-
+include "idOwnershipGenesis.circom";
 
 // verifyKYCCredentials proves ownership and validity of Country of Residence Claim
 // and Birthday Claim and verifies they have allowed values (age >= 18 and country
