@@ -8,6 +8,7 @@ import (
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-merkletree-sql"
+	"github.com/iden3/go-merkletree-sql/db/memory"
 	"math"
 	"math/big"
 	"test/crypto/primitive"
@@ -158,14 +159,17 @@ func AddClaimToTree(tree *merkletree.MerkleTree, claim *core.Claim) (*merkletree
 
 	entry := claim.TreeEntry()
 	index, _ := entry.HIndex()
-	tree.AddEntry(context.TODO(), &entry)
+	err := tree.AddEntry(context.TODO(), &entry)
+	if err != nil {
+		return nil, err
+	}
 
 	proof, _, err := tree.GenerateProof(context.TODO(), index.BigInt(), tree.Root())
 
 	return proof, err
 }
 
-func PrintClaim(claim *core.Claim) {
+func PrintClaim(claimName string, claim *core.Claim) {
 
 	cIn := make([]string, 0)
 	entry := claim.TreeEntry()
@@ -183,6 +187,90 @@ func PrintClaim(claim *core.Claim) {
 		panic(err)
 	}
 
-	fmt.Println("\"claim\":", string(json))
+	fmt.Println(claimName, string(json))
+}
 
+func GenerateIdentity(ctx context.Context, privKHex string, challenge *big.Int) (*core.ID, *merkletree.MerkleTree, map[string]string) {
+	// extract pubKey
+	key, X, Y := ExtractPubXY(privKHex)
+
+	// init claims tree
+	claimsTree, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 4)
+	ExitOnError(err)
+
+	// create auth claim
+	authClaim, err := AuthClaimFromPubKey(X, Y)
+	ExitOnError(err)
+
+	// add auth claim to claimsMT
+	entry := authClaim.TreeEntry()
+	hi, hv, err := entry.HiHv()
+	ExitOnError(err)
+	claimsTree.Add(ctx, hi.BigInt(), hv.BigInt())
+
+	// sign challenge
+	decompressedSig, err := SignBBJJ(key, challenge.Bytes())
+	ExitOnError(err)
+
+	// create new identity
+	identifier, err := core.CalculateGenesisID(claimsTree.Root())
+	ExitOnError(err)
+
+	// calculate current state
+	currentState, err := merkletree.HashElems(claimsTree.Root().BigInt(),
+		merkletree.HashZero.BigInt(), merkletree.HashZero.BigInt())
+	ExitOnError(err)
+
+	inputs := make(map[string]string)
+	inputs["id"] = identifier.BigInt().String()
+	inputs["BBJAx"] = X.String()
+	inputs["BBJAy"] = Y.String()
+	inputs["BBJClaimClaimsTreeRoot"] = claimsTree.Root().BigInt().String()
+	inputs["challenge"] = challenge.String()
+	inputs["challengeSignatureR8x"] = decompressedSig.R8.X.String()
+	inputs["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
+	inputs["challengeSignatureS"] = decompressedSig.S.String()
+	inputs["state"] = currentState.BigInt().String()
+
+	return identifier, claimsTree, inputs
+}
+
+func CalcIdentityStateFromRoots(claimsTree *merkletree.MerkleTree, optTrees ...*merkletree.MerkleTree) (*merkletree.Hash, error) {
+	revTreeRoot := merkletree.HashZero.BigInt()
+	rootsTreeRoot := merkletree.HashZero.BigInt()
+	if len(optTrees) > 0 {
+		revTreeRoot = optTrees[0].Root().BigInt()
+	}
+	if len(optTrees) > 1 {
+		rootsTreeRoot = optTrees[1].Root().BigInt()
+	}
+	state, err := merkletree.HashElems(
+		claimsTree.Root().BigInt(),
+		revTreeRoot,
+		rootsTreeRoot)
+	return state, err
+}
+
+func CreateRelayerWithRelayedIdentity(relayerPrivKey string, idenIdentifier *core.ID, idenState *merkletree.Hash) (*merkletree.Proof, *merkletree.Hash, *merkletree.Hash) {
+	ctx := context.Background()
+	_, relayerClaimsTree, _ := GenerateIdentity(ctx, relayerPrivKey, big.NewInt(0))
+
+	indexSlotA, _ := core.NewDataSlotFromInt(idenIdentifier.BigInt())
+	valueSlotA, _ := core.NewDataSlotFromInt(idenState.BigInt())
+	var schemaHash core.SchemaHash
+	copy(schemaHash[:], []byte{0}) //todo is it correct [TORESEARCH] which schema is correct?
+	claim, err := core.NewClaim(
+		schemaHash,
+		//core.WithIndexID(*identifier), // todo do we need this identifier [TORESEARCH]
+		core.WithIndexData(indexSlotA, core.DataSlot{}),
+		core.WithValueData(valueSlotA, core.DataSlot{}),
+	)
+	ExitOnError(err)
+
+	proofIdentityIsRelayed, err := AddClaimToTree(relayerClaimsTree, claim)
+	ExitOnError(err)
+	relayerState, err := CalcIdentityStateFromRoots(relayerClaimsTree)
+	ExitOnError(err)
+
+	return proofIdentityIsRelayed, relayerState, relayerClaimsTree.Root()
 }

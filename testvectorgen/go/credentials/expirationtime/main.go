@@ -27,5 +27,5 @@ func main() {
 	date, _ := claim.GetExpirationDate()
 	fmt.Println(date.Unix())
 
-	utils.PrintClaim(claim)
+	utils.PrintClaim("claim", claim)
 }

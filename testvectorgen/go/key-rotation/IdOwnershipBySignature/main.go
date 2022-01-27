@@ -26,12 +26,14 @@ func main() {
 	numberOfKeys := 1
 	numberOfFirstClaimsToRevoke := 0
 	signingKeyIndex := 0
+	useRelayer := false
 
 	//claimSchema, _ := big.NewInt(0).SetString("251025091000101825075425831481271126140", 10)
 
 	fmt.Println("Number of keys:", numberOfKeys)
 	fmt.Println("Signing key index:", signingKeyIndex)
 	fmt.Println("Number of first keys to revoke:", numberOfFirstClaimsToRevoke)
+	fmt.Println("Use relayer:", useRelayer)
 
 	privKeys := createPrivateKeys(privKeysHex[:numberOfKeys])
 	authClaims := createAuthClaims(privKeys)
@@ -66,10 +68,13 @@ func main() {
 	}
 
 	ctx := context.Background()
-	identifier, claimsTree, revTree, currentState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke)
+	identifier, claimsTree, revTree, hoIdenState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke)
 
-	fmt.Println("\nid:", identifier.BigInt())
-	fmt.Println("hoIdenState:", currentState.BigInt())
+	if useRelayer {
+		fmt.Println("\nhoId:", identifier.BigInt())
+	} else {
+		fmt.Println("hoIdenState:", hoIdenState.BigInt())
+	}
 	//MTP Claim
 	fmt.Println("\nclaimsTreeRoot:", claimsTree.Root().BigInt())
 	signingAuthClaim := authClaims[signingKeyIndex]
@@ -80,8 +85,7 @@ func main() {
 	utils.ExitOnError(err)
 	allSiblingsClaimsTree := proof.AllSiblings()
 	utils.PrintSiblings("authClaimMtp", allSiblingsClaimsTree)
-	fmt.Println("authClaim:")
-	utils.PrintClaim(signingAuthClaim)
+	utils.PrintClaim("authClaim:", signingAuthClaim)
 
 	//MTP Claim not revoked
 	revNonce := signingAuthClaim.GetRevocationNonce()
@@ -89,7 +93,7 @@ func main() {
 	proofNotRevoke, _, err := revTree.GenerateProof(ctx, hi, revTree.Root())
 	utils.ExitOnError(err)
 
-	fmt.Println("\nrevTreeRoot", revTree.Root().BigInt())
+	fmt.Println("\nrevTreeRoot: ", revTree.Root().BigInt())
 	utils.PrintSiblings("authClaimNonRevMtp:", proofNotRevoke.AllSiblings())
 	if proofNotRevoke.NodeAux == nil {
 		fmt.Println("authClaimNonRevMtpNoAux: 1")
@@ -101,14 +105,7 @@ func main() {
 		fmt.Println("authClaimNonRevMtpAuxHv: ", proofNotRevoke.NodeAux.Value.BigInt())
 	}
 
-	fmt.Println()
-	fmt.Println("rootsTreeRoot 0")
-
-	// this is hardcoded state for: 2 auth claims, 0 revoked claims
-	//newStateBigInt := big.NewInt(0)
-	//newStateBigInt.SetString("6243262098189365110173326120466238114783380459336290130750689570190357902007", 10)
-	//challenge, err := poseidon.Hash([]*big.Int{currentState.BigInt(), newStateBigInt})
-	//utils.ExitOnError(err)
+	fmt.Println("\nrootsTreeRoot: 0")
 
 	// Test signature
 	challenge := big.NewInt(1)
@@ -121,13 +118,20 @@ func main() {
 	decompressedSig, err = new(babyjub.Signature).Decompress(sig)
 	utils.ExitOnError(err)
 
-	fmt.Println()
-	//fmt.Println("old state:", currentState.BigInt())
-	//fmt.Println("new state:", newStateBigInt)
-	fmt.Println("challenge:", challenge)
+	fmt.Println("\nchallenge:", challenge)
 	fmt.Println("challengeSignatureR8x:", decompressedSig.R8.X)
-	fmt.Println("challengeSignatureR8y", decompressedSig.R8.Y)
-	fmt.Println("challengeSignatureS", decompressedSig.S)
+	fmt.Println("challengeSignatureR8y:", decompressedSig.R8.Y)
+	fmt.Println("challengeSignatureS:", decompressedSig.S)
+
+	if useRelayer {
+		proofIdenStateInRelayer, reIdenState, relayerClaimsTree := utils.CreateRelayerWithRelayedIdentity("28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c0000f", identifier, hoIdenState)
+
+		fmt.Println("\nreIdenState:", reIdenState.BigInt())
+		utils.PrintSiblings("idenStateInRelayerClaimMtp:", proofIdenStateInRelayer.AllSiblings())
+		fmt.Println("reProofValidClaimsTreeRoot:", relayerClaimsTree.BigInt())
+		fmt.Println("reProofValidRevTreeRoot: 0")
+		fmt.Println("reProofValidRootsTreeRoot: 0")
+	}
 }
 
 func createIdentityMultiAuthClaims(
@@ -151,10 +155,7 @@ func createIdentityMultiAuthClaims(
 
 	revTree := createRevTree(ctx, authClaims[:numOfFirstClaimsToRevoke])
 
-	state, err := merkletree.HashElems(
-		claimsTree.Root().BigInt(),
-		revTree.Root().BigInt(),
-		merkletree.HashZero.BigInt())
+	state, err := utils.CalcIdentityStateFromRoots(claimsTree, revTree)
 	utils.ExitOnError(err)
 
 	return identifier, claimsTree, revTree, state
