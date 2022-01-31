@@ -16,7 +16,7 @@ describe('Test NOTIN operator:', async function() {
     let circuit;
 
     before(async function() {
-        circuit = await wasm_tester(path.join(__dirname, "../../circuits/query/operators", "notinTest.circom"));
+        circuit = await wasm_tester(path.join(__dirname, "../circuits/query/", "notinTest.circom"));
     });
 
     tests.forEach(({desc, input,expOut}) => {

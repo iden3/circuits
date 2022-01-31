@@ -29,7 +29,7 @@ describe("Test IN operator:", async function() {
     let circuit;
 
     before(async function() {
-        circuit = await wasm_tester(path.join(__dirname, "../../circuits/query/operators", "inTest.circom"));
+        circuit = await wasm_tester(path.join(__dirname, "../circuits/query/", "inTest.circom"));
     });
 
     tests.forEach(({desc, input, expOut}) => {
