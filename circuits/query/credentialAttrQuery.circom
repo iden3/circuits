@@ -31,29 +31,29 @@ template AtomicQueryIN(IdOwnershipLevels, IssuerLevels, valueLevels) {
     */
 
     /* id ownership signals */
-  	signal input id;
+    signal input id;
     signal input hoIdenState;
 
-	signal input hoClaimsTreeRoot;
-	signal input authClaimMtp[IdOwnershipLevels];
-	signal input authClaim[8];
+    signal input hoClaimsTreeRoot;
+    signal input authClaimMtp[IdOwnershipLevels];
+    signal input authClaim[8];
 
-	signal input hoRevTreeRoot;
+    signal input hoRevTreeRoot;
     signal input authClaimNonRevMtp[IdOwnershipLevels];
     signal input authClaimNonRevMtpNoAux;
     signal input authClaimNonRevMtpAuxHi;
     signal input authClaimNonRevMtpAuxHv;
 
-	signal input hoRootsTreeRoot;
+    signal input hoRootsTreeRoot;
 
-  	/* signature*/
-	signal input challenge;
-	signal input challengeSignatureR8x;
-	signal input challengeSignatureR8y;
-	signal input challengeSignatureS;
+    /* signature*/
+    signal input challenge;
+    signal input challengeSignatureR8x;
+    signal input challengeSignatureR8y;
+    signal input challengeSignatureS;
 
-  	/* claim signals */
-  	signal input claimSchema;
+    /* claim signals */
+    signal input claimSchema;
     signal input claim[8];
     signal input claimIssuanceMtp[IssuerLevels];
     signal input claimIssuanceClaimsTreeRoot;
