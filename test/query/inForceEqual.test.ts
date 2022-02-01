@@ -5,32 +5,31 @@ const wasm_tester = require("circom_tester").wasm;
 
 describe("Test IN operator:", async function() {
     const tests = [
-        {desc: "value in the list",
+        {desc: "single accepted value",
             input: {
                 in: "123",
-                value: ["123", "9999", "5555"],
+                value: ["123", "9999"],
             },
-            expOut: {out: "1"}},
+            expOut: {}},
 
-        {desc: "multiple values in the list",
+        {desc: "multiple accepted values",
             input: {
                 in: "123",
                 value: ["123", "123", "999"],
             },
-            expOut: {out: "1"}},
-        {desc: "value not in the list",
+            expOut: {}},
+        {desc: "all accepted values",
             input: {
                 in: "123",
-                value: ["124", "888", "999"],
+                value: ["123", "123", "123"],
             },
-            expOut: {out: "0"}},
-
+            expOut: {}},
     ];
 
     let circuit;
 
     before(async function() {
-        circuit = await wasm_tester(path.join(__dirname, "../circuits/query/", "inTest.circom"));
+        circuit = await wasm_tester(path.join(__dirname, "../circuits/query/", "inForceEqualTest.circom"));
     });
 
     tests.forEach(({desc, input, expOut}) => {
