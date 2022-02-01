@@ -146,8 +146,10 @@ template AtomicQueryIN(IdOwnershipLevels, IssuerLevels, valueLevels) {
     for (var i=0; i<8; i++) { getClaimValue.claim[i] <== claim[i]; }
     getClaimValue.index <== slotIndex;
 
-    component notin = NOTIN_ForceEqual(valueLevels);
-    notin.in <== getClaimValue.value;
-    for(var i = 0; i<valueLevels; i++){notin.value[i] <== value[i];}
+    component in = IN(valueLevels);
+    in.in <== getClaimValue.value;
+    for(var i = 0; i<valueLevels; i++){in.value[i] <== value[i];}
+
+    in.out === operator;
 
 }
