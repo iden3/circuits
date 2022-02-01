@@ -90,7 +90,7 @@ describe("Test claim query NOTIN operation", function() {
 
             slotIndex: "3",
             value: ["1", "12", "13", "14"],
-            operator: "0",
+            operator: "4",
             timestamp: "1638533435",
         }
 
@@ -99,7 +99,7 @@ describe("Test claim query NOTIN operation", function() {
             id: "318143161927515226538633402626308472116169082888716969971233931702195126272",
             claimSchema: "49",
             slotIndex: "3",
-            operator: "0",
+            operator: "4",
             timestamp: "1638533435",
         }
         const w = await circuit.calculateWitness(inputs, true);
@@ -168,7 +168,7 @@ describe("Test claim query NOTIN operation", function() {
 
             slotIndex: "3",
             value: ["1", "0", "13", "14"],
-            operator: "1",
+            operator: "3",
             timestamp: "1638533435",
         }
 
@@ -177,7 +177,7 @@ describe("Test claim query NOTIN operation", function() {
             id: "318143161927515226538633402626308472116169082888716969971233931702195126272",
             claimSchema: "49",
             slotIndex: "3",
-            operator: "1",
+            operator: "3",
             timestamp: "1638533435",
         }
         const w = await circuit.calculateWitness(inputs, true);

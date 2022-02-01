@@ -4,7 +4,7 @@ include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "comparators.circom";
 include "../idOwnershipBySignature.circom";
-include "../credential.circom";
+include "query.circom";
 
 
 /**
@@ -146,10 +146,11 @@ template AtomicQueryIN(IdOwnershipLevels, IssuerLevels, valueLevels) {
     for (var i=0; i<8; i++) { getClaimValue.claim[i] <== claim[i]; }
     getClaimValue.index <== slotIndex;
 
-    component in = IN(valueLevels);
-    in.in <== getClaimValue.value;
-    for(var i = 0; i<valueLevels; i++){in.value[i] <== value[i];}
+    component q = Query(valueLevels);
+    q.in <== getClaimValue.value;
+    q.operator <== operator;
+    for(var i = 0; i<valueLevels; i++){q.value[i] <== value[i];}
 
-    in.out === operator;
+    q.out === 1;
 
 }
