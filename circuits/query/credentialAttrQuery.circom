@@ -24,7 +24,7 @@ valueLevels - Number of elements in comparison array for in/notin operation if l
 comparison ["1", "2", "3"]
 
 */
-template AtomicQueryIN(IdOwnershipLevels, IssuerLevels, valueLevels) {
+template AtomicQueryIN(IdOwnershipLevels, IssuerLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -146,10 +146,10 @@ template AtomicQueryIN(IdOwnershipLevels, IssuerLevels, valueLevels) {
     for (var i=0; i<8; i++) { getClaimValue.claim[i] <== claim[i]; }
     getClaimValue.index <== slotIndex;
 
-    component q = Query(valueLevels);
+    component q = Query(valueArraySize);
     q.in <== getClaimValue.value;
     q.operator <== operator;
-    for(var i = 0; i<valueLevels; i++){q.value[i] <== value[i];}
+    for(var i = 0; i<valueArraySize; i++){q.value[i] <== value[i];}
 
     q.out === 1;
 

@@ -38,12 +38,6 @@ template Query (valueLevels) {
     inComp.in <== in;
     for(var i = 0; i<valueLevels; i++){inComp.value[i] <== value[i];}
 
-    // notin
-    component notinComp = NOTIN(valueLevels);
-    notinComp.in <== in;
-    for(var i = 0; i<valueLevels; i++){notinComp.value[i] <== value[i];}
-
-
     // mux
     component mux = Mux3();
     component n2b = Num2Bits(3);
@@ -57,7 +51,9 @@ template Query (valueLevels) {
     lt.out ==> mux.c[1];
     gt.out ==> mux.c[2];
     inComp.out ==> mux.c[3];
-    notinComp.out ==> mux.c[4];
+
+    1-inComp.out ==> mux.c[4];
+
     0 ==> mux.c[5]; // not in use
     0 ==> mux.c[6]; // not in use
     0 ==> mux.c[7]; // not in use
