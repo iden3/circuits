@@ -24,7 +24,7 @@ valueLevels - Number of elements in comparison array for in/notin operation if l
 comparison ["1", "2", "3"]
 
 */
-template AtomicQueryIN(IdOwnershipLevels, IssuerLevels, valueArraySize) {
+template CredentialAttrQuery(IdOwnershipLevels, IssuerLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<

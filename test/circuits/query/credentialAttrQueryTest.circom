@@ -9,4 +9,4 @@ component main{public [challenge,
                        slotIndex,
                        operator,
                        value,
-                       timestamp]} = AtomicQueryIN(4, 4, 4);
+                       timestamp]} = CredentialAttrQuery(4, 4, 4);
