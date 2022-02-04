@@ -13,14 +13,16 @@ describe("idOwnershipBySignature", function() {
     before(async () => {
         circuit = await tester(
             path.join(__dirname, "../circuits", "idOwnershipBySignatures.circom"),
-            {reduceConstraints: false}
+            {
+                output: path.join(__dirname, "../circuits", "build/idOwnershipBySignatures"),
+                recompile: true,
+                reduceConstraints: false,
+            },
         );
     });
 
     it("Ownership should be ok. Auth claims total: 1. Signed by: 1st claim. Revoked: none", async () => {
         const inputs = {
-            hoIdenState: "18311560525383319719311394957064820091354976310599818797157189568621466950811",
-
             claimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
             authClaimMtp: ["0", "0", "0", "0"],
             authClaim : [
@@ -46,6 +48,8 @@ describe("idOwnershipBySignature", function() {
             challengeSignatureR8x: "8553678144208642175027223770335048072652078621216414881653012537434846327449",
             challengeSignatureR8y: "5507837342589329113352496188906367161790372084365285966741761856353367255709",
             challengeSignatureS: "2093461910575977345603199789919760192811763972089699387324401771367839603655",
+
+            hoIdenState: "18311560525383319719311394957064820091354976310599818797157189568621466950811",
         }
 
         const witness = await circuit.calculateWitness(inputs, true);
@@ -159,7 +163,6 @@ describe("idOwnershipBySignature", function() {
         await circuit.calculateWitness(inputs, true).catch((err) => {
             error = err;
         });
-        expect(error).not.to.be.undefined
         expect(error.message).to.include("Error: Assert Failed. Error in template")
     });
 
@@ -199,7 +202,6 @@ describe("idOwnershipBySignature", function() {
         await circuit.calculateWitness(inputs, true).catch((err) => {
             error = err;
         });
-        expect(error).not.to.be.undefined
         expect(error.message).to.include("Error: Assert Failed. Error in template")
     });
 });
