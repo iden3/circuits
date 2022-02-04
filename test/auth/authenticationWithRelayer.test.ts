@@ -47,7 +47,7 @@ describe("authWithRelayer.circom:", async function() {
             {
                 reduceConstraints: false,
                 output: path.join(__dirname, "../circuits", "build/authWithRelayer"),
-                recompile: false,
+                recompile: true,
             }
         );
     });

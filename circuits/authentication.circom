@@ -4,7 +4,6 @@ include "idOwnershipBySignature.circom";
 
 template VerifyAuthenticationInformation(IdOwnershipLevels) {
 
-    /* id ownership signals */
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[IdOwnershipLevels];
 	signal input authClaim[8];
@@ -23,14 +22,9 @@ template VerifyAuthenticationInformation(IdOwnershipLevels) {
 	signal input challengeSignatureS;
 	
     signal input state;
-
     // we have no constraints for "id" in this circuit, however we introduce "id" input here
     // as it serves as public input which should be the same for prover and verifier
     signal input id;
-
-    /*
-        Id ownership check
-    */
 
     component checkIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
 

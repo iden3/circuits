@@ -4,7 +4,6 @@ include "idOwnershipBySignatureWithRelayer.circom";
 
 template VerifyAuthenticationInformationWithRelayer(IdOwnershipLevels, RelayerLevels) {
 
-    /* id ownership signals */
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[IdOwnershipLevels];
 	signal input authClaim[8];
@@ -22,7 +21,8 @@ template VerifyAuthenticationInformationWithRelayer(IdOwnershipLevels, RelayerLe
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
-    // we have no constraints for "id" in this circuit, however we introduce "id" input here
+    //todo check if state should be here
+    // we have no constraints for "state" in this circuit, however we introduce "state" input here
     // as it serves as public input which should be the same for prover and verifier
     signal input state;
     signal input id;
@@ -32,10 +32,6 @@ template VerifyAuthenticationInformationWithRelayer(IdOwnershipLevels, RelayerLe
     signal input reProofValidClaimsTreeRoot;
     signal input reProofValidRevTreeRoot;
     signal input reProofValidRootsTreeRoot;
-
-    /*
-        Id ownership check
-    */
 
     component checkIdOwnership = IdOwnershipBySignatureWithRelayer(IdOwnershipLevels, RelayerLevels);
 
