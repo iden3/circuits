@@ -96,31 +96,3 @@ template VerifyClaimKeyBBJJinState(nLevels) {
     smtClaimNotRevoked.value <== 0;
 }
 
-// VerifyClaimKeyBBJJinClaimsTreeRoot - Circuit to check that claim with the provided public key is in ClaimsTreeRoot
-template VerifyClaimKeyBBJJinIdState(nLevels) {
-	signal input BBJAx;
-	signal input BBJAy;
-	signal input siblings[nLevels];
-	signal input claimsTreeRoot;
-	signal input revTreeRoot;
-	signal input rootsTreeRoot;
-	signal input idState;
-
-	// build ClaimKeyBBJJ
-	component verifyClaimKeyBBJJinClaimsTreeRoot = VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels);
-	verifyClaimKeyBBJJinClaimsTreeRoot.BBJAx <== BBJAx;
-	verifyClaimKeyBBJJinClaimsTreeRoot.BBJAy <== BBJAy;
-    for (var i=0; i<nLevels; i++) {
-        verifyClaimKeyBBJJinClaimsTreeRoot.siblings[i] <== siblings[i];
-    }
-    verifyClaimKeyBBJJinClaimsTreeRoot.claimsTreeRoot <== claimsTreeRoot;
-
-    component calcIdState = Poseidon(3);
-    calcIdState.inputs[0] <== claimsTreeRoot;
-    calcIdState.inputs[1] <== revTreeRoot;
-    calcIdState.inputs[2] <== rootsTreeRoot;
-
-    calcIdState.out === idState;
-
-}
-
