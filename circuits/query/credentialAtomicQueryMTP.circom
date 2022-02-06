@@ -8,8 +8,9 @@ include "query.circom";
 
 
 /**
-credentialAttrQuery.circom - circuit verifies next iden3 statements:
+credentialAtomicQueryMTP.circom - query claim value and verify claim MTP
 
+checks:
 - identity ownership
 - verify credential subject (verify that identity is an owner of a claim )
 - claim schema
