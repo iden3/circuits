@@ -17,7 +17,7 @@ checks:
 - claim ownership and issuance state
 - claim non revocation state
 - claim expiration ?
-- query data slots, check if in signal in/notin value[nElements]
+- query data slots
 
 IdOwnershipLevels - Merkle tree depth level for personal claims
 IssuerLevels - Merkle tree depth level for claims issued by the issuer
