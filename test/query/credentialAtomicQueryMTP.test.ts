@@ -15,7 +15,7 @@ describe("Test claim query NOTIN operation", function() {
 
     before(async () => {
         circuit = await wasm_tester(
-            path.join(__dirname, "../circuits/query", "credentialAttrQueryTest.circom"),
+            path.join(__dirname, "../circuits/query", "credentialAtomicQueryMTP.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,

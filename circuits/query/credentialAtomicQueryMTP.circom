@@ -24,7 +24,7 @@ valueLevels - Number of elements in comparison array for in/notin operation if l
 comparison ["1", "2", "3"]
 
 */
-template CredentialAttrQuery(IdOwnershipLevels, IssuerLevels, valueArraySize) {
+template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -73,7 +73,7 @@ template CredentialAttrQuery(IdOwnershipLevels, IssuerLevels, valueArraySize) {
 
     /** Query */
     signal input slotIndex;
-    signal input value[valueLevels];
+    signal input value[valueArraySize];
     signal input operator; // 0 - not in the list, // 1 - in the list
 
     /* current time */
