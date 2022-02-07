@@ -12,10 +12,10 @@ include "comparators.circom";
  "3" - in
  "4" - notin
 */
-template Query (valueLevels) {
+template Query (valueArraySize) {
     // signals
     signal input in;
-    signal input value[valueLevels];
+    signal input value[valueArraySize];
     signal input operator;
     signal output out;
 
@@ -34,9 +34,9 @@ template Query (valueLevels) {
     gt.in[1] <== value[0];
 
     // in
-    component inComp = IN(valueLevels);
+    component inComp = IN(valueArraySize);
     inComp.in <== in;
-    for(var i = 0; i<valueLevels; i++){inComp.value[i] <== value[i];}
+    for(var i = 0; i<valueArraySize; i++){inComp.value[i] <== value[i];}
 
     // mux
     component mux = Mux3();
