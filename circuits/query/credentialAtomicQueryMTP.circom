@@ -61,6 +61,7 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     signal input claimIssuanceRevTreeRoot;
     signal input claimIssuanceRootsTreeRoot;
     signal input claimIssuanceIdenState;
+    signal input issuerID;
 
     // claim non rev inputs
     signal input claimNonRevMtp[IssuerLevels];
