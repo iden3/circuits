@@ -76,7 +76,7 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     /** Query */
     signal input slotIndex;
     signal input value[valueArraySize];
-    signal input operator; // 0 - not in the list, // 1 - in the list
+    signal input operator;
 
     /* current time */
     signal input timestamp;
