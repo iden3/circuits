@@ -15,7 +15,7 @@ describe("Test claim query NOTIN operation", function() {
 
     before(async () => {
         circuit = await wasm_tester(
-            path.join(__dirname, "../circuits/query", "credentialAtomicQueryMTP.circom"),
+            path.join(__dirname, "../circuits/query", "credentialAtomicQueryMTPTest.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,
@@ -78,6 +78,7 @@ describe("Test claim query NOTIN operation", function() {
             claimIssuanceRevTreeRoot: "0",
             claimIssuanceRootsTreeRoot: "0",
             claimIssuanceIdenState: "7250774806265342444670050834809653548010854890881205160371587352728471237096",
+            issuerID: "293373448908678327289599234275657468666604586273320428510206058753616052224",
 
             claimNonRevMtp: ["0", "0", "0", "0"],
             claimNonRevMtpNoAux: "1",
@@ -101,6 +102,7 @@ describe("Test claim query NOTIN operation", function() {
             slotIndex: "3",
             operator: "4",
             timestamp: "1638533435",
+            issuerID: "293373448908678327289599234275657468666604586273320428510206058753616052224",
         }
         const w = await circuit.calculateWitness(inputs, true);
 
@@ -156,6 +158,7 @@ describe("Test claim query NOTIN operation", function() {
             claimIssuanceRevTreeRoot: "0",
             claimIssuanceRootsTreeRoot: "0",
             claimIssuanceIdenState: "7250774806265342444670050834809653548010854890881205160371587352728471237096",
+            issuerID: "293373448908678327289599234275657468666604586273320428510206058753616052224",
 
             claimNonRevMtp: ["0", "0", "0", "0"],
             claimNonRevMtpNoAux: "1",
@@ -179,6 +182,7 @@ describe("Test claim query NOTIN operation", function() {
             slotIndex: "3",
             operator: "3",
             timestamp: "1638533435",
+            issuerID: "293373448908678327289599234275657468666604586273320428510206058753616052224",
         }
         const w = await circuit.calculateWitness(inputs, true);
 
