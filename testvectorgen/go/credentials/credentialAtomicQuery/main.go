@@ -21,21 +21,34 @@ func main() {
 func attributeQuery() {
 	fmt.Println("\n-------\ntest vectors for credentialAtomicQuery:")
 	userPrivKHex := "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69f"
+	relayPrivKHex := "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c40000"
 	issuerPrivKHex := "21a5e7321d0e2f3ca1cc6504396e6594a2211544b08c206847cdee96f832421a"
 	challenge := new(big.Int).SetInt64(12345)
 
 	ctx := context.Background()
 
 	// User
-	userIdentity, uClaimsTree, userInputs := utils.GenerateIdentity(ctx, userPrivKHex, challenge)
+	userIdentity, userClaimsTree, userInputs := utils.GenerateIdentity(ctx, userPrivKHex, challenge)
 
-	fmt.Printf("\n signatures end -------- \n\n")
+	// Relay
+	userState, _ := utils.CalcIdentityStateFromRoots(userClaimsTree)
+
+	idenStateInRelayClaim, reIdenState, relayClaimsTreeRoot, proofIdenStateInRelayer := utils.GenerateRelayWithIdenStateClaim(
+		relayPrivKHex, userIdentity, userState)
+
+	fmt.Println("\nreIdenState", reIdenState.BigInt())
+	utils.PrintSiblings("hoStateInRelayerClaimMtp:", proofIdenStateInRelayer.AllSiblings())
+	utils.PrintClaim("hoStateInRelayClaim:", idenStateInRelayClaim)
+	fmt.Println("reProofValidClaimsTreeRoot:", relayClaimsTreeRoot.BigInt())
+	fmt.Println("reProofValidRevTreeRoot: 0")
+	fmt.Println("reProofValidRootsTreeRoot: 0")
 
 	// Issuer
-	_, iClaimsTree, issuerInputs := utils.GenerateIdentity(ctx, issuerPrivKHex, challenge)
+	_, issuerClaimsTree, issuerInputs := utils.GenerateIdentity(ctx, issuerPrivKHex, challenge)
 
-	fmt.Println(uClaimsTree)
+	fmt.Println("\nUser inputs:")
 	utils.PrintMap(userInputs)
+	fmt.Println("Issuer inputs:")
 	utils.PrintMap(issuerInputs)
 
 	// issue claim for user
@@ -53,23 +66,23 @@ func attributeQuery() {
 	utils.ExitOnError(err)
 
 	// addClaimToIssuerTree
-	proof, err := utils.AddClaimToTree(iClaimsTree, claim)
+	proof, err := utils.AddClaimToTree(issuerClaimsTree, claim)
 	utils.ExitOnError(err)
 
 	// Calim proof
 	proofSib, err := json.Marshal(proof.AllSiblings())
 	utils.ExitOnError(err)
 
-	fmt.Println("proofSib:", string(proofSib))
+	fmt.Println("\nproofSib:", string(proofSib))
 
-	cIn, err := utils.ClaimToString(claim)
+	claimAsString, err := utils.ClaimToString(claim)
 	utils.ExitOnError(err)
 
-	fmt.Println("cIn:", cIn)
+	fmt.Println("claimAsString:", claimAsString)
 
-	fmt.Println("issuer claim tree root:", iClaimsTree.Root().BigInt().String())
+	fmt.Println("issuer claim tree root:", issuerClaimsTree.Root().BigInt().String())
 	fmt.Println("current issuer state:")
-	utils.PrintCurrentState(iClaimsTree)
+	utils.PrintCurrentState(issuerClaimsTree)
 
 	issuerRevTreeStorage := memory.NewMemoryStorage()
 	issuerRevTree, err := merkletree.NewMerkleTree(ctx, issuerRevTreeStorage, 4)
@@ -90,8 +103,8 @@ func attributeQuery() {
 	//fmt.Println("NodeAux Key:",proof.NodeAux.Key.BigInt().String())
 	//fmt.Println("NodeAux Value:",proof.NodeAux.Value.BigInt().String())
 
-	fmt.Println("Rev tree state:", iClaimsTree.Root().BigInt().String())
+	fmt.Println("Rev tree state:", issuerClaimsTree.Root().BigInt().String())
 	fmt.Println("Rev tree issuer state:")
-	utils.PrintCurrentState(iClaimsTree)
+	utils.PrintCurrentState(issuerClaimsTree)
 
 }

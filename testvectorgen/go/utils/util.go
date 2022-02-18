@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
@@ -231,8 +232,70 @@ func GenerateIdentity(ctx context.Context, privKHex string, challenge *big.Int) 
 	inputs["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
 	inputs["challengeSignatureS"] = decompressedSig.S.String()
 	inputs["state"] = currentState.BigInt().String()
+	inputs["authClaim"], _ = ClaimToString(authClaim)
+	ExitOnError(err)
 
 	return identifier, claimsTree, inputs
+}
+
+func GenerateIdentity2(ctx context.Context, privKHex string, challenge *big.Int) (*core.ID, *merkletree.MerkleTree, *core.Claim, *babyjub.PrivateKey, error) {
+
+	// extract pubKey
+	var privKey babyjub.PrivateKey
+
+	if _, err := hex.Decode(privKey[:], []byte(privKHex)); err != nil {
+		panic(err)
+	}
+	X := privKey.Public().X
+	Y := privKey.Public().Y
+
+	// init claims tree
+	claimsTree, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 40)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	// create auth claim
+	authClaim, err := AuthClaimFromPubKey(X, Y)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	// add auth claim to claimsMT
+	entry := authClaim.TreeEntry()
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	hi, hv, err := entry.HiHv()
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	err = claimsTree.Add(ctx, hi.BigInt(), hv.BigInt())
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	// create new identity
+	identifier, err := core.CalculateGenesisID(claimsTree.Root())
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	return identifier, claimsTree, authClaim, &privKey, nil
+}
+
+func FormatInput(input interface{}) string {
+	var value string
+	switch v := input.(type) {
+	case *merkletree.Hash:
+		value = v.BigInt().String()
+	case *core.ID:
+		value = v.BigInt().String()
+	default:
+		ExitOnError(errors.New("Unknown input type. Can't format to string."))
+	}
+	return value
 }
 
 func CalcIdentityStateFromRoots(claimsTree *merkletree.MerkleTree, optTrees ...*merkletree.MerkleTree) (*merkletree.Hash, error) {
@@ -251,18 +314,17 @@ func CalcIdentityStateFromRoots(claimsTree *merkletree.MerkleTree, optTrees ...*
 	return state, err
 }
 
-func CreateRelayerWithRelayedIdentity(relayerPrivKey string, idenIdentifier *core.ID, idenState *merkletree.Hash) (*merkletree.Proof, *merkletree.Hash, *merkletree.Hash) {
+func GenerateRelayWithIdenStateClaim(relayerPrivKey string, identifier *core.ID, idenState *merkletree.Hash) (*core.Claim, *merkletree.Hash, *merkletree.Hash, *merkletree.Proof) {
 	ctx := context.Background()
 	_, relayerClaimsTree, _ := GenerateIdentity(ctx, relayerPrivKey, big.NewInt(0))
 
-	indexSlotA, _ := core.NewDataSlotFromInt(idenIdentifier.BigInt())
 	valueSlotA, _ := core.NewDataSlotFromInt(idenState.BigInt())
 	var schemaHash core.SchemaHash
-	copy(schemaHash[:], []byte{0}) //todo is it correct [TORESEARCH] which schema is correct?
+	schemaEncodedBytes, _ := hex.DecodeString("ba56af399498b2dfce51e2d14ba1f0fd") //todo shema encoded value may be wrong and WIP value. Need to check!
+	copy(schemaHash[:], merkletree.SwapEndianness(schemaEncodedBytes))
 	claim, err := core.NewClaim(
 		schemaHash,
-		//core.WithIndexID(*identifier), // todo do we need this identifier [TORESEARCH]
-		core.WithIndexData(indexSlotA, core.DataSlot{}),
+		core.WithIndexID(*identifier),
 		core.WithValueData(valueSlotA, core.DataSlot{}),
 	)
 	ExitOnError(err)
@@ -272,5 +334,5 @@ func CreateRelayerWithRelayedIdentity(relayerPrivKey string, idenIdentifier *cor
 	relayerState, err := CalcIdentityStateFromRoots(relayerClaimsTree)
 	ExitOnError(err)
 
-	return proofIdentityIsRelayed, relayerState, relayerClaimsTree.Root()
+	return claim, relayerState, relayerClaimsTree.Root(), proofIdentityIsRelayed
 }

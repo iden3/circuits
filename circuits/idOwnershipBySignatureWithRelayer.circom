@@ -31,10 +31,12 @@ template IdOwnershipBySignatureWithRelayer(nLevelsHolder, nLevelsRelayer) {
 
     signal input reIdenState;
     signal input hoStateInRelayerClaimMtp[nLevelsRelayer];
+    signal input hoStateInRelayerClaim[8];
 	signal input reProofValidClaimsTreeRoot;
 	signal input reProofValidRevTreeRoot;
 	signal input reProofValidRootsTreeRoot;
 
+    log(11111);
     component verifyAuthClaim = VerifyAuthClaim(nLevelsHolder);
     for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== authClaim[i]; }
 	for (var i=0; i<nLevelsHolder; i++) { verifyAuthClaim.authClaimMtp[i] <== authClaimMtp[i]; }
@@ -52,20 +54,28 @@ template IdOwnershipBySignatureWithRelayer(nLevelsHolder, nLevelsRelayer) {
 
 	// get claim for identity state and check that it is included into Relayer's state
 
+    log(22222);
 	component calcHolderState = getIdenState();
     calcHolderState.claimsTreeRoot <== claimsTreeRoot;
     calcHolderState.revTreeRoot <== revTreeRoot;
     calcHolderState.rootsTreeRoot <== rootsTreeRoot;
 
-    component idenStateInRelayerClaim = getIdenStateInRelayerClaim();
-    idenStateInRelayerClaim.id <== hoId;
-    idenStateInRelayerClaim.state <== calcHolderState.idenState;
+    calcHolderState.idenState === hoStateInRelayerClaim[6];
+
+	component header = getClaimHeader();
+	for (var i=0; i<8; i++) { header.claim[i] <== hoStateInRelayerClaim[i]; }
+
+	component subjectOtherIden = getClaimSubjectOtherIden(0);
+	for (var i=0; i<8; i++) { subjectOtherIden.claim[i] <== hoStateInRelayerClaim[i]; }
+	for (var i=0; i<32; i++) { subjectOtherIden.claimFlags[i] <== header.claimFlags[i]; }
+
+    hoId === subjectOtherIden.id;
 
     component claimHiHv = getClaimHiHv();
     for (var i=0; i<8; i++) {
-        claimHiHv.claim[i] <== idenStateInRelayerClaim.claim[i];
+        claimHiHv.claim[i] <== hoStateInRelayerClaim[i];
     }
-    
+    log(3333);
     component checkHolderStateInRelayer = SMTVerifier(nLevelsRelayer);
     checkHolderStateInRelayer.enabled <== 1;
     checkHolderStateInRelayer.fnc <== 0; //inclusion
@@ -78,7 +88,7 @@ template IdOwnershipBySignatureWithRelayer(nLevelsHolder, nLevelsRelayer) {
     checkHolderStateInRelayer.isOld0 <== 0;
     checkHolderStateInRelayer.key <== claimHiHv.hi;
     checkHolderStateInRelayer.value <== claimHiHv.hv;
-
+    log(4444);
 	component calcRelayerState = getIdenState();
     calcRelayerState.claimsTreeRoot <== reProofValidClaimsTreeRoot;
     calcRelayerState.revTreeRoot <== reProofValidRevTreeRoot;
@@ -88,20 +98,4 @@ template IdOwnershipBySignatureWithRelayer(nLevelsHolder, nLevelsRelayer) {
     isRelayerStateCorrect.in[0] <== calcRelayerState.idenState;
     isRelayerStateCorrect.in[1] <== reIdenState;
     isRelayerStateCorrect.out === 1;
-}
-
-template getIdenStateInRelayerClaim() {
-    signal input id;
-    signal input state;
-    signal output claim[8];
-
-    //todo put correct schema to the claim but not zero
-    claim[0] <== 0;
-    claim[1] <== 0;
-    claim[2] <== id;
-    claim[3] <== 0;
-    claim[4] <== 0;
-    claim[5] <== 0;
-    claim[6] <== state;
-    claim[7] <== 0;
 }
