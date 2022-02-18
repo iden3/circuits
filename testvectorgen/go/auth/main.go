@@ -24,7 +24,7 @@ func main() {
 	inputs := make(map[string]string)
 	ctx := context.Background()
 
-	useRelayer := true
+	useRelay := true
 
 	privKeyHex := "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69f"
 	var privKey babyjub.PrivateKey
@@ -101,13 +101,13 @@ func main() {
 
 	utils.PrintMap(inputs)
 
-	if useRelayer {
-		_, reIdenState, relayerClaimsTree, proofIdenStateInRelayer := utils.GenerateRelayWithIdenStateClaim(
+	if useRelay {
+		_, reIdenState, relayClaimsTree, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim(
 			"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c0000f", identifier, currentState)
 
 		fmt.Println("\nreIdenState:", reIdenState.BigInt())
-		utils.PrintSiblings("idenStateInRelayerClaimMtp:", proofIdenStateInRelayer.AllSiblings())
-		fmt.Println("reProofValidClaimsTreeRoot:", relayerClaimsTree.BigInt())
+		utils.PrintSiblings("idenStateInRelayClaimMtp:", proofIdenStateInRelay.AllSiblings())
+		fmt.Println("reProofValidClaimsTreeRoot:", relayClaimsTree.BigInt())
 		fmt.Println("reProofValidRevTreeRoot: 0")
 		fmt.Println("reProofValidRootsTreeRoot: 0")
 	}

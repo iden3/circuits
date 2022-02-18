@@ -314,13 +314,13 @@ func CalcIdentityStateFromRoots(claimsTree *merkletree.MerkleTree, optTrees ...*
 	return state, err
 }
 
-func GenerateRelayWithIdenStateClaim(relayerPrivKey string, identifier *core.ID, idenState *merkletree.Hash) (*core.Claim, *merkletree.Hash, *merkletree.Hash, *merkletree.Proof) {
+func GenerateRelayWithIdenStateClaim(relayPrivKey string, identifier *core.ID, idenState *merkletree.Hash) (*core.Claim, *merkletree.Hash, *merkletree.Hash, *merkletree.Proof) {
 	ctx := context.Background()
-	_, relayerClaimsTree, _ := GenerateIdentity(ctx, relayerPrivKey, big.NewInt(0))
+	_, relayClaimsTree, _ := GenerateIdentity(ctx, relayPrivKey, big.NewInt(0))
 
 	valueSlotA, _ := core.NewDataSlotFromInt(idenState.BigInt())
 	var schemaHash core.SchemaHash
-	schemaEncodedBytes, _ := hex.DecodeString("ba56af399498b2dfce51e2d14ba1f0fd") //todo shema encoded value may be wrong and WIP value. Need to check!
+	schemaEncodedBytes, _ := hex.DecodeString("ba56af399498b2dfce51e2d14ba1f0fd")
 	copy(schemaHash[:], merkletree.SwapEndianness(schemaEncodedBytes))
 	claim, err := core.NewClaim(
 		schemaHash,
@@ -329,10 +329,10 @@ func GenerateRelayWithIdenStateClaim(relayerPrivKey string, identifier *core.ID,
 	)
 	ExitOnError(err)
 
-	proofIdentityIsRelayed, err := AddClaimToTree(relayerClaimsTree, claim)
+	proofIdentityIsRelayed, err := AddClaimToTree(relayClaimsTree, claim)
 	ExitOnError(err)
-	relayerState, err := CalcIdentityStateFromRoots(relayerClaimsTree)
+	relayState, err := CalcIdentityStateFromRoots(relayClaimsTree)
 	ExitOnError(err)
 
-	return claim, relayerState, relayerClaimsTree.Root(), proofIdentityIsRelayed
+	return claim, relayState, relayClaimsTree.Root(), proofIdentityIsRelayed
 }

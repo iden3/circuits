@@ -3,7 +3,7 @@ include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "comparators.circom";
-include "../idOwnershipBySignatureWithRelayer.circom";
+include "../IdOwnershipBySignatureWithRelay.circom";
 include "query.circom";
 
 
@@ -35,7 +35,7 @@ template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, Rela
     signal input id;
 
     signal input reIdenState;
-    signal input hoStateInRelayerClaimMtp[RelayLevels];
+    signal input hoStateInRelayClaimMtp[RelayLevels];
     signal input hoStateInRelayClaim[8];
 	signal input reProofValidClaimsTreeRoot;
 	signal input reProofValidRevTreeRoot;
@@ -92,7 +92,7 @@ template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, Rela
     */
 
     /* Id ownership check*/
-    component userIdOwnership = IdOwnershipBySignatureWithRelayer(IdOwnershipLevels, RelayLevels);
+    component userIdOwnership = IdOwnershipBySignatureWithRelay(IdOwnershipLevels, RelayLevels);
 
     userIdOwnership.claimsTreeRoot <== hoClaimsTreeRoot; // currentHolderStateClaimsTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.authClaimMtp[i] <== authClaimMtp[i]; }
@@ -116,7 +116,7 @@ template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, Rela
     userIdOwnership.hoId <== id;
 
     userIdOwnership.reIdenState <== reIdenState;
-    for (var i=0; i<RelayLevels; i++) { userIdOwnership.hoStateInRelayerClaimMtp[i] <== hoStateInRelayerClaimMtp[i]; }
+    for (var i=0; i<RelayLevels; i++) { userIdOwnership.hoStateInRelayClaimMtp[i] <== hoStateInRelayClaimMtp[i]; }
 	userIdOwnership.reProofValidClaimsTreeRoot <== reProofValidClaimsTreeRoot;
 	userIdOwnership.reProofValidRevTreeRoot <== reProofValidRevTreeRoot;
 	userIdOwnership.reProofValidRootsTreeRoot <== reProofValidRootsTreeRoot;

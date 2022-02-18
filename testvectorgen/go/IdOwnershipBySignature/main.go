@@ -26,14 +26,14 @@ func main() {
 	numberOfKeys := 2
 	numberOfFirstClaimsToRevoke := 2
 	signingKeyIndex := 1
-	useRelayer := true
+	useRelay := true
 
 	//claimSchema, _ := big.NewInt(0).SetString("251025091000101825075425831481271126140", 10)
 
 	fmt.Println("Number of keys:", numberOfKeys)
 	fmt.Println("Signing key index:", signingKeyIndex)
 	fmt.Println("Number of first keys to revoke:", numberOfFirstClaimsToRevoke)
-	fmt.Println("Use relayer:", useRelayer)
+	fmt.Println("Use relay:", useRelay)
 
 	privKeys := createPrivateKeys(privKeysHex[:numberOfKeys])
 	authClaims := createAuthClaims(privKeys)
@@ -70,7 +70,7 @@ func main() {
 	ctx := context.Background()
 	identifier, claimsTree, revTree, hoIdenState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke)
 
-	if useRelayer {
+	if useRelay {
 		fmt.Println("\nhoId:", identifier.BigInt())
 	} else {
 		fmt.Println("hoIdenState:", hoIdenState.BigInt())
@@ -123,13 +123,13 @@ func main() {
 	fmt.Println("challengeSignatureR8y:", decompressedSig.R8.Y)
 	fmt.Println("challengeSignatureS:", decompressedSig.S)
 
-	if useRelayer {
-		idenStateInRelayClaim, reIdenState, relayerClaimsTree, proofIdenStateInRelayer := utils.GenerateRelayWithIdenStateClaim("28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c0000f", identifier, hoIdenState)
+	if useRelay {
+		idenStateInRelayClaim, reIdenState, relayClaimsTree, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim("28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c0000f", identifier, hoIdenState)
 
 		fmt.Println("\nreIdenState:", reIdenState.BigInt())
-		utils.PrintSiblings("hoStateInRelayerClaimMtp:", proofIdenStateInRelayer.AllSiblings())
-		utils.PrintClaim("hoStateInRelayerClaim:", idenStateInRelayClaim)
-		fmt.Println("reProofValidClaimsTreeRoot:", relayerClaimsTree.BigInt())
+		utils.PrintSiblings("hoStateInRelayClaimMtp:", proofIdenStateInRelay.AllSiblings())
+		utils.PrintClaim("hoStateInRelayClaim:", idenStateInRelayClaim)
+		fmt.Println("reProofValidClaimsTreeRoot:", relayClaimsTree.BigInt())
 		fmt.Println("reProofValidRevTreeRoot: 0")
 		fmt.Println("reProofValidRootsTreeRoot: 0")
 	}

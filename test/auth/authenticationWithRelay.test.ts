@@ -3,7 +3,7 @@ import {describe} from "mocha";
 const path = require("path");
 const wasm_tester = require("circom_tester").wasm;
 
-describe("authWithRelayer.circom:", async function() {
+describe("authWithRelay.circom:", async function() {
     const tests = [
         {
             desc: "success",
@@ -25,7 +25,7 @@ describe("authWithRelayer.circom:", async function() {
                 state: "18311560525383319719311394957064820091354976310599818797157189568621466950811",
 
                 reIdenState: "21379323467784491789003100787647318195982639612387659754289889351500654829825",
-                hoStateInRelayerClaimMtp: ["17605167619224034183296372581673201279930657375530777790807744693157278638913", "0", "0", "0"],
+                hoStateInRelayClaimMtp: ["17605167619224034183296372581673201279930657375530777790807744693157278638913", "0", "0", "0"],
                 reProofValidClaimsTreeRoot: "6406432174442839937842097428557085929352759679431949812924728323765004816196",
                 reProofValidRevTreeRoot: "0",
                 reProofValidRootsTreeRoot: "0",
@@ -43,10 +43,10 @@ describe("authWithRelayer.circom:", async function() {
 
     before(async () => {
         circuit = await wasm_tester(
-            path.join(__dirname, "../circuits", "authWithRelayer.circom"),
+            path.join(__dirname, "../circuits", "authWithRelay.circom"),
             {
                 reduceConstraints: false,
-                output: path.join(__dirname, "../circuits", "build/authWithRelayer"),
+                output: path.join(__dirname, "../circuits", "build/authWithRelay"),
                 recompile: true,
             }
         );

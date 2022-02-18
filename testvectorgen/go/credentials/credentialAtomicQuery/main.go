@@ -33,11 +33,11 @@ func attributeQuery() {
 	// Relay
 	userState, _ := utils.CalcIdentityStateFromRoots(userClaimsTree)
 
-	idenStateInRelayClaim, reIdenState, relayClaimsTreeRoot, proofIdenStateInRelayer := utils.GenerateRelayWithIdenStateClaim(
+	idenStateInRelayClaim, reIdenState, relayClaimsTreeRoot, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim(
 		relayPrivKHex, userIdentity, userState)
 
 	fmt.Println("\nreIdenState", reIdenState.BigInt())
-	utils.PrintSiblings("hoStateInRelayerClaimMtp:", proofIdenStateInRelayer.AllSiblings())
+	utils.PrintSiblings("hoStateInRelayClaimMtp:", proofIdenStateInRelay.AllSiblings())
 	utils.PrintClaim("hoStateInRelayClaim:", idenStateInRelayClaim)
 	fmt.Println("reProofValidClaimsTreeRoot:", relayClaimsTreeRoot.BigInt())
 	fmt.Println("reProofValidRevTreeRoot: 0")

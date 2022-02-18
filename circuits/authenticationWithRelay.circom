@@ -1,8 +1,8 @@
 pragma circom 2.0.0;
 
-include "idOwnershipBySignatureWithRelayer.circom";
+include "idOwnershipBySignatureWithRelay.circom";
 
-template VerifyAuthenticationInformationWithRelayer(IdOwnershipLevels, RelayerLevels) {
+template VerifyAuthenticationInformationWithRelay(IdOwnershipLevels, RelayLevels) {
 
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[IdOwnershipLevels];
@@ -28,12 +28,12 @@ template VerifyAuthenticationInformationWithRelayer(IdOwnershipLevels, RelayerLe
     signal input id;
 
     signal input reIdenState;
-    signal input hoStateInRelayerClaimMtp[RelayerLevels];
+    signal input hoStateInRelayClaimMtp[RelayLevels];
     signal input reProofValidClaimsTreeRoot;
     signal input reProofValidRevTreeRoot;
     signal input reProofValidRootsTreeRoot;
 
-    component checkIdOwnership = IdOwnershipBySignatureWithRelayer(IdOwnershipLevels, RelayerLevels);
+    component checkIdOwnership = IdOwnershipBySignatureWithRelay(IdOwnershipLevels, RelayLevels);
 
 	checkIdOwnership.claimsTreeRoot <== claimsTreeRoot;
 	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.authClaimMtp[i] <== authClaimMtp[i]; }
@@ -55,7 +55,7 @@ template VerifyAuthenticationInformationWithRelayer(IdOwnershipLevels, RelayerLe
     checkIdOwnership.hoId <== id;
 
     checkIdOwnership.reIdenState <== reIdenState;
-    for (var i=0; i<RelayerLevels; i++) { checkIdOwnership.hoStateInRelayerClaimMtp[i] <== hoStateInRelayerClaimMtp[i]; }
+    for (var i=0; i<RelayLevels; i++) { checkIdOwnership.hoStateInRelayClaimMtp[i] <== hoStateInRelayClaimMtp[i]; }
     checkIdOwnership.reProofValidClaimsTreeRoot <== reProofValidClaimsTreeRoot;
     checkIdOwnership.reProofValidRevTreeRoot <== reProofValidRevTreeRoot;
     checkIdOwnership.reProofValidRootsTreeRoot <== reProofValidRootsTreeRoot;
