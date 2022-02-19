@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	core "github.com/iden3/go-iden3-core"
@@ -14,7 +15,7 @@ import (
 
 func main() {
 
-	// Generate inputs for attributeQuery.circom
+	// Generate inputs for credentialAtomicQueryMTPWithRelay.circom and credentialAtomicQueryMTP.circom
 	attributeQuery()
 }
 
@@ -55,7 +56,8 @@ func attributeQuery() {
 	dataSlotA, _ := core.NewDataSlotFromInt(big.NewInt(10))
 	nonce := 1
 	var schemaHash core.SchemaHash
-	copy(schemaHash[:], "1")
+	schemaBytes, err := hex.DecodeString("ce6bb12c96bfd1544c02c289c6b4b987")
+	copy(schemaHash[:], schemaBytes)
 
 	claim, err := core.NewClaim(
 		schemaHash,

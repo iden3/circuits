@@ -23,9 +23,9 @@ func main() {
 		"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d",
 	}
 
-	numberOfKeys := 2
-	numberOfFirstClaimsToRevoke := 2
-	signingKeyIndex := 1
+	numberOfKeys := 1
+	numberOfFirstClaimsToRevoke := 0
+	signingKeyIndex := 0
 	useRelay := true
 
 	//claimSchema, _ := big.NewInt(0).SetString("251025091000101825075425831481271126140", 10)
