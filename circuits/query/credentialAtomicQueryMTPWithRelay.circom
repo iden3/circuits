@@ -117,6 +117,7 @@ template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, Rela
 
     userIdOwnership.reIdenState <== reIdenState;
     for (var i=0; i<RelayLevels; i++) { userIdOwnership.hoStateInRelayClaimMtp[i] <== hoStateInRelayClaimMtp[i]; }
+    for (var i=0; i<8; i++) { userIdOwnership.hoStateInRelayClaim[i] <== hoStateInRelayClaim[i]; }
 	userIdOwnership.reProofValidClaimsTreeRoot <== reProofValidClaimsTreeRoot;
 	userIdOwnership.reProofValidRevTreeRoot <== reProofValidRevTreeRoot;
 	userIdOwnership.reProofValidRootsTreeRoot <== reProofValidRootsTreeRoot;
