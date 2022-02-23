@@ -36,7 +36,6 @@ template IdOwnershipBySignatureWithRelay(nLevelsHolder, nLevelsRelay) {
 	signal input reProofValidRevTreeRoot;
 	signal input reProofValidRootsTreeRoot;
 
-    log(11111);
     component verifyAuthClaim = VerifyAuthClaim(nLevelsHolder);
     for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== authClaim[i]; }
 	for (var i=0; i<nLevelsHolder; i++) { verifyAuthClaim.authClaimMtp[i] <== authClaimMtp[i]; }
@@ -54,7 +53,6 @@ template IdOwnershipBySignatureWithRelay(nLevelsHolder, nLevelsRelay) {
 
 	// get claim for identity state and check that it is included into Relay's state
 
-    log(22222);
 	component calcHolderState = getIdenState();
     calcHolderState.claimsTreeRoot <== claimsTreeRoot;
     calcHolderState.revTreeRoot <== revTreeRoot;
@@ -75,7 +73,8 @@ template IdOwnershipBySignatureWithRelay(nLevelsHolder, nLevelsRelay) {
     for (var i=0; i<8; i++) {
         claimHiHv.claim[i] <== hoStateInRelayClaim[i];
     }
-    log(3333);
+
+    // Check that StatinInRelayClaim is in Relay state
     component checkHolderStateInRelay = SMTVerifier(nLevelsRelay);
     checkHolderStateInRelay.enabled <== 1;
     checkHolderStateInRelay.fnc <== 0; //inclusion
@@ -88,7 +87,7 @@ template IdOwnershipBySignatureWithRelay(nLevelsHolder, nLevelsRelay) {
     checkHolderStateInRelay.isOld0 <== 0;
     checkHolderStateInRelay.key <== claimHiHv.hi;
     checkHolderStateInRelay.value <== claimHiHv.hv;
-    log(4444);
+
 	component calcRelayState = getIdenState();
     calcRelayState.claimsTreeRoot <== reProofValidClaimsTreeRoot;
     calcRelayState.revTreeRoot <== reProofValidRevTreeRoot;
