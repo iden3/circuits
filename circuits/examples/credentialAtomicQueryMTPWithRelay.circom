@@ -3,8 +3,8 @@ pragma circom 2.0.0;
 include "../query/credentialAtomicQueryMTPWithRelay.circom";
 
 component main{public [challenge,
-                        id,
-                        reIdenState,
+                        userID,
+                        relayState,
                         issuerID,
                         claimSchema,
                         slotIndex,

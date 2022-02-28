@@ -9,13 +9,18 @@ pragma circom 2.0.0;
 
 include "verifyAuthClaim.circom";
 
-template IdOwnershipBySignatureWithRelay(nLevelsHolder, nLevelsRelay) {
+template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
+
+    /*
+    >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    */
+
 	signal input claimsTreeRoot;
-	signal input authClaimMtp[nLevelsHolder];
+	signal input authClaimMtp[nLevelsUser];
 	signal input authClaim[8];
 
 	signal input revTreeRoot;
-    signal input authClaimNonRevMtp[nLevelsHolder];
+    signal input authClaimNonRevMtp[nLevelsUser];
     signal input authClaimNonRevMtpNoAux;
     signal input authClaimNonRevMtpAuxHi;
     signal input authClaimNonRevMtpAuxHv;
@@ -27,21 +32,25 @@ template IdOwnershipBySignatureWithRelay(nLevelsHolder, nLevelsRelay) {
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
-    signal input hoId;
+    signal input userID;
 
-    signal input reIdenState;
-    signal input hoStateInRelayClaimMtp[nLevelsRelay];
-    signal input hoStateInRelayClaim[8];
-	signal input reProofValidClaimsTreeRoot;
-	signal input reProofValidRevTreeRoot;
-	signal input reProofValidRootsTreeRoot;
+    signal input relayState;
+    signal input userStateInRelayClaimMtp[nLevelsRelay];
+    signal input userStateInRelayClaim[8];
+	signal input relayProofValidClaimsTreeRoot;
+	signal input relayProofValidRevTreeRoot;
+	signal input relayProofValidRootsTreeRoot;
 
-    component verifyAuthClaim = VerifyAuthClaim(nLevelsHolder);
+    /*
+    >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    */
+
+    component verifyAuthClaim = VerifyAuthClaim(nLevelsUser);
     for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== authClaim[i]; }
-	for (var i=0; i<nLevelsHolder; i++) { verifyAuthClaim.authClaimMtp[i] <== authClaimMtp[i]; }
+	for (var i=0; i<nLevelsUser; i++) { verifyAuthClaim.authClaimMtp[i] <== authClaimMtp[i]; }
 	verifyAuthClaim.claimsTreeRoot <== claimsTreeRoot;
 	verifyAuthClaim.revTreeRoot <== revTreeRoot;
-	for (var i=0; i<nLevelsHolder; i++) { verifyAuthClaim.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
+	for (var i=0; i<nLevelsUser; i++) { verifyAuthClaim.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
 	verifyAuthClaim.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
 	verifyAuthClaim.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
 	verifyAuthClaim.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
@@ -53,48 +62,48 @@ template IdOwnershipBySignatureWithRelay(nLevelsHolder, nLevelsRelay) {
 
 	// get claim for identity state and check that it is included into Relay's state
 
-	component calcHolderState = getIdenState();
-    calcHolderState.claimsTreeRoot <== claimsTreeRoot;
-    calcHolderState.revTreeRoot <== revTreeRoot;
-    calcHolderState.rootsTreeRoot <== rootsTreeRoot;
+	component calcUserState = getIdenState();
+    calcUserState.claimsTreeRoot <== claimsTreeRoot;
+    calcUserState.revTreeRoot <== revTreeRoot;
+    calcUserState.rootsTreeRoot <== rootsTreeRoot;
 
-    calcHolderState.idenState === hoStateInRelayClaim[6];
+    calcUserState.idenState === userStateInRelayClaim[6];
 
 	component header = getClaimHeader();
-	for (var i=0; i<8; i++) { header.claim[i] <== hoStateInRelayClaim[i]; }
+	for (var i=0; i<8; i++) { header.claim[i] <== userStateInRelayClaim[i]; }
 
 	component subjectOtherIden = getClaimSubjectOtherIden(0);
-	for (var i=0; i<8; i++) { subjectOtherIden.claim[i] <== hoStateInRelayClaim[i]; }
+	for (var i=0; i<8; i++) { subjectOtherIden.claim[i] <== userStateInRelayClaim[i]; }
 	for (var i=0; i<32; i++) { subjectOtherIden.claimFlags[i] <== header.claimFlags[i]; }
 
-    hoId === subjectOtherIden.id;
+    userID === subjectOtherIden.id;
 
     component claimHiHv = getClaimHiHv();
     for (var i=0; i<8; i++) {
-        claimHiHv.claim[i] <== hoStateInRelayClaim[i];
+        claimHiHv.claim[i] <== userStateInRelayClaim[i];
     }
 
     // Check that StatinInRelayClaim is in Relay state
-    component checkHolderStateInRelay = SMTVerifier(nLevelsRelay);
-    checkHolderStateInRelay.enabled <== 1;
-    checkHolderStateInRelay.fnc <== 0; //inclusion
-    checkHolderStateInRelay.root <== reProofValidClaimsTreeRoot;
+    component checkUserStateInRelay = SMTVerifier(nLevelsRelay);
+    checkUserStateInRelay.enabled <== 1;
+    checkUserStateInRelay.fnc <== 0; //inclusion
+    checkUserStateInRelay.root <== relayProofValidClaimsTreeRoot;
     for (var i=0; i<nLevelsRelay; i++) {
-        checkHolderStateInRelay.siblings[i] <== hoStateInRelayClaimMtp[i];
+        checkUserStateInRelay.siblings[i] <== userStateInRelayClaimMtp[i];
     }
-    checkHolderStateInRelay.oldKey <== 0;
-    checkHolderStateInRelay.oldValue <== 0;
-    checkHolderStateInRelay.isOld0 <== 0;
-    checkHolderStateInRelay.key <== claimHiHv.hi;
-    checkHolderStateInRelay.value <== claimHiHv.hv;
+    checkUserStateInRelay.oldKey <== 0;
+    checkUserStateInRelay.oldValue <== 0;
+    checkUserStateInRelay.isOld0 <== 0;
+    checkUserStateInRelay.key <== claimHiHv.hi;
+    checkUserStateInRelay.value <== claimHiHv.hv;
 
 	component calcRelayState = getIdenState();
-    calcRelayState.claimsTreeRoot <== reProofValidClaimsTreeRoot;
-    calcRelayState.revTreeRoot <== reProofValidRevTreeRoot;
-    calcRelayState.rootsTreeRoot <== reProofValidRootsTreeRoot;
+    calcRelayState.claimsTreeRoot <== relayProofValidClaimsTreeRoot;
+    calcRelayState.revTreeRoot <== relayProofValidRevTreeRoot;
+    calcRelayState.rootsTreeRoot <== relayProofValidRootsTreeRoot;
 
     component isRelayStateCorrect = IsEqual();
     isRelayStateCorrect.in[0] <== calcRelayState.idenState;
-    isRelayStateCorrect.in[1] <== reIdenState;
+    isRelayStateCorrect.in[1] <== relayState;
     isRelayStateCorrect.out === 1;
 }

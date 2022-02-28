@@ -2,8 +2,6 @@ import {describe} from "mocha";
 
 const path = require("path");
 const wasm_tester = require("circom_tester").wasm;
-const chai = require("chai");
-const assert = chai.assert;
 
 export {};
 
@@ -31,16 +29,16 @@ describe("Test claim query IN, NOT IN operation", function () {
     it("claims slot[3] = `0`, value NOT IN the list: [1, 12, 13, 14]", async () => {
 
         const inputs = {
-            id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
+            userID: "323416925264666217617288569742564703632850816035761084002720090377353297920",
 
-            reIdenState: "9567295008641054288261061367762855120424889358077873428998243939488311767955",
-            hoStateInRelayClaimMtp: ["0", "14984182005329191396993118103366240378691291400560637634045002581903516328103", "0", "0"],
-            hoStateInRelayClaim: ["928251232571379559706167670634346311933", "323416925264666217617288569742564703632850816035761084002720090377353297920", "0", "0", "0", "0", "18311560525383319719311394957064820091354976310599818797157189568621466950811", "0"],
-            reProofValidClaimsTreeRoot: "4363126336135379650861073572245208647463603543037672666254113932136121452383",
-            reProofValidRevTreeRoot: "0",
-            reProofValidRootsTreeRoot: "0",
+            relayState: "9567295008641054288261061367762855120424889358077873428998243939488311767955",
+            userStateInRelayClaimMtp: ["0", "14984182005329191396993118103366240378691291400560637634045002581903516328103", "0", "0"],
+            userStateInRelayClaim: ["928251232571379559706167670634346311933", "323416925264666217617288569742564703632850816035761084002720090377353297920", "0", "0", "0", "0", "18311560525383319719311394957064820091354976310599818797157189568621466950811", "0"],
+            relayProofValidClaimsTreeRoot: "4363126336135379650861073572245208647463603543037672666254113932136121452383",
+            relayProofValidRevTreeRoot: "0",
+            relayProofValidRootsTreeRoot: "0",
 
-            hoClaimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
+            userClaimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
             authClaimMtp: ["0", "0", "0", "0"],
             authClaim: [
                 "251025091000101825075425831481271126140",
@@ -53,13 +51,13 @@ describe("Test claim query IN, NOT IN operation", function () {
                 "0",
             ],
 
-            hoRevTreeRoot: "0",
+            userRevTreeRoot: "0",
             authClaimNonRevMtp: ["0", "0", "0", "0"],
             authClaimNonRevMtpNoAux: "1",
             authClaimNonRevMtpAuxHi: "0",
             authClaimNonRevMtpAuxHv: "0",
 
-            hoRootsTreeRoot: "0",
+            userRootsTreeRoot: "0",
 
             challenge: "12345",
             challengeSignatureR8x: "20325325089801048194045249505428880076655971734013328186061936404000070227397",
@@ -106,7 +104,7 @@ describe("Test claim query IN, NOT IN operation", function () {
 
         const expOut = {
             challenge: "12345",
-            id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
+            userID: "323416925264666217617288569742564703632850816035761084002720090377353297920",
             claimSchema: "49",
             slotIndex: "3",
             operator: "4",
@@ -120,16 +118,16 @@ describe("Test claim query IN, NOT IN operation", function () {
 
     it("claims slot[3] = `0`, value IN the list: [1, 0, 13, 14]", async () => {
         const inputs = {
-            id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
+            userID: "323416925264666217617288569742564703632850816035761084002720090377353297920",
 
-            reIdenState: "9567295008641054288261061367762855120424889358077873428998243939488311767955",
-            hoStateInRelayClaimMtp: ["0", "14984182005329191396993118103366240378691291400560637634045002581903516328103", "0", "0"],
-            hoStateInRelayClaim: ["928251232571379559706167670634346311933", "323416925264666217617288569742564703632850816035761084002720090377353297920", "0", "0", "0", "0", "18311560525383319719311394957064820091354976310599818797157189568621466950811", "0"],
-            reProofValidClaimsTreeRoot: "4363126336135379650861073572245208647463603543037672666254113932136121452383",
-            reProofValidRevTreeRoot: "0",
-            reProofValidRootsTreeRoot: "0",
+            relayState: "9567295008641054288261061367762855120424889358077873428998243939488311767955",
+            userStateInRelayClaimMtp: ["0", "14984182005329191396993118103366240378691291400560637634045002581903516328103", "0", "0"],
+            userStateInRelayClaim: ["928251232571379559706167670634346311933", "323416925264666217617288569742564703632850816035761084002720090377353297920", "0", "0", "0", "0", "18311560525383319719311394957064820091354976310599818797157189568621466950811", "0"],
+            relayProofValidClaimsTreeRoot: "4363126336135379650861073572245208647463603543037672666254113932136121452383",
+            relayProofValidRevTreeRoot: "0",
+            relayProofValidRootsTreeRoot: "0",
 
-            hoClaimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
+            userClaimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
             authClaimMtp: ["0", "0", "0", "0"],
             authClaim: [
                 "251025091000101825075425831481271126140",
@@ -142,13 +140,13 @@ describe("Test claim query IN, NOT IN operation", function () {
                 "0",
             ],
 
-            hoRevTreeRoot: "0",
+            userRevTreeRoot: "0",
             authClaimNonRevMtp: ["0", "0", "0", "0"],
             authClaimNonRevMtpNoAux: "1",
             authClaimNonRevMtpAuxHi: "0",
             authClaimNonRevMtpAuxHv: "0",
 
-            hoRootsTreeRoot: "0",
+            userRootsTreeRoot: "0",
 
             challenge: "12345",
             challengeSignatureR8x: "20325325089801048194045249505428880076655971734013328186061936404000070227397",
@@ -195,7 +193,7 @@ describe("Test claim query IN, NOT IN operation", function () {
 
         const expOut = {
             challenge: "12345",
-            id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
+            userID: "323416925264666217617288569742564703632850816035761084002720090377353297920",
             claimSchema: "49",
             slotIndex: "3",
             operator: "3",
