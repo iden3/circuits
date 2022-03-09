@@ -185,7 +185,7 @@ describe("Test claim query NOTIN operation", function() {
             issuerID: "293373448908678327289599234275657468666604586273320428510206058753616052224",
         }
         const w = await circuit.calculateWitness(inputs, true);
-
+        await circuit.checkConstraints(w);
         await circuit.assertOut(w, expOut);
     });
 })

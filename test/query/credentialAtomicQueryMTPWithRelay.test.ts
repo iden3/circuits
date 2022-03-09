@@ -113,6 +113,7 @@ describe("Test claim query IN, NOT IN operation", function () {
         }
 
         const w = await circuit.calculateWitness(inputs, true);
+        await circuit.checkConstraints(w);
         await circuit.assertOut(w, expOut);
     });
 
@@ -201,7 +202,7 @@ describe("Test claim query IN, NOT IN operation", function () {
             issuerID: "284566762428324726989704087792235500378284127405663309435086666644619722752",
         }
         const w = await circuit.calculateWitness(inputs, true);
-
+        await circuit.checkConstraints(w);
         await circuit.assertOut(w, expOut);
     });
 });

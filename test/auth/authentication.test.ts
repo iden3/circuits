@@ -50,6 +50,7 @@ describe('auth.circom:', async function () {
     tests.forEach(({desc, input, expOut}) => {
         it(`auth ${desc}`, async function () {
             const w = await circuit.calculateWitness(input, true);
+            await circuit.checkConstraints(w);
             await circuit.assertOut(w, expOut);
         });
     });
