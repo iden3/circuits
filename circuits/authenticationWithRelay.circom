@@ -25,13 +25,14 @@ template VerifyAuthenticationInformationWithRelay(IdOwnershipLevels, RelayLevels
     // we have no constraints for "state" in this circuit, however we introduce "state" input here
     // as it serves as public input which should be the same for prover and verifier
     signal input state;
-    signal input id;
+    signal input userID;
 
-    signal input reIdenState;
-    signal input hoStateInRelayClaimMtp[RelayLevels];
-    signal input reProofValidClaimsTreeRoot;
-    signal input reProofValidRevTreeRoot;
-    signal input reProofValidRootsTreeRoot;
+    signal input relayState;
+    signal input userStateInRelayClaimMtp[RelayLevels];
+    signal input userStateInRelayClaim[8];
+    signal input relayProofValidClaimsTreeRoot;
+    signal input relayProofValidRevTreeRoot;
+    signal input relayProofValidRootsTreeRoot;
 
     component checkIdOwnership = IdOwnershipBySignatureWithRelay(IdOwnershipLevels, RelayLevels);
 
@@ -52,11 +53,12 @@ template VerifyAuthenticationInformationWithRelay(IdOwnershipLevels, RelayLevels
     checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
     checkIdOwnership.challengeSignatureS <== challengeSignatureS;
     
-    checkIdOwnership.hoId <== id;
+    checkIdOwnership.userID <== userID;
 
-    checkIdOwnership.reIdenState <== reIdenState;
-    for (var i=0; i<RelayLevels; i++) { checkIdOwnership.hoStateInRelayClaimMtp[i] <== hoStateInRelayClaimMtp[i]; }
-    checkIdOwnership.reProofValidClaimsTreeRoot <== reProofValidClaimsTreeRoot;
-    checkIdOwnership.reProofValidRevTreeRoot <== reProofValidRevTreeRoot;
-    checkIdOwnership.reProofValidRootsTreeRoot <== reProofValidRootsTreeRoot;
+    checkIdOwnership.relayState <== relayState;
+    for (var i=0; i<RelayLevels; i++) { checkIdOwnership.userStateInRelayClaimMtp[i] <== userStateInRelayClaimMtp[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.userStateInRelayClaim[i] <== userStateInRelayClaim[i]; }
+    checkIdOwnership.relayProofValidClaimsTreeRoot <== relayProofValidClaimsTreeRoot;
+    checkIdOwnership.relayProofValidRevTreeRoot <== relayProofValidRevTreeRoot;
+    checkIdOwnership.relayProofValidRootsTreeRoot <== relayProofValidRootsTreeRoot;
 }
