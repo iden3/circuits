@@ -89,8 +89,6 @@ template IdOwnershipBySignature(nLevels) {
 	verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
 	verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
 
-    log(12);
-
 	// check identity state
 	// note that the Type & Checksum on this version is not verified
 	component calcIdState = Poseidon(3);
