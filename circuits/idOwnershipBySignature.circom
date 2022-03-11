@@ -42,6 +42,7 @@ include "../node_modules/circomlib/circuits/eddsaposeidon.circom";
 include "buildClaimKeyBBJJ.circom";
 include "cutIdState.circom";
 include "verifyClaimKeyBBJJ.circom";
+include "credential.circom";
 
 template IdOwnershipBySignature(nLevels) {
     signal input hoIdenState;
@@ -63,6 +64,15 @@ template IdOwnershipBySignature(nLevels) {
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
+
+    var AUTH_SCHEMA_HASH  = 269270088098491255471307608775043319525;
+    component verifyAuthSchema  = verifyCredentialSchema();
+    for (var i=0; i<8; i++) {
+            verifyAuthSchema.claim[i] <== authClaim[i];
+    }
+    verifyAuthSchema.schema <== AUTH_SCHEMA_HASH;
+
+
     component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels);
     for (var i=0; i<8; i++) {
         verifyClaimKeyBBJJ.claim[i] <== authClaim[i];
@@ -78,6 +88,8 @@ template IdOwnershipBySignature(nLevels) {
 	verifyClaimKeyBBJJ.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
 	verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
 	verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
+
+    log(12);
 
 	// check identity state
 	// note that the Type & Checksum on this version is not verified

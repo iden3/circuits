@@ -7,7 +7,7 @@ include "../node_modules/circomlib/circuits/poseidon.circom";
 //include "utils.circom";
 
 template BuildClaimKeyBBJJ() {
-	var AUTH_SCHEMA_HASH  = 164867201768971999401702181843803888060;
+	var AUTH_SCHEMA_HASH  = 269270088098491255471307608775043319525;
 
 	signal input ax;
 	signal input ay;
