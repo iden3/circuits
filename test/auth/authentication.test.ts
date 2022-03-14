@@ -34,15 +34,23 @@ describe('auth.circom:', async function () {
     ];
 
     let circuit;
-    this.timeout(30000)
+    this.timeout(300000)
 
     before(async function () {
-        circuit = await wasm_tester(path.join(__dirname, "../../circuits/examples", "auth.circom"));
+        circuit = await wasm_tester(
+            path.join(__dirname, "../../circuits/examples", "auth.circom"),
+            {
+                output: path.join(__dirname, "../circuits", "build/auth"),
+                recompile: true,
+                reduceConstraints: false,
+            }
+        );
     });
 
     tests.forEach(({desc, input, expOut}) => {
         it(`auth ${desc}`, async function () {
             const w = await circuit.calculateWitness(input, true);
+            await circuit.checkConstraints(w);
             await circuit.assertOut(w, expOut);
         });
     });

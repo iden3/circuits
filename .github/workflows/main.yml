@@ -16,7 +16,7 @@ jobs:
     - name: Use Nodejs
       uses: actions/setup-node@v1
       with:
-          node-version: '14'
+          node-version: '16'
     - name: Install node_modules
       run: npm install
 

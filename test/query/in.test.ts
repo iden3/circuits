@@ -37,6 +37,7 @@ describe("Test IN operator:", async function() {
         it(`${desc}`, async function() {
             const w = await circuit.calculateWitness(input, true);
             await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
         });
     });
 });

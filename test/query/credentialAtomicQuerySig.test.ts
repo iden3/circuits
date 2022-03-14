@@ -84,7 +84,7 @@ describe("Test CredentialAtomicQuerySig.circom", function () {
             timestamp: "1642074362",
         }
         const w = await circuit.calculateWitness(inputs, true);
-
+        await circuit.checkConstraints(w);
         await circuit.assertOut(w, expOut);
     });
 })
