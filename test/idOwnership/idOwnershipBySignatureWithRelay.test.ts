@@ -14,7 +14,7 @@ describe("IdOwnershipBySignatureWithRelay", function() {
         circuit = await tester(
             path.join(__dirname, "../circuits", "IdOwnershipBySignatureWithRelay.circom"),
             {
-                output: path.join(__dirname, "../circuits", "build/IdOwnershipBySignatureWithRelay"),
+                output: path.join(__dirname, "circuits", "build"),
                 recompile: true,
                 reduceConstraints: false,
             },
