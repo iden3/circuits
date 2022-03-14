@@ -7,10 +7,51 @@ include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "buildClaimKeyBBJJ.circom";
 include "credential.circom";
 
-// VerifyClaimKeyBBJJinClaimsTreeRoot:
+template VerifyAuthClaim(nLevels) {
+	signal input claimsTreeRoot;
+	signal input authClaimMtp[nLevels];
+	signal input authClaim[8];
+
+	signal input revTreeRoot;
+    signal input authClaimNonRevMtp[nLevels];
+    signal input authClaimNonRevMtpNoAux;
+    signal input authClaimNonRevMtpAuxHi;
+    signal input authClaimNonRevMtpAuxHv;
+
+	signal input challenge;
+	signal input challengeSignatureR8x;
+	signal input challengeSignatureR8y;
+	signal input challengeSignatureS;
+
+    component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinState(nLevels);
+    for (var i=0; i<8; i++) {
+        verifyClaimKeyBBJJ.claim[i] <== authClaim[i];
+    }
+    for (var i=0; i<nLevels; i++) {
+        verifyClaimKeyBBJJ.authClaimMtp[i] <== authClaimMtp[i];
+    }
+    verifyClaimKeyBBJJ.claimsTreeRoot <== claimsTreeRoot;
+    verifyClaimKeyBBJJ.revTreeRoot <== revTreeRoot;
+    for (var i=0; i<nLevels; i++) {
+        verifyClaimKeyBBJJ.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i];
+    }
+    verifyClaimKeyBBJJ.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
+    verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
+    verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
+
+    component sigVerifier = EdDSAPoseidonVerifier();
+    sigVerifier.enabled <== 1;
+    sigVerifier.Ax <== authClaim[2]; // Ax should be in indexSlotA
+    sigVerifier.Ay <== authClaim[3]; // Ay should be in indexSlotB
+    sigVerifier.S <== challengeSignatureS;
+    sigVerifier.R8x <== challengeSignatureR8x;
+    sigVerifier.R8y <== challengeSignatureR8y;
+    sigVerifier.M <== challenge;
+}
+
 // circuit to check that claim with the provided public key is in ClaimsTreeRoot
 // and its revocation nonce is not in RevTreeRoot
-template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
+template VerifyClaimKeyBBJJinState(nLevels) {
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[nLevels];
     signal input claim[8];
@@ -53,33 +94,5 @@ template VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels) {
     smtClaimNotRevoked.oldValue <== authClaimNonRevMtpAuxHv;
     smtClaimNotRevoked.key <== claimRevNonce.revNonce;
     smtClaimNotRevoked.value <== 0;
-
 }
 
-// VerifyClaimKeyBBJJinClaimsTreeRoot - Circuit to check that claim with the provided public key is in ClaimsTreeRoot
-template VerifyClaimKeyBBJJinIdState(nLevels) {
-	signal input BBJAx;
-	signal input BBJAy;
-	signal input siblings[nLevels];
-	signal input claimsTreeRoot;
-	signal input revTreeRoot;
-	signal input rootsTreeRoot;
-	signal input idState;
-
-	// build ClaimKeyBBJJ
-	component verifyClaimKeyBBJJinClaimsTreeRoot = VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels);
-	verifyClaimKeyBBJJinClaimsTreeRoot.BBJAx <== BBJAx;
-	verifyClaimKeyBBJJinClaimsTreeRoot.BBJAy <== BBJAy;
-    for (var i=0; i<nLevels; i++) {
-        verifyClaimKeyBBJJinClaimsTreeRoot.siblings[i] <== siblings[i];
-    }
-    verifyClaimKeyBBJJinClaimsTreeRoot.claimsTreeRoot <== claimsTreeRoot;
-
-    component calcIdState = Poseidon(3);
-    calcIdState.inputs[0] <== claimsTreeRoot;
-    calcIdState.inputs[1] <== revTreeRoot;
-    calcIdState.inputs[2] <== rootsTreeRoot;
-
-    calcIdState.out === idState;
-
-}

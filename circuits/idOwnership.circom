@@ -42,42 +42,42 @@ include "verifyClaimKeyBBJJ.circom";
 include "cutIdState.circom";
 
 template IdOwnership(nLevels) {
-	signal input id;
-	signal input userPrivateKey;
-	signal input siblings[nLevels];
-	signal input claimsTreeRoot;
-	signal input revTreeRoot;
-	signal input rootsTreeRoot;
+signal input id;
+signal input userPrivateKey;
+signal input siblings[nLevels];
+signal input claimsTreeRoot;
+signal input revTreeRoot;
+signal input rootsTreeRoot;
 
-	// privateKey & publicKey
-	component babyPbk = BabyPbk();
-	babyPbk.in <== userPrivateKey;
-	
-    component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels);
-	verifyClaimKeyBBJJ.BBJAx <== babyPbk.Ax;
-	verifyClaimKeyBBJJ.BBJAy <== babyPbk.Ay;
-	for (var i=0; i<nLevels; i++) {
-		verifyClaimKeyBBJJ.siblings[i] <== siblings[i];
-	}
-	verifyClaimKeyBBJJ.claimsTreeRoot <== claimsTreeRoot;
+// privateKey & publicKey
+component babyPbk = BabyPbk();
+babyPbk.in <== userPrivateKey;
 
-	// check identity state
-	// note that the Type & Checksum on this version is not verified
-	component calcIdState = Poseidon(3);
-	calcIdState.inputs[0] <== claimsTreeRoot;
-	calcIdState.inputs[1] <== revTreeRoot;
-	calcIdState.inputs[2] <== rootsTreeRoot;
+component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinClaimsTreeRoot(nLevels);
+verifyClaimKeyBBJJ.BBJAx <== babyPbk.Ax;
+verifyClaimKeyBBJJ.BBJAy <== babyPbk.Ay;
+for (var i=0; i<nLevels; i++) {
+verifyClaimKeyBBJJ.siblings[i] <== siblings[i];
+}
+verifyClaimKeyBBJJ.claimsTreeRoot <== claimsTreeRoot;
 
-	component calcCutState = cutState();
-	calcCutState.in <== calcIdState.out;
+// check identity state
+// note that the Type & Checksum on this version is not verified
+component calcIdState = Poseidon(3);
+calcIdState.inputs[0] <== claimsTreeRoot;
+calcIdState.inputs[1] <== revTreeRoot;
+calcIdState.inputs[2] <== rootsTreeRoot;
 
-	component calcCutId = cutId();
-	calcCutId.in <== id;
+component calcCutState = cutState();
+calcCutState.in <== calcIdState.out;
 
-	component checkIdState = IsEqual();
-	checkIdState.in[0] <== calcCutState.out;
-	checkIdState.in[1] <== calcCutId.out;
-	checkIdState.out === 1;
+component calcCutId = cutId();
+calcCutId.in <== id;
 
-	// TODO: check claim not revoked
+component checkIdState = IsEqual();
+checkIdState.in[0] <== calcCutState.out;
+checkIdState.in[1] <== calcCutId.out;
+checkIdState.out === 1;
+
+// TODO: check claim not revoked
 }

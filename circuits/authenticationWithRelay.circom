@@ -1,8 +1,8 @@
 pragma circom 2.0.0;
 
-include "idOwnershipBySignature.circom";
+include "idOwnershipBySignatureWithRelay.circom";
 
-template VerifyAuthenticationInformation(IdOwnershipLevels) {
+template VerifyAuthenticationInformationWithRelay(IdOwnershipLevels, RelayLevels) {
 
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[IdOwnershipLevels];
@@ -20,13 +20,21 @@ template VerifyAuthenticationInformation(IdOwnershipLevels) {
 	signal input challengeSignatureR8x;
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
-	
-    signal input state;
-    // we have no constraints for "id" in this circuit, however we introduce "id" input here
-    // as it serves as public input which should be the same for prover and verifier
-    signal input id;
 
-    component checkIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
+    //todo check if state should be here
+    // we have no constraints for "state" in this circuit, however we introduce "state" input here
+    // as it serves as public input which should be the same for prover and verifier
+    signal input state;
+    signal input userID;
+
+    signal input relayState;
+    signal input userStateInRelayClaimMtp[RelayLevels];
+    signal input userStateInRelayClaim[8];
+    signal input relayProofValidClaimsTreeRoot;
+    signal input relayProofValidRevTreeRoot;
+    signal input relayProofValidRootsTreeRoot;
+
+    component checkIdOwnership = IdOwnershipBySignatureWithRelay(IdOwnershipLevels, RelayLevels);
 
 	checkIdOwnership.claimsTreeRoot <== claimsTreeRoot;
 	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.authClaimMtp[i] <== authClaimMtp[i]; }
@@ -45,5 +53,12 @@ template VerifyAuthenticationInformation(IdOwnershipLevels) {
     checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
     checkIdOwnership.challengeSignatureS <== challengeSignatureS;
     
-    checkIdOwnership.hoIdenState <== state;
+    checkIdOwnership.userID <== userID;
+
+    checkIdOwnership.relayState <== relayState;
+    for (var i=0; i<RelayLevels; i++) { checkIdOwnership.userStateInRelayClaimMtp[i] <== userStateInRelayClaimMtp[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.userStateInRelayClaim[i] <== userStateInRelayClaim[i]; }
+    checkIdOwnership.relayProofValidClaimsTreeRoot <== relayProofValidClaimsTreeRoot;
+    checkIdOwnership.relayProofValidRevTreeRoot <== relayProofValidRevTreeRoot;
+    checkIdOwnership.relayProofValidRootsTreeRoot <== relayProofValidRootsTreeRoot;
 }

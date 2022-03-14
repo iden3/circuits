@@ -24,6 +24,8 @@ func main() {
 	inputs := make(map[string]string)
 	ctx := context.Background()
 
+	useRelay := true
+
 	privKeyHex := "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69f"
 	var privKey babyjub.PrivateKey
 	if _, err := hex.Decode(privKey[:], []byte(privKeyHex)); err != nil {
@@ -68,7 +70,7 @@ func main() {
 	decompressedSig, err = new(babyjub.Signature).Decompress(sig)
 	utils.ExitOnError(err)
 
-	inputs["id"] = identifier.BigInt().String()
+	inputs["userID"] = identifier.BigInt().String()
 	inputs["state"] = currentState.BigInt().String()
 
 	for i := len(allSiblingsClaimsTree); i < 40; i++ {
@@ -99,6 +101,17 @@ func main() {
 
 	utils.PrintMap(inputs)
 
+	if useRelay {
+		userStateInRelayClaim, relayState, relayClaimsTree, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim(
+			"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c0000f", identifier, currentState)
+
+		fmt.Println("\nrelayState:", relayState.BigInt())
+		utils.PrintSiblings("userStateInRelayClaimMtp:", proofIdenStateInRelay.AllSiblings())
+		utils.PrintClaim("userStateInRelayClaim:", userStateInRelayClaim)
+		fmt.Println("relayProofValidClaimsTreeRoot:", relayClaimsTree.BigInt())
+		fmt.Println("relayProofValidRevTreeRoot: 0")
+		fmt.Println("relayProofValidRootsTreeRoot: 0")
+	}
 }
 
 func createIdentityMultiAuthClaims(

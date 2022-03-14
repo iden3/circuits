@@ -83,7 +83,7 @@ describe("Test claim query NOTIN operation", function () {
 
         }
         const w = await circuit.calculateWitness(inputs, true);
-
+        await circuit.checkConstraints(w);
         await circuit.assertOut(w, expOut);
     });
 })

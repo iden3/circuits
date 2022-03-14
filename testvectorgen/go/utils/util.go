@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-merkletree-sql"
+	"github.com/iden3/go-merkletree-sql/db/memory"
 	"math"
 	"math/big"
 	"test/crypto/primitive"
@@ -158,14 +160,17 @@ func AddClaimToTree(tree *merkletree.MerkleTree, claim *core.Claim) (*merkletree
 
 	entry := claim.TreeEntry()
 	index, _ := entry.HIndex()
-	tree.AddEntry(context.TODO(), &entry)
+	err := tree.AddEntry(context.TODO(), &entry)
+	if err != nil {
+		return nil, err
+	}
 
 	proof, _, err := tree.GenerateProof(context.TODO(), index.BigInt(), tree.Root())
 
 	return proof, err
 }
 
-func PrintClaim(claim *core.Claim) {
+func PrintClaim(claimName string, claim *core.Claim) {
 
 	cIn := make([]string, 0)
 	entry := claim.TreeEntry()
@@ -183,6 +188,151 @@ func PrintClaim(claim *core.Claim) {
 		panic(err)
 	}
 
-	fmt.Println("\"claim\":", string(json))
+	fmt.Println(claimName, string(json))
+}
 
+func GenerateIdentity(ctx context.Context, privKHex string, challenge *big.Int) (*core.ID, *merkletree.MerkleTree, map[string]string) {
+	// extract pubKey
+	key, X, Y := ExtractPubXY(privKHex)
+
+	// init claims tree
+	claimsTree, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 4)
+	ExitOnError(err)
+
+	// create auth claim
+	authClaim, err := AuthClaimFromPubKey(X, Y)
+	ExitOnError(err)
+
+	// add auth claim to claimsMT
+	entry := authClaim.TreeEntry()
+	hi, hv, err := entry.HiHv()
+	ExitOnError(err)
+	claimsTree.Add(ctx, hi.BigInt(), hv.BigInt())
+
+	// sign challenge
+	decompressedSig, err := SignBBJJ(key, challenge.Bytes())
+	ExitOnError(err)
+
+	// create new identity
+	identifier, err := core.CalculateGenesisID(claimsTree.Root())
+	ExitOnError(err)
+
+	// calculate current state
+	currentState, err := merkletree.HashElems(claimsTree.Root().BigInt(),
+		merkletree.HashZero.BigInt(), merkletree.HashZero.BigInt())
+	ExitOnError(err)
+
+	inputs := make(map[string]string)
+	inputs["id"] = identifier.BigInt().String()
+	inputs["BBJAx"] = X.String()
+	inputs["BBJAy"] = Y.String()
+	inputs["BBJClaimClaimsTreeRoot"] = claimsTree.Root().BigInt().String()
+	inputs["challenge"] = challenge.String()
+	inputs["challengeSignatureR8x"] = decompressedSig.R8.X.String()
+	inputs["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
+	inputs["challengeSignatureS"] = decompressedSig.S.String()
+	inputs["state"] = currentState.BigInt().String()
+	inputs["authClaim"], _ = ClaimToString(authClaim)
+	ExitOnError(err)
+
+	return identifier, claimsTree, inputs
+}
+
+func GenerateIdentity2(ctx context.Context, privKHex string, challenge *big.Int) (*core.ID, *merkletree.MerkleTree, *core.Claim, *babyjub.PrivateKey, error) {
+
+	// extract pubKey
+	var privKey babyjub.PrivateKey
+
+	if _, err := hex.Decode(privKey[:], []byte(privKHex)); err != nil {
+		panic(err)
+	}
+	X := privKey.Public().X
+	Y := privKey.Public().Y
+
+	// init claims tree
+	claimsTree, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 40)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+	// create auth claim
+	authClaim, err := AuthClaimFromPubKey(X, Y)
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	// add auth claim to claimsMT
+	entry := authClaim.TreeEntry()
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	hi, hv, err := entry.HiHv()
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	err = claimsTree.Add(ctx, hi.BigInt(), hv.BigInt())
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	// create new identity
+	identifier, err := core.CalculateGenesisID(claimsTree.Root())
+	if err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	return identifier, claimsTree, authClaim, &privKey, nil
+}
+
+func FormatInput(input interface{}) string {
+	var value string
+	switch v := input.(type) {
+	case *merkletree.Hash:
+		value = v.BigInt().String()
+	case *core.ID:
+		value = v.BigInt().String()
+	default:
+		ExitOnError(errors.New("Unknown input type. Can't format to string."))
+	}
+	return value
+}
+
+func CalcIdentityStateFromRoots(claimsTree *merkletree.MerkleTree, optTrees ...*merkletree.MerkleTree) (*merkletree.Hash, error) {
+	revTreeRoot := merkletree.HashZero.BigInt()
+	rootsTreeRoot := merkletree.HashZero.BigInt()
+	if len(optTrees) > 0 {
+		revTreeRoot = optTrees[0].Root().BigInt()
+	}
+	if len(optTrees) > 1 {
+		rootsTreeRoot = optTrees[1].Root().BigInt()
+	}
+	state, err := merkletree.HashElems(
+		claimsTree.Root().BigInt(),
+		revTreeRoot,
+		rootsTreeRoot)
+	return state, err
+}
+
+func GenerateRelayWithIdenStateClaim(relayPrivKey string, identifier *core.ID, idenState *merkletree.Hash) (*core.Claim, *merkletree.Hash, *merkletree.Hash, *merkletree.Proof) {
+	ctx := context.Background()
+	_, relayClaimsTree, _ := GenerateIdentity(ctx, relayPrivKey, big.NewInt(0))
+
+	valueSlotA, _ := core.NewDataSlotFromInt(idenState.BigInt())
+	var schemaHash core.SchemaHash
+	schemaEncodedBytes, _ := hex.DecodeString("ba56af399498b2dfce51e2d14ba1f0fd")
+	copy(schemaHash[:], schemaEncodedBytes)
+	claim, err := core.NewClaim(
+		schemaHash,
+		core.WithIndexID(*identifier),
+		core.WithValueData(valueSlotA, core.DataSlot{}),
+	)
+	ExitOnError(err)
+
+	proofIdentityIsRelayed, err := AddClaimToTree(relayClaimsTree, claim)
+	ExitOnError(err)
+	relayState, err := CalcIdentityStateFromRoots(relayClaimsTree)
+	ExitOnError(err)
+
+	return claim, relayState, relayClaimsTree.Root(), proofIdentityIsRelayed
 }

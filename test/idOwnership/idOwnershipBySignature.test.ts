@@ -12,8 +12,12 @@ describe("idOwnershipBySignature", function() {
 
     before(async () => {
         circuit = await tester(
-            path.join(__dirname, "circuits", "idOwnershipBySignatures.circom"),
-            {reduceConstraints: false}
+            path.join(__dirname, "../circuits", "idOwnershipBySignatures.circom"),
+            {
+                output: path.join(__dirname, "../circuits", "build/idOwnershipBySignatures"),
+                recompile: true,
+                reduceConstraints: false,
+            },
         );
     });
 
@@ -156,11 +160,12 @@ describe("idOwnershipBySignature", function() {
         }
 
         // let error;
+        let error;
         await circuit.calculateWitness(inputs, true).catch((err) => {
-            expect(err).not.to.be.undefined
-            expect(err.message).to.include("Error: Assert Failed. Error in template ForceEqualIfEnabled_225 line: 56")
+            error = err;
         });
 
+        expect(error.message).to.include("Error: Assert Failed. Error in template")
     });
 
     it(`Ownership should fail. Claims total: 2. Signed by: 2nd claim. Revoked: 2nd claim`, async () => {
@@ -199,7 +204,6 @@ describe("idOwnershipBySignature", function() {
         await circuit.calculateWitness(inputs, true).catch((err) => {
             error = err;
         });
-        expect(error).not.to.be.undefined
-        expect(error.message).to.include("Error: Assert Failed. Error in template ForceEqualIfEnabled_225 line: 56")
+        expect(error.message).to.include("Error: Assert Failed. Error in template")
     });
 });
