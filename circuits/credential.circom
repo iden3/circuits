@@ -241,6 +241,8 @@ template verifyCredentialSchema() {
 	component claimSchema = getClaimSchema();
 	for (var i=0; i<8; i++) { claimSchema.claim[i] <== claim[i]; }
 
+    log(schema);
+    log(claimSchema.schema);
 	claimSchema.schema === schema;
 }
 

@@ -10,4 +10,4 @@ component main{public [challenge,
                        slotIndex,
                        operator,
                        value,
-                       timestamp]} = CredentialAtomicQueryMTPWithRelay(4, 4, 4, 4);
+                       timestamp]} = CredentialAtomicQueryMTPWithRelay(40, 40, 40, 16);

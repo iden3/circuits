@@ -7,7 +7,7 @@ include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "buildClaimKeyBBJJ.circom";
 include "credential.circom";
 
-template VerifyAuthClaim(nLevels) {
+template VerifyAuthClaimAndSignature(nLevels) {
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[nLevels];
 	signal input authClaim[8];
@@ -22,6 +22,15 @@ template VerifyAuthClaim(nLevels) {
 	signal input challengeSignatureR8x;
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
+
+    var AUTH_SCHEMA_HASH  = 269270088098491255471307608775043319525;
+    log(27);
+    component verifyAuthSchema  = verifyCredentialSchema();
+    for (var i=0; i<8; i++) {
+            verifyAuthSchema.claim[i] <== authClaim[i];
+    }
+    verifyAuthSchema.schema <== AUTH_SCHEMA_HASH;
+    log(28);
 
     component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinState(nLevels);
     for (var i=0; i<8; i++) {

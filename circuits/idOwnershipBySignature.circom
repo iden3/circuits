@@ -9,7 +9,6 @@ Circuit to check that the prover is the owner of the identity
 pragma circom 2.0.0;
 
 include "verifyAuthClaim.circom";
-include "credential.circom";
 
 template IdOwnershipBySignature(nLevels) {
     signal input hoIdenState;
@@ -32,14 +31,7 @@ template IdOwnershipBySignature(nLevels) {
 	signal input challengeSignatureS;
 
 
-    var AUTH_SCHEMA_HASH  = 269270088098491255471307608775043319525;
-    component verifyAuthSchema  = verifyCredentialSchema();
-    for (var i=0; i<8; i++) {
-            verifyAuthSchema.claim[i] <== authClaim[i];
-    }
-    verifyAuthSchema.schema <== AUTH_SCHEMA_HASH;
-
-    component verifyAuthClaim = VerifyAuthClaim(nLevels);
+    component verifyAuthClaim = VerifyAuthClaimAndSignature(nLevels);
     for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== authClaim[i]; }
 	for (var i=0; i<nLevels; i++) { verifyAuthClaim.authClaimMtp[i] <== authClaimMtp[i]; }
 	verifyAuthClaim.claimsTreeRoot <== claimsTreeRoot;
