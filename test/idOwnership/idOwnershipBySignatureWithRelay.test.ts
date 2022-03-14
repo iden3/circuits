@@ -5,14 +5,14 @@ const expect = chai.expect;
 
 export {};
 
-describe("IdOwnershipBySignatureWithRelay", function() {
+describe("idOwnershipBySignatureWithRelay", function() {
     this.timeout(600000);
 
     let circuit;
 
     before(async () => {
         circuit = await tester(
-            path.join(__dirname, "../circuits", "IdOwnershipBySignatureWithRelay.circom"),
+            path.join(__dirname, "../circuits", "idOwnershipBySignatureWithRelay.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,
