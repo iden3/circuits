@@ -103,7 +103,7 @@ func main() {
 
 	if useRelay {
 		userStateInRelayClaim, relayState, relayClaimsTree, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim(
-			"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c0000f", identifier, currentState)
+			"9db637b457c284e844e58955c54cd8e67d989b72ed4b56411eabbeb775fb853a", identifier, currentState)
 
 		fmt.Println("\nrelayState:", relayState.BigInt())
 		utils.PrintSiblings("userStateInRelayClaimMtp:", proofIdenStateInRelay.AllSiblings())

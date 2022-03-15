@@ -24,13 +24,11 @@ template VerifyAuthClaimAndSignature(nLevels) {
 	signal input challengeSignatureS;
 
     var AUTH_SCHEMA_HASH  = 269270088098491255471307608775043319525;
-    log(27);
     component verifyAuthSchema  = verifyCredentialSchema();
     for (var i=0; i<8; i++) {
             verifyAuthSchema.claim[i] <== authClaim[i];
     }
     verifyAuthSchema.schema <== AUTH_SCHEMA_HASH;
-    log(28);
 
     component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinState(nLevels);
     for (var i=0; i<8; i++) {

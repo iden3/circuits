@@ -7,7 +7,7 @@ Circuit to check that the prover is the owner of the identity
 
 pragma circom 2.0.0;
 
-include "verifyAuthClaim.circom";
+include "verifyAuthClaimAndSignature.circom";
 
 template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 
@@ -45,7 +45,6 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
-    log(1);
     component verifyAuthClaim = VerifyAuthClaimAndSignature(nLevelsUser);
     for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== authClaim[i]; }
 	for (var i=0; i<nLevelsUser; i++) { verifyAuthClaim.authClaimMtp[i] <== authClaimMtp[i]; }
@@ -63,7 +62,6 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 
 	// get claim for identity state and check that it is included into Relay's state
 
-    log(2);
 	component calcUserState = getIdenState();
     calcUserState.claimsTreeRoot <== claimsTreeRoot;
     calcUserState.revTreeRoot <== revTreeRoot;
@@ -71,18 +69,23 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 
     calcUserState.idenState === userStateInRelayClaim[6];
 
-    log(200);
+
+    // verify relay claim schema
+     var RELAY_SCHEMA_HASH  = 300643596977370539894307577071173136726; // hex e22dd9c0f7aef15788c130d4d86c7156
+     component verifyRelaySchema  = verifyCredentialSchema();
+     for (var i=0; i<8; i++) {
+          verifyRelaySchema.claim[i] <== userStateInRelayClaim[i];
+     }
+     verifyRelaySchema.schema <== RELAY_SCHEMA_HASH;
+
 	component header = getClaimHeader();
 	for (var i=0; i<8; i++) { header.claim[i] <== userStateInRelayClaim[i]; }
 
-    log(3);
 	component subjectOtherIden = getClaimSubjectOtherIden(0);
 	for (var i=0; i<8; i++) { subjectOtherIden.claim[i] <== userStateInRelayClaim[i]; }
 	for (var i=0; i<32; i++) { subjectOtherIden.claimFlags[i] <== header.claimFlags[i]; }
 
     userID === subjectOtherIden.id;
-
-    log(4);
 
     component claimHiHv = getClaimHiHv();
     for (var i=0; i<8; i++) {
@@ -102,8 +105,6 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
     checkUserStateInRelay.isOld0 <== 0;
     checkUserStateInRelay.key <== claimHiHv.hi;
     checkUserStateInRelay.value <== claimHiHv.hv;
-
-    log(5);
 
 	component calcRelayState = getIdenState();
     calcRelayState.claimsTreeRoot <== relayProofValidClaimsTreeRoot;

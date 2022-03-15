@@ -89,7 +89,6 @@ template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, Rela
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
-    log(92);
     /* Id ownership check*/
     component userIdOwnership = IdOwnershipBySignatureWithRelay(IdOwnershipLevels, RelayLevels);
 
