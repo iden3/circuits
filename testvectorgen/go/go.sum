@@ -3,8 +3,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dchest/blake512 v1.0.0 h1:oDFEQFIqFSeuA34xLtXZ/rWxCXdSjirjzPhey5EUvmA=
 github.com/dchest/blake512 v1.0.0/go.mod h1:FV1x7xPPLWukZlpDpWQ88rF/SFwZ5qbskrzhLMB92JI=
-github.com/iden3/go-iden3-core v0.0.11 h1:Msi8F6n5e755OMer+7ZV03z04GnQtoTNboKwfrDgB9A=
-github.com/iden3/go-iden3-core v0.0.11/go.mod h1:Ou51YR716WqeBJ3Z4BkGVAJROgSYgfnl4i8x3mfLOeY=
+github.com/iden3/go-iden3-core v0.0.12 h1:wmDZU2e5Z7iMrCUCQQWzeUqBE8X4wl3t41DeyhnHpL8=
+github.com/iden3/go-iden3-core v0.0.12/go.mod h1:Ou51YR716WqeBJ3Z4BkGVAJROgSYgfnl4i8x3mfLOeY=
 github.com/iden3/go-iden3-core v0.0.12 h1:wmDZU2e5Z7iMrCUCQQWzeUqBE8X4wl3t41DeyhnHpL8=
 github.com/iden3/go-iden3-core v0.0.12/go.mod h1:Ou51YR716WqeBJ3Z4BkGVAJROgSYgfnl4i8x3mfLOeY=
 github.com/iden3/go-iden3-crypto v0.0.11 h1:5cFQ/BIqH9gjwe9Z68Hmc5jOTGqmMYnewIaTGCeO+6A=

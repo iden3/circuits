@@ -23,9 +23,9 @@ func main() {
 		"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d",
 	}
 
-	numberOfKeys := 1
-	numberOfFirstClaimsToRevoke := 0
-	signingKeyIndex := 0
+	numberOfKeys := 2
+	numberOfFirstClaimsToRevoke := 2
+	signingKeyIndex := 1
 	useRelay := true
 
 	//claimSchema, _ := big.NewInt(0).SetString("251025091000101825075425831481271126140", 10)
@@ -124,7 +124,7 @@ func main() {
 	fmt.Println("challengeSignatureS:", decompressedSig.S)
 
 	if useRelay {
-		idenStateInRelayClaim, reIdenState, relayClaimsTree, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim("28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c0000f", identifier, hoIdenState)
+		idenStateInRelayClaim, reIdenState, relayClaimsTree, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim("9db637b457c284e844e58955c54cd8e67d989b72ed4b56411eabbeb775fb853a", identifier, hoIdenState)
 
 		fmt.Println("\nreIdenState:", reIdenState.BigInt())
 		utils.PrintSiblings("hoStateInRelayClaimMtp:", proofIdenStateInRelay.AllSiblings())

@@ -32,7 +32,7 @@ func ExitOnError(err error) {
 
 func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 	var schemaHash core.SchemaHash
-	schemaEncodedBytes, _ := hex.DecodeString("7c0844a075a9ddc7fcbdfb4f88acd9bc")
+	schemaEncodedBytes, _ := hex.DecodeString("ca938857241db9451ea329256b9c06e5")
 	copy(schemaHash[:], schemaEncodedBytes)
 
 	// NOTE: We take nonce as hash of public key to make it random

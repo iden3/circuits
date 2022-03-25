@@ -3,11 +3,12 @@ pragma circom 2.0.0;
 include "../node_modules/circomlib/circuits/babyjub.circom";
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
-//include "../node_modules/circomlib/circuits/bitify.circom";
-//include "utils.circom";
+include "../node_modules/circomlib/circuits/bitify.circom";
+include "utils.circom";
 
+//@Deprecated
 template BuildClaimKeyBBJJ() {
-	var AUTH_SCHEMA_HASH  = 164867201768971999401702181843803888060;
+	var AUTH_SCHEMA_HASH  = 269270088098491255471307608775043319525;
 
 	signal input ax;
 	signal input ay;
@@ -17,7 +18,7 @@ template BuildClaimKeyBBJJ() {
 
 //	component e0 = Bits2Num(256);
 //	var claimType[256];
-//	claimType = bigEndian(CLAIM_TYPE, 128);
+//	claimType = bigEndian(AUTH_SCHEMA_HASH, 128);
 //	for (var i=0; i<128; i++) {
 //		e0.in[i] <== claimType[i];
 //	}

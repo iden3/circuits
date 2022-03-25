@@ -320,7 +320,7 @@ func GenerateRelayWithIdenStateClaim(relayPrivKey string, identifier *core.ID, i
 
 	valueSlotA, _ := core.NewDataSlotFromInt(idenState.BigInt())
 	var schemaHash core.SchemaHash
-	schemaEncodedBytes, _ := hex.DecodeString("ba56af399498b2dfce51e2d14ba1f0fd")
+	schemaEncodedBytes, _ := hex.DecodeString("e22dd9c0f7aef15788c130d4d86c7156")
 	copy(schemaHash[:], schemaEncodedBytes)
 	claim, err := core.NewClaim(
 		schemaHash,

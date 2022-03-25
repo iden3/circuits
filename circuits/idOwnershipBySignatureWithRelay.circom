@@ -7,7 +7,7 @@ Circuit to check that the prover is the owner of the identity
 
 pragma circom 2.0.0;
 
-include "verifyAuthClaim.circom";
+include "verifyAuthClaimAndSignature.circom";
 
 template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 
@@ -45,7 +45,7 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
-    component verifyAuthClaim = VerifyAuthClaim(nLevelsUser);
+    component verifyAuthClaim = VerifyAuthClaimAndSignature(nLevelsUser);
     for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== authClaim[i]; }
 	for (var i=0; i<nLevelsUser; i++) { verifyAuthClaim.authClaimMtp[i] <== authClaimMtp[i]; }
 	verifyAuthClaim.claimsTreeRoot <== claimsTreeRoot;
@@ -68,6 +68,15 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
     calcUserState.rootsTreeRoot <== rootsTreeRoot;
 
     calcUserState.idenState === userStateInRelayClaim[6];
+
+
+    // verify relay claim schema
+     var RELAY_SCHEMA_HASH  = 300643596977370539894307577071173136726; // hex e22dd9c0f7aef15788c130d4d86c7156
+     component verifyRelaySchema  = verifyCredentialSchema();
+     for (var i=0; i<8; i++) {
+          verifyRelaySchema.claim[i] <== userStateInRelayClaim[i];
+     }
+     verifyRelaySchema.schema <== RELAY_SCHEMA_HASH;
 
 	component header = getClaimHeader();
 	for (var i=0; i<8; i++) { header.claim[i] <== userStateInRelayClaim[i]; }
