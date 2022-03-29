@@ -8,6 +8,7 @@ Circuit to check that the prover is the owner of the identity
 pragma circom 2.0.0;
 
 include "verifyAuthClaimAndSignature.circom";
+include "credential.circom";
 
 template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 
@@ -62,13 +63,11 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 
 	// get claim for identity state and check that it is included into Relay's state
 
-	component calcUserState = getIdenState();
-    calcUserState.claimsTreeRoot <== claimsTreeRoot;
-    calcUserState.revTreeRoot <== revTreeRoot;
-    calcUserState.rootsTreeRoot <== rootsTreeRoot;
-
-    calcUserState.idenState === userStateInRelayClaim[6];
-
+    component checkUserState = verifyIdenStateMatchesRoots();
+    checkUserState.isProofValidClaimsTreeRoot <== claimsTreeRoot;
+    checkUserState.isProofValidRevTreeRoot <== revTreeRoot;
+    checkUserState.isProofValidRootsTreeRoot <== rootsTreeRoot;
+    checkUserState.isIdenState <== userStateInRelayClaim[6];
 
     // verify relay claim schema
      var RELAY_SCHEMA_HASH  = 300643596977370539894307577071173136726; // hex e22dd9c0f7aef15788c130d4d86c7156
@@ -106,13 +105,9 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
     checkUserStateInRelay.key <== claimHiHv.hi;
     checkUserStateInRelay.value <== claimHiHv.hv;
 
-	component calcRelayState = getIdenState();
-    calcRelayState.claimsTreeRoot <== relayProofValidClaimsTreeRoot;
-    calcRelayState.revTreeRoot <== relayProofValidRevTreeRoot;
-    calcRelayState.rootsTreeRoot <== relayProofValidRootsTreeRoot;
-
-    component isRelayStateCorrect = IsEqual();
-    isRelayStateCorrect.in[0] <== calcRelayState.idenState;
-    isRelayStateCorrect.in[1] <== relayState;
-    isRelayStateCorrect.out === 1;
+    component checkRelayState = verifyIdenStateMatchesRoots();
+    checkRelayState.isProofValidClaimsTreeRoot <== relayProofValidClaimsTreeRoot;
+    checkRelayState.isProofValidRevTreeRoot <== relayProofValidRevTreeRoot;
+    checkRelayState.isProofValidRootsTreeRoot <== relayProofValidRootsTreeRoot;
+    checkRelayState.isIdenState <== relayState;
 }

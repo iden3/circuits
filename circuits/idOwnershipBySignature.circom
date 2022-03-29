@@ -9,6 +9,7 @@ Circuit to check that the prover is the owner of the identity
 pragma circom 2.0.0;
 
 include "verifyAuthClaimAndSignature.circom";
+include "credential.circom";
 
 template IdOwnershipBySignature(nLevels) {
     signal input hoIdenState;
@@ -46,13 +47,10 @@ template IdOwnershipBySignature(nLevels) {
     verifyAuthClaim.challengeSignatureR8y <== challengeSignatureR8y;
     verifyAuthClaim.challenge <== challenge;
 
-	component calcHolderState = getIdenState();
-    calcHolderState.claimsTreeRoot <== claimsTreeRoot;
-    calcHolderState.revTreeRoot <== revTreeRoot;
-    calcHolderState.rootsTreeRoot <== rootsTreeRoot;
-
-    component checkHolderState = IsEqual();
-    checkHolderState.in[0] <== calcHolderState.idenState;
-    checkHolderState.in[1] <== hoIdenState;
-    checkHolderState.out === 1;
+    component checkUserState = verifyIdenStateMatchesRoots();
+    checkUserState.isProofValidClaimsTreeRoot <== claimsTreeRoot;
+    checkUserState.isProofValidRevTreeRoot <== revTreeRoot;
+    checkUserState.isProofValidRootsTreeRoot <== rootsTreeRoot;
+    checkUserState.isIdenState <== hoIdenState;
 }
+
