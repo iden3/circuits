@@ -64,10 +64,10 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 	// get claim for identity state and check that it is included into Relay's state
 
     component checkUserState = verifyIdenStateMatchesRoots();
-    checkUserState.isProofValidClaimsTreeRoot <== claimsTreeRoot;
-    checkUserState.isProofValidRevTreeRoot <== revTreeRoot;
-    checkUserState.isProofValidRootsTreeRoot <== rootsTreeRoot;
-    checkUserState.isIdenState <== userStateInRelayClaim[6];
+    checkUserState.claimsTreeRoot <== claimsTreeRoot;
+    checkUserState.revTreeRoot <== revTreeRoot;
+    checkUserState.rootsTreeRoot <== rootsTreeRoot;
+    checkUserState.expectedState <== userStateInRelayClaim[6];
 
     // verify relay claim schema
      var RELAY_SCHEMA_HASH  = 300643596977370539894307577071173136726; // hex e22dd9c0f7aef15788c130d4d86c7156
@@ -92,8 +92,8 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
     checkUserStateInRelay.treeRoot <== relayProofValidClaimsTreeRoot;
 
     component checkRelayState = verifyIdenStateMatchesRoots();
-    checkRelayState.isProofValidClaimsTreeRoot <== relayProofValidClaimsTreeRoot;
-    checkRelayState.isProofValidRevTreeRoot <== relayProofValidRevTreeRoot;
-    checkRelayState.isProofValidRootsTreeRoot <== relayProofValidRootsTreeRoot;
-    checkRelayState.isIdenState <== relayState;
+    checkRelayState.claimsTreeRoot <== relayProofValidClaimsTreeRoot;
+    checkRelayState.revTreeRoot <== relayProofValidRevTreeRoot;
+    checkRelayState.rootsTreeRoot <== relayProofValidRootsTreeRoot;
+    checkRelayState.expectedState <== relayState;
 }

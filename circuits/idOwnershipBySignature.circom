@@ -48,9 +48,9 @@ template IdOwnershipBySignature(nLevels) {
     verifyAuthClaim.challenge <== challenge;
 
     component checkUserState = verifyIdenStateMatchesRoots();
-    checkUserState.isProofValidClaimsTreeRoot <== claimsTreeRoot;
-    checkUserState.isProofValidRevTreeRoot <== revTreeRoot;
-    checkUserState.isProofValidRootsTreeRoot <== rootsTreeRoot;
-    checkUserState.isIdenState <== hoIdenState;
+    checkUserState.claimsTreeRoot <== claimsTreeRoot;
+    checkUserState.revTreeRoot <== revTreeRoot;
+    checkUserState.rootsTreeRoot <== rootsTreeRoot;
+    checkUserState.expectedState <== hoIdenState;
 }
 

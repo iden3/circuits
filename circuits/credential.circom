@@ -277,26 +277,20 @@ template checkClaimExists(IssuerLevels) {
 
 
 
-// verifyCredentialExistence verifies that claim is issued by the issuer
-// is contained in a claim (`claim`) issued by an identity that has a recent
-// identity state (`isIdenState`), while proving that the claim has not been
-// revoked as of the recent identity state.
+// verifyIdenStateMatchesRoots checks that a hash of 3 tree
+// roots is equal to expected identity state
 template verifyIdenStateMatchesRoots() {
-	signal input isProofValidClaimsTreeRoot;
-	signal input isProofValidRevTreeRoot;
-	signal input isProofValidRootsTreeRoot;
-	signal input isIdenState;
+	signal input claimsTreeRoot;
+	signal input revTreeRoot;
+	signal input rootsTreeRoot;
+	signal input expectedState;
 
-	//
-	// F. Verify ValidIdenState == isIdenState
-	//
 	component isProofValidIdenState = getIdenState();
-	isProofValidIdenState.claimsTreeRoot <== isProofValidClaimsTreeRoot;
-	isProofValidIdenState.revTreeRoot <== isProofValidRevTreeRoot;
-	isProofValidIdenState.rootsTreeRoot <== isProofValidRootsTreeRoot;
-	// out: isProofValidIdenState.idenState
+	isProofValidIdenState.claimsTreeRoot <== claimsTreeRoot;
+	isProofValidIdenState.revTreeRoot <== revTreeRoot;
+	isProofValidIdenState.rootsTreeRoot <== rootsTreeRoot;
 
-	isProofValidIdenState.idenState === isIdenState;
+	isProofValidIdenState.idenState === expectedState;
 }
 
 // verifyClaimIssuance verifies that claim is issued by the issuer and not revoked
@@ -325,10 +319,10 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 
     // verify issuer state includes country claim
     component verifyClaimIssuanceIdenState = verifyIdenStateMatchesRoots();
-    verifyClaimIssuanceIdenState.isProofValidClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
-    verifyClaimIssuanceIdenState.isProofValidRevTreeRoot <== claimIssuanceRevTreeRoot;
-    verifyClaimIssuanceIdenState.isProofValidRootsTreeRoot <== claimIssuanceRootsTreeRoot;
-    verifyClaimIssuanceIdenState.isIdenState <== claimIssuanceIdenState;
+    verifyClaimIssuanceIdenState.claimsTreeRoot <== claimIssuanceClaimsTreeRoot;
+    verifyClaimIssuanceIdenState.revTreeRoot <== claimIssuanceRevTreeRoot;
+    verifyClaimIssuanceIdenState.rootsTreeRoot <== claimIssuanceRootsTreeRoot;
+    verifyClaimIssuanceIdenState.expectedState <== claimIssuanceIdenState;
 
     // check non-revocation proof for claim
     component verifyClaimNotRevoked = verifyCredentialNotRevoked(IssuerLevels);
@@ -343,10 +337,10 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 
     // check issuer state matches for non-revocation proof
     component verifyClaimNonRevIssuerState = verifyIdenStateMatchesRoots();
-    verifyClaimNonRevIssuerState.isProofValidClaimsTreeRoot <== claimNonRevIssuerClaimsTreeRoot;
-    verifyClaimNonRevIssuerState.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
-    verifyClaimNonRevIssuerState.isProofValidRootsTreeRoot <== claimNonRevIssuerRootsTreeRoot;
-    verifyClaimNonRevIssuerState.isIdenState <== claimNonRevIssuerState;
+    verifyClaimNonRevIssuerState.claimsTreeRoot <== claimNonRevIssuerClaimsTreeRoot;
+    verifyClaimNonRevIssuerState.revTreeRoot <== claimNonRevIssuerRevTreeRoot;
+    verifyClaimNonRevIssuerState.rootsTreeRoot <== claimNonRevIssuerRootsTreeRoot;
+    verifyClaimNonRevIssuerState.expectedState <== claimNonRevIssuerState;
 }
 
 // verifyClaimSignature verifies that claim is signed with the provided public key
