@@ -8,8 +8,6 @@ The circuits of this repository are compatible with the [go-iden3-core implement
 
 Circuits:
 
-- [Identity Ownership](circuits/idOwnership.circom): circuit used to verify that the prover is the owner of the Identity
-- [Identity Ownership Genesis](circuits/idOwnershipGenesis.circom): wrapper on top of idOwnership.circom to check the ownership only for a Genesis Id state
 - [Identity State Update](circuits/idState.circom): circuit used to verify validity when updating an Identity State
 - [BuildClaimKeyBBJJ](circuits/buildClaimKeyBBJJ.circom): circuit used build ClaimKeyBabyJubJub
 - [Credential](circuits/credential.circom): circuit used to verify a
