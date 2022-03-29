@@ -279,57 +279,26 @@ template verifyCredentialNotRevoked(IssuerLevels) {
 	smtClaimValid.value <== 0;
 }
 
-// verifyCredentialMtp verifies that claim is issued by the issuer and included into the claim tree root
-template verifyCredentialMtp(IssuerLevels) {
+// checkClaimExists verifies that claim is included into the claim tree root
+template checkClaimExists(IssuerLevels) {
 	signal input claim[8];
 
-	// C. issuer proof of claim existence
-	// TODO: rename signals
-	signal input isProofExistMtp[IssuerLevels]; // issuerClaimMtp
-	signal input isProofExistClaimsTreeRoot;    // issuerClaimTreeRoot
-	// signal input isProofExistRevTreeRoot;    // issuerRevTreeRoot
-	// signal input isProofExistRootsTreeRoot;  // issuerRootsTreeRoot
+	signal input claimMTP[IssuerLevels];
+	signal input isProofExistClaimsTreeRoot;
 
 	component claimHiHv = getClaimHiHv();
 	for (var i=0; i<8; i++) { claimHiHv.claim[i] <== claim[i]; }
-	// out: claimHiHv.hi
-	// out: claimHiHv.hv
 
-	//
-	// C. Claim proof of existence (isProofExist)
-	//
 	component smtClaimExists = SMTVerifier(IssuerLevels);
 	smtClaimExists.enabled <== 1;
 	smtClaimExists.fnc <== 0; // Inclusion
 	smtClaimExists.root <== isProofExistClaimsTreeRoot;
-	for (var i=0; i<IssuerLevels; i++) { smtClaimExists.siblings[i] <== isProofExistMtp[i]; }
+	for (var i=0; i<IssuerLevels; i++) { smtClaimExists.siblings[i] <== claimMTP[i]; }
 	smtClaimExists.oldKey <== 0;
 	smtClaimExists.oldValue <== 0;
 	smtClaimExists.isOld0 <== 0;
 	smtClaimExists.key <== claimHiHv.hi;
 	smtClaimExists.value <== claimHiHv.hv;
-}
-
-// verifyCredentialMtp verifies that claim is issued by the issuer and included into the claim tree root
-template verifyCredentialMtpHiHv(IssuerLevels) {
-	signal input hi;
-	signal input hv;
-
-	signal input isProofExistMtp[IssuerLevels]; // issuerClaimMtp
-	signal input isProofExistClaimsTreeRoot;    // issuerClaimTreeRoot
-	// signal input isProofExistRevTreeRoot;    // issuerRevTreeRoot
-	// signal input isProofExistRootsTreeRoot;  // issuerRootsTreeRoot
-
-	component smtClaimExists = SMTVerifier(IssuerLevels);
-	smtClaimExists.enabled <== 1;
-	smtClaimExists.fnc <== 0; // Inclusion
-	smtClaimExists.root <== isProofExistClaimsTreeRoot;
-	for (var i=0; i<IssuerLevels; i++) { smtClaimExists.siblings[i] <== isProofExistMtp[i]; }
-	smtClaimExists.oldKey <== 0;
-	smtClaimExists.oldValue <== 0;
-	smtClaimExists.isOld0 <== 0;
-	smtClaimExists.key <== hi;
-	smtClaimExists.value <== hv;
 }
 
 // verifyClaimsTreeRoot verifies that claim is issued by the issuer and included into the claim tree root
@@ -401,9 +370,9 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 	signal input claimNonRevIssuerState;
 
     // verify country claim is included in claims tree root
-    component claimIssuanceCheck = verifyCredentialMtp(IssuerLevels);
+    component claimIssuanceCheck = checkClaimExists(IssuerLevels);
     for (var i=0; i<8; i++) { claimIssuanceCheck.claim[i] <== claim[i]; }
-    for (var i=0; i<IssuerLevels; i++) { claimIssuanceCheck.isProofExistMtp[i] <== claimIssuanceMtp[i]; }
+    for (var i=0; i<IssuerLevels; i++) { claimIssuanceCheck.claimMTP[i] <== claimIssuanceMtp[i]; }
     claimIssuanceCheck.isProofExistClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
 
     // verify issuer state includes country claim
