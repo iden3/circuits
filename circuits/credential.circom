@@ -258,7 +258,7 @@ template checkClaimExists(IssuerLevels) {
 	signal input claim[8];
 
 	signal input claimMTP[IssuerLevels];
-	signal input isProofExistClaimsTreeRoot;
+	signal input treeRoot;
 
 	component claimHiHv = getClaimHiHv();
 	for (var i=0; i<8; i++) { claimHiHv.claim[i] <== claim[i]; }
@@ -266,7 +266,7 @@ template checkClaimExists(IssuerLevels) {
 	component smtClaimExists = SMTVerifier(IssuerLevels);
 	smtClaimExists.enabled <== 1;
 	smtClaimExists.fnc <== 0; // Inclusion
-	smtClaimExists.root <== isProofExistClaimsTreeRoot;
+	smtClaimExists.root <== treeRoot;
 	for (var i=0; i<IssuerLevels; i++) { smtClaimExists.siblings[i] <== claimMTP[i]; }
 	smtClaimExists.oldKey <== 0;
 	smtClaimExists.oldValue <== 0;
@@ -321,7 +321,7 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
     component claimIssuanceCheck = checkClaimExists(IssuerLevels);
     for (var i=0; i<8; i++) { claimIssuanceCheck.claim[i] <== claim[i]; }
     for (var i=0; i<IssuerLevels; i++) { claimIssuanceCheck.claimMTP[i] <== claimIssuanceMtp[i]; }
-    claimIssuanceCheck.isProofExistClaimsTreeRoot <== claimIssuanceClaimsTreeRoot;
+    claimIssuanceCheck.treeRoot <== claimIssuanceClaimsTreeRoot;
 
     // verify issuer state includes country claim
     component verifyClaimIssuanceIdenState = verifyIdenStateMatchesRoots();

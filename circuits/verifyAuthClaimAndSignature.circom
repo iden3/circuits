@@ -69,22 +69,10 @@ template VerifyClaimKeyBBJJinState(nLevels) {
     signal input authClaimNonRevMtpAuxHv;
     signal input authClaimNonRevMtpAuxHi;
 
-	component claimHiHv = getClaimHiHv();
-	for (var i=0; i<8; i++) { claimHiHv.claim[i] <== claim[i]; }
-
-	// check claim existence
-	component smtClaimExists = SMTVerifier(nLevels);
-	smtClaimExists.enabled <== 1;
-	smtClaimExists.fnc <== 0;
-	smtClaimExists.root <== claimsTreeRoot;
-	for (var i=0; i<nLevels; i++) {
-		smtClaimExists.siblings[i] <== authClaimMtp[i];
-	}
-	smtClaimExists.oldKey <== 0;
-	smtClaimExists.oldValue <== 0;
-	smtClaimExists.isOld0 <== 0;
-	smtClaimExists.key <== claimHiHv.hi;
-	smtClaimExists.value <== claimHiHv.hv;
+    component claimExists = checkClaimExists(nLevels);
+    for (var i=0; i<8; i++) { claimExists.claim[i] <== claim[i]; }
+	for (var i=0; i<nLevels; i++) { claimExists.claimMTP[i] <== authClaimMtp[i]; }
+    claimExists.treeRoot <== claimsTreeRoot;
 
     // check claim is not revoked
     component claimRevNonce = getClaimRevNonce();

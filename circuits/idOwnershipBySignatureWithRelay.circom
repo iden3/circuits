@@ -86,24 +86,10 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 
     userID === subjectOtherIden.id;
 
-    component claimHiHv = getClaimHiHv();
-    for (var i=0; i<8; i++) {
-        claimHiHv.claim[i] <== userStateInRelayClaim[i];
-    }
-
-    // Check that StatinInRelayClaim is in Relay state
-    component checkUserStateInRelay = SMTVerifier(nLevelsRelay);
-    checkUserStateInRelay.enabled <== 1;
-    checkUserStateInRelay.fnc <== 0; //inclusion
-    checkUserStateInRelay.root <== relayProofValidClaimsTreeRoot;
-    for (var i=0; i<nLevelsRelay; i++) {
-        checkUserStateInRelay.siblings[i] <== userStateInRelayClaimMtp[i];
-    }
-    checkUserStateInRelay.oldKey <== 0;
-    checkUserStateInRelay.oldValue <== 0;
-    checkUserStateInRelay.isOld0 <== 0;
-    checkUserStateInRelay.key <== claimHiHv.hi;
-    checkUserStateInRelay.value <== claimHiHv.hv;
+    component checkUserStateInRelay = checkClaimExists(nLevelsRelay);
+    for (var i=0; i<8; i++) { checkUserStateInRelay.claim[i] <== userStateInRelayClaim[i]; }
+	for (var i=0; i<nLevelsRelay; i++) { checkUserStateInRelay.claimMTP[i] <== userStateInRelayClaimMtp[i]; }
+    checkUserStateInRelay.treeRoot <== relayProofValidClaimsTreeRoot;
 
     component checkRelayState = verifyIdenStateMatchesRoots();
     checkRelayState.isProofValidClaimsTreeRoot <== relayProofValidClaimsTreeRoot;
