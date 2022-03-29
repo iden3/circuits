@@ -175,15 +175,15 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     verifyClaimIssuanceIdenState.expectedState <== claimNonRevIssuerState;
 
     // non revocation status
-    component verifyClaimNotRevoked = verifyCredentialNotRevoked(IssuerLevels);
+    component verifyClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
     for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== claim[i]; }
     for (var i=0; i<IssuerLevels; i++) {
-        verifyClaimNotRevoked.isProofValidNonRevMtp[i] <== claimNonRevMtp[i];
+        verifyClaimNotRevoked.claimNonRevMTP[i] <== claimNonRevMtp[i];
     }
-    verifyClaimNotRevoked.isProofValidNonRevMtpNoAux <== claimNonRevMtpNoAux;
-    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHi <== claimNonRevMtpAuxHi;
-    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHv <== claimNonRevMtpAuxHv;
-    verifyClaimNotRevoked.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
+    verifyClaimNotRevoked.noAux <== claimNonRevMtpNoAux;
+    verifyClaimNotRevoked.auxHi <== claimNonRevMtpAuxHi;
+    verifyClaimNotRevoked.auxHv <== claimNonRevMtpAuxHv;
+    verifyClaimNotRevoked.treeRoot <== claimNonRevIssuerRevTreeRoot;
 
     // query
     component getClaimValue = getValueByIndex();

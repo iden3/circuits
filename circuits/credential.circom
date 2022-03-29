@@ -218,45 +218,9 @@ template verifyCredentialSchema() {
 	claimSchema.schema === schema;
 }
 
-// verifyCredentialNotRevoked verifies that claim is not included into the revocation tree
-// TODO: how do we get all of these params and why do we need them at all?
-template verifyCredentialNotRevoked(IssuerLevels) {
-	signal input claim[8];
-
-	// D. issuer proof of claim validity
-	signal input isProofValidNonRevMtp[IssuerLevels];
-	signal input isProofValidNonRevMtpNoAux;
-	signal input isProofValidNonRevMtpAuxHi;
-	signal input isProofValidNonRevMtpAuxHv;
-	signal input isProofValidRevTreeRoot;
-
-
-	component claimRevNonce = getClaimRevNonce();
-	for (var i=0; i<8; i++) { claimRevNonce.claim[i] <== claim[i]; }
-	// out: claimRevNonce.revNonce
-
-	//
-	// D. Claim proof of non revocation (validity)
-	//
-	component revNonceHiHv = getRevNonceNoVerHiHv();
-	revNonceHiHv.revNonce <== claimRevNonce.revNonce;
-
-	component smtClaimValid = SMTVerifier(IssuerLevels);
-	smtClaimValid.enabled <== 1;
-	smtClaimValid.fnc <== 1; // Non-inclusion
-	smtClaimValid.root <== isProofValidRevTreeRoot;
-	for (var i=0; i<IssuerLevels; i++) { smtClaimValid.siblings[i] <== isProofValidNonRevMtp[i]; }
-	smtClaimValid.oldKey <== isProofValidNonRevMtpAuxHi;
-	smtClaimValid.oldValue <== isProofValidNonRevMtpAuxHv;
-	smtClaimValid.isOld0 <==  isProofValidNonRevMtpNoAux;
-	smtClaimValid.key <== revNonceHiHv.hi;
-	smtClaimValid.value <== 0;
-}
-
 // checkClaimExists verifies that claim is included into the claim tree root
 template checkClaimExists(IssuerLevels) {
 	signal input claim[8];
-
 	signal input claimMTP[IssuerLevels];
 	signal input treeRoot;
 
@@ -275,7 +239,31 @@ template checkClaimExists(IssuerLevels) {
 	smtClaimExists.value <== claimHiHv.hv;
 }
 
+template checkClaimNotRevoked(treeLevels) {
+    signal input claim[8];
+    signal input claimNonRevMTP[treeLevels];
+    signal input treeRoot;
+    signal input noAux;
+    signal input auxHi;
+    signal input auxHv;
 
+	component claimRevNonce = getClaimRevNonce();
+	for (var i=0; i<8; i++) { claimRevNonce.claim[i] <== claim[i]; }
+
+	component revNonceHiHv = getRevNonceNoVerHiHv();
+	revNonceHiHv.revNonce <== claimRevNonce.revNonce;
+
+    component smtClaimNotExists = SMTVerifier(treeLevels);
+    smtClaimNotExists.enabled <== 1;
+    smtClaimNotExists.fnc <== 1; // Non-inclusion
+    smtClaimNotExists.root <== treeRoot;
+    for (var i=0; i<treeLevels; i++) { smtClaimNotExists.siblings[i] <== claimNonRevMTP[i]; }
+    smtClaimNotExists.oldKey <== auxHi;
+    smtClaimNotExists.oldValue <== auxHv;
+    smtClaimNotExists.isOld0 <== noAux;
+    smtClaimNotExists.key <== revNonceHiHv.hi;
+    smtClaimNotExists.value <== 0;
+}
 
 // verifyIdenStateMatchesRoots checks that a hash of 3 tree
 // roots is equal to expected identity state
@@ -325,15 +313,15 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
     verifyClaimIssuanceIdenState.expectedState <== claimIssuanceIdenState;
 
     // check non-revocation proof for claim
-    component verifyClaimNotRevoked = verifyCredentialNotRevoked(IssuerLevels);
+    component verifyClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
     for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== claim[i]; }
     for (var i=0; i<IssuerLevels; i++) {
-        verifyClaimNotRevoked.isProofValidNonRevMtp[i] <== claimNonRevMtp[i];
+        verifyClaimNotRevoked.claimNonRevMTP[i] <== claimNonRevMtp[i];
     }
-    verifyClaimNotRevoked.isProofValidNonRevMtpNoAux <== claimNonRevMtpNoAux;
-    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHi <== claimNonRevMtpAuxHi;
-    verifyClaimNotRevoked.isProofValidNonRevMtpAuxHv <== claimNonRevMtpAuxHv;
-    verifyClaimNotRevoked.isProofValidRevTreeRoot <== claimNonRevIssuerRevTreeRoot;
+    verifyClaimNotRevoked.noAux <== claimNonRevMtpNoAux;
+    verifyClaimNotRevoked.auxHi <== claimNonRevMtpAuxHi;
+    verifyClaimNotRevoked.auxHv <== claimNonRevMtpAuxHv;
+    verifyClaimNotRevoked.treeRoot <== claimNonRevIssuerRevTreeRoot;
 
     // check issuer state matches for non-revocation proof
     component verifyClaimNonRevIssuerState = verifyIdenStateMatchesRoots();

@@ -75,19 +75,14 @@ template VerifyClaimKeyBBJJinState(nLevels) {
     claimExists.treeRoot <== claimsTreeRoot;
 
     // check claim is not revoked
-    component claimRevNonce = getClaimRevNonce();
-    for (var i=0; i<8; i++) {
-        claimRevNonce.claim[i] <== claim[i];
+    component smtClaimNotRevoked = checkClaimNotRevoked(nLevels);
+    for (var i=0; i<8; i++) { smtClaimNotRevoked.claim[i] <== claim[i]; }
+    for (var i=0; i<nLevels; i++) {
+        smtClaimNotRevoked.claimNonRevMTP[i] <== authClaimNonRevMtp[i];
     }
-    component smtClaimNotRevoked = SMTVerifier(nLevels);
-    smtClaimNotRevoked.enabled <== 1;
-    smtClaimNotRevoked.fnc <== 1; // Non-inclusion
-    smtClaimNotRevoked.root <== revTreeRoot;
-    for (var i=0; i<nLevels; i++) { smtClaimNotRevoked.siblings[i] <== authClaimNonRevMtp[i]; }
-    smtClaimNotRevoked.isOld0 <== authClaimNonRevMtpNoAux;
-    smtClaimNotRevoked.oldKey <== authClaimNonRevMtpAuxHi;
-    smtClaimNotRevoked.oldValue <== authClaimNonRevMtpAuxHv;
-    smtClaimNotRevoked.key <== claimRevNonce.revNonce;
-    smtClaimNotRevoked.value <== 0;
+    smtClaimNotRevoked.treeRoot <== revTreeRoot;
+    smtClaimNotRevoked.noAux <== authClaimNonRevMtpNoAux;
+    smtClaimNotRevoked.auxHi <== authClaimNonRevMtpAuxHi;
+    smtClaimNotRevoked.auxHv <== authClaimNonRevMtpAuxHv;
 }
 
