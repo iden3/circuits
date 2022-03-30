@@ -43,7 +43,7 @@ describe('auth.circom:', async function () {
             path.join(__dirname, "../circuits", "auth.circom"),
             {
                 output: path.join(__dirname, "../circuits", "build/auth"),
-                recompile: false,
+                recompile: true,
                 reduceConstraints: false,
             }
         );
