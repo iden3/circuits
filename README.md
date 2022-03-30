@@ -83,3 +83,25 @@ node s3_util.js zip v1
 ```bash
 node s3_util.js rm v1
 ```
+
+## Push docker container to github packages
+1. Create [PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token);
+2. Login to github registry:
+    ```bash
+    echo <PAT> | docker login ghcr.io -u <GITHUB_NAME> --password-stdin
+    ```
+3. Build docker image with tag:
+    ```bash
+    docker build -t ghcr.io/iden3/circom:<version> .
+    ```
+4. Push docker image:
+    ```bash
+    docker push ghcr.io/iden3/circom:<version>
+    ```
+5. Update `.github/workflows/main.yaml` to the new image:
+    ```yaml
+    ...
+        container:
+          image: ghcr.io/iden3/circom:<version>
+    ...
+    ```
