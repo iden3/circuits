@@ -63,7 +63,7 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 
 	// get claim for identity state and check that it is included into Relay's state
 
-    component checkUserState = verifyIdenStateMatchesRoots();
+    component checkUserState = checkIdenStateMatchesRoots();
     checkUserState.claimsTreeRoot <== claimsTreeRoot;
     checkUserState.revTreeRoot <== revTreeRoot;
     checkUserState.rootsTreeRoot <== rootsTreeRoot;
@@ -91,7 +91,7 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 	for (var i=0; i<nLevelsRelay; i++) { checkUserStateInRelay.claimMTP[i] <== userStateInRelayClaimMtp[i]; }
     checkUserStateInRelay.treeRoot <== relayProofValidClaimsTreeRoot;
 
-    component checkRelayState = verifyIdenStateMatchesRoots();
+    component checkRelayState = checkIdenStateMatchesRoots();
     checkRelayState.claimsTreeRoot <== relayProofValidClaimsTreeRoot;
     checkRelayState.revTreeRoot <== relayProofValidRevTreeRoot;
     checkRelayState.rootsTreeRoot <== relayProofValidRootsTreeRoot;

@@ -265,9 +265,9 @@ template checkClaimNotRevoked(treeLevels) {
     smtClaimNotExists.value <== 0;
 }
 
-// verifyIdenStateMatchesRoots checks that a hash of 3 tree
+// checkIdenStateMatchesRoots checks that a hash of 3 tree
 // roots is equal to expected identity state
-template verifyIdenStateMatchesRoots() {
+template checkIdenStateMatchesRoots() {
 	signal input claimsTreeRoot;
 	signal input revTreeRoot;
 	signal input rootsTreeRoot;
@@ -306,7 +306,7 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
     claimIssuanceCheck.treeRoot <== claimIssuanceClaimsTreeRoot;
 
     // verify issuer state includes country claim
-    component verifyClaimIssuanceIdenState = verifyIdenStateMatchesRoots();
+    component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();
     verifyClaimIssuanceIdenState.claimsTreeRoot <== claimIssuanceClaimsTreeRoot;
     verifyClaimIssuanceIdenState.revTreeRoot <== claimIssuanceRevTreeRoot;
     verifyClaimIssuanceIdenState.rootsTreeRoot <== claimIssuanceRootsTreeRoot;
@@ -324,7 +324,7 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
     verifyClaimNotRevoked.treeRoot <== claimNonRevIssuerRevTreeRoot;
 
     // check issuer state matches for non-revocation proof
-    component verifyClaimNonRevIssuerState = verifyIdenStateMatchesRoots();
+    component verifyClaimNonRevIssuerState = checkIdenStateMatchesRoots();
     verifyClaimNonRevIssuerState.claimsTreeRoot <== claimNonRevIssuerClaimsTreeRoot;
     verifyClaimNonRevIssuerState.revTreeRoot <== claimNonRevIssuerRevTreeRoot;
     verifyClaimNonRevIssuerState.rootsTreeRoot <== claimNonRevIssuerRootsTreeRoot;
