@@ -1,7 +1,7 @@
 import {describe} from "mocha";
 
 const path = require("path");
-const wasm_tester = require("circom_tester").wasm;
+const tester = require("circom_tester").wasm;
 const chai = require("chai");
 const assert = chai.assert;
 
@@ -22,7 +22,9 @@ describe("credential#getValueByIndex",  function() {
         "7"];
 
     before(async function() {
-        circuit = await wasm_tester(path.join(__dirname, "circuits/credential", "credential_GetValueByIndex.circom"));
+        circuit = await tester(
+            path.join(__dirname, "../circuits/credential", "credential_GetValueByIndex.circom"),
+        );
     });
 
     afterEach( async ()=>{

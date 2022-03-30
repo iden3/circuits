@@ -9,7 +9,6 @@ The circuits of this repository are compatible with the [go-iden3-core implement
 Circuits:
 
 - [Identity State Update](circuits/idState.circom): circuit used to verify validity when updating an Identity State
-- [BuildClaimKeyBBJJ](circuits/buildClaimKeyBBJJ.circom): circuit used build ClaimKeyBabyJubJub
 - [Credential](circuits/credential.circom): circuit used to verify a
   Credential. This means that the prover is the owner of the identity, and the
   identity is inside a claim with Subject OtherIden, and that claim is inside
