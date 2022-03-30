@@ -45,14 +45,14 @@ template VerifyAuthClaimAndSignature(nLevels) {
     verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
     verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
 
-    component sigVerifier = EdDSAPoseidonVerifier();
-    sigVerifier.enabled <== 1;
-    sigVerifier.Ax <== authClaim[2]; // Ax should be in indexSlotA
-    sigVerifier.Ay <== authClaim[3]; // Ay should be in indexSlotB
-    sigVerifier.S <== challengeSignatureS;
-    sigVerifier.R8x <== challengeSignatureR8x;
-    sigVerifier.R8y <== challengeSignatureR8y;
-    sigVerifier.M <== challenge;
+    component sigVerifier = checkDataSignatureWithPubKeyInClaim();
+    for (var i=0; i<8; i++) {
+        sigVerifier.claim[i] <== authClaim[i];
+    }
+    sigVerifier.signatureS <== challengeSignatureS;
+    sigVerifier.signatureR8X <== challengeSignatureR8x;
+    sigVerifier.signatureR8Y <== challengeSignatureR8y;
+    sigVerifier.data <== challenge;
 }
 
 // circuit to check that claim with the provided public key is in ClaimsTreeRoot
