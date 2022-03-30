@@ -1,3 +1,5 @@
+import {describe} from "mocha";
+
 const path = require("path");
 const tester = require("circom_tester").wasm;
 const chai = require("chai");
@@ -19,7 +21,7 @@ const verifyCredentialSubject = {
     id: "197990912273762023075897629417744831667514652778362723486029975898079821824", // 117twYCgGzxHUtMsAfjM3muCrypTXcu6oc7cSsuGHM
 }
 
-describe("credential verifyCredentialSubject test", function () {
+describe.skip("credential verifyCredentialSubject test", function () {
     this.timeout(200000);
     it("Test credential verifyCredentialSubject", async () => {
         const circuit = await tester(
@@ -65,7 +67,7 @@ const verifyCredentialMtp = {
     "isProofExistClaimsTreeRoot": "8983046041355403090199265671506633595311694354613197795337389712944858482798"
 }
 
-describe("credential verifyCredentialMtp test", function () {
+describe.skip("credential verifyCredentialMtp test", function () {
     this.timeout(200000);
     it("Test credential verifyCredentialMtp", async () => {
         const circuit = await tester(
@@ -78,7 +80,7 @@ describe("credential verifyCredentialMtp test", function () {
     });
 });
 
-describe("credential verifyIdenStateMatchesRoots test", function () {
+describe.skip("credential verifyIdenStateMatchesRoots test", function () {
     this.timeout(200000);
     it("Test credential verifyIdenStateMatchesRoots", async () => {
         const circuit = await tester(
@@ -96,7 +98,7 @@ describe("credential verifyIdenStateMatchesRoots test", function () {
     });
 });
 
-describe("credential verifyClaimSignature test", function () {
+describe.skip("credential verifyClaimSignature test", function () {
     this.timeout(200000);
     it("Test credential verifyClaimSignature", async () => {
         const circuit = await tester(
