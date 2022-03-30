@@ -1,9 +1,9 @@
 pragma circom 2.0.0;
 
-include "../node_modules/circomlib/circuits/comparators.circom";
-include "../node_modules/circomlib/circuits/poseidon.circom";
-include "../node_modules/circomlib/circuits/smt/smtverifier.circom";
-include "../node_modules/circomlib/circuits/smt/smtprocessor.circom";
+include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../../node_modules/circomlib/circuits/poseidon.circom";
+include "../../node_modules/circomlib/circuits/smt/smtverifier.circom";
+include "../../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "credential.circom";
 
 template VerifyAuthClaimAndSignature(nLevels) {

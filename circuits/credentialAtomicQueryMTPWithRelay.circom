@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "../query/credentialAtomicQueryMTPWithRelay.circom";
+include "lib/query/credentialAtomicQueryMTPWithRelay.circom";
 
 component main{public [challenge,
                         userID,

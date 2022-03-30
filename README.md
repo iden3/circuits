@@ -16,11 +16,8 @@ Circuits:
 
 Examples of circuits usage:
 
-- [Identity State Update](circuits/examples/idState.circom): Identity state
+- [Identity State Update](circuits/idState.circom): Identity state
   update circuit with genesis proofs of at most 4 levels.
-- [Credential Demo Wrapper](circuits/examples/credentialDemoWrapper.circom):
-  Credential demo circuit that proves ownership of a claim of type
-  ClaimOtherIden (with some values set to 0 for simplicity).
 
 # Building and trusted setup
 

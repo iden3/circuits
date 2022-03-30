@@ -1,5 +1,5 @@
 pragma circom 2.0.0;
 
-include "../../circuits/idState.circom";
+include "../../circuits/lib/idState.circom";
 
 component main = IdState(40);

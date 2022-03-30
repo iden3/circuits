@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../../../node_modules/circomlib/circuits/comparators.circom";
 
 // nElements - number of value elements
 // Example nElements = 3, '1' v ['12', '1231', '9999'], 1 not in array of values
