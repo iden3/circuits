@@ -26,11 +26,6 @@ describe('auth.circom:', async function () {
                 "rootsTreeRoot": "0",
                 "state": "5816868615164565912277677884704888703982258184820398645933682814085602171910"
             },
-            expOut: {
-                challenge: 1,
-                id: "286312392162647260160287083374160163061246635086990474403590223113720496128",
-                state: "5816868615164565912277677884704888703982258184820398645933682814085602171910"
-            }
         }
 
     ];
@@ -43,17 +38,16 @@ describe('auth.circom:', async function () {
             path.join(__dirname, "../circuits", "auth.circom"),
             {
                 output: path.join(__dirname, "../circuits", "build/auth"),
-                recompile: true,
+                recompile: false,
                 reduceConstraints: false,
             }
         );
     });
 
-    tests.forEach(({desc, input, expOut}) => {
+    tests.forEach(({desc, input}) => {
         it(`auth ${desc}`, async function () {
             const w = await circuit.calculateWitness(input, true);
             await circuit.checkConstraints(w);
-            await circuit.assertOut(w, expOut);
         });
     });
 });
