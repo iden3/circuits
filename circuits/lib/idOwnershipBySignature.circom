@@ -12,19 +12,19 @@ include "verifyAuthClaimAndSignature.circom";
 include "credential.circom";
 
 template IdOwnershipBySignature(nLevels) {
-    signal input hoIdenState;
+    signal input userState;
 
-	signal input claimsTreeRoot;
-	signal input authClaimMtp[nLevels];
-	signal input authClaim[8];
+	signal input userClaimsTreeRoot;
+	signal input userAuthClaimMtp[nLevels];
+	signal input userAuthClaim[8];
 
-	signal input revTreeRoot;
-    signal input authClaimNonRevMtp[nLevels];
-    signal input authClaimNonRevMtpNoAux;
-    signal input authClaimNonRevMtpAuxHi;
-    signal input authClaimNonRevMtpAuxHv;
+	signal input userRevTreeRoot;
+    signal input userAuthClaimNonRevMtp[nLevels];
+    signal input userAuthClaimNonRevMtpNoAux;
+    signal input userAuthClaimNonRevMtpAuxHi;
+    signal input userAuthClaimNonRevMtpAuxHv;
 
-	signal input rootsTreeRoot;
+	signal input userRootsTreeRoot;
 
 	signal input challenge;
 	signal input challengeSignatureR8x;
@@ -33,14 +33,14 @@ template IdOwnershipBySignature(nLevels) {
 
 
     component verifyAuthClaim = VerifyAuthClaimAndSignature(nLevels);
-    for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== authClaim[i]; }
-	for (var i=0; i<nLevels; i++) { verifyAuthClaim.authClaimMtp[i] <== authClaimMtp[i]; }
-	verifyAuthClaim.claimsTreeRoot <== claimsTreeRoot;
-	verifyAuthClaim.revTreeRoot <== revTreeRoot;
-	for (var i=0; i<nLevels; i++) { verifyAuthClaim.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
-	verifyAuthClaim.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
-	verifyAuthClaim.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
-	verifyAuthClaim.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
+    for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== userAuthClaim[i]; }
+	for (var i=0; i<nLevels; i++) { verifyAuthClaim.authClaimMtp[i] <== userAuthClaimMtp[i]; }
+	verifyAuthClaim.claimsTreeRoot <== userClaimsTreeRoot;
+	verifyAuthClaim.revTreeRoot <== userRevTreeRoot;
+	for (var i=0; i<nLevels; i++) { verifyAuthClaim.authClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
+	verifyAuthClaim.authClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
+	verifyAuthClaim.authClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
+	verifyAuthClaim.authClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
 
     verifyAuthClaim.challengeSignatureS <== challengeSignatureS;
     verifyAuthClaim.challengeSignatureR8x <== challengeSignatureR8x;
@@ -48,9 +48,9 @@ template IdOwnershipBySignature(nLevels) {
     verifyAuthClaim.challenge <== challenge;
 
     component checkUserState = checkIdenStateMatchesRoots();
-    checkUserState.claimsTreeRoot <== claimsTreeRoot;
-    checkUserState.revTreeRoot <== revTreeRoot;
-    checkUserState.rootsTreeRoot <== rootsTreeRoot;
-    checkUserState.expectedState <== hoIdenState;
+    checkUserState.claimsTreeRoot <== userClaimsTreeRoot;
+    checkUserState.revTreeRoot <== userRevTreeRoot;
+    checkUserState.rootsTreeRoot <== userRootsTreeRoot;
+    checkUserState.expectedState <== userState;
 }
 

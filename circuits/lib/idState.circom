@@ -78,22 +78,22 @@ template IdState(nLevels) {
 
 	component checkIdOwnership = IdOwnershipBySignature(nLevels);
 
-	checkIdOwnership.claimsTreeRoot <== claimsTreeRoot;
-	for (var i=0; i<nLevels; i++) { checkIdOwnership.authClaimMtp[i] <== authClaimMtp[i]; }
-    for (var i=0; i<8; i++) { checkIdOwnership.authClaim[i] <== authClaim[i]; }
+	checkIdOwnership.userClaimsTreeRoot <== claimsTreeRoot;
+	for (var i=0; i<nLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== authClaimMtp[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.userAuthClaim[i] <== authClaim[i]; }
 
-	checkIdOwnership.revTreeRoot <== revTreeRoot;
-	for (var i=0; i<nLevels; i++) { checkIdOwnership.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
-	checkIdOwnership.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
-	checkIdOwnership.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
-	checkIdOwnership.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
+	checkIdOwnership.userRevTreeRoot <== revTreeRoot;
+	for (var i=0; i<nLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
+	checkIdOwnership.userAuthClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
+	checkIdOwnership.userAuthClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
+	checkIdOwnership.userAuthClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
 
-	checkIdOwnership.rootsTreeRoot <== rootsTreeRoot;
+	checkIdOwnership.userRootsTreeRoot <== rootsTreeRoot;
 
     checkIdOwnership.challenge <== challenge.out;
     checkIdOwnership.challengeSignatureR8x <== signatureR8x;
     checkIdOwnership.challengeSignatureR8y <== signatureR8y;
     checkIdOwnership.challengeSignatureS <== signatureS;
 
-	checkIdOwnership.hoIdenState <== oldIdState;
+	checkIdOwnership.userState <== oldIdState;
 }

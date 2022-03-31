@@ -23,11 +23,11 @@ describe("idOwnershipBySignature", function() {
 
     it("Ownership should be ok. Auth claims total: 1. Signed by: 1st claim. Revoked: none", async () => {
         const inputs = {
-            hoIdenState: "5816868615164565912277677884704888703982258184820398645933682814085602171910",
+            userState: "5816868615164565912277677884704888703982258184820398645933682814085602171910",
 
-            claimsTreeRoot: "8033159210005724351649063848617878571712113104821846241291681963936214187701",
-            authClaimMtp: ["0", "0", "0", "0"],
-            authClaim : [
+            userClaimsTreeRoot: "8033159210005724351649063848617878571712113104821846241291681963936214187701",
+            userAuthClaimMtp: ["0", "0", "0", "0"],
+            userAuthClaim : [
                 "269270088098491255471307608775043319525",
                 "0",
                 "17640206035128972995519606214765283372613874593503528180869261482403155458945",
@@ -38,13 +38,13 @@ describe("idOwnershipBySignature", function() {
                 "0",
             ],
 
-            revTreeRoot: "0",
-            authClaimNonRevMtp: ["0", "0", "0", "0"],
-            authClaimNonRevMtpNoAux: "1",
-            authClaimNonRevMtpAuxHi: "0",
-            authClaimNonRevMtpAuxHv: "0",
+            userRevTreeRoot: "0",
+            userAuthClaimNonRevMtp: ["0", "0", "0", "0"],
+            userAuthClaimNonRevMtpNoAux: "1",
+            userAuthClaimNonRevMtpAuxHi: "0",
+            userAuthClaimNonRevMtpAuxHv: "0",
 
-            rootsTreeRoot: "0",
+            userRootsTreeRoot: "0",
 
             challenge: "1",
             challengeSignatureR8x: "8553678144208642175027223770335048072652078621216414881653012537434846327449",
@@ -58,11 +58,11 @@ describe("idOwnershipBySignature", function() {
 
     it(`Ownership should be ok. Claims total: 2. Signed by: 2nd claim. Revoked: none`, async () => {
         const inputs = {
-            hoIdenState: "21799818405085739943263537616587664863501401321957145427557061721281929782461",
+            userState: "21799818405085739943263537616587664863501401321957145427557061721281929782461",
 
-            claimsTreeRoot: "1267420139493013179506222700019094822263769414097067662137215579894068836606",
-            authClaimMtp: ["8033159210005724351649063848617878571712113104821846241291681963936214187701", "0", "0", "0"],
-            authClaim : [
+            userClaimsTreeRoot: "1267420139493013179506222700019094822263769414097067662137215579894068836606",
+            userAuthClaimMtp: ["8033159210005724351649063848617878571712113104821846241291681963936214187701", "0", "0", "0"],
+            userAuthClaim : [
                 "269270088098491255471307608775043319525",
                 "0",
                 "4720763745722683616702324599137259461509439547324750011830105416383780791263",
@@ -73,13 +73,13 @@ describe("idOwnershipBySignature", function() {
                 "0",
             ],
 
-            revTreeRoot: "0",
-            authClaimNonRevMtp: ["0", "0", "0", "0"],
-            authClaimNonRevMtpNoAux: "1",
-            authClaimNonRevMtpAuxHi: "0",
-            authClaimNonRevMtpAuxHv: "0",
+            userRevTreeRoot: "0",
+            userAuthClaimNonRevMtp: ["0", "0", "0", "0"],
+            userAuthClaimNonRevMtpNoAux: "1",
+            userAuthClaimNonRevMtpAuxHi: "0",
+            userAuthClaimNonRevMtpAuxHv: "0",
 
-            rootsTreeRoot: "0",
+            userRootsTreeRoot: "0",
 
             challenge: "1",
             challengeSignatureR8x: "3318605682427930847043923964996627571509054270532204838981931388121839601904",
@@ -94,11 +94,11 @@ describe("idOwnershipBySignature", function() {
     it(`Ownership should be ok. Claims total: 2. Signed by: 2nd claim. Revoked: 1st claim`, async () => {
 
         const inputs = {
-            hoIdenState: "16212306690062253699959504587205358109947105302123737824933420422652535404326",
+            userState: "16212306690062253699959504587205358109947105302123737824933420422652535404326",
 
-            claimsTreeRoot: "1267420139493013179506222700019094822263769414097067662137215579894068836606",
-            authClaimMtp: ["8033159210005724351649063848617878571712113104821846241291681963936214187701", "0", "0", "0"],
-            authClaim : [
+            userClaimsTreeRoot: "1267420139493013179506222700019094822263769414097067662137215579894068836606",
+            userAuthClaimMtp: ["8033159210005724351649063848617878571712113104821846241291681963936214187701", "0", "0", "0"],
+            userAuthClaim : [
                 "269270088098491255471307608775043319525",
                 "0",
                 "4720763745722683616702324599137259461509439547324750011830105416383780791263",
@@ -109,13 +109,13 @@ describe("idOwnershipBySignature", function() {
                 "0",
             ],
 
-            revTreeRoot: "9572161194792737168173461511232528826921561251689921703982232129896045083154",
-            authClaimNonRevMtp: ["0", "0", "0", "0"],
-            authClaimNonRevMtpNoAux: "0",
-            authClaimNonRevMtpAuxHi: "15930428023331155902",
-            authClaimNonRevMtpAuxHv: "0",
+            userRevTreeRoot: "9572161194792737168173461511232528826921561251689921703982232129896045083154",
+            userAuthClaimNonRevMtp: ["0", "0", "0", "0"],
+            userAuthClaimNonRevMtpNoAux: "0",
+            userAuthClaimNonRevMtpAuxHi: "15930428023331155902",
+            userAuthClaimNonRevMtpAuxHv: "0",
 
-            rootsTreeRoot: "0",
+            userRootsTreeRoot: "0",
 
             challenge: "1",
             challengeSignatureR8x: "3318605682427930847043923964996627571509054270532204838981931388121839601904",
@@ -130,11 +130,11 @@ describe("idOwnershipBySignature", function() {
     it(`Ownership should fail. Claims total: 1. Signed by: 1st claim. Revoked: 1st claim`, async () => {
 
         const inputs = {
-            hoIdenState: "13312337630407117190690801285857799236101280464600310314935537176326743082698",
+            userState: "13312337630407117190690801285857799236101280464600310314935537176326743082698",
 
-            claimsTreeRoot: "8033159210005724351649063848617878571712113104821846241291681963936214187701",
-            authClaimMtp: ["0", "0", "0", "0"],
-            authClaim : [
+            userClaimsTreeRoot: "8033159210005724351649063848617878571712113104821846241291681963936214187701",
+            userAuthClaimMtp: ["0", "0", "0", "0"],
+            userAuthClaim : [
                 "269270088098491255471307608775043319525",
                 "0",
                 "17640206035128972995519606214765283372613874593503528180869261482403155458945",
@@ -145,13 +145,13 @@ describe("idOwnershipBySignature", function() {
                 "0",
             ],
 
-            revTreeRoot: "9572161194792737168173461511232528826921561251689921703982232129896045083154",
-            authClaimNonRevMtp: ["0", "0", "0", "0"],
-            authClaimNonRevMtpNoAux: "1",
-            authClaimNonRevMtpAuxHi: "0",
-            authClaimNonRevMtpAuxHv: "0",
+            userRevTreeRoot: "9572161194792737168173461511232528826921561251689921703982232129896045083154",
+            userAuthClaimNonRevMtp: ["0", "0", "0", "0"],
+            userAuthClaimNonRevMtpNoAux: "1",
+            userAuthClaimNonRevMtpAuxHi: "0",
+            userAuthClaimNonRevMtpAuxHv: "0",
 
-            rootsTreeRoot: "0",
+            userRootsTreeRoot: "0",
 
             challenge: "1",
             challengeSignatureR8x: "8553678144208642175027223770335048072652078621216414881653012537434846327449",
@@ -171,11 +171,11 @@ describe("idOwnershipBySignature", function() {
     it(`Ownership should fail. Claims total: 2. Signed by: 2nd claim. Revoked: 2nd claim`, async () => {
 
         const inputs = {
-            hoIdenState: "20138099233809816912157444795305418523517739598699803427285545016792186731290",
+            userState: "20138099233809816912157444795305418523517739598699803427285545016792186731290",
 
-            claimsTreeRoot: "1267420139493013179506222700019094822263769414097067662137215579894068836606",
-            authClaimMtp: ["8033159210005724351649063848617878571712113104821846241291681963936214187701", "0", "0", "0"],
-            authClaim : [
+            userClaimsTreeRoot: "1267420139493013179506222700019094822263769414097067662137215579894068836606",
+            userAuthClaimMtp: ["8033159210005724351649063848617878571712113104821846241291681963936214187701", "0", "0", "0"],
+            userAuthClaim : [
                 "269270088098491255471307608775043319525",
                 "0",
                 "4720763745722683616702324599137259461509439547324750011830105416383780791263",
@@ -186,13 +186,13 @@ describe("idOwnershipBySignature", function() {
                 "0",
             ],
 
-            revTreeRoot: "19457836367977756683788174626344746000647215586327462959978582532138667631896",
-            authClaimNonRevMtp: ["9572161194792737168173461511232528826921561251689921703982232129896045083154", "0", "0", "0"],
-            authClaimNonRevMtpNoAux: "1",
-            authClaimNonRevMtpAuxHi: "0",
-            authClaimNonRevMtpAuxHv: "0",
+            userRevTreeRoot: "19457836367977756683788174626344746000647215586327462959978582532138667631896",
+            userAuthClaimNonRevMtp: ["9572161194792737168173461511232528826921561251689921703982232129896045083154", "0", "0", "0"],
+            userAuthClaimNonRevMtpNoAux: "1",
+            userAuthClaimNonRevMtpAuxHi: "0",
+            userAuthClaimNonRevMtpAuxHv: "0",
 
-            rootsTreeRoot: "0",
+            userRootsTreeRoot: "0",
 
             challenge: "1",
             challengeSignatureR8x: "3318605682427930847043923964996627571509054270532204838981931388121839601904",
