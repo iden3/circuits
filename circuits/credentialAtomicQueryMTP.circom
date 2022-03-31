@@ -3,11 +3,11 @@ pragma circom 2.0.0;
 include "lib/query/credentialAtomicQueryMTP.circom";
 
 component main{public [challenge,
-                        id,
-                        hoIdenState,
+                        userID,
+                        userState,
                         issuerID,
-                        claimIssuanceIdenState,
-                        claimSchema,
+                        issuerClaimIdenState,
+                        issuerClaimSchema,
                         slotIndex,
                         operator,
                         value,
