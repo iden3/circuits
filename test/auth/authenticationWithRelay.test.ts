@@ -42,7 +42,7 @@ describe("authWithRelay.circom:", async function() {
 
     before(async () => {
         circuit = await wasm_tester(
-            path.join(__dirname, "../circuits", "authWithRelay.circom"),
+            path.join(__dirname, "../circuits", "authWithRelayTest.circom"),
             {
                 reduceConstraints: false,
                 output: path.join(__dirname, "../circuits", "build/authWithRelay"),
