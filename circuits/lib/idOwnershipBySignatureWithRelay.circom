@@ -16,17 +16,17 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
-	signal input claimsTreeRoot;
-	signal input authClaimMtp[nLevelsUser];
-	signal input authClaim[8];
+	signal input userClaimsTreeRoot;
+	signal input userAuthClaimMtp[nLevelsUser];
+	signal input userAuthClaim[8];
 
-	signal input revTreeRoot;
-    signal input authClaimNonRevMtp[nLevelsUser];
-    signal input authClaimNonRevMtpNoAux;
-    signal input authClaimNonRevMtpAuxHi;
-    signal input authClaimNonRevMtpAuxHv;
+	signal input userRevTreeRoot;
+    signal input userAuthClaimNonRevMtp[nLevelsUser];
+    signal input userAuthClaimNonRevMtpNoAux;
+    signal input userAuthClaimNonRevMtpAuxHi;
+    signal input userAuthClaimNonRevMtpAuxHv;
 
-	signal input rootsTreeRoot;
+	signal input userRootsTreeRoot;
 
 	signal input challenge;
 	signal input challengeSignatureR8x;
@@ -47,14 +47,14 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
     */
 
     component verifyAuthClaim = VerifyAuthClaimAndSignature(nLevelsUser);
-    for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== authClaim[i]; }
-	for (var i=0; i<nLevelsUser; i++) { verifyAuthClaim.authClaimMtp[i] <== authClaimMtp[i]; }
-	verifyAuthClaim.claimsTreeRoot <== claimsTreeRoot;
-	verifyAuthClaim.revTreeRoot <== revTreeRoot;
-	for (var i=0; i<nLevelsUser; i++) { verifyAuthClaim.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
-	verifyAuthClaim.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
-	verifyAuthClaim.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
-	verifyAuthClaim.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
+    for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== userAuthClaim[i]; }
+	for (var i=0; i<nLevelsUser; i++) { verifyAuthClaim.authClaimMtp[i] <== userAuthClaimMtp[i]; }
+	verifyAuthClaim.claimsTreeRoot <== userClaimsTreeRoot;
+	verifyAuthClaim.revTreeRoot <== userRevTreeRoot;
+	for (var i=0; i<nLevelsUser; i++) { verifyAuthClaim.authClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
+	verifyAuthClaim.authClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
+	verifyAuthClaim.authClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
+	verifyAuthClaim.authClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
 
     verifyAuthClaim.challengeSignatureS <== challengeSignatureS;
     verifyAuthClaim.challengeSignatureR8x <== challengeSignatureR8x;
@@ -64,9 +64,9 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 	// get claim for identity state and check that it is included into Relay's state
 
     component checkUserState = checkIdenStateMatchesRoots();
-    checkUserState.claimsTreeRoot <== claimsTreeRoot;
-    checkUserState.revTreeRoot <== revTreeRoot;
-    checkUserState.rootsTreeRoot <== rootsTreeRoot;
+    checkUserState.claimsTreeRoot <== userClaimsTreeRoot;
+    checkUserState.revTreeRoot <== userRevTreeRoot;
+    checkUserState.rootsTreeRoot <== userRootsTreeRoot;
     checkUserState.expectedState <== userStateInRelayClaim[6];
 
     // verify relay claim schema

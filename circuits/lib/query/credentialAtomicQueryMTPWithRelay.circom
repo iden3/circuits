@@ -92,17 +92,17 @@ template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, Rela
     /* Id ownership check*/
     component userIdOwnership = IdOwnershipBySignatureWithRelay(IdOwnershipLevels, RelayLevels);
 
-    userIdOwnership.claimsTreeRoot <== userClaimsTreeRoot; // currentUserStateClaimsTreeRoot
-    for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.authClaimMtp[i] <== authClaimMtp[i]; }
-    for (var i=0; i<8; i++) { userIdOwnership.authClaim[i] <== authClaim[i]; }
+    userIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot; // currentUserStateClaimsTreeRoot
+    for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimMtp[i] <== authClaimMtp[i]; }
+    for (var i=0; i<8; i++) { userIdOwnership.userAuthClaim[i] <== authClaim[i]; }
 
-    userIdOwnership.revTreeRoot <== userRevTreeRoot;  // currentUserStateClaimsRevTreeRoot
-    for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
-    userIdOwnership.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
-    userIdOwnership.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
-    userIdOwnership.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
+    userIdOwnership.userRevTreeRoot <== userRevTreeRoot;  // currentUserStateClaimsRevTreeRoot
+    for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
+    userIdOwnership.userAuthClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
+    userIdOwnership.userAuthClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
+    userIdOwnership.userAuthClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
 
-    userIdOwnership.rootsTreeRoot <== userRootsTreeRoot; // currentUserStateClaimsRootsTreeRoot
+    userIdOwnership.userRootsTreeRoot <== userRootsTreeRoot; // currentUserStateClaimsRootsTreeRoot
 
     userIdOwnership.challenge <== challenge;
     userIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
