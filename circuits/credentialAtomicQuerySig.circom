@@ -3,11 +3,11 @@ pragma circom 2.0.0;
 include "lib/query/credentialAtomicQuerySig.circom";
 
 component main{public [challenge,
-                        id,
-                        hoIdenState,
+                        userID,
+                        userState,
                         issuerID,
-                        issuerIdenState,
-                        claimSchema,
+                        issuerState,
+                        issuerClaimSchema,
                         slotIndex,
                         operator,
                         value,
