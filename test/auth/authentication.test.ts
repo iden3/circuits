@@ -35,7 +35,7 @@ describe('auth.circom:', async function () {
 
     before(async function () {
         circuit = await wasm_tester(
-            path.join(__dirname, "../circuits", "auth.circom"),
+            path.join(__dirname, "../circuits", "authTest.circom"),
             {
                 output: path.join(__dirname, "../circuits", "build/auth"),
                 recompile: true,

@@ -8,7 +8,7 @@ describe("idState", function () {
 
     // it("1 auth claim is in the claims tree. Add 1 more auth claim to the claims tree.", async () => {
     //     const circuit = await tester(
-    //         path.join(__dirname, "circuits", "idState.circom"),
+    //         path.join(__dirname, "circuits", "idStateTest.circom"),
     //         {
     //             output: path.join(__dirname, "circuits", "build"),
     //             recompile: true,
@@ -51,7 +51,7 @@ describe("idState", function () {
     // });
     // it("2 claims is in the claims tree. 1 claim is revoked in the new state", async () => {
     //     const circuit = await tester(
-    //         path.join(__dirname, "circuits", "idState.circom"),
+    //         path.join(__dirname, "circuits", "idStateTest.circom"),
     //         {
     //             output: path.join(__dirname, "circuits", "build"),
     //             recompile: true,
@@ -83,7 +83,7 @@ describe("idState", function () {
 
     it("1 auth claim is in the claims tree.", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "idState.circom"),
+            path.join(__dirname, "circuits", "idStateTest.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,
