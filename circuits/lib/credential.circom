@@ -364,10 +364,13 @@ template checkDataSignatureWithPubKeyInClaim() {
     signal input signatureR8Y;
     signal input data;
 
+    component getPubKey = getPubKeyFromClaim();
+    for (var i=0; i<8; i++){ getPubKey.claim[i] <== claim[i]; }
+
     component sigVerifier = EdDSAPoseidonVerifier();
     sigVerifier.enabled <== 1;
-    sigVerifier.Ax <== claim[2]; // Ax should be in indexSlotA
-    sigVerifier.Ay <== claim[3]; // Ay should be in indexSlotB
+    sigVerifier.Ax <== getPubKey.Ax;
+    sigVerifier.Ay <== getPubKey.Ay;
     sigVerifier.S <== signatureS;
     sigVerifier.R8x <== signatureR8X;
     sigVerifier.R8y <== signatureR8Y;
@@ -379,8 +382,8 @@ template getPubKeyFromClaim() {
     signal output Ax;
     signal output Ay;
 
-    Ax <== claim[2];
-    Ay <== claim[3];
+    Ax <== claim[2]; // Ax should be in indexSlotA
+    Ay <== claim[3]; // Ay should be in indexSlotB
 }
 
 // getValueByIndex select slot from claim by given index
