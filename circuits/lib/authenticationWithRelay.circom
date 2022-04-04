@@ -2,7 +2,7 @@ pragma circom 2.0.0;
 
 include "idOwnershipBySignatureWithRelay.circom";
 
-template VerifyAuthenticationInformationWithRelay(IdOwnershipLevels, RelayLevels) {
+template VerifyAuthenticationWithRelay(IdOwnershipLevels, RelayLevels) {
 
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[IdOwnershipLevels];

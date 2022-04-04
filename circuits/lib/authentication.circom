@@ -2,7 +2,7 @@ pragma circom 2.0.0;
 
 include "idOwnershipBySignature.circom";
 
-template VerifyAuthenticationInformation(IdOwnershipLevels) {
+template VerifyAuthentication(IdOwnershipLevels) {
 
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[IdOwnershipLevels];
