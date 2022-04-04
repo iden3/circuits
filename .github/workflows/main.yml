@@ -7,29 +7,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [ 14.x ]
+    container:
+      image: ghcr.io/iden3/circom:0.0.1
+      options: --user 1001 # https://github.com/cypress-io/github-action/issues/446#issuecomment-987015822
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
     - uses: actions/checkout@v2
-    - name: Use Nodejs
-      uses: actions/setup-node@v1
-      with:
-          node-version: '16'
     - name: Install node_modules
       run: npm install
-
-    - name: Install rust
-      run: |
-        curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh -s -- -y
-
-    - name: Install circom
-      run: | 
-        git clone https://github.com/iden3/circom.git && 
-        cd circom && 
-        cargo build --release &&
-        cargo install --path circom
-
     - name: Test circom circuits
       run: npm run test
