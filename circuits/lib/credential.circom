@@ -178,11 +178,6 @@ template getRevNonceNoVerHiHv() {
 		hashHv.inputs[i] <== 0;
 	}
 	hv <== hashHv.out;
-
-	// hv = Poseidon([0xffff_ffff, 0, 0, 0, 0)
-	//hv <== Poseidon([0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, 0, 0, 0, 0, 0])
-	//hv <== 17142353815121200339963760108352696118925531835836661574604762966243856573359;
-	//hv <== 8137207316649344643315856769015464323293372071975540252804619894838929375565; // new from go
 }
 
 // verifyCredentialSubject verifies that claim is issued to a specified identity
