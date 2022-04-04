@@ -107,23 +107,6 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
 
     userIdOwnership.userState <== userState;
 
-
-    // Check issuerClaim is issued to provided identity
-    component claimIdCheck = verifyCredentialSubject();
-    for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
-    claimIdCheck.id <== userID;
-
-    // Verify issuerClaim schema
-    component claimSchemaCheck = verifyCredentialSchema();
-    for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
-    claimSchemaCheck.schema <== issuerClaimSchema;
-
-    // verify issuerClaim expiration time
-    component claimExpirationCheck = verifyExpirationTime();
-    for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
-    claimExpirationCheck.timestamp <== timestamp;
-
-
     // verify issuerClaim issued and not revoked
     component vci = verifyClaimIssuanceNonRev(IssuerLevels);
     for (var i=0; i<8; i++) { vci.claim[i] <== issuerClaim[i]; }
@@ -142,6 +125,21 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     vci.claimNonRevIssuerRevTreeRoot <== issuerClaimNonRevRevTreeRoot;
     vci.claimNonRevIssuerRootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
     vci.claimNonRevIssuerState <== issuerClaimNonRevState;
+
+    // Check issuerClaim is issued to provided identity
+    component claimIdCheck = verifyCredentialSubject();
+    for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
+    claimIdCheck.id <== userID;
+
+    // Verify issuerClaim schema
+    component claimSchemaCheck = verifyCredentialSchema();
+    for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
+    claimSchemaCheck.schema <== issuerClaimSchema;
+
+    // verify issuerClaim expiration time
+    component claimExpirationCheck = verifyExpirationTime();
+    for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
+    claimExpirationCheck.timestamp <== timestamp;
 
     // Query
     component getClaimValue = getValueByIndex();
