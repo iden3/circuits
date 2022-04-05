@@ -29,21 +29,20 @@ template VerifyAuthClaimAndSignature(nLevels) {
     }
     verifyAuthSchema.schema <== AUTH_SCHEMA_HASH;
 
-    component verifyClaimKeyBBJJ = VerifyClaimKeyBBJJinState(nLevels);
-    for (var i=0; i<8; i++) {
-        verifyClaimKeyBBJJ.claim[i] <== authClaim[i];
-    }
+    component claimExists = checkClaimExists(nLevels);
+    for (var i=0; i<8; i++) { claimExists.claim[i] <== authClaim[i]; }
+	for (var i=0; i<nLevels; i++) { claimExists.claimMTP[i] <== authClaimMtp[i]; }
+    claimExists.treeRoot <== claimsTreeRoot;
+
+    component smtClaimNotRevoked = checkClaimNotRevoked(nLevels);
+    for (var i=0; i<8; i++) { smtClaimNotRevoked.claim[i] <== claim[i]; }
     for (var i=0; i<nLevels; i++) {
-        verifyClaimKeyBBJJ.authClaimMtp[i] <== authClaimMtp[i];
+        smtClaimNotRevoked.claimNonRevMTP[i] <== authClaimNonRevMtp[i];
     }
-    verifyClaimKeyBBJJ.claimsTreeRoot <== claimsTreeRoot;
-    verifyClaimKeyBBJJ.revTreeRoot <== revTreeRoot;
-    for (var i=0; i<nLevels; i++) {
-        verifyClaimKeyBBJJ.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i];
-    }
-    verifyClaimKeyBBJJ.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
-    verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
-    verifyClaimKeyBBJJ.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
+    smtClaimNotRevoked.treeRoot <== revTreeRoot;
+    smtClaimNotRevoked.noAux <== authClaimNonRevMtpNoAux;
+    smtClaimNotRevoked.auxHi <== authClaimNonRevMtpAuxHi;
+    smtClaimNotRevoked.auxHv <== authClaimNonRevMtpAuxHv;
 
     component sigVerifier = checkDataSignatureWithPubKeyInClaim();
     for (var i=0; i<8; i++) {
@@ -54,34 +53,3 @@ template VerifyAuthClaimAndSignature(nLevels) {
     sigVerifier.signatureR8Y <== challengeSignatureR8y;
     sigVerifier.data <== challenge;
 }
-
-// circuit to check that claim with the provided public key is in ClaimsTreeRoot
-// and its revocation nonce is not in RevTreeRoot
-template VerifyClaimKeyBBJJinState(nLevels) {
-	signal input claimsTreeRoot;
-	signal input authClaimMtp[nLevels];
-    signal input claim[8];
-
-	signal input revTreeRoot;
-    signal input authClaimNonRevMtp[nLevels];
-    signal input authClaimNonRevMtpNoAux;
-    signal input authClaimNonRevMtpAuxHv;
-    signal input authClaimNonRevMtpAuxHi;
-
-    component claimExists = checkClaimExists(nLevels);
-    for (var i=0; i<8; i++) { claimExists.claim[i] <== claim[i]; }
-	for (var i=0; i<nLevels; i++) { claimExists.claimMTP[i] <== authClaimMtp[i]; }
-    claimExists.treeRoot <== claimsTreeRoot;
-
-    // check claim is not revoked
-    component smtClaimNotRevoked = checkClaimNotRevoked(nLevels);
-    for (var i=0; i<8; i++) { smtClaimNotRevoked.claim[i] <== claim[i]; }
-    for (var i=0; i<nLevels; i++) {
-        smtClaimNotRevoked.claimNonRevMTP[i] <== authClaimNonRevMtp[i];
-    }
-    smtClaimNotRevoked.treeRoot <== revTreeRoot;
-    smtClaimNotRevoked.noAux <== authClaimNonRevMtpNoAux;
-    smtClaimNotRevoked.auxHi <== authClaimNonRevMtpAuxHi;
-    smtClaimNotRevoked.auxHv <== authClaimNonRevMtpAuxHv;
-}
-
