@@ -58,7 +58,7 @@ describe("Test claim query NOTIN operation", function () {
             "issuerClaimNonRevMtpAuxHi": "0",
             "issuerClaimNonRevMtpAuxHv": "0",
             "issuerClaimNonRevMtpNoAux": "1",
-            "сlaimSchema": "274380136414749538182079640726762994055",
+            "claimSchema": "274380136414749538182079640726762994055",
             "userClaimsTreeRoot": "8033159210005724351649063848617878571712113104821846241291681963936214187701",
             "userState": "5816868615164565912277677884704888703982258184820398645933682814085602171910",
             "userRevTreeRoot": "0",
@@ -74,7 +74,7 @@ describe("Test claim query NOTIN operation", function () {
         const expOut = {
             challenge: "1",
             userID: "286312392162647260160287083374160163061246635086990474403590223113720496128",
-            сlaimSchema: "274380136414749538182079640726762994055",
+            claimSchema: "274380136414749538182079640726762994055",
             slotIndex: "2",
             operator: "0",
             timestamp: "1642074362",

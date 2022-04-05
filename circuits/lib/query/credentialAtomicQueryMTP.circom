@@ -73,7 +73,7 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     signal input issuerClaimNonRevState;
 
     /** Query */
-    signal input сlaimSchema;
+    signal input claimSchema;
     signal input slotIndex;
     signal input value[valueArraySize];
     signal input operator;
@@ -134,7 +134,7 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     // Verify issuerClaim schema
     component claimSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
-    claimSchemaCheck.schema <== сlaimSchema;
+    claimSchemaCheck.schema <== claimSchema;
 
     // verify issuerClaim expiration time
     component claimExpirationCheck = verifyExpirationTime();
