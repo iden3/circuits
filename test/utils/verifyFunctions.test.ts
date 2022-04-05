@@ -34,19 +34,19 @@ describe("utils verifyCredentialSubject test", function () {
     });
 });
 
-describe("utils verifyIdenStateMatchesRoots test", function () {
+describe("utils checkIdenStateMatchesRoots test", function () {
     this.timeout(200000);
-    it("Test utils verifyIdenStateMatchesRoots", async () => {
+    it("Test utils checkIdenStateMatchesRoots", async () => {
         const circuit = await tester(
-            path.join(__dirname, "../circuits/utils", "utils_verifyIdenStateMatchesRoots.circom"),
+            path.join(__dirname, "../circuits/utils", "utils_checkIdenStateMatchesRoots.circom"),
             //{reduceConstraints: false},
         );
 
         const witness = await circuit.calculateWitness({
-            "isProofValidClaimsTreeRoot": "5390978791160263927985161830452830346003784422812143177724675599288112176057",
-            "isProofValidRevTreeRoot": "0",
-            "isProofValidRootsTreeRoot": "0",
-            "isIdenState": "17685575544241839934776615609352503109564813484662571173826983469932580732343"
+            "claimsTreeRoot": "5390978791160263927985161830452830346003784422812143177724675599288112176057",
+            "revTreeRoot": "0",
+            "rootsTreeRoot": "0",
+            "expectedState": "17685575544241839934776615609352503109564813484662571173826983469932580732343"
         }, true);
         await circuit.checkConstraints(witness);
     });
