@@ -23,7 +23,7 @@ describe("utils#getValueByIndex",  function() {
 
     before(async function() {
         circuit = await tester(
-            path.join(__dirname, "../circuits/claimUtils", "utils_GetValueByIndex.circom"),
+            path.join(__dirname, "../circuits/utils", "utils_GetValueByIndex.circom"),
         );
     });
 

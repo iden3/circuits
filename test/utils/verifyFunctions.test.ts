@@ -21,11 +21,11 @@ const verifyCredentialSubject = {
     id: "197990912273762023075897629417744831667514652778362723486029975898079821824", // 117twYCgGzxHUtMsAfjM3muCrypTXcu6oc7cSsuGHM
 }
 
-describe.skip("utils verifyCredentialSubject test", function () {
+describe("utils verifyCredentialSubject test", function () {
     this.timeout(200000);
     it("Test utils verifyCredentialSubject", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "utils_verifyCredentialSubject.circom"),
+            path.join(__dirname, "../circuits/utils", "utils_verifyCredentialSubject.circom"),
             {reduceConstraints: false},
         );
 
@@ -34,57 +34,11 @@ describe.skip("utils verifyCredentialSubject test", function () {
     });
 });
 
-const verifyCredentialMtp = {
-    "claim": [
-        "20654715993900013474510316175425517108417418890313728",
-        "40727245799613559019751726539717406914187024287975587258911930442547331072",
-        "0",
-        "0",
-        "3422259402",
-        "0",
-        "0",
-        "0"
-    ],
-    "isProofExistMtp": [
-        "8642944718030808750631174116590545595346699877855966554837410767850901050241",
-        "0",
-        "2559121857990624749645748723611740625389471552768523819941100032832108291070",
-        "0",
-        "0",
-        "0",
-        "0",
-        "0",
-        "0",
-        "0",
-        "0",
-        "0",
-        "0",
-        "0",
-        "0",
-        "0",
-        "0"
-    ],
-    "isProofExistClaimsTreeRoot": "8983046041355403090199265671506633595311694354613197795337389712944858482798"
-}
-
-describe.skip("utils verifyCredentialMtp test", function () {
-    this.timeout(200000);
-    it("Test utils verifyCredentialMtp", async () => {
-        const circuit = await tester(
-            path.join(__dirname, "circuits", "utils_verifyCredentialMtp.circom"),
-            //{reduceConstraints: false},
-        );
-
-        const witness = await circuit.calculateWitness(verifyCredentialMtp, true);
-        await circuit.checkConstraints(witness);
-    });
-});
-
-describe.skip("utils verifyIdenStateMatchesRoots test", function () {
+describe("utils verifyIdenStateMatchesRoots test", function () {
     this.timeout(200000);
     it("Test utils verifyIdenStateMatchesRoots", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "utils_verifyIdenStateMatchesRoots.circom"),
+            path.join(__dirname, "../circuits/utils", "utils_verifyIdenStateMatchesRoots.circom"),
             //{reduceConstraints: false},
         );
 
@@ -98,11 +52,11 @@ describe.skip("utils verifyIdenStateMatchesRoots test", function () {
     });
 });
 
-describe.skip("utils verifyClaimSignature test", function () {
+describe("utils verifyClaimSignature test", function () {
     this.timeout(200000);
     it("Test utils verifyClaimSignature", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "utils_verifyClaimSignature.circom"),
+            path.join(__dirname, "../circuits/utils", "utils_verifyClaimSignature.circom"),
             //{reduceConstraints: false},
         );
 
