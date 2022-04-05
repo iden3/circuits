@@ -1,5 +1,5 @@
 pragma circom 2.0.0;
 
-include "../../circuits/lib/credential.circom";
+include "../../circuits/lib/treeUtils.circom";
 
 component main = verifyIdenStateMatchesRoots();

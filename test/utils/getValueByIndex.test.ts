@@ -9,7 +9,7 @@ export {};
 
 const Q = "21888242871839275222246405745257275088548364400416034343698204186575808495616";
 
-describe("credential#getValueByIndex",  function() {
+describe("utils#getValueByIndex",  function() {
     let circuit;
     let testData = {in:{},expOut:{}};
     const claim =["0",
@@ -23,7 +23,7 @@ describe("credential#getValueByIndex",  function() {
 
     before(async function() {
         circuit = await tester(
-            path.join(__dirname, "../circuits/credential", "credential_GetValueByIndex.circom"),
+            path.join(__dirname, "../circuits/claimUtils", "utils_GetValueByIndex.circom"),
         );
     });
 

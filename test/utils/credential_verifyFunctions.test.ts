@@ -21,11 +21,11 @@ const verifyCredentialSubject = {
     id: "197990912273762023075897629417744831667514652778362723486029975898079821824", // 117twYCgGzxHUtMsAfjM3muCrypTXcu6oc7cSsuGHM
 }
 
-describe.skip("credential verifyCredentialSubject test", function () {
+describe.skip("utils verifyCredentialSubject test", function () {
     this.timeout(200000);
-    it("Test credential verifyCredentialSubject", async () => {
+    it("Test utils verifyCredentialSubject", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "credential_verifyCredentialSubject.circom"),
+            path.join(__dirname, "circuits", "utils_verifyCredentialSubject.circom"),
             {reduceConstraints: false},
         );
 
@@ -67,11 +67,11 @@ const verifyCredentialMtp = {
     "isProofExistClaimsTreeRoot": "8983046041355403090199265671506633595311694354613197795337389712944858482798"
 }
 
-describe.skip("credential verifyCredentialMtp test", function () {
+describe.skip("utils verifyCredentialMtp test", function () {
     this.timeout(200000);
-    it("Test credential verifyCredentialMtp", async () => {
+    it("Test utils verifyCredentialMtp", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "credential_verifyCredentialMtp.circom"),
+            path.join(__dirname, "circuits", "utils_verifyCredentialMtp.circom"),
             //{reduceConstraints: false},
         );
 
@@ -80,11 +80,11 @@ describe.skip("credential verifyCredentialMtp test", function () {
     });
 });
 
-describe.skip("credential verifyIdenStateMatchesRoots test", function () {
+describe.skip("utils verifyIdenStateMatchesRoots test", function () {
     this.timeout(200000);
-    it("Test credential verifyIdenStateMatchesRoots", async () => {
+    it("Test utils verifyIdenStateMatchesRoots", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "credential_verifyIdenStateMatchesRoots.circom"),
+            path.join(__dirname, "circuits", "utils_verifyIdenStateMatchesRoots.circom"),
             //{reduceConstraints: false},
         );
 
@@ -98,11 +98,11 @@ describe.skip("credential verifyIdenStateMatchesRoots test", function () {
     });
 });
 
-describe.skip("credential verifyClaimSignature test", function () {
+describe.skip("utils verifyClaimSignature test", function () {
     this.timeout(200000);
-    it("Test credential verifyClaimSignature", async () => {
+    it("Test utils verifyClaimSignature", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "credential_verifyClaimSignature.circom"),
+            path.join(__dirname, "circuits", "utils_verifyClaimSignature.circom"),
             //{reduceConstraints: false},
         );
 

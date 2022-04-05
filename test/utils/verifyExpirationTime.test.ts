@@ -8,7 +8,7 @@ describe("Test verifyExpirationTime",  function() {
     let testData = {in:{},expOut:{}};
 
     before(async function() {
-        circuit = await wasm_tester(path.join(__dirname, "../circuits/credential", "credential_verifyExpirationTime.circom"));
+        circuit = await wasm_tester(path.join(__dirname, "../circuits/utils", "utils_verifyExpirationTime.circom"));
     });
 
     afterEach( async ()=>{

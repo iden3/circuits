@@ -7,8 +7,8 @@ Circuit to check that the prover is the owner of the identity
 
 pragma circom 2.0.0;
 
-include "verifyAuthClaimAndSignature.circom";
-include "credential.circom";
+include "utils/claimUtils.circom";
+include "utils/treeUtils.circom";
 
 template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 

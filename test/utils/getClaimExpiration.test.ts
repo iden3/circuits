@@ -65,7 +65,7 @@ describe('Test getClaimExpiration:', async function() {
     let circuit;
 
     before(async function() {
-        circuit = await wasm_tester(path.join(__dirname, "../circuits/credential", "credential_getClaimExpiration.circom"));
+        circuit = await wasm_tester(path.join(__dirname, "../circuits/utils", "utils_getClaimExpiration.circom"));
     });
 
     tests.forEach(({desc, input,expOut}) => {
