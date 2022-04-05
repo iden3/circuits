@@ -5,7 +5,7 @@ include "../../../circuits/lib/query/credentialAtomicQueryMTP.circom";
 component main{public [challenge,
                        userID,
                        userState,
-                       issuerClaimSchema,
+                       сlaimSchema,
                        issuerID,
                        slotIndex,
                        operator,

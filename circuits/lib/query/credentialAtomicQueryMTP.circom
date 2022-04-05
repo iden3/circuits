@@ -54,7 +54,6 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     signal input challengeSignatureS;
 
     /* issuerClaim signals */
-    signal input issuerClaimSchema;
     signal input issuerClaim[8];
     signal input issuerClaimMtp[IssuerLevels];
     signal input issuerClaimClaimsTreeRoot;
@@ -74,6 +73,7 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     signal input issuerClaimNonRevState;
 
     /** Query */
+    signal input сlaimSchema;
     signal input slotIndex;
     signal input value[valueArraySize];
     signal input operator;
@@ -134,7 +134,7 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     // Verify issuerClaim schema
     component claimSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
-    claimSchemaCheck.schema <== issuerClaimSchema;
+    claimSchemaCheck.schema <== сlaimSchema;
 
     // verify issuerClaim expiration time
     component claimExpirationCheck = verifyExpirationTime();
