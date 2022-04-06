@@ -4,27 +4,27 @@ include "idOwnershipBySignatureWithRelay.circom";
 
 template VerifyAuthenticationWithRelay(IdOwnershipLevels, RelayLevels) {
 
-	signal input claimsTreeRoot;
-	signal input authClaimMtp[IdOwnershipLevels];
-	signal input authClaim[8];
+	signal input userClaimsTreeRoot;
+	signal input userAuthClaimMtp[IdOwnershipLevels];
+	signal input userAuthClaim[8];
 
-	signal input revTreeRoot;
-    signal input authClaimNonRevMtp[IdOwnershipLevels];
-    signal input authClaimNonRevMtpNoAux;
-    signal input authClaimNonRevMtpAuxHv;
-    signal input authClaimNonRevMtpAuxHi;
+	signal input userRevTreeRoot;
+    signal input userAuthClaimNonRevMtp[IdOwnershipLevels];
+    signal input userAuthClaimNonRevMtpNoAux;
+    signal input userAuthClaimNonRevMtpAuxHv;
+    signal input userAuthClaimNonRevMtpAuxHi;
 
-	signal input rootsTreeRoot;
+	signal input userRootsTreeRoot;
 
 	signal input challenge;
 	signal input challengeSignatureR8x;
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
-    //todo check if state should be here
+    //todo check if userState should be here
     // we have no constraints for "state" in this circuit, however we introduce "state" input here
     // as it serves as public input which should be the same for prover and verifier
-    signal input state;
+    signal input userState;
     signal input userID;
 
     signal input relayState;
@@ -36,17 +36,17 @@ template VerifyAuthenticationWithRelay(IdOwnershipLevels, RelayLevels) {
 
     component checkIdOwnership = IdOwnershipBySignatureWithRelay(IdOwnershipLevels, RelayLevels);
 
-	checkIdOwnership.userClaimsTreeRoot <== claimsTreeRoot;
-	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== authClaimMtp[i]; }
-    for (var i=0; i<8; i++) { checkIdOwnership.userAuthClaim[i] <== authClaim[i]; }
+	checkIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot;
+	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
 
-	checkIdOwnership.userRevTreeRoot <== revTreeRoot;
-	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
-	checkIdOwnership.userAuthClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
-	checkIdOwnership.userAuthClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
-	checkIdOwnership.userAuthClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
+	checkIdOwnership.userRevTreeRoot <== userRevTreeRoot;
+	for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
+	checkIdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
+	checkIdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
+	checkIdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
 
-    checkIdOwnership.userRootsTreeRoot <== rootsTreeRoot;
+    checkIdOwnership.userRootsTreeRoot <== userRootsTreeRoot;
 
     checkIdOwnership.challenge <== challenge;
     checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
