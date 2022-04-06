@@ -1,31 +1,3 @@
-/*
-# idState.circom
-
-Circuit to check:
-- idOwnership: prover is the owner of the identity (can sign a
-challenge with private key, which public key is in a Claim inside the MerkleTree)
-- nullifier check
-- [in the future] that the identity state transition is correct
-
-
-                                   +-------------+
-PRI_ClaimsTreeRoot+--------------->+             |
-                                   |             |
-(PRI_RevTreeRoot)+---------------->+             |
-                                   | idOwnership |
-(PRI_RootsTreeRoot)+-------------->+ BySignature +<--------------+PRI_MTP
-                                   |             |
-PRI_UserPrivateKey+--------------->+             +<--------------+PUB_ID
-                                   +-------------+
-                      +----+
-              +------>+ != +<----+PUB_OldIdState
-              +       +----+
- PUB_NewIdState
-              +       +----+
-              +------>+ != +<----+0
-                      +----+
-
-*/
 
 pragma circom 2.0.0;
 
@@ -37,12 +9,12 @@ include "../../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "idOwnershipBySignature.circom";
 
-template IdState(nLevels) {
+template StateTransition(nLevels) {
 	// we have no constraints for "id" in this circuit, however we introduce "id" input here
 	// as it serves as public input which should be the same for prover and verifier
-	signal input id;
-	signal input oldIdState;
-	signal input newIdState;
+	signal input userID;
+	signal input oldUserState;
+	signal input newUserState;
 
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[nLevels];
@@ -60,21 +32,21 @@ template IdState(nLevels) {
 	signal input signatureR8y;
 	signal input signatureS;
 
-	// check newIdState is not zero
-	component idStateIsNotZero = IsZero();
-	idStateIsNotZero.in <== newIdState;
-	idStateIsNotZero.out === 0;
+	// check newUserState is not zero
+	component stateIsNotZero = IsZero();
+	stateIsNotZero.in <== newUserState;
+	stateIsNotZero.out === 0;
 
-	// old & new idState checks
+	// old & new state checks
 	component oldNewNotEqual = IsEqual();
-	oldNewNotEqual.in[0] <== oldIdState;
-	oldNewNotEqual.in[1] <== newIdState;
+	oldNewNotEqual.in[0] <== oldUserState;
+	oldNewNotEqual.in[1] <== newUserState;
 	oldNewNotEqual.out === 0;
 
-    // check id ownership by correct signature of a hash of old state and new state
+    // check userID ownership by correct signature of a hash of old state and new state
     component challenge = Poseidon(2);
-    challenge.inputs[0] <== oldIdState;
-    challenge.inputs[1] <== newIdState;
+    challenge.inputs[0] <== oldUserState;
+    challenge.inputs[1] <== newUserState;
 
 	component checkIdOwnership = IdOwnershipBySignature(nLevels);
 
@@ -95,5 +67,5 @@ template IdState(nLevels) {
     checkIdOwnership.challengeSignatureR8y <== signatureR8y;
     checkIdOwnership.challengeSignatureS <== signatureS;
 
-	checkIdOwnership.userState <== oldIdState;
+	checkIdOwnership.userState <== oldUserState;
 }

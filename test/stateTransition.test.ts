@@ -3,12 +3,12 @@ const tester = require("circom_tester").wasm;
 
 export {};
 
-describe("idState", function () {
+describe("StateTransition", function () {
     this.timeout(600000);
 
     // it("1 auth claim is in the claims tree. Add 1 more auth claim to the claims tree.", async () => {
     //     const circuit = await tester(
-    //         path.join(__dirname, "circuits", "idStateTest.circom"),
+    //         path.join(__dirname, "circuits", "stateTransitionTest.circom"),
     //         {
     //             output: path.join(__dirname, "circuits", "build"),
     //             recompile: true,
@@ -17,9 +17,9 @@ describe("idState", function () {
     //     );
     //
     //     const inputs = {
-    //         id: "323416925264666217617288569742564703632850816035761084002720090377353297920",
-    //         oldIdState: "18311560525383319719311394957064820091354976310599818797157189568621466950811",
-    //         newIdState: "6243262098189365110173326120466238114783380459336290130750689570190357902007",
+    //         userID: "323416925264666217617288569742564703632850816035761084002720090377353297920",
+    //         oldUserState: "18311560525383319719311394957064820091354976310599818797157189568621466950811",
+    //         newUserState: "6243262098189365110173326120466238114783380459336290130750689570190357902007",
     //
     //         claimsTreeRoot: "14501975351413460283779241106398661838785725538630637996477950952692691051377",
     //         authClaimMtp: ["0", "0", "0", "0"],
@@ -51,7 +51,7 @@ describe("idState", function () {
     // });
     // it("2 claims is in the claims tree. 1 claim is revoked in the new state", async () => {
     //     const circuit = await tester(
-    //         path.join(__dirname, "circuits", "idStateTest.circom"),
+    //         path.join(__dirname, "circuits", "stateTransitionTest.circom"),
     //         {
     //             output: path.join(__dirname, "circuits", "build"),
     //             recompile: true,
@@ -67,9 +67,9 @@ describe("idState", function () {
     //         "authClaimNonRevMtpAuxHv": "0",
     //         "authClaimNonRevMtpNoAux": "1",
     //         "claimsTreeRoot": "4391004575225191356091924845925138609981629126838337482351782494426166055282",
-    //         "id": "356993913155855432799649482520123310103696210589421536464905889646930493440",
-    //         "newIdState": "17268442397954957023777367454402134865562796216851187969412301340920628455659",
-    //         "oldIdState": "4184931649847803667202237732911450570986787389402491101188838319583389264794",
+    //         "userID": "356993913155855432799649482520123310103696210589421536464905889646930493440",
+    //         "newUserState": "17268442397954957023777367454402134865562796216851187969412301340920628455659",
+    //         "oldUserState": "4184931649847803667202237732911450570986787389402491101188838319583389264794",
     //         "revTreeRoot": "0",
     //         "rootsTreeRoot": "0",
     //         "signatureR8x": "21420402936832933857351985953119059381042904267374802779170746082355708622343",
@@ -83,7 +83,7 @@ describe("idState", function () {
 
     it("1 auth claim is in the claims tree.", async () => {
         const circuit = await tester(
-            path.join(__dirname, "circuits", "idStateTest.circom"),
+            path.join(__dirname, "circuits", "stateTransitionTest.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,
@@ -99,9 +99,9 @@ describe("idState", function () {
             "authClaimNonRevMtpAuxHv": "0",
             "authClaimNonRevMtpNoAux": "1",
             "claimsTreeRoot": "7080158925658360173572117351438458775187308620048444661932566860021946691911",
-            "id": "254516485417117669604883746489712311182469560895998296557398532694025109504",
-            "newIdState": "5465748102760201017766487342967635788590869694748561099468758455034533291556",
-            "oldIdState": "13176599323901742742055581761244662470012062489876892454255630909560071027835",
+            "userID": "254516485417117669604883746489712311182469560895998296557398532694025109504",
+            "newUserState": "5465748102760201017766487342967635788590869694748561099468758455034533291556",
+            "oldUserState": "13176599323901742742055581761244662470012062489876892454255630909560071027835",
             "revTreeRoot": "0",
             "rootsTreeRoot": "0",
             "signatureR8x": "18373221186084427683374638449053384615755216533374169264284121192617707419166",

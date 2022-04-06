@@ -8,7 +8,7 @@ The circuits of this repository are compatible with the [go-iden3-core implement
 
 Circuits:
 
-- [Identity State Update](circuits/idState.circom): circuit used to verify validity when updating an Identity State
+- [Identity State Update](circuits/stateTransition.circom): circuit used to verify validity when updating an Identity State
 - [Credential](circuits/credential.circom): circuit used to verify a
   Credential. This means that the prover is the owner of the identity, and the
   identity is inside a claim with Subject OtherIden, and that claim is inside
@@ -16,7 +16,7 @@ Circuits:
 
 Examples of circuits usage:
 
-- [Identity State Update](circuits/idState.circom): Identity state
+- [Identity State Update](circuits/stateTransition.circom): Identity state
   update circuit with genesis proofs of at most 4 levels.
 
 # Building and trusted setup
