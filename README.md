@@ -6,19 +6,6 @@ Circuits used by the iden3 core protocol.
 
 The circuits of this repository are compatible with the [go-iden3-core implementation](https://github.com/iden3/go-iden3-core)
 
-Circuits:
-
-- [Identity State Update](circuits/stateTransition.circom): circuit used to verify validity when updating an Identity State
-- [Credential](circuits/credential.circom): circuit used to verify a
-  Credential. This means that the prover is the owner of the identity, and the
-  identity is inside a claim with Subject OtherIden, and that claim is inside
-  the MerkleTree of the Issuer identity, and the claim is not revoked.
-
-Examples of circuits usage:
-
-- [Identity State Update](circuits/stateTransition.circom): Identity state
-  update circuit with genesis proofs of at most 4 levels.
-
 # Building and trusted setup
 
 First install the npm dependencies:
