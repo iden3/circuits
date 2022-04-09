@@ -103,3 +103,29 @@ template verifyClaimIssuanceNonRevBySignature(IssuerLevels) {
     verifyClaimNonRevIssuerState.isProofValidRootsTreeRoot <== claimNonRevIssuerRootsTreeRoot;
     verifyClaimNonRevIssuerState.isIdenState <== claimNonRevIssuerState;
 }
+
+// getRevNonceNoVerHiHv calculates the hashes Hi and Hv of the leaf used in the
+// revocations tree, out of a revocation nonce, to be used as key, value in an
+// SMT.
+// todo check if this HiHv calculation is correct
+template getRevNonceNoVerHiHv() {
+	signal input revNonce;
+	// signal input version;
+
+	signal output hi;
+	signal output hv;
+
+	component hashHi = Poseidon(6);
+	hashHi.inputs[0] <== revNonce;
+	for (var i=1; i<6; i++) {
+		hashHi.inputs[i] <== 0;
+	}
+	hi <== hashHi.out;
+
+	component hashHv = Poseidon(6);
+	hashHv.inputs[0] <== 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+	for (var i=1; i<6; i++) {
+		hashHv.inputs[i] <== 0;
+	}
+	hv <== hashHv.out;
+}
