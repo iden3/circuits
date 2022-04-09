@@ -55,9 +55,6 @@ template checkClaimNotRevoked(treeLevels) {
 	component claimRevNonce = getClaimRevNonce();
 	for (var i=0; i<8; i++) { claimRevNonce.claim[i] <== claim[i]; }
 
-	component revNonceHiHv = getRevNonceNoVerHiHv();
-	revNonceHiHv.revNonce <== claimRevNonce.revNonce;
-
     component smtClaimNotExists = SMTVerifier(treeLevels);
     smtClaimNotExists.enabled <== 1;
     smtClaimNotExists.fnc <== 1; // Non-inclusion
@@ -66,7 +63,7 @@ template checkClaimNotRevoked(treeLevels) {
     smtClaimNotExists.oldKey <== auxHi;
     smtClaimNotExists.oldValue <== auxHv;
     smtClaimNotExists.isOld0 <== noAux;
-    smtClaimNotExists.key <== revNonceHiHv.hi;
+    smtClaimNotExists.key <== claimRevNonce.revNonce;
     smtClaimNotExists.value <== 0;
 }
 
