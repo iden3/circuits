@@ -172,7 +172,7 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     // verify issuer state includes issuerClaim
     component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();
     verifyClaimIssuanceIdenState.claimsTreeRoot <== issuerClaimNonRevClaimsTreeRoot;
-    verifyClaimIssuanceIdenState.revTreeRoot <== issuerClaimNonRevRootsTreeRoot;
+    verifyClaimIssuanceIdenState.revTreeRoot <== issuerClaimNonRevRevTreeRoot;
     verifyClaimIssuanceIdenState.rootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
     verifyClaimIssuanceIdenState.expectedState <== issuerClaimNonRevState;
 
