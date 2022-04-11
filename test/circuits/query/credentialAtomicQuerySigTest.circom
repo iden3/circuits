@@ -5,7 +5,7 @@ include "../../../circuits/lib/query/credentialAtomicQuerySig.circom";
 component main{public [challenge,
                        userID,
                        userState,
-                       issuerClaimSchema,
+                       claimSchema,
                        slotIndex,
                        operator,
                        value,

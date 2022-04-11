@@ -54,8 +54,9 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     signal input challengeSignatureS;
 
     /* issuerClaim signals */
-    signal input issuerClaimSchema;
+
     signal input issuerClaim[8];
+    
     // issuerClaim signature
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
@@ -86,6 +87,7 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     signal input issuerClaimNonRevState;
 
     /** Query */
+    signal input claimSchema;
     signal input slotIndex;
     signal input value[valueArraySize];
     signal input operator;
@@ -128,7 +130,7 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     // Verify issuerClaim schema
     component claimSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
-    claimSchemaCheck.schema <== issuerClaimSchema;
+    claimSchemaCheck.schema <== claimSchema;
 
     // verify issuerClaim expiration time
     component claimExpirationCheck = verifyExpirationTime();
