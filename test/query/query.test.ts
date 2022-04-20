@@ -289,10 +289,10 @@ describe("Test query",  function() {
             const inputs = {
                 in: "0",
                 operator:  IN,
-                value: ["0", "0", "0"],
+                value: ["0", "10", "0"],
             }
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = {out: 1, value: ["0", "10", "0"]}
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
