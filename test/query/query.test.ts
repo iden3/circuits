@@ -327,6 +327,20 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w);
         });
 
+        it("#IN 0 in [`0`, `0`, `0`] (true)", async () => {
+            const inputs = {
+                in: "0",
+                operator:  IN,
+                value: ["0", "0", "0"],
+            }
+
+            const expOut = {out: 1, value: ["0", "0", "0"]}
+
+            const w = await circuit.calculateWitness(inputs, true);
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
     });
 
     describe("#NOTIN", function() {
