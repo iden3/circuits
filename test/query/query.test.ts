@@ -42,8 +42,10 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }
 
+            const expOut = {out: 1, value: ["10", "0", "0"]}
+
             const w = await circuit.calculateWitness(inputs, true);
-            await circuit.assertOut(w, {out: 1});
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -82,8 +84,10 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }
 
+            const expOut = {out: 1, value: ["0", "0", "0"]}
+
             const w = await circuit.calculateWitness(inputs, true);
-            await circuit.assertOut(w, {out: 1});
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -97,7 +101,9 @@ describe("Test query",  function() {
                 value: ["11", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w, {out: 1});
+            const expOut = {out: 1, value: ["11", "0", "0"]}
+
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -109,7 +115,9 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w1, {out: 0});
+            const expOut = {out: 0, value: ["10", "0", "0"]}
+
+            await circuit.assertOut(w1, expOut);
             await circuit.checkConstraints(w1);
         });
 
@@ -120,7 +128,9 @@ describe("Test query",  function() {
                 value: ["9", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w2, {out: 0});
+            const expOut = {out: 0, value: ["9", "0", "0"]}
+
+            await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
         });
 
@@ -131,7 +141,9 @@ describe("Test query",  function() {
                 value: ["11", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w, {out: 1});
+            const expOut = {out: 1, value: ["11", "0", "0"]}
+
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -142,7 +154,9 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w, {out: 0});
+            const expOut = {out: 0, value: ["0", "0", "0"]}
+
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -153,7 +167,9 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w, {out: 0});
+            const expOut = {out: 0, value: ["0", "0", "0"]}
+
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
     });
@@ -166,7 +182,9 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w, {out: 1});
+            const expOut = {out: 1, value: ["10", "0", "0"]}
+
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -178,7 +196,9 @@ describe("Test query",  function() {
                 value: ["11", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w1, {out: 0});
+            const expOut = {out: 0, value: ["11", "0", "0"]}
+
+            await circuit.assertOut(w1, expOut);
             await circuit.checkConstraints(w1);
         });
 
@@ -189,7 +209,9 @@ describe("Test query",  function() {
                 value: ["12", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w2, {out: 0});
+            const expOut = {out: 0, value: ["12", "0", "0"]}
+
+            await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
         });
 
@@ -200,7 +222,9 @@ describe("Test query",  function() {
                 value: ["12", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w2, {out: 0});
+            const expOut = {out: 0, value: ["12", "0", "0"]}
+
+            await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
         });
 
@@ -211,7 +235,9 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w2, {out: 1});
+            const expOut = {out: 1, value: ["0", "0", "0"]}
+
+            await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
         });
 
@@ -222,7 +248,9 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }, true);
 
-            await circuit.assertOut(w2, {out: 0});
+            const expOut = {out: 0, value: ["0", "0", "0"]}
+
+            await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
         });
 
@@ -236,7 +264,7 @@ describe("Test query",  function() {
                 value: ["12", "11", "10"],
             }
 
-            const expOut = {out: 1}
+            const expOut = {out: 1, value: ["12", "11", "10"]}
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -250,8 +278,10 @@ describe("Test query",  function() {
                 value: ["10", "10", "0"],
             }
 
+            const expOut = {out: 0, value: ["10", "10", "0"]}
+
             const w = await circuit.calculateWitness(inputs, true);
-            await circuit.assertOut(w, {out: 0});
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -262,8 +292,10 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }
 
+            const expOut = {out: 1, value: ["0", "0", "0"]}
+
             const w = await circuit.calculateWitness(inputs, true);
-            await circuit.assertOut(w, {out: 1});
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -274,8 +306,10 @@ describe("Test query",  function() {
                 value: ["10", "11", "12"],
             }
 
+            const expOut = {out: 0, value: ["10", "11", "12"]}
+
             const w = await circuit.calculateWitness(inputs, true);
-            await circuit.assertOut(w, {out: 0});
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -286,8 +320,10 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }
 
+            const expOut = {out: 0, value: ["0", "0", "0"]}
+
             const w = await circuit.calculateWitness(inputs, true);
-            await circuit.assertOut(w, {out: 0});
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -301,7 +337,7 @@ describe("Test query",  function() {
                 value: ["12", "11", "13"],
             }
 
-            const expOut = {out: 1}
+            const expOut = {out: 1, value: ["12", "11", "13"]}
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -315,8 +351,10 @@ describe("Test query",  function() {
                 value: ["10", "10", "0"],
             }
 
+            const expOut = {out: 0, value: ["10", "10", "0"]}
+
             const w = await circuit.calculateWitness(inputs, true);
-            await circuit.assertOut(w, {out: 0});
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -327,8 +365,10 @@ describe("Test query",  function() {
                 value: ["10", "10", "10"],
             }
 
+            const expOut = {out: 1, value: ["10", "10", "10"]}
+
             const w = await circuit.calculateWitness(inputs, true);
-            await circuit.assertOut(w, {out: 1});
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -339,8 +379,10 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }
 
+            const expOut = {out: 1, value: ["0", "0", "0"]}
+
             const w = await circuit.calculateWitness(inputs, true);
-            await circuit.assertOut(w, {out: 1});
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
@@ -351,8 +393,10 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }
 
+            const expOut = {out: 0, value: ["0", "0", "0"]}
+
             const w = await circuit.calculateWitness(inputs, true);
-            await circuit.assertOut(w, {out: 0});
+            await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
