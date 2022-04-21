@@ -23,9 +23,9 @@ func main() {
 		"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d",
 	}
 
-	numberOfKeys := 2
-	numberOfFirstClaimsToRevoke := 2
-	signingKeyIndex := 1
+	numberOfKeys := 1
+	numberOfFirstClaimsToRevoke := 0
+	signingKeyIndex := 0
 	useRelay := true
 
 	//claimSchema, _ := big.NewInt(0).SetString("251025091000101825075425831481271126140", 10)
@@ -68,12 +68,12 @@ func main() {
 	}
 
 	ctx := context.Background()
-	identifier, claimsTree, revTree, hoIdenState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke)
+	identifier, claimsTree, revTree, userState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke)
 
 	if useRelay {
-		fmt.Println("\nhoId:", identifier.BigInt())
+		fmt.Println("\nuserID:", identifier.BigInt())
 	} else {
-		fmt.Println("hoIdenState:", hoIdenState.BigInt())
+		fmt.Println("\nuserState:", userState.BigInt())
 	}
 	//MTP Claim
 	fmt.Println("\nclaimsTreeRoot:", claimsTree.Root().BigInt())
@@ -124,7 +124,7 @@ func main() {
 	fmt.Println("challengeSignatureS:", decompressedSig.S)
 
 	if useRelay {
-		idenStateInRelayClaim, reIdenState, relayClaimsTree, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim("9db637b457c284e844e58955c54cd8e67d989b72ed4b56411eabbeb775fb853a", identifier, hoIdenState)
+		idenStateInRelayClaim, reIdenState, relayClaimsTree, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim("9db637b457c284e844e58955c54cd8e67d989b72ed4b56411eabbeb775fb853a", identifier, userState)
 
 		fmt.Println("\nreIdenState:", reIdenState.BigInt())
 		utils.PrintSiblings("hoStateInRelayClaimMtp:", proofIdenStateInRelay.AllSiblings())

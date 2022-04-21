@@ -2,4 +2,4 @@ pragma circom 2.0.0;
 
 include "../../circuits/lib/stateTransition.circom";
 
-component main = StateTransition(40);
+component main {public [userID,oldUserState,newUserState,isOldStateGenesis]} = StateTransition(40);

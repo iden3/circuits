@@ -15,6 +15,7 @@ template StateTransition(nLevels) {
 	signal input userID;
 	signal input oldUserState;
 	signal input newUserState;
+	signal input isOldStateGenesis;
 
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[nLevels];
@@ -31,6 +32,20 @@ template StateTransition(nLevels) {
 	signal input signatureR8x;
 	signal input signatureR8y;
 	signal input signatureS;
+
+    component cutId = cutId();
+    cutId.in <== userID;
+
+    component cutState = cutState();
+    cutState.in <== oldUserState;
+
+    component isCutIdEqualToCutState = IsEqual();
+    isCutIdEqualToCutState.in[0] <== cutId.out;
+    isCutIdEqualToCutState.in[1] <== cutState.out;
+
+    // if isOldStateGenesis != 0 then old state is genesis
+    // and we must check that userID was derived from that state
+    (1 - isCutIdEqualToCutState.out) * isOldStateGenesis === 0;
 
 	// check newUserState is not zero
 	component stateIsNotZero = IsZero();
