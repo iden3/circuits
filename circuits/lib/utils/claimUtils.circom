@@ -46,10 +46,16 @@ template getClaimHeader() {
 		claimTypeNum.in[i] <== i0Bits.out[i];
 	}
 	claimType <== claimTypeNum.out;
-
+    log(claimType);
 	for (var i=0; i<32; i++) {
 		claimFlags[i] <== i0Bits.out[128 + i];
 	}
+	    log(claimFlags[0]);
+	    log(claimFlags[1]);
+
+	    log(claimFlags[2]);
+
+
 }
 
 // getClaimSchema gets the schema of a claim
