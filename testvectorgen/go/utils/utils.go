@@ -4,12 +4,13 @@ import (
 	"encoding/hex"
 	json "encoding/json"
 	"fmt"
+	"math/big"
+	"os"
+
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql"
-	"math/big"
-	"os"
 	"test/crypto/primitive"
 )
 
@@ -73,16 +74,6 @@ func PrintSiblings(name string, siblings []*merkletree.Hash) {
 }
 
 func ClaimToString(claim *core.Claim) (string, error) {
-	slots := make([]*big.Int, 0)
-	entry := claim.TreeEntry()
-	indexes := entry.Index()
-	values := entry.Value()
-	for _, index := range indexes {
-		slots = append(slots, index.BigInt())
-	}
-	for _, value := range values {
-		slots = append(slots, value.BigInt())
-	}
-	json, err := json.Marshal(slots)
+	json, err := json.Marshal(claim)
 	return string(json), err
 }

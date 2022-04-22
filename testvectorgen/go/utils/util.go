@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
+	"math/big"
+
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-merkletree-sql"
 	"github.com/iden3/go-merkletree-sql/db/memory"
-	"math"
-	"math/big"
 	"test/crypto/primitive"
 )
 
@@ -98,22 +99,22 @@ func generateIDInputs(pk *babyjub.PublicKey, claimsTree *merkletree.MerkleTree, 
 		core.WithRevocationNonce(uint64(0)))
 	ExitOnError(err)
 
-	entry := authClaim.TreeEntry()
-	claimsTree.AddEntry(context.Background(), &entry) // add claim to the MT
+	index, hv, err := authClaim.HiHv()
+	ExitOnError(err)
 
+	claimsTree.Add(context.Background(), index, hv) // add claim to the MT
+
+	genesisState, err := merkletree.HashElems(claimsTree.Root().BigInt(), big.NewInt(0), big.NewInt(0))
+	ExitOnError(err)
 	// generate id
-	identifier, err := core.CalculateGenesisID(claimsTree.Root())
+	identifier, err := core.IdGenesisFromIdenState(core.TypeDefault, genesisState.BigInt())
 	ExitOnError(err)
 
 	fmt.Println("Identifier:", identifier)
 	inputs["id"] = identifier.BigInt().String()
 
-	authEntry := authClaim.TreeEntry()
-	index, err := authEntry.HIndex()
-	ExitOnError(err)
-
 	//MTP
-	proof, _, err := claimsTree.GenerateProof(context.Background(), index.BigInt(), claimsTree.Root())
+	proof, _, err := claimsTree.GenerateProof(context.Background(), index, claimsTree.Root())
 	ExitOnError(err)
 
 	fmt.Printf("%+v\n", proof)
@@ -124,20 +125,12 @@ func generateIDInputs(pk *babyjub.PublicKey, claimsTree *merkletree.MerkleTree, 
 
 func GenerateClaimAndInputs(tree *merkletree.MerkleTree, claim *core.Claim) map[string]string {
 
-	cIn := ""
 	inputs := make(map[string]string)
 
-	entry := claim.TreeEntry()
-	indexes := entry.Index()
-	values := entry.Value()
-	for _, index := range indexes {
-		cIn += index.BigInt().String() + ","
-	}
-	for _, value := range values {
-		cIn += value.BigInt().String() + ","
-	}
+	claimJSON, err := json.Marshal(claim)
+	ExitOnError(err)
 
-	inputs["claim"] = cIn
+	inputs["claim"] = string(claimJSON)
 
 	proof, _ := AddClaimToTree(tree, claim)
 
@@ -158,32 +151,20 @@ func GenerateClaimAndInputs(tree *merkletree.MerkleTree, claim *core.Claim) map[
 
 func AddClaimToTree(tree *merkletree.MerkleTree, claim *core.Claim) (*merkletree.Proof, error) {
 
-	entry := claim.TreeEntry()
-	index, _ := entry.HIndex()
-	err := tree.AddEntry(context.TODO(), &entry)
+	index, value, _ := claim.HiHv()
+	err := tree.Add(context.TODO(), index, value)
 	if err != nil {
 		return nil, err
 	}
 
-	proof, _, err := tree.GenerateProof(context.TODO(), index.BigInt(), tree.Root())
+	proof, _, err := tree.GenerateProof(context.TODO(), index, tree.Root())
 
 	return proof, err
 }
 
 func PrintClaim(claimName string, claim *core.Claim) {
 
-	cIn := make([]string, 0)
-	entry := claim.TreeEntry()
-	indexes := entry.Index()
-	values := entry.Value()
-	for _, index := range indexes {
-		cIn = append(cIn, index.BigInt().String())
-	}
-	for _, value := range values {
-		cIn = append(cIn, value.BigInt().String())
-	}
-
-	json, err := json.Marshal(cIn)
+	json, err := json.Marshal(claim)
 	if err != nil {
 		panic(err)
 	}
@@ -204,17 +185,18 @@ func GenerateIdentity(ctx context.Context, privKHex string, challenge *big.Int) 
 	ExitOnError(err)
 
 	// add auth claim to claimsMT
-	entry := authClaim.TreeEntry()
-	hi, hv, err := entry.HiHv()
+	hi, hv, err := authClaim.HiHv()
 	ExitOnError(err)
-	claimsTree.Add(ctx, hi.BigInt(), hv.BigInt())
+	claimsTree.Add(ctx, hi, hv)
 
 	// sign challenge
 	decompressedSig, err := SignBBJJ(key, challenge.Bytes())
 	ExitOnError(err)
 
+	state, err := core.IdenState(claimsTree.Root().BigInt(), big.NewInt(0), big.NewInt(0))
+	ExitOnError(err)
 	// create new identity
-	identifier, err := core.CalculateGenesisID(claimsTree.Root())
+	identifier, err := core.IdGenesisFromIdenState(core.TypeDefault, state)
 	ExitOnError(err)
 
 	// calculate current state
@@ -261,23 +243,23 @@ func GenerateIdentity2(ctx context.Context, privKHex string, challenge *big.Int)
 	}
 
 	// add auth claim to claimsMT
-	entry := authClaim.TreeEntry()
+	hi, hv, err := authClaim.HiHv()
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
 
-	hi, hv, err := entry.HiHv()
+	err = claimsTree.Add(ctx, hi, hv)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
 
-	err = claimsTree.Add(ctx, hi.BigInt(), hv.BigInt())
+	//
+	state, err := core.IdenState(claimsTree.Root().BigInt(), big.NewInt(0), big.NewInt(0))
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
-
 	// create new identity
-	identifier, err := core.CalculateGenesisID(claimsTree.Root())
+	identifier, err := core.IdGenesisFromIdenState(core.TypeDefault, state)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
@@ -318,14 +300,14 @@ func GenerateRelayWithIdenStateClaim(relayPrivKey string, identifier *core.ID, i
 	ctx := context.Background()
 	_, relayClaimsTree, _ := GenerateIdentity(ctx, relayPrivKey, big.NewInt(0))
 
-	valueSlotA, _ := core.NewDataSlotFromInt(idenState.BigInt())
+	valueSlotA, _ := core.NewElemBytesFromInt(idenState.BigInt())
 	var schemaHash core.SchemaHash
 	schemaEncodedBytes, _ := hex.DecodeString("e22dd9c0f7aef15788c130d4d86c7156")
 	copy(schemaHash[:], schemaEncodedBytes)
 	claim, err := core.NewClaim(
 		schemaHash,
 		core.WithIndexID(*identifier),
-		core.WithValueData(valueSlotA, core.DataSlot{}),
+		core.WithValueData(valueSlotA, core.ElemBytes{}),
 	)
 	ExitOnError(err)
 
