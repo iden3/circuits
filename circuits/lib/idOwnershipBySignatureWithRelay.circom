@@ -70,7 +70,7 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
     checkUserState.expectedState <== userStateInRelayClaim[6];
 
     // verify relay claim schema
-     var RELAY_SCHEMA_HASH  = 300643596977370539894307577071173136726; // hex e22dd9c0f7aef15788c130d4d86c7156
+     var RELAY_SCHEMA_HASH  = 114902544861707262506546142943811022306; // hex e22dd9c0f7aef15788c130d4d86c7156
      component verifyRelaySchema  = verifyCredentialSchema();
      for (var i=0; i<8; i++) {
           verifyRelaySchema.claim[i] <== userStateInRelayClaim[i];
