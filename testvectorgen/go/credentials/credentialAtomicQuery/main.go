@@ -53,7 +53,7 @@ func attributeQuery() {
 	utils.PrintMap(issuerInputs)
 
 	// issue claim for user
-	dataSlotA, _ := core.NewDataSlotFromInt(big.NewInt(10))
+	dataSlotA, _ := core.NewElemBytesFromInt(big.NewInt(10))
 	nonce := 1
 	var schemaHash core.SchemaHash
 	schemaBytes, err := hex.DecodeString("ce6bb12c96bfd1544c02c289c6b4b987")
@@ -62,7 +62,7 @@ func attributeQuery() {
 	claim, err := core.NewClaim(
 		schemaHash,
 		core.WithIndexID(*userIdentity),
-		core.WithIndexData(dataSlotA, core.DataSlot{}),
+		core.WithIndexData(dataSlotA, core.ElemBytes{}),
 		core.WithExpirationDate(time.Unix(1669884010, 0)), //Thu Dec 01 2022 08:40:10 GMT+0000
 		core.WithRevocationNonce(uint64(nonce)))
 	utils.ExitOnError(err)

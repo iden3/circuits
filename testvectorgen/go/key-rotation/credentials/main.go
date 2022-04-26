@@ -34,14 +34,14 @@ func main() {
 	fmt.Println("\nhoId:", userIdentity.BigInt())
 
 	// issue claim for holder
-	dataSlotA, _ := core.NewDataSlotFromInt(big.NewInt(10))
+	dataSlotA, _ := core.NewElemBytesFromInt(big.NewInt(10))
 	nonce := 1
 	var schemaHash core.SchemaHash
 	copy(schemaHash[:], "1")
 	claim, err := core.NewClaim(
 		schemaHash,
 		core.WithIndexID(*userIdentity),
-		core.WithIndexData(dataSlotA, core.DataSlot{}),
+		core.WithIndexData(dataSlotA, core.ElemBytes{}),
 		core.WithExpirationDate(time.Unix(1669884010, 0)), //Thu Dec 01 2022 08:40:10 GMT+0000
 		core.WithRevocationNonce(uint64(nonce)))
 	utils.ExitOnError(err)
@@ -104,22 +104,21 @@ func generateIdentity(ctx context.Context, privKHex string, challenge *big.Int) 
 	utils.ExitOnError(err)
 
 	// add auth claim to claimsMT
-	entry := authClaim.TreeEntry()
-	hi, hv, err := entry.HiHv()
+	hi, hv, err := authClaim.HiHv()
 	utils.ExitOnError(err)
-	claimsTree.Add(ctx, hi.BigInt(), hv.BigInt())
+	claimsTree.Add(ctx, hi, hv)
 
 	// sign challenge
 	decompressedSig, err := utils.SignBBJJ(key, challenge.Bytes())
 	utils.ExitOnError(err)
 
-	// create new identity
-	identifier, err := core.CalculateGenesisID(claimsTree.Root())
-	utils.ExitOnError(err)
-
 	// calculate current state
 	currentState, err := merkletree.HashElems(claimsTree.Root().BigInt(),
 		merkletree.HashZero.BigInt(), merkletree.HashZero.BigInt())
+	// create new identity
+	identifier, err := core.IdGenesisFromIdenState(core.TypeDefault, currentState.BigInt())
+	utils.ExitOnError(err)
+
 	utils.ExitOnError(err)
 
 	inputs := make(map[string]string)

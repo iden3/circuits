@@ -138,7 +138,7 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     claimExpirationCheck.timestamp <== timestamp;
 
 
-    var AUTH_SCHEMA_HASH  = 269270088098491255471307608775043319525;
+    var AUTH_SCHEMA_HASH  = 304427537360709784173770334266246861770;
     // verify issuerClaim issued and not revoked
     component hashHi = Poseidon(4);
     hashHi.inputs[0] <== AUTH_SCHEMA_HASH;
