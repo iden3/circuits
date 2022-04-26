@@ -73,7 +73,32 @@ func PrintSiblings(name string, siblings []*merkletree.Hash) {
 	fmt.Println(name, string(json))
 }
 
-func ClaimToString(claim *core.Claim) (string, error) {
+func SiblingsToString(siblings []*merkletree.Hash, treeLevels int) string {
+	s := make([]*merkletree.Hash, treeLevels)
+	zero, _ := merkletree.NewHashFromString("0")
+	if treeLevels > len(siblings) {
+		for i := 0; i < len(siblings); i++ {
+			s[i] = siblings[i]
+		}
+		for i := len(siblings); i < treeLevels; i++ {
+
+			s[i] = zero
+		}
+	} else {
+		for i := 0; i < treeLevels; i++ {
+			s[i] = siblings[i]
+		}
+	}
+
+	res, err := json.Marshal(s)
+	ExitOnError(err)
+	return string(res)
+}
+
+func ClaimToString(claim *core.Claim) string {
 	json, err := json.Marshal(claim)
-	return string(json), err
+	if err != nil {
+		panic(err)
+	}
+	return string(json)
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
+	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql"
 	"github.com/iden3/go-merkletree-sql/db/memory"
 	"math/big"
@@ -23,10 +24,18 @@ func main() {
 		"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d",
 	}
 
+	treeLevels := 4
+
 	numberOfKeys := 1
 	numberOfFirstClaimsToRevoke := 0
 	signingKeyIndex := 0
-	useRelay := true
+
+	useRelay := false
+
+	//todo If useOldAndNewStateForChallenge = true then an input for stateTransition circuit is generated
+	// It has correct values but wrong names, which is something that is better to fix
+	useOldAndNewStateForChallenge := false
+	newState, _ := big.NewInt(0).SetString("8061408109549794622894897529509400209321866093562736009325703847306244896707", 10)
 
 	//claimSchema, _ := big.NewInt(0).SetString("251025091000101825075425831481271126140", 10)
 
@@ -64,24 +73,26 @@ func main() {
 		//fmt.Println("    GetSchemaHash: ", big.NewInt(0).SetBytes(schema))
 	}
 
+	testVector := make(map[string]string)
+
 	ctx := context.Background()
-	identifier, claimsTree, revTree, userState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke)
+	identifier, claimsTree, revTree, userState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke, treeLevels)
 
 	if useRelay {
-		fmt.Println("\nuserID:", identifier.BigInt())
+		testVector["userID"] = identifier.BigInt().String()
 	} else {
-		fmt.Println("\nuserState:", userState.BigInt())
+		testVector["userState"] = userState.BigInt().String()
 	}
 	//MTP Claim
-	fmt.Println("\nclaimsTreeRoot:", claimsTree.Root().BigInt())
+	testVector["userClaimsTreeRoot"] = claimsTree.Root().BigInt().String()
 	signingAuthClaim := authClaims[signingKeyIndex]
 	hIndex, _, err := signingAuthClaim.HiHv()
 	utils.ExitOnError(err)
 	proof, _, err := claimsTree.GenerateProof(ctx, hIndex, claimsTree.Root())
 	utils.ExitOnError(err)
 	allSiblingsClaimsTree := proof.AllSiblings()
-	utils.PrintSiblings("authClaimMtp", allSiblingsClaimsTree)
-	utils.PrintClaim("authClaim:", signingAuthClaim)
+	testVector["userAuthClaimMtp"] = utils.SiblingsToString(allSiblingsClaimsTree, treeLevels)
+	testVector["userAuthClaim"] = utils.ClaimToString(signingAuthClaim)
 
 	//MTP Claim not revoked
 	revNonce := signingAuthClaim.GetRevocationNonce()
@@ -89,22 +100,39 @@ func main() {
 	proofNotRevoke, _, err := revTree.GenerateProof(ctx, hi, revTree.Root())
 	utils.ExitOnError(err)
 
-	fmt.Println("\nrevTreeRoot: ", revTree.Root().BigInt())
-	utils.PrintSiblings("authClaimNonRevMtp:", proofNotRevoke.AllSiblings())
+	testVector["userRevTreeRoot"] = revTree.Root().BigInt().String()
+	testVector["userAuthClaimNonRevMtp"] = utils.SiblingsToString(proofNotRevoke.AllSiblings(), treeLevels)
 	if proofNotRevoke.NodeAux == nil {
-		fmt.Println("authClaimNonRevMtpNoAux: 1")
-		fmt.Println("authClaimNonRevMtpAuxHi: 0")
-		fmt.Println("authClaimNonRevMtpAuxHv: 0")
+		testVector["userAuthClaimNonRevMtpNoAux"] = "1"
+		testVector["userAuthClaimNonRevMtpAuxHi"] = "0"
+		testVector["userAuthClaimNonRevMtpAuxHv"] = "0"
 	} else {
-		fmt.Println("authClaimNonRevMtpNoAux: 0")
-		fmt.Println("authClaimNonRevMtpAuxHi: ", proofNotRevoke.NodeAux.Key.BigInt())
-		fmt.Println("authClaimNonRevMtpAuxHv: ", proofNotRevoke.NodeAux.Value.BigInt())
+		testVector["userAuthClaimNonRevMtpNoAux"] = "0"
+		testVector["userAuthClaimNonRevMtpAuxHi"] = proofNotRevoke.NodeAux.Key.BigInt().String()
+		testVector["userAuthClaimNonRevMtpAuxHv"] = proofNotRevoke.NodeAux.Value.BigInt().String()
 	}
 
-	fmt.Println("\nrootsTreeRoot: 0")
+	testVector["userRootsTreeRoot"] = "0"
 
+	var challenge *big.Int
 	// Test signature
-	challenge := big.NewInt(1)
+	if useOldAndNewStateForChallenge {
+		testVector["userID"] = identifier.BigInt().String()
+		testVector["oldUserState"] = userState.BigInt().String()
+		testVector["newUserState"] = newState.String()
+		challenge, _ = poseidon.Hash([]*big.Int{userState.BigInt(), newState})
+		delete(testVector, "challenge")
+		delete(testVector, "userState")
+		if numberOfKeys == 1 {
+			testVector["isOldStateGenesis"] = "1"
+		} else {
+			testVector["isOldStateGenesis"] = "0"
+		}
+	} else {
+		challenge = big.NewInt(1)
+		testVector["challenge"] = challenge.String()
+	}
+
 	bjjSigner := primitive.NewBJJSigner(&privKeys[signingKeyIndex])
 	signature, err := bjjSigner.Sign(challenge.Bytes())
 	utils.ExitOnError(err)
@@ -114,28 +142,28 @@ func main() {
 	decompressedSig, err = new(babyjub.Signature).Decompress(sig)
 	utils.ExitOnError(err)
 
-	fmt.Println("\nchallenge:", challenge)
-	fmt.Println("challengeSignatureR8x:", decompressedSig.R8.X)
-	fmt.Println("challengeSignatureR8y:", decompressedSig.R8.Y)
-	fmt.Println("challengeSignatureS:", decompressedSig.S)
+	testVector["challengeSignatureR8x"] = decompressedSig.R8.X.String()
+	testVector["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
+	testVector["challengeSignatureS"] = decompressedSig.S.String()
 
 	if useRelay {
 		idenStateInRelayClaim, reIdenState, relayClaimsTree, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim("9db637b457c284e844e58955c54cd8e67d989b72ed4b56411eabbeb775fb853a", identifier, userState)
 
-		fmt.Println("\nreIdenState:", reIdenState.BigInt())
-		utils.PrintSiblings("hoStateInRelayClaimMtp:", proofIdenStateInRelay.AllSiblings())
-		utils.PrintClaim("hoStateInRelayClaim:", idenStateInRelayClaim)
-		fmt.Println("reProofValidClaimsTreeRoot:", relayClaimsTree.BigInt())
-		fmt.Println("reProofValidRevTreeRoot: 0")
-		fmt.Println("reProofValidRootsTreeRoot: 0")
+		testVector["relayState"] = reIdenState.BigInt().String()
+		testVector["userStateInRelayClaimMtp"] = utils.SiblingsToString(proofIdenStateInRelay.AllSiblings(), treeLevels)
+		testVector["userStateInRelayClaim"] = utils.ClaimToString(idenStateInRelayClaim)
+		testVector["relayProofValiduserClaimsTreeRoot"] = relayClaimsTree.BigInt().String()
+		testVector["relayProofValiduserRevTreeRoot"] = "0"
+		testVector["relayProofValiduserRootsTreeRoot"] = "0"
 	}
+
+	fmt.Println()
+	utils.PrintMap(testVector)
 }
 
-func createIdentityMultiAuthClaims(
-	ctx context.Context, authClaims []*core.Claim, numOfFirstClaimsToRevoke int) (
-	*core.ID, *merkletree.MerkleTree, *merkletree.MerkleTree, *merkletree.Hash) {
+func createIdentityMultiAuthClaims(ctx context.Context, authClaims []*core.Claim, numOfFirstClaimsToRevoke int, treeLevels int) (*core.ID, *merkletree.MerkleTree, *merkletree.MerkleTree, *merkletree.Hash) {
 	claimTreeStorage := memory.NewMemoryStorage()
-	claimsTree, err := merkletree.NewMerkleTree(ctx, claimTreeStorage, 4)
+	claimsTree, err := merkletree.NewMerkleTree(ctx, claimTreeStorage, treeLevels)
 	utils.ExitOnError(err)
 
 	var identifier *core.ID
@@ -153,7 +181,7 @@ func createIdentityMultiAuthClaims(
 		}
 	}
 
-	revTree := createRevTree(ctx, authClaims[:numOfFirstClaimsToRevoke])
+	revTree := createRevTree(ctx, authClaims[:numOfFirstClaimsToRevoke], treeLevels)
 
 	state, err := utils.CalcIdentityStateFromRoots(claimsTree, revTree)
 	utils.ExitOnError(err)
@@ -188,9 +216,9 @@ func createPrivateKey(privKeyHex string) babyjub.PrivateKey {
 	return privKey
 }
 
-func createRevTree(ctx context.Context, authClaims []*core.Claim) *merkletree.MerkleTree {
+func createRevTree(ctx context.Context, authClaims []*core.Claim, treeLevels int) *merkletree.MerkleTree {
 	treeStorage := memory.NewMemoryStorage()
-	tree, err := merkletree.NewMerkleTree(ctx, treeStorage, 4)
+	tree, err := merkletree.NewMerkleTree(ctx, treeStorage, treeLevels)
 	utils.ExitOnError(err)
 
 	for _, v := range authClaims {

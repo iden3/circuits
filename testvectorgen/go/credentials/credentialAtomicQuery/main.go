@@ -77,8 +77,7 @@ func attributeQuery() {
 
 	fmt.Println("\nproofSib:", string(proofSib))
 
-	claimAsString, err := utils.ClaimToString(claim)
-	utils.ExitOnError(err)
+	claimAsString := utils.ClaimToString(claim)
 
 	fmt.Println("claimAsString:", claimAsString)
 

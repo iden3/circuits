@@ -78,8 +78,7 @@ func main() {
 	}
 	utils.PrintSiblings("authClaimMtp", allSiblingsClaimsTree)
 
-	cs, err := utils.ClaimToString(claim)
-	utils.ExitOnError(err)
+	cs := utils.ClaimToString(claim)
 
 	inputs["authClaim"] = cs
 
