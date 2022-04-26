@@ -48,17 +48,14 @@ func main() {
 			isRevokedKey = true
 		}
 
-		authEntry := authClaims[i].TreeEntry()
-		hIndex, err := authEntry.HIndex()
-		utils.ExitOnError(err)
-		hValue, err := authEntry.HValue()
+		hIndex, hValue, err := authClaims[i].HiHv()
 		utils.ExitOnError(err)
 
 		fmt.Println()
 		fmt.Println("Claim info: ")
 		fmt.Println(fmt.Sprintf("    Public key: %v, isSigningKey: %t, isRevokedKey: %t", i, isSigningKey, isRevokedKey))
-		fmt.Println("    HIndex: ", hIndex.BigInt())
-		fmt.Println("    HValue: ", hValue.BigInt())
+		fmt.Println("    HIndex: ", hIndex.String())
+		fmt.Println("    HValue: ", hValue.String())
 		//fmt.Println("    Schema: ", claimSchema)
 		fmt.Println("    x", v.Public().X)
 		fmt.Println("    y", v.Public().Y)
@@ -78,10 +75,9 @@ func main() {
 	//MTP Claim
 	fmt.Println("\nclaimsTreeRoot:", claimsTree.Root().BigInt())
 	signingAuthClaim := authClaims[signingKeyIndex]
-	authEntry := signingAuthClaim.TreeEntry()
-	hIndex, err := authEntry.HIndex()
+	hIndex, _, err := signingAuthClaim.HiHv()
 	utils.ExitOnError(err)
-	proof, _, err := claimsTree.GenerateProof(ctx, hIndex.BigInt(), claimsTree.Root())
+	proof, _, err := claimsTree.GenerateProof(ctx, hIndex, claimsTree.Root())
 	utils.ExitOnError(err)
 	allSiblingsClaimsTree := proof.AllSiblings()
 	utils.PrintSiblings("authClaimMtp", allSiblingsClaimsTree)
@@ -145,11 +141,14 @@ func createIdentityMultiAuthClaims(
 	var identifier *core.ID
 
 	for i, claim := range authClaims {
-		entry := claim.TreeEntry()
-		err := claimsTree.AddEntry(ctx, &entry)
+		hi, hv, err := claim.HiHv()
+		utils.ExitOnError(err)
+		err = claimsTree.Add(ctx, hi, hv)
 		utils.ExitOnError(err)
 		if i == 0 {
-			identifier, err = core.CalculateGenesisID(claimsTree.Root())
+			state, err := core.IdenState(claimsTree.Root().BigInt(), big.NewInt(0), big.NewInt(0))
+			utils.ExitOnError(err)
+			identifier, err = core.IdGenesisFromIdenState(core.TypeDefault, state)
 			utils.ExitOnError(err)
 		}
 	}

@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"math/big"
+
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-merkletree-sql"
 	"github.com/iden3/go-merkletree-sql/db/memory"
-	"math/big"
 	"test/crypto/primitive"
 	"test/utils"
 )
@@ -36,10 +37,9 @@ func main() {
 
 	identifier, claimsTree, revTree, currentState := createIdentityMultiAuthClaims(ctx, claim)
 
-	authEntry := claim.TreeEntry()
-	hIndex, err := authEntry.HIndex()
+	hIndex, err := claim.HIndex()
 	utils.ExitOnError(err)
-	proof, _, err := claimsTree.GenerateProof(ctx, hIndex.BigInt(), claimsTree.Root())
+	proof, _, err := claimsTree.GenerateProof(ctx, hIndex, claimsTree.Root())
 	utils.ExitOnError(err)
 	allSiblingsClaimsTree := proof.AllSiblings()
 
@@ -123,21 +123,26 @@ func createIdentityMultiAuthClaims(
 
 	var identifier *core.ID
 
-	entry := authClaim.TreeEntry()
-	err = claimsTree.AddEntry(ctx, &entry)
+	hi, hv, err := authClaim.HiHv()
 	utils.ExitOnError(err)
-	identifier, err = core.CalculateGenesisID(claimsTree.Root())
+	err = claimsTree.Add(ctx, hi, hv)
+	utils.ExitOnError(err)
+
+	state, err := core.IdenState(claimsTree.Root().BigInt(), big.NewInt(0), big.NewInt(0))
+	utils.ExitOnError(err)
+
+	identifier, err = core.IdGenesisFromIdenState(core.TypeDefault, state)
 	utils.ExitOnError(err)
 
 	treeStorage := memory.NewMemoryStorage()
 	revTree, err := merkletree.NewMerkleTree(ctx, treeStorage, 40)
 	utils.ExitOnError(err)
 
-	state, err := merkletree.HashElems(
+	stateHash, err := merkletree.HashElems(
 		claimsTree.Root().BigInt(),
 		revTree.Root().BigInt(),
 		merkletree.HashZero.BigInt())
 	utils.ExitOnError(err)
 
-	return identifier, claimsTree, revTree, state
+	return identifier, claimsTree, revTree, stateHash
 }

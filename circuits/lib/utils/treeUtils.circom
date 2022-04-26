@@ -149,7 +149,7 @@ template VerifyAuthClaimAndSignature(nLevels) {
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
-    var AUTH_SCHEMA_HASH  = 269270088098491255471307608775043319525;
+    var AUTH_SCHEMA_HASH  = 304427537360709784173770334266246861770;
     component verifyAuthSchema  = verifyCredentialSchema();
     for (var i=0; i<8; i++) {
             verifyAuthSchema.claim[i] <== authClaim[i];

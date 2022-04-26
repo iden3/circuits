@@ -75,11 +75,11 @@ template getClaimRevNonce() {
 
 	signal output revNonce;
 
-	component claimRevNonce = Bits2Num(32);
+	component claimRevNonce = Bits2Num(64);
 
  	component v0Bits = Num2Bits(256);
 	v0Bits.in <== claim[4];
-	for (var i=0; i<32; i++) {
+	for (var i=0; i<64; i++) {
 		claimRevNonce.in[i] <== v0Bits.out[i];
 	}
 	revNonce <== claimRevNonce.out;
