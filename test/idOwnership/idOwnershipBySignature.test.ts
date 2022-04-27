@@ -15,7 +15,7 @@ describe("idOwnershipBySignature", function () {
             path.join(__dirname, "../circuits", "idOwnershipBySignatureTest.circom"),
             {
                 output: path.join(__dirname, "../circuits", "build/idOwnershipBySignature"),
-                recompile: false,
+                recompile: true,
                 reduceConstraints: false,
             },
         );
