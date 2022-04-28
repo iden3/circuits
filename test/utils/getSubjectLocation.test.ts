@@ -21,7 +21,7 @@ describe("Test", function () {
         const claim = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
         testData.in = {claimFlags: claim};
-        testData.expOut = {subject: 0};
+        testData.expOut = {out: 0};
     });
 
     it("#index location", async () => {
@@ -29,7 +29,7 @@ describe("Test", function () {
         const claim = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
         testData.in = {claimFlags: claim};
-        testData.expOut = {subject: 2};
+        testData.expOut = {out: 2};
     });
 
     it("#value location", async () => {
@@ -37,6 +37,6 @@ describe("Test", function () {
         const claim = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
         testData.in = {claimFlags: claim};
-        testData.expOut = {subject: 3};
+        testData.expOut = {out: 3};
     });
 })
