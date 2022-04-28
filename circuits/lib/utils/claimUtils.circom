@@ -266,3 +266,19 @@ template getClaimExpiration() {
 	}
 	expiration <== expirationBits.out;
 }
+
+// getSubjectLocation extract subject from claim flags.
+template getSubjectLocation() {
+    signal input claimFlags[32];
+    signal output subject;
+
+    component subjectBits = Bits2Num(3);
+
+    var j = 2;
+    for (var i=0; i<3; i++) {
+        subjectBits.in[j] <== claimFlags[5+i];
+        j--;
+    }
+
+    subject <== subjectBits.out;
+}
