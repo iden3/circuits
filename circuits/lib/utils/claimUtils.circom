@@ -280,3 +280,17 @@ template getSubjectLocation() {
 
     out <== subjectBits.out;
 }
+
+template isExpiration() {
+        signal input claimFlags[32];
+        signal output out;
+
+        out <== claimFlags[3];
+}
+
+template isUpdatable() {
+        signal input claimFlags[32];
+        signal output out;
+
+        out <== claimFlags[4];
+}
