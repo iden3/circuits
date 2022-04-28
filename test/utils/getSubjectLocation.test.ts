@@ -26,7 +26,7 @@ describe("Test", function () {
 
     it("#index location", async () => {
         // this claim generated with claim, err := NewClaim(schemaHash, WithID(ID{}, IDPositionIndex))
-        const claim = [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        const claim = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
         testData.in = {claimFlags: claim};
         testData.expOut = {subject: 2};
@@ -34,7 +34,7 @@ describe("Test", function () {
 
     it("#value location", async () => {
         // this claim generated with `claim, err := NewClaim(schemaHash, WithID(ID{}, IDPositionValue))`
-        const claim = [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        const claim = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
         testData.in = {claimFlags: claim};
         testData.expOut = {subject: 3};

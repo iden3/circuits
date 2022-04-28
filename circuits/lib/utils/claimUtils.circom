@@ -274,10 +274,8 @@ template getSubjectLocation() {
 
     component subjectBits = Bits2Num(3);
 
-    var j = 2;
     for (var i=0; i<3; i++) {
-        subjectBits.in[j] <== claimFlags[5+i];
-        j--;
+        subjectBits.in[i] <== claimFlags[i];
     }
 
     subject <== subjectBits.out;
