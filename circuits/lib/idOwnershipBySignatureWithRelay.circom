@@ -80,12 +80,10 @@ template IdOwnershipBySignatureWithRelay(nLevelsUser, nLevelsRelay) {
 	component header = getClaimHeader();
 	for (var i=0; i<8; i++) { header.claim[i] <== userStateInRelayClaim[i]; }
 
-	component subjectOtherIden = getClaimSubjectOtherIden(0);
+	component subjectOtherIden = getClaimSubjectOtherIden();
 	for (var i=0; i<8; i++) { subjectOtherIden.claim[i] <== userStateInRelayClaim[i]; }
-	for (var i=0; i<32; i++) { subjectOtherIden.claimFlags[i] <== header.claimFlags[i]; }
 
     userID === subjectOtherIden.id;
-
     component checkUserStateInRelay = checkClaimExists(nLevelsRelay);
     for (var i=0; i<8; i++) { checkUserStateInRelay.claim[i] <== userStateInRelayClaim[i]; }
 	for (var i=0; i<nLevelsRelay; i++) { checkUserStateInRelay.claimMTP[i] <== userStateInRelayClaimMtp[i]; }

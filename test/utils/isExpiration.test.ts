@@ -16,14 +16,14 @@ describe("Test", function () {
         await circuit.assertOut(w, testData.expOut);
     })
 
-    it("#not updatable", async () => {
+    it("#not expiration", async () => {
         const claim = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
         testData.in = {claimFlags: claim};
         testData.expOut = {out: 0};
     });
 
-    it("#updatable", async () => {
+    it("#expiration", async () => {
         const claim = [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
         testData.in = {claimFlags: claim};

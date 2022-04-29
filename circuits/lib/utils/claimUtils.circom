@@ -5,29 +5,36 @@ include "../../../node_modules/circomlib/circuits/eddsaposeidon.circom";
 include "../../../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../../../node_modules/circomlib/circuits/mux3.circom";
 include "../../../node_modules/circomlib/circuits/mux1.circom";
+include "../../../node_modules/circomlib/circuits/mux2.circom";
 
-// getClaimSubjectOtherIden checks that a claim Subject is OtherIden and
-// outputs the identity within.  Parameter index is bool:  0 if SubjectPos is
-// Index, 1 if SubjectPos is Value.
-template getClaimSubjectOtherIden(index) {
+// getClaimSubjectOtherIden checks that a claim Subject is OtherIden and outputs the identity within.
+template getClaimSubjectOtherIden() {
 	signal input claim[8];
-	signal input claimFlags[32]; // claimFlags must be parsed from the claim
-
 	signal output id;
 
-	// Assert that claim subject is OtherIden
-	// flags[0:2] == [0, 1]: Subject == OtherIden
-	claimFlags[0] === 0;
-	claimFlags[1] === 1;
-	// flags[2] == 0 / 1: SubjectPos == Index / Value
-	claimFlags[2] === index;
+    // get header flags from claim.
+	component header = getClaimHeader();
+	for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
 
-	if (index == 0) {
-		id <== claim[0*4 + 1];
-	} else {
-		id <== claim[1*4 + 1];
-	}
+    // get subject location from header flags.
+    component subjectLocation = getSubjectLocation();
+    for (var i = 0; i < 32; i++) { subjectLocation.claimFlags[i] <== header.claimFlags[i]; }
+
+    component mux = Mux2();
+    component n2b = Num2Bits(2);
+    n2b.in <== subjectLocation.out;
+
+    mux.s[0] <== n2b.out[0];
+    mux.s[1] <== n2b.out[1];
+
+    mux.c[0] <== 0;
+    mux.c[1] <== 0;
+    mux.c[2] <== claim[0*4 + 1];
+    mux.c[3] <== claim[1*4 + 1];
+
+    id <== mux.out;
 }
+
 
 // getClaimHeader gets the header of a claim, outputing the claimType as an
 // integer and the claimFlags as a bit array.
@@ -134,10 +141,8 @@ template verifyCredentialSubject() {
 	component header = getClaimHeader();
 	for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
 
-    // TODO: add reading SubjectPos from claim (0 = index, 1 = value) and providing it to the following component
-	component subjectOtherIden = getClaimSubjectOtherIden(0);
+	component subjectOtherIden = getClaimSubjectOtherIden();
 	for (var i=0; i<8; i++) { subjectOtherIden.claim[i] <== claim[i]; }
-	for (var i=0; i<32; i++) { subjectOtherIden.claimFlags[i] <== header.claimFlags[i]; }
 
     subjectOtherIden.id === id;
 }
