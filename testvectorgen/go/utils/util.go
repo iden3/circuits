@@ -214,7 +214,7 @@ func GenerateIdentity(ctx context.Context, privKHex string, challenge *big.Int) 
 	inputs["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
 	inputs["challengeSignatureS"] = decompressedSig.S.String()
 	inputs["state"] = currentState.BigInt().String()
-	inputs["authClaim"], _ = ClaimToString(authClaim)
+	inputs["authClaim"] = ClaimToString(authClaim)
 	ExitOnError(err)
 
 	return identifier, claimsTree, inputs
