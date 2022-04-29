@@ -281,6 +281,7 @@ template getSubjectLocation() {
     out <== subjectBits.out;
 }
 
+// isExpiration return 1 if expiration flag is set otherwise 0.
 template isExpiration() {
         signal input claimFlags[32];
         signal output out;
@@ -288,6 +289,7 @@ template isExpiration() {
         out <== claimFlags[3];
 }
 
+// isUpdatable return 1 if updatable flag is set otherwise 0.
 template isUpdatable() {
         signal input claimFlags[32];
         signal output out;
