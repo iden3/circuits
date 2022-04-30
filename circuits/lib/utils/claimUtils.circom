@@ -266,3 +266,33 @@ template getClaimExpiration() {
 	}
 	expiration <== expirationBits.out;
 }
+
+// getSubjectLocation extract subject from claim flags.
+template getSubjectLocation() {
+    signal input claimFlags[32];
+    signal output out;
+
+    component subjectBits = Bits2Num(3);
+
+    for (var i=0; i<3; i++) {
+        subjectBits.in[i] <== claimFlags[i];
+    }
+
+    out <== subjectBits.out;
+}
+
+// isExpirable return 1 if expiration flag is set otherwise 0.
+template isExpirable() {
+        signal input claimFlags[32];
+        signal output out;
+
+        out <== claimFlags[3];
+}
+
+// isUpdatable return 1 if updatable flag is set otherwise 0.
+template isUpdatable() {
+        signal input claimFlags[32];
+        signal output out;
+
+        out <== claimFlags[4];
+}
