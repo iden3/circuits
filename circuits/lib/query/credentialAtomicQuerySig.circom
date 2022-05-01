@@ -71,10 +71,11 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
 
     signal input issuerAuthClaimMtp[IssuerLevels];
 
-    signal input issuerAuthHi;
-    signal input issuerAuthHv;
-    signal input issuerPubKeyX;
-    signal input issuerPubKeyY;
+//    signal input issuerAuthHi;
+//    signal input issuerAuthHv;
+//    signal input issuerPubKeyX;
+//    signal input issuerPubKeyY;
+    signal input issuerAuthClaim[8];
 
     // issuerClaim non rev inputs
     signal input issuerClaimNonRevMtp[IssuerLevels];
@@ -139,26 +140,36 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
 
 
     var AUTH_SCHEMA_HASH  = 304427537360709784173770334266246861770;
+    component issuerSchemaCheck = verifyCredentialSchema();
+    for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
+    issuerSchemaCheck.schema <== AUTH_SCHEMA_HASH;
     // verify issuerClaim issued and not revoked
-    component hashHi = Poseidon(4);
-    hashHi.inputs[0] <== AUTH_SCHEMA_HASH;
-    hashHi.inputs[1] <== 0;
-    hashHi.inputs[2] <== issuerPubKeyX;
-    hashHi.inputs[3] <== issuerPubKeyY;
-    hashHi.out === issuerAuthHi;
+//    component hashHi = Poseidon(4);
+//    hashHi.inputs[0] <== AUTH_SCHEMA_HASH;
+//    hashHi.inputs[1] <== 0;
+//    hashHi.inputs[2] <== issuerPubKeyX;
+//    hashHi.inputs[3] <== issuerPubKeyY;
+//    hashHi.out === issuerAuthHi;
+
+
 
     // issuerClaim proof of existence (isProofExist)
     //
-    component smtIssuerAuthClaimExists = SMTVerifier(IssuerLevels);
-    smtIssuerAuthClaimExists.enabled <== 1;
-    smtIssuerAuthClaimExists.fnc <== 0; // Inclusion
-    smtIssuerAuthClaimExists.root <== issuerClaimsTreeRoot;
-    for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.siblings[i] <== issuerAuthClaimMtp[i]; }
-    smtIssuerAuthClaimExists.oldKey <== 0;
-    smtIssuerAuthClaimExists.oldValue <== 0;
-    smtIssuerAuthClaimExists.isOld0 <== 0;
-    smtIssuerAuthClaimExists.key <== issuerAuthHi;
-    smtIssuerAuthClaimExists.value <== issuerAuthHv;
+    component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);
+    for (var i=0; i<8; i++) { smtIssuerAuthClaimExists.claim[i] <== issuerAuthClaim[i]; }
+    for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.claimMTP[i] <== issuerAuthClaimMtp[i]; }
+    smtIssuerAuthClaimExists.treeRoot <== issuerClaimsTreeRoot;
+
+//    component smtIssuerAuthClaimExists = SMTVerifier(IssuerLevels);
+//    smtIssuerAuthClaimExists.enabled <== 1;
+//    smtIssuerAuthClaimExists.fnc <== 0; // Inclusion
+//    smtIssuerAuthClaimExists.root <== issuerClaimsTreeRoot;
+//    for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.siblings[i] <== issuerAuthClaimMtp[i]; }
+//    smtIssuerAuthClaimExists.oldKey <== 0;
+//    smtIssuerAuthClaimExists.oldValue <== 0;
+//    smtIssuerAuthClaimExists.isOld0 <== 0;
+//    smtIssuerAuthClaimExists.key <== issuerAuthHi;
+//    smtIssuerAuthClaimExists.value <== issuerAuthHv;
 
     // issuerClaim  check signature
     component verifyClaimSig = verifyClaimSignature();
@@ -166,8 +177,8 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     verifyClaimSig.sigR8x <== issuerClaimSignatureR8x;
     verifyClaimSig.sigR8y <== issuerClaimSignatureR8y;
     verifyClaimSig.sigS <== issuerClaimSignatureS;
-    verifyClaimSig.pubKeyX <== issuerPubKeyX;
-    verifyClaimSig.pubKeyY <== issuerPubKeyY;
+    verifyClaimSig.pubKeyX <== issuerAuthClaim[2];//issuerPubKeyX;
+    verifyClaimSig.pubKeyY <== issuerAuthClaim[3];//issuerPubKeyY;
 
     // verify issuer state includes issuerClaim
     component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();
