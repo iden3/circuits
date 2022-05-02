@@ -8,7 +8,7 @@ describe("Test", function () {
     let testData = {in:{},expOut:{}}
 
     before(async function() {
-        circuit = await wasm_tester(path.join(__dirname, "../circuits/utils", "utils_isExpiration.circom"));
+        circuit = await wasm_tester(path.join(__dirname, "../circuits/utils", "utils_isExpirable.circom"));
     })
 
     afterEach( async ()=>{
@@ -16,14 +16,14 @@ describe("Test", function () {
         await circuit.assertOut(w, testData.expOut);
     })
 
-    it("#not expiration", async () => {
+    it("#not expirable", async () => {
         const claim = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
         testData.in = {claimFlags: claim};
         testData.expOut = {out: 0};
     });
 
-    it("#expiration", async () => {
+    it("#expirable", async () => {
         const claim = [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
         testData.in = {claimFlags: claim};
