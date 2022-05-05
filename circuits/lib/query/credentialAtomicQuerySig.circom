@@ -69,13 +69,14 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     signal input issuerRevTreeRoot;
     signal input issuerRootsTreeRoot;
 
-    signal input issuerAuthClaimMtp[IssuerLevels];
 
-//    signal input issuerAuthHi;
-//    signal input issuerAuthHv;
-//    signal input issuerPubKeyX;
-//    signal input issuerPubKeyY;
     signal input issuerAuthClaim[8];
+    signal input issuerAuthClaimMtp[IssuerLevels];
+    // issuer auth claim non rev proof
+    signal input issuerAuthClaimNonRevMtp[IdOwnershipLevels];
+    signal input issuerAuthClaimNonRevMtpNoAux;
+    signal input issuerAuthClaimNonRevMtpAuxHi;
+    signal input issuerAuthClaimNonRevMtpAuxHv;
 
     // issuerClaim non rev inputs
     signal input issuerClaimNonRevMtp[IssuerLevels];
@@ -143,33 +144,26 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     component issuerSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
     issuerSchemaCheck.schema <== AUTH_SCHEMA_HASH;
-    // verify issuerClaim issued and not revoked
-//    component hashHi = Poseidon(4);
-//    hashHi.inputs[0] <== AUTH_SCHEMA_HASH;
-//    hashHi.inputs[1] <== 0;
-//    hashHi.inputs[2] <== issuerPubKeyX;
-//    hashHi.inputs[3] <== issuerPubKeyY;
-//    hashHi.out === issuerAuthHi;
+    // verify authClaim issued and not revoked
 
-
-
-    // issuerClaim proof of existence (isProofExist)
+    // issuerAuthClaim proof of existence (isProofExist)
     //
     component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);
     for (var i=0; i<8; i++) { smtIssuerAuthClaimExists.claim[i] <== issuerAuthClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.claimMTP[i] <== issuerAuthClaimMtp[i]; }
     smtIssuerAuthClaimExists.treeRoot <== issuerClaimsTreeRoot;
 
-//    component smtIssuerAuthClaimExists = SMTVerifier(IssuerLevels);
-//    smtIssuerAuthClaimExists.enabled <== 1;
-//    smtIssuerAuthClaimExists.fnc <== 0; // Inclusion
-//    smtIssuerAuthClaimExists.root <== issuerClaimsTreeRoot;
-//    for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.siblings[i] <== issuerAuthClaimMtp[i]; }
-//    smtIssuerAuthClaimExists.oldKey <== 0;
-//    smtIssuerAuthClaimExists.oldValue <== 0;
-//    smtIssuerAuthClaimExists.isOld0 <== 0;
-//    smtIssuerAuthClaimExists.key <== issuerAuthHi;
-//    smtIssuerAuthClaimExists.value <== issuerAuthHv;
+    // issuerAuthClaim proof of non-revocation
+    //
+    component verifyIssuerAuthClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyIssuerAuthClaimNotRevoked.claim[i] <== issuerAuthClaim[i]; }
+    for (var i=0; i<IssuerLevels; i++) {
+        verifyIssuerAuthClaimNotRevoked.claimNonRevMTP[i] <== issuerAuthClaimNonRevMtp[i];
+    }
+    verifyIssuerAuthClaimNotRevoked.noAux <== issuerAuthClaimNonRevMtpNoAux;
+    verifyIssuerAuthClaimNotRevoked.auxHi <== issuerAuthClaimNonRevMtpAuxHi;
+    verifyIssuerAuthClaimNotRevoked.auxHv <== issuerAuthClaimNonRevMtpAuxHv;
+    verifyIssuerAuthClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
 
     // issuerClaim  check signature
     component verifyClaimSig = verifyClaimSignature();
