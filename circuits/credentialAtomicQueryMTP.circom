@@ -11,4 +11,4 @@ component main{public [challenge,
                         slotIndex,
                         operator,
                         value,
-                        timestamp]} = CredentialAtomicQueryMTP(40, 40, 16);
+                        timestamp]} = CredentialAtomicQueryMTP(32, 32, 64);
