@@ -179,14 +179,17 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     verifyIssuerAuthClaimNotRevoked.auxHv <== issuerAuthClaimNonRevMtpAuxHv;
     verifyIssuerAuthClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
 
+    component issuerAuthPubKey = getPubKeyFromClaim();
+    for (var i=0; i<8; i++){ issuerAuthPubKey.claim[i] <== issuerAuthClaim[i]; }
+
     // issuerClaim  check signature
     component verifyClaimSig = verifyClaimSignature();
     for (var i=0; i<8; i++) { verifyClaimSig.claim[i] <== issuerClaim[i]; }
     verifyClaimSig.sigR8x <== issuerClaimSignatureR8x;
     verifyClaimSig.sigR8y <== issuerClaimSignatureR8y;
     verifyClaimSig.sigS <== issuerClaimSignatureS;
-    verifyClaimSig.pubKeyX <== issuerAuthClaim[2];//issuerPubKeyX;
-    verifyClaimSig.pubKeyY <== issuerAuthClaim[3];//issuerPubKeyY;
+    verifyClaimSig.pubKeyX <== issuerAuthPubKey.Ax;
+    verifyClaimSig.pubKeyY <== issuerAuthPubKey.Ay;
 
     // verify issuer state includes issuerClaim
     component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();
