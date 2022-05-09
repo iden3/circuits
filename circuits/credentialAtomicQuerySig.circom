@@ -7,8 +7,9 @@ component main{public [challenge,
                         userState,
                         issuerID,
                         issuerState,
+                        issuerClaimNonRevState,
                         claimSchema,
                         slotIndex,
                         operator,
                         value,
-                        timestamp]} = CredentialAtomicQuerySig(40, 40, 16);
+                        timestamp]} = CredentialAtomicQuerySig(32, 32, 64);
