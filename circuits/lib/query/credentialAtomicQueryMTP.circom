@@ -72,14 +72,14 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     signal input issuerClaimNonRevRootsTreeRoot;
     signal input issuerClaimNonRevState;
 
+    /* current time */
+    signal input timestamp;
+
     /** Query */
     signal input claimSchema;
     signal input slotIndex;
-    signal input value[valueArraySize];
     signal input operator;
-
-    /* current time */
-    signal input timestamp;
+    signal input value[valueArraySize];
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
