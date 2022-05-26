@@ -6,11 +6,12 @@ include "comparators.circom";
 
 /*
   Operators:
- "0" - equals
- "1" - less-than
- "2" - greater-than
- "3" - in
- "4" - notin
+ "0" - noop, skip execution. Ignores all `in` and `value` passed to query, out 1
+ "1" - equals
+ "2" - less-than
+ "3" - greater-than
+ "4" - in
+ "5" - notin
 */
 template Query (valueArraySize) {
     // signals
@@ -47,14 +48,14 @@ template Query (valueArraySize) {
     mux.s[1] <== n2b.out[1];
     mux.s[2] <== n2b.out[2];
 
-    mux.c[0] <== eq.out;
-    mux.c[1] <== lt.out;
-    mux.c[2] <== gt.out;
-    mux.c[3] <== inComp.out;
+    mux.c[0] <== 1; // noop, skip execution
+    mux.c[1] <== eq.out;
+    mux.c[2] <== lt.out;
+    mux.c[3] <== gt.out;
+    mux.c[4] <== inComp.out;
 
-    mux.c[4] <== 1-inComp.out;
+    mux.c[5] <== 1-inComp.out;
 
-    mux.c[5] <== 0; // not in use
     mux.c[6] <== 0; // not in use
     mux.c[7] <== 0; // not in use
 
