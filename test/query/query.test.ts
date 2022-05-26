@@ -7,17 +7,48 @@ const assert = chai.assert;
 
 export {};
 
-const EQUALS  = "0"; // = - equals sign
-const LESS    = "1"; // = - less-than sign
-const GREATER    = "2"; // = - greter-than sign
-const IN = "3"; // = - in
-const NOTIN = "4"; // = - notin
+const NOOP = "0"; // = - no operation, skip query verification if set
+const EQUALS  = "1"; // = - equals sign
+const LESS    = "2"; // = - less-than sign
+const GREATER    = "3"; // = - greter-than sign
+const IN = "4"; // = - in
+const NOTIN = "5"; // = - notin
 
 describe("Test query",  function() {
     let circuit;
 
     before(async function() {
         circuit = await wasm_tester(path.join(__dirname, "../circuits/query/", "queryTest.circom"));
+    });
+
+    describe("#Noop", function() {
+        it("#Noop (true)", async () => {
+            const inputs = {
+                in: "10",
+                operator:  NOOP,
+                value: ["11", "0", "0"],
+            }
+
+            const expOut = {out: 1, value: ["11", "0", "0"]}
+
+            const w = await circuit.calculateWitness(inputs, true);
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("#Noop (true)", async () => {
+            const inputs = {
+                in: "0",
+                operator:  NOOP,
+                value: ["0", "0", "0"],
+            }
+
+            const expOut = {out: 1, value: ["0", "0", "0"]}
+
+            const w = await circuit.calculateWitness(inputs, true);
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
     });
 
     describe("#IsEqual", function() {
