@@ -63,7 +63,7 @@ describe("Test CredentialAtomicQuerySig.circom", function () {
             "issuerRevTreeRoot": "0",
             "issuerRootsTreeRoot": "0",
             "issuerState": "11672667429383627660992648216772306271234451162443612055001584519010749218959",
-            "operator": 1,
+            "operator": 2,
             "slotIndex": 2,
             "timestamp": "1651850376",
             "userAuthClaim": ["304427537360709784173770334266246861770", "0", "11151655580697319947882291674102291730051706338247314064771322625319070352517", "17002319580480461745556995341522831877523489413849835052106266233588801210277", "0", "0", "0", "0"],
@@ -85,7 +85,7 @@ describe("Test CredentialAtomicQuerySig.circom", function () {
             userID: "222712906379570502079611869905711649383946316867077911802139171411787317248",
             claimSchema: "210459579859058135404770043788028292398",
             slotIndex: "2",
-            operator: "1",
+            operator: "2",
             timestamp: "1651850376",
         }
         const w = await circuit.calculateWitness(inputs, true);
