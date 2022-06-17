@@ -64,11 +64,6 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
 
     // issuer state
     signal input issuerID;
-    signal input issuerState;
-    signal input issuerClaimsTreeRoot;
-    signal input issuerRevTreeRoot;
-    signal input issuerRootsTreeRoot;
-
 
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimMtp[IssuerLevels];
