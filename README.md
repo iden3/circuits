@@ -1,8 +1,6 @@
-# circuits [![Tests](https://github.com/iden3/circuits/workflows/Tests/badge.svg)](https://github.com/iden3/circuits/actions?query=workflow%3ATests) [![npm](https://img.shields.io/npm/v/@iden3/circuits)](https://img.shields.io/npm/v/@iden3/circuits)
+# circuits [![Tests](https://github.com/iden3/circuits/workflows/Tests/badge.svg)](https://github.com/iden3/circuits/actions?query=workflow%3ATests) 
 
 Circuits used by the iden3 core protocol.
-
-**Warning:** This repository is in a very early stage.
 
 The circuits of this repository are compatible with the [go-iden3-core implementation](https://github.com/iden3/go-iden3-core)
 
@@ -14,24 +12,17 @@ First install the npm dependencies:
 npm ci
 ```
 
-The compilation circuit converts the proving key to the
-`go-circom-prover-verifier` binary format with `.go.bin` extension. For that,
-the
-[`go-circom-prover-verifier`](https://github.com/iden3/go-circom-prover-verifier)
-respository needs to be checked out in the same folder where the `circuits`
-repository is found. `go` must be installed in the system as well.
-
 Then build the circuit and do the "trusted" setup:
 
 ```bash
-./compile-circuit.sh CIRCUIT_PATH
+./compile-circuit.sh CIRCUIT_PATH PTAU_FILE_PATH
 ```
 
 Examples:
 
 ```bash
-./compile-circuit.sh circuits/examples/idState.circom
-./compile-circuit.sh circuits/examples/credentialDemoWrapper.circom
+./compile-circuit.sh circuits/auth.circom build/powersOfTau28_hez_final_16.ptau
+./compile-circuit.sh circuits/stateTransition.circom build/powersOfTau28_hez_final_15.ptau
 ```
 
 ## Work with `s3_util.js` script
