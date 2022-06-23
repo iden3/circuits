@@ -203,6 +203,19 @@ describe("Test query",  function() {
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
+
+        it("#LessThan - p-1 < 10 (false)", async () => {
+            const w = await circuit.calculateWitness({
+                in: "21888242871839275222246405745257275088548364400416034343698204186575808495616",
+                operator: LESS,
+                value: ["10", "0", "0"],
+            }, true);
+
+            const expOut = {out: 0, value: ["10", "0", "0"]}
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
     });
 
     describe("#GreterThan", function() {

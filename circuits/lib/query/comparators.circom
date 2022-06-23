@@ -19,7 +19,7 @@ template IN (valueArraySize){
             count += eq[i].out;
         }
 
-        // Greater then
+        // Greater than
         component gt = GreaterThan(252);
         gt.in[0] <== count;
         gt.in[1] <== 0;
