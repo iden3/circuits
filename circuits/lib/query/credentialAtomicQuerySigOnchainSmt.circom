@@ -3,7 +3,7 @@ include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "comparators.circom";
-include "../idOwnershipBySignature.circom";
+include "../idOwnershipBySignatureOnchainSmt.circom";
 include "query.circom";
 
 
@@ -34,19 +34,16 @@ template CredentialAtomicQuerySigOnchainSmt(UserOnChainSmtLevels, IdOwnershipLev
     /* 0n-chain SMT state proof */
     signal input userOnChainSmtRoot;
     signal input userOnChainSmtMtp[UserOnChainSmtLevels];
-    signal input userID;
-    signal input userState;
 
     /* Nullifier inputs */
  // todo better naming maybe
     signal input verifierCorrelationID;
     signal input nullifierHash;
-// todo remove this
-//    signal input nullifierSignatureS;
-//    signal input nullifierSignatureR8X;
-//    signal input nullifierSignatureR8Y;
 
     /* userID ownership signals */
+    signal input userID;
+    signal input userState;
+
     signal input userClaimsTreeRoot;
     signal input userAuthClaimMtp[IdOwnershipLevels];
     signal input userAuthClaim[8];
@@ -114,39 +111,11 @@ template CredentialAtomicQuerySigOnchainSmt(UserOnChainSmtLevels, IdOwnershipLev
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
-    /* Check on-chain SMT inclusion existence */
-    component onChainSmtInclusion = SMTVerifier(UserOnChainSmtLevels);
-    onChainSmtInclusion.enabled <== 1;
-    onChainSmtInclusion.fnc <== 0; // Inclusion
-    onChainSmtInclusion.root <== userOnChainSmtRoot;
-    for (var i=0; i<UserOnChainSmtLevels; i++) { onChainSmtInclusion.siblings[i] <== userOnChainSmtMtp[i]; }
-    onChainSmtInclusion.oldKey <== 0;
-    onChainSmtInclusion.oldValue <== 0;
-    onChainSmtInclusion.isOld0 <== 0;
-    onChainSmtInclusion.key <== userID;
-    onChainSmtInclusion.value <== userState;
-
-    /* Nullifier calculation */
-
-// Option 1: check that nullifier = hash(verifierCorrelationID, pubKeyX, pubKeyY);
-    component checkNullifier = checkNullifier();
-    for (var i=0; i<8; i++){ checkNullifier.claim[i] <== userAuthClaim[i]; }
-    checkNullifier.correlationID <== verifierCorrelationID;
-    checkNullifier.nullifierHash <== nullifierHash;
-
-
-// todo remove this
-// Option 2: check that nullifier = hash(verifierCorrelationID, sig(verifierCorrelationID));
-//    component checkNullifier = checkNullifier2();
-//    for (var i=0; i<8; i++){ checkNullifier.claim[i] <== userAuthClaim[i]; }
-//    checkNullifier.correlationID <== verifierCorrelationID;
-//    checkNullifier.nullifierHash <== nullifierHash;
-//    checkNullifier.signatureS <== nullifierSignatureS;
-//    checkNullifier.signatureR8X <== nullifierSignatureR8X;
-//    checkNullifier.signatureR8Y <== nullifierSignatureR8Y;
-
     /* Id ownership check*/
-    component userIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
+    component userIdOwnership = IdOwnershipBySignatureOnchainSmt(IdOwnershipLevels, UserOnChainSmtLevels);
+
+    userIdOwnership.userID <== userID;
+    userIdOwnership.userState <== userState;
 
     userIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot; // currentHolderStateClaimsTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
@@ -165,7 +134,11 @@ template CredentialAtomicQuerySigOnchainSmt(UserOnChainSmtLevels, IdOwnershipLev
     userIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
     userIdOwnership.challengeSignatureS <== challengeSignatureS;
 
-    userIdOwnership.userState <== userState;
+    userIdOwnership.userOnChainSmtRoot <== userOnChainSmtRoot;
+    for (var i=0; i<UserOnChainSmtLevels; i++) { userIdOwnership.userOnChainSmtMtp[i] <== userOnChainSmtMtp[i]; }
+
+    userIdOwnership.verifierCorrelationID <== verifierCorrelationID;
+    userIdOwnership.nullifierHash <== nullifierHash;
 
 
     // Check issuerClaim is issued to provided identity
@@ -258,49 +231,3 @@ template CredentialAtomicQuerySigOnchainSmt(UserOnChainSmtLevels, IdOwnershipLev
     for(var i = 0; i<valueArraySize; i++){q.value[i] <== value[i];}
     q.out === 1;
 }
-
-template checkNullifier() {
-    signal input claim[8];
-    signal input correlationID;
-    signal input nullifierHash;
-
-    component getPubKey = getPubKeyFromClaim();
-    for (var i=0; i<8; i++){ getPubKey.claim[i] <== claim[i]; }
-
-    component poseidon = Poseidon(3);
-    poseidon.inputs[0] <== correlationID;
-    poseidon.inputs[1] <== getPubKey.Ax;
-    poseidon.inputs[2] <== getPubKey.Ay;
-
-    poseidon.out === nullifierHash;
-}
-
-// todo remove this
-//template checkNullifier2() {
-//    signal input claim[8];
-//    signal input correlationID;
-//    signal input nullifierHash;
-//    signal input signatureS;
-//    signal input signatureR8X;
-//    signal input signatureR8Y;
-//
-//    component getPubKey = getPubKeyFromClaim();
-//    for (var i=0; i<8; i++){ getPubKey.claim[i] <== claim[i]; }
-//
-//    component sigVerifier = EdDSAPoseidonVerifier();
-//    sigVerifier.enabled <== 1;
-//    sigVerifier.Ax <== getPubKey.Ax;
-//    sigVerifier.Ay <== getPubKey.Ay;
-//    sigVerifier.S <== signatureS;
-//    sigVerifier.R8x <== signatureR8X;
-//    sigVerifier.R8y <== signatureR8Y;
-//    sigVerifier.M <== correlationID;
-//
-//    component poseidon = Poseidon(4);
-//    poseidon.inputs[0] <== correlationID;
-//    poseidon.inputs[1] <== signatureS;
-//    poseidon.inputs[2] <== signatureR8X;
-//    poseidon.inputs[3] <== signatureR8Y;
-//
-//    poseidon.out === nullifierHash;
-//}

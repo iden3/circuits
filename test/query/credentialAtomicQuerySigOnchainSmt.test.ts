@@ -1,7 +1,7 @@
 import {describe} from "mocha";
 
 const path = require("path");
-const wasm_tester = require("circom_tester").wasm;
+const wasmTester = require("circom_tester").wasm;
 
 export {};
 
@@ -12,7 +12,7 @@ describe("Test CredentialAtomicQuerySigOnchainSmt.circom", function() {
   let circuit;
 
   before(async () => {
-    circuit = await wasm_tester(
+    circuit = await wasmTester(
       path.join(__dirname, "../circuits/query", "credentialAtomicQuerySigOnchainSmtTest.circom"),
       {
         output: path.join(__dirname, "circuits", "build"),
@@ -74,25 +74,17 @@ describe("Test CredentialAtomicQuerySigOnchainSmt.circom", function() {
       issuerAuthRootsTreeRoot: "0",
       verifierCorrelationID: "123456789",
       nullifierHash: "3886931623570934357017887171328389254245198238824798786420210009480671968146",
-      // nullifierSignatureS: "341225347126841947395972508315950325593182311812611544934981959080146045700",
-      // nullifierSignatureR8X: "19536577678587102761623416251660087049884123747920640742468502801023539377063",
-      // nullifierSignatureR8Y: "21306442926842044454977385087460296385197710161059127490927766321703750010903",
       userOnChainSmtMtp: ["0", "2740674427662457332835454792145677734479634481325332115749498841888350110548", "19991091798052235227442886829713443191817461077589875647331508266325270343516", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
       userOnChainSmtRoot: "15785738096134850558745431966983374165786089520107561966902434607487856520167",
     }
 
-    // signal input issuerState;
-    // signal input issuerClaimsTreeRoot;
-    // signal input issuerRevTreeRoot;
-    // signal input issuerRootsTreeRoot;
-
     const expOut = {
-      userState: "18656147546666944484453899241916469544090258810192803949522794490493271005313",
+      verifierCorrelationID: "123456789",
+      nullifierHash: "3886931623570934357017887171328389254245198238824798786420210009480671968146",
       issuerID: "26599707002460144379092755370384635496563807452878989192352627271768342528",
       issuerAuthState: "6317996369756476782464660619835940615734517981889733696047139451453239145426",
       issuerClaimNonRevState: "18605292738057394742004097311192572049290380262377486632479765119429313092475",
       challenge: "1",
-      userID: "379949150130214723420589610911161895495647789006649785264738141299135414272",
       claimSchema: "180410020913331409885634153623124536270",
       slotIndex: "2",
       operator: "1",
@@ -105,44 +97,3 @@ describe("Test CredentialAtomicQuerySigOnchainSmt.circom", function() {
   ;
 })
 ;
-
-// todo move the info to the docs and remove this
-
-/*
-INITIAL AtomicQuerySig CIRCUIT
-=======
-template instances: 351
-non-linear constraints: 60649
-linear constraints: 0
-public inputs: 73
-public outputs: 1
-private inputs: 208
-private outputs: 0
-wires: 60870
-labels: 277108
-
-
-CIRCUIT WITH ONCHAIN SMT AND NULLIFIER (PUB KEY IN THE HASH, WITHOUT SIGNATURE)
-template instances: 352
-non-linear constraints: 69857 (+9208)
-linear constraints: 0
-public inputs: 73
-public outputs: 1
-private inputs: 243
-private outputs: 0
-wires: 70107
-labels: 320747
-
-
-CIRCUIT WITH ONCHAIN SMT AND NULLIFIER (WITH SIGNATURE)
-template instances: 352
-non-linear constraints: 74100 (+13451)
-linear constraints: 0
-public inputs: 73
-public outputs: 1
-private inputs: 246
-private outputs: 0
-wires: 74349
-labels: 343100
-
-*/
