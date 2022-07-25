@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/iden3/go-iden3-crypto/poseidon"
 	"math"
 	"math/big"
 
@@ -317,4 +318,29 @@ func GenerateRelayWithIdenStateClaim(relayPrivKey string, identifier *core.ID, i
 	ExitOnError(err)
 
 	return claim, relayState, relayClaimsTree.Root(), proofIdentityIsRelayed
+}
+
+func GenerateOnChainSMT(identifier *core.ID, state *merkletree.Hash, treeLevels int) *merkletree.MerkleTree {
+	ctx := context.Background()
+	smt, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 32)
+	ExitOnError(err)
+	err = smt.Add(ctx, identifier.BigInt(), state.BigInt())
+	ExitOnError(err)
+	return smt
+}
+
+func GenerateNullifierHash(claim *core.Claim, correlationID *big.Int) *big.Int {
+	slots := claim.RawSlotsAsInts()
+	hash, err := poseidon.Hash([]*big.Int{correlationID, slots[2], slots[3]})
+	ExitOnError(err)
+	return hash
+}
+
+func GenerateNullifierHash2(privKHex string, correlationID *big.Int) (*big.Int, *big.Int, *big.Int, *big.Int) {
+	key, _, _ := ExtractPubXY(privKHex)
+	decompressedSig, err := SignBBJJ(key, correlationID.Bytes())
+
+	hash, err := poseidon.Hash([]*big.Int{correlationID, decompressedSig.S, decompressedSig.R8.X, decompressedSig.R8.Y})
+	ExitOnError(err)
+	return hash, decompressedSig.S, decompressedSig.R8.X, decompressedSig.R8.Y
 }

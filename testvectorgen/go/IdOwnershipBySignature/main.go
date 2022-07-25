@@ -24,13 +24,13 @@ func main() {
 		"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d",
 	}
 
-	treeLevels := 4
+	treeLevels := 32
 
 	numberOfKeys := 1
 	numberOfFirstClaimsToRevoke := 0
 	signingKeyIndex := 0
 
-	useRelay := false
+	useRelay := true
 
 	//todo If useOldAndNewStateForChallenge = true then an input for stateTransition circuit is generated
 	// It has correct values but wrong names, which is something that is better to fix
@@ -147,14 +147,23 @@ func main() {
 	testVector["challengeSignatureS"] = decompressedSig.S.String()
 
 	if useRelay {
-		idenStateInRelayClaim, reIdenState, relayClaimsTree, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim("9db637b457c284e844e58955c54cd8e67d989b72ed4b56411eabbeb775fb853a", identifier, userState)
+		onChainSmtTreeLevels := 32
+		onChainSMT := utils.GenerateOnChainSMT(identifier, userState, onChainSmtTreeLevels)
+		//this is just to emulate that some data already exists in the tree
+		err := onChainSMT.Add(ctx, big.NewInt(2), big.NewInt(100))
+		utils.ExitOnError(err)
+		err = onChainSMT.Add(ctx, big.NewInt(4), big.NewInt(300))
+		utils.ExitOnError(err)
+		proofIdentityInSmt, err := onChainSMT.GenerateCircomVerifierProof(ctx, identifier.BigInt(), nil)
+		utils.ExitOnError(err)
 
-		testVector["relayState"] = reIdenState.BigInt().String()
-		testVector["userStateInRelayClaimMtp"] = utils.SiblingsToString(proofIdenStateInRelay.AllSiblings(), treeLevels)
-		testVector["userStateInRelayClaim"] = utils.ClaimToString(idenStateInRelayClaim)
-		testVector["relayProofValiduserClaimsTreeRoot"] = relayClaimsTree.BigInt().String()
-		testVector["relayProofValiduserRevTreeRoot"] = "0"
-		testVector["relayProofValiduserRootsTreeRoot"] = "0"
+		testVector["userOnChainSmtRoot"] = onChainSMT.Root().BigInt().String()
+		testVector["userOnChainSmtMtp"] = utils.SiblingsToString(proofIdentityInSmt.Siblings, onChainSmtTreeLevels)
+
+		correlationID := big.NewInt(123456789)
+		nh := utils.GenerateNullifierHash(authClaims[signingKeyIndex], correlationID)
+		testVector["verifierCorrelationID"] = correlationID.String()
+		testVector["nullifierHash"] = nh.String()
 	}
 
 	fmt.Println()
