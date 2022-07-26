@@ -32,8 +32,11 @@ template IdOwnershipBySignatureOnchainSmt(nLevels, onChainLevels) {
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
-    signal input userOnChainSmtRoot;
-    signal input userOnChainSmtMtp[onChainLevels];
+    signal input userStateInOnChainSmtRoot;
+    signal input userStateInOnChainSmtMtp[onChainLevels];
+    signal input userStateInOnChainSmtMtpAuxHi;
+    signal input userStateInOnChainSmtMtpAuxHv;
+    signal input userStateInOnChainSmtMtpNoAux;
 
     signal input verifierCorrelationID;
     signal input nullifierHash;
@@ -60,14 +63,24 @@ template IdOwnershipBySignatureOnchainSmt(nLevels, onChainLevels) {
     checkUserState.expectedState <== userState;
 
     /* Check on-chain SMT inclusion existence */
+    component cutId = cutId();
+    cutId.in <== userID;
+
+    component cutState = cutState();
+    cutState.in <== userState;
+
+    component isCutIdEqualToCutState = IsEqual();
+    isCutIdEqualToCutState.in[0] <== cutId.out;
+    isCutIdEqualToCutState.in[1] <== cutState.out;
+
     component onChainSmtInclusion = SMTVerifier(onChainLevels);
     onChainSmtInclusion.enabled <== 1;
-    onChainSmtInclusion.fnc <== 0; // Inclusion
-    onChainSmtInclusion.root <== userOnChainSmtRoot;
-    for (var i=0; i<onChainLevels; i++) { onChainSmtInclusion.siblings[i] <== userOnChainSmtMtp[i]; }
-    onChainSmtInclusion.oldKey <== 0;
-    onChainSmtInclusion.oldValue <== 0;
-    onChainSmtInclusion.isOld0 <== 0;
+    onChainSmtInclusion.fnc <== isCutIdEqualToCutState.out; // non-inclusion in case if genesis state, otherwise inclusion
+    onChainSmtInclusion.root <== userStateInOnChainSmtRoot;
+    for (var i=0; i<onChainLevels; i++) { onChainSmtInclusion.siblings[i] <== userStateInOnChainSmtMtp[i]; }
+    onChainSmtInclusion.oldKey <== userStateInOnChainSmtMtpAuxHi;
+    onChainSmtInclusion.oldValue <== userStateInOnChainSmtMtpAuxHv;
+    onChainSmtInclusion.isOld0 <== userStateInOnChainSmtMtpNoAux;
     onChainSmtInclusion.key <== userID;
     onChainSmtInclusion.value <== userState;
 

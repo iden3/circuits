@@ -25,15 +25,18 @@ valueArraySize - Number of elements in comparison array for in/notin operation i
 comparison ["1", "2", "3"]
 
 */
-template CredentialAtomicQuerySigOnchainSmt(UserOnChainSmtLevels, IdOwnershipLevels, IssuerLevels, valueArraySize) {
+template CredentialAtomicQuerySigOnchainSmt(IdOwnershipLevels, IssuerLevels, OnChainSmtLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
     /* 0n-chain SMT state proof */
-    signal input userOnChainSmtRoot;
-    signal input userOnChainSmtMtp[UserOnChainSmtLevels];
+    signal input userStateInOnChainSmtRoot;
+    signal input userStateInOnChainSmtMtp[OnChainSmtLevels];
+    signal input userStateInOnChainSmtMtpAuxHi;
+    signal input userStateInOnChainSmtMtpAuxHv;
+    signal input userStateInOnChainSmtMtpNoAux;
 
     /* Nullifier inputs */
  // todo better naming maybe
@@ -112,7 +115,7 @@ template CredentialAtomicQuerySigOnchainSmt(UserOnChainSmtLevels, IdOwnershipLev
     */
 
     /* Id ownership check*/
-    component userIdOwnership = IdOwnershipBySignatureOnchainSmt(IdOwnershipLevels, UserOnChainSmtLevels);
+    component userIdOwnership = IdOwnershipBySignatureOnchainSmt(IdOwnershipLevels, OnChainSmtLevels);
 
     userIdOwnership.userID <== userID;
     userIdOwnership.userState <== userState;
@@ -134,8 +137,11 @@ template CredentialAtomicQuerySigOnchainSmt(UserOnChainSmtLevels, IdOwnershipLev
     userIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
     userIdOwnership.challengeSignatureS <== challengeSignatureS;
 
-    userIdOwnership.userOnChainSmtRoot <== userOnChainSmtRoot;
-    for (var i=0; i<UserOnChainSmtLevels; i++) { userIdOwnership.userOnChainSmtMtp[i] <== userOnChainSmtMtp[i]; }
+    userIdOwnership.userStateInOnChainSmtRoot <== userStateInOnChainSmtRoot;
+    for (var i=0; i<OnChainSmtLevels; i++) { userIdOwnership.userStateInOnChainSmtMtp[i] <== userStateInOnChainSmtMtp[i]; }
+    userIdOwnership.userStateInOnChainSmtMtpAuxHi <== userStateInOnChainSmtMtpAuxHi;
+    userIdOwnership.userStateInOnChainSmtMtpAuxHv <== userStateInOnChainSmtMtpAuxHv;
+    userIdOwnership.userStateInOnChainSmtMtpNoAux <== userStateInOnChainSmtMtpNoAux;
 
     userIdOwnership.verifierCorrelationID <== verifierCorrelationID;
     userIdOwnership.nullifierHash <== nullifierHash;

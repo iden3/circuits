@@ -78,6 +78,13 @@ func main() {
 	ctx := context.Background()
 	identifier, claimsTree, revTree, userState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke, treeLevels)
 
+	// Non Genesis: included in the SMT
+	claimsTree.Add(ctx, big.NewInt(1), big.NewInt(1))
+	userState, err := utils.CalcIdentityStateFromRoots(claimsTree, revTree)
+	if err != nil {
+		return
+	}
+
 	if useRelay {
 		testVector["userID"] = identifier.BigInt().String()
 	} else {
@@ -148,9 +155,16 @@ func main() {
 
 	if useRelay {
 		onChainSmtTreeLevels := 32
+
+		// Non Genesis: included in the SMT
 		onChainSMT := utils.GenerateOnChainSMT(identifier, userState, onChainSmtTreeLevels)
+
+		// Genesis: not included in the SMT
+		//onChainSMT, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 32)
+		//utils.ExitOnError(err)
+
 		//this is just to emulate that some data already exists in the tree
-		err := onChainSMT.Add(ctx, big.NewInt(2), big.NewInt(100))
+		err = onChainSMT.Add(ctx, big.NewInt(2), big.NewInt(100))
 		utils.ExitOnError(err)
 		err = onChainSMT.Add(ctx, big.NewInt(4), big.NewInt(300))
 		utils.ExitOnError(err)
@@ -159,6 +173,15 @@ func main() {
 
 		testVector["userOnChainSmtRoot"] = onChainSMT.Root().BigInt().String()
 		testVector["userOnChainSmtMtp"] = utils.SiblingsToString(proofIdentityInSmt.Siblings, onChainSmtTreeLevels)
+
+		if proofIdentityInSmt.IsOld0 {
+			testVector["userStateInOnChainSmtMtpNoAux"] = "1"
+		} else {
+			testVector["userStateInOnChainSmtMtpNoAux"] = "0"
+		}
+
+		testVector["userStateInOnChainSmtMtpAuxHi"] = proofIdentityInSmt.OldKey.BigInt().String()
+		testVector["userStateInOnChainSmtMtpAuxHv"] = proofIdentityInSmt.OldValue.BigInt().String()
 
 		correlationID := big.NewInt(123456789)
 		nh := utils.GenerateNullifierHash(authClaims[signingKeyIndex], correlationID)
