@@ -3,7 +3,7 @@ include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "comparators.circom";
-include "../idOwnershipBySignatureOnchainSmt.circom";
+include "../idOwnershipBySignatureOnChainSmt.circom";
 include "query.circom";
 
 
@@ -25,7 +25,7 @@ valueArraySize - Number of elements in comparison array for in/notin operation i
 comparison ["1", "2", "3"]
 
 */
-template CredentialAtomicQuerySigOnchainSmt(IdOwnershipLevels, IssuerLevels, OnChainSmtLevels, valueArraySize) {
+template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnChainSmtLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -115,7 +115,7 @@ template CredentialAtomicQuerySigOnchainSmt(IdOwnershipLevels, IssuerLevels, OnC
     */
 
     /* Id ownership check*/
-    component userIdOwnership = IdOwnershipBySignatureOnchainSmt(IdOwnershipLevels, OnChainSmtLevels);
+    component userIdOwnership = IdOwnershipBySignatureOnChainSmt(IdOwnershipLevels, OnChainSmtLevels);
 
     userIdOwnership.userID <== userID;
     userIdOwnership.userState <== userState;

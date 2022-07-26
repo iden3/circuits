@@ -11,7 +11,7 @@ pragma circom 2.0.0;
 include "utils/claimUtils.circom";
 include "utils/treeUtils.circom";
 
-template IdOwnershipBySignatureOnchainSmt(nLevels, onChainLevels) {
+template IdOwnershipBySignatureOnChainSmt(nLevels, onChainLevels) {
     signal input userID;
     signal input userState;
 
