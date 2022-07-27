@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "lib/query/credentialAtomicQuerySig.circom";
+include "lib/query/credentialAtomicQuerySigOnChainSmt.circom";
 
 component main{public [challenge,
                         verifierCorrelationID,
@@ -11,4 +11,4 @@ component main{public [challenge,
                         slotIndex,
                         operator,
                         value,
-                        timestamp]} = CredentialAtomicQuerySig(32, 32, 32, 64);
+                        timestamp]} = CredentialAtomicQuerySigOnChainSmt(32, 32, 32, 64);
