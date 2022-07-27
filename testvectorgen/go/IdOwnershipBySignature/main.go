@@ -24,13 +24,14 @@ func main() {
 		"28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d",
 	}
 
-	treeLevels := 32
-
 	numberOfKeys := 1
 	numberOfFirstClaimsToRevoke := 0
 	signingKeyIndex := 0
+	treeLevels := 32
 
-	useRelay := true
+	useOnChainSmt := true
+	onChainSmtTreeLevels := 32
+	isUserStateGenesis := false
 
 	//todo If useOldAndNewStateForChallenge = true then an input for stateTransition circuit is generated
 	// It has correct values but wrong names, which is something that is better to fix
@@ -42,7 +43,7 @@ func main() {
 	fmt.Println("Number of keys:", numberOfKeys)
 	fmt.Println("Signing key index:", signingKeyIndex)
 	fmt.Println("Number of first keys to revoke:", numberOfFirstClaimsToRevoke)
-	fmt.Println("Use relay:", useRelay)
+	fmt.Println("Use on-chain SMT:", useOnChainSmt)
 
 	privKeys := createPrivateKeys(privKeysHex[:numberOfKeys])
 	authClaims := createAuthClaims(privKeys)
@@ -73,23 +74,23 @@ func main() {
 		//fmt.Println("    GetSchemaHash: ", big.NewInt(0).SetBytes(schema))
 	}
 
-	testVector := make(map[string]string)
+	testVector := make(map[string]interface{})
 
 	ctx := context.Background()
 	identifier, claimsTree, revTree, userState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke, treeLevels)
 
-	// Non Genesis: included in the SMT
-	claimsTree.Add(ctx, big.NewInt(1), big.NewInt(1))
-	userState, err := utils.CalcIdentityStateFromRoots(claimsTree, revTree)
-	if err != nil {
-		return
+	if !isUserStateGenesis {
+		err := claimsTree.Add(ctx, big.NewInt(1), big.NewInt(1))
+		utils.ExitOnError(err)
+		userState, err = utils.CalcIdentityStateFromRoots(claimsTree, revTree)
+		utils.ExitOnError(err)
 	}
 
-	if useRelay {
+	testVector["userState"] = userState.BigInt().String()
+	if useOnChainSmt {
 		testVector["userID"] = identifier.BigInt().String()
-	} else {
-		testVector["userState"] = userState.BigInt().String()
 	}
+
 	//MTP Claim
 	testVector["userClaimsTreeRoot"] = claimsTree.Root().BigInt().String()
 	signingAuthClaim := authClaims[signingKeyIndex]
@@ -98,8 +99,8 @@ func main() {
 	proof, _, err := claimsTree.GenerateProof(ctx, hIndex, claimsTree.Root())
 	utils.ExitOnError(err)
 	allSiblingsClaimsTree := proof.AllSiblings()
-	testVector["userAuthClaimMtp"] = utils.SiblingsToString(allSiblingsClaimsTree, treeLevels)
-	testVector["userAuthClaim"] = utils.ClaimToString(signingAuthClaim)
+	testVector["userAuthClaimMtp"] = utils.PadSiblingsToTreeLevels(allSiblingsClaimsTree, treeLevels)
+	testVector["userAuthClaim"] = signingAuthClaim
 
 	//MTP Claim not revoked
 	revNonce := signingAuthClaim.GetRevocationNonce()
@@ -108,7 +109,7 @@ func main() {
 	utils.ExitOnError(err)
 
 	testVector["userRevTreeRoot"] = revTree.Root().BigInt().String()
-	testVector["userAuthClaimNonRevMtp"] = utils.SiblingsToString(proofNotRevoke.AllSiblings(), treeLevels)
+	testVector["userAuthClaimNonRevMtp"] = utils.PadSiblingsToTreeLevels(proofNotRevoke.AllSiblings(), treeLevels)
 	if proofNotRevoke.NodeAux == nil {
 		testVector["userAuthClaimNonRevMtpNoAux"] = "1"
 		testVector["userAuthClaimNonRevMtpAuxHi"] = "0"
@@ -153,27 +154,28 @@ func main() {
 	testVector["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
 	testVector["challengeSignatureS"] = decompressedSig.S.String()
 
-	if useRelay {
-		onChainSmtTreeLevels := 32
-
-		// Non Genesis: included in the SMT
-		onChainSMT := utils.GenerateOnChainSMT(identifier, userState, onChainSmtTreeLevels)
-
-		// Genesis: not included in the SMT
-		//onChainSMT, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 32)
-		//utils.ExitOnError(err)
+	if useOnChainSmt {
+		var onChainSMT *merkletree.MerkleTree
+		if isUserStateGenesis {
+			onChainSMT, err = merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 32)
+			utils.ExitOnError(err)
+		} else {
+			onChainSMT = utils.GenerateOnChainSMT(identifier, userState, onChainSmtTreeLevels)
+		}
 
 		//this is just to emulate that some data already exists in the tree
 		err = onChainSMT.Add(ctx, big.NewInt(2), big.NewInt(100))
 		utils.ExitOnError(err)
 		err = onChainSMT.Add(ctx, big.NewInt(4), big.NewInt(300))
 		utils.ExitOnError(err)
+
 		proofIdentityInSmt, err := onChainSMT.GenerateCircomVerifierProof(ctx, identifier.BigInt(), nil)
 		utils.ExitOnError(err)
 
-		testVector["userOnChainSmtRoot"] = onChainSMT.Root().BigInt().String()
-		testVector["userOnChainSmtMtp"] = utils.SiblingsToString(proofIdentityInSmt.Siblings, onChainSmtTreeLevels)
+		testVector["userStateInOnChainSmtRoot"] = onChainSMT.Root().BigInt().String()
+		testVector["userStateInOnChainSmtMtp"] = utils.PadSiblingsToTreeLevels(proofIdentityInSmt.Siblings, onChainSmtTreeLevels)
 
+		//todo: is it correct?
 		if proofIdentityInSmt.IsOld0 {
 			testVector["userStateInOnChainSmtMtpNoAux"] = "1"
 		} else {

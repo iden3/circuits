@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/hex"
 	json "encoding/json"
 	"fmt"
@@ -58,22 +59,22 @@ func SignBBJJ(key *babyjub.PrivateKey, sigInput []byte) (*babyjub.Signature, err
 	return new(babyjub.Signature).Decompress(sig)
 }
 
-func PrintMap(inputs map[string]string) {
-	json, err := json.Marshal(inputs)
+func PrintMap(inputs map[string]interface{}) {
+	b, err := MarshalIndent(inputs, "", "  ")
 	ExitOnError(err)
 
-	fmt.Println(string(json))
+	fmt.Println(string(b))
 }
 
 func PrintSiblings(name string, siblings []*merkletree.Hash) {
-	json, err := json.Marshal(siblings)
+	b, err := json.Marshal(siblings)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(name, string(json))
+	fmt.Println(name, string(b))
 }
 
-func SiblingsToString(siblings []*merkletree.Hash, treeLevels int) string {
+func PadSiblingsToTreeLevels(siblings []*merkletree.Hash, treeLevels int) []*merkletree.Hash {
 	s := make([]*merkletree.Hash, treeLevels)
 	zero, _ := merkletree.NewHashFromString("0")
 	if treeLevels > len(siblings) {
@@ -81,7 +82,6 @@ func SiblingsToString(siblings []*merkletree.Hash, treeLevels int) string {
 			s[i] = siblings[i]
 		}
 		for i := len(siblings); i < treeLevels; i++ {
-
 			s[i] = zero
 		}
 	} else {
@@ -90,15 +90,81 @@ func SiblingsToString(siblings []*merkletree.Hash, treeLevels int) string {
 		}
 	}
 
-	res, err := json.Marshal(s)
-	ExitOnError(err)
-	return string(res)
+	return s
 }
 
 func ClaimToString(claim *core.Claim) string {
-	json, err := json.Marshal(claim)
+	b, err := json.Marshal(claim)
 	if err != nil {
 		panic(err)
 	}
-	return string(json)
+	return string(b)
+}
+
+func MarshalIndent(v interface{}, prefix, indent string) ([]byte, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	var buf bytes.Buffer
+	err = Indent(&buf, b, prefix, indent)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// this is a modified copy from the json package of stdlib
+// it does not print newlines after each item in an array
+// this is to make the output more readable and with much less vertical size
+func Indent(dst *bytes.Buffer, src []byte, prefix, indent string) error {
+	needIndent := false
+	needNewLine := true
+	depth := 0
+	for _, c := range src {
+
+		// Add spacing around real punctuation.
+		switch c {
+		case '{':
+			// delay indent so that empty object and array are formatted as {} and [].
+			needIndent = true
+			dst.WriteByte(c)
+		case '[':
+			needNewLine = false
+			dst.WriteByte(c)
+		case ',':
+			dst.WriteByte(c)
+			if needNewLine {
+				newline(dst, prefix, indent, depth)
+			}
+
+		case ':':
+			dst.WriteByte(c)
+			dst.WriteByte(' ')
+
+		case '}':
+			if needIndent {
+				// suppress indent in empty object/array
+				needIndent = false
+			} else {
+				depth--
+				newline(dst, prefix, indent, depth)
+			}
+			dst.WriteByte(c)
+		case ']':
+			needNewLine = true
+			dst.WriteByte(c)
+		default:
+			dst.WriteByte(c)
+		}
+	}
+	return nil
+}
+
+func newline(dst *bytes.Buffer, prefix, indent string, depth int) {
+	dst.WriteByte('\n')
+	dst.WriteString(prefix)
+	for i := 0; i < depth; i++ {
+		dst.WriteString(indent)
+	}
 }
