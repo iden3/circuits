@@ -2,18 +2,156 @@ package utils
 
 import (
 	"bytes"
+	"context"
 	"encoding/hex"
-	json "encoding/json"
+	"encoding/json"
 	"fmt"
+	"github.com/iden3/go-iden3-crypto/poseidon"
 	"math/big"
 	"os"
 
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
-	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql"
+	"github.com/iden3/go-merkletree-sql/db/memory"
 	"test/crypto/primitive"
 )
+
+func PrintCurrentState(claimsTree *merkletree.MerkleTree) {
+	// calculate current state
+	currentState, err := merkletree.HashElems(claimsTree.Root().BigInt(),
+		merkletree.HashZero.BigInt(), merkletree.HashZero.BigInt())
+	ExitOnError(err)
+
+	fmt.Println("Current state Hex:", currentState)
+	fmt.Println("Current state BigInt:", currentState.BigInt())
+}
+
+func AddClaimToTree(tree *merkletree.MerkleTree, claim *core.Claim) (*merkletree.Proof, error) {
+
+	index, value, _ := claim.HiHv()
+	err := tree.Add(context.TODO(), index, value)
+	if err != nil {
+		return nil, err
+	}
+
+	proof, _, err := tree.GenerateProof(context.TODO(), index, tree.Root())
+
+	return proof, err
+}
+
+func PrintClaim(claimName string, claim *core.Claim) {
+
+	json, err := json.Marshal(claim)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(claimName, string(json))
+}
+
+func GenerateIdentity(ctx context.Context, privKHex string, challenge *big.Int) (*core.ID, *merkletree.MerkleTree, map[string]interface{}) {
+	// extract pubKey
+	key, X, Y := ExtractPubXY(privKHex)
+
+	// init claims tree
+	claimsTree, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 4)
+	ExitOnError(err)
+
+	// create auth claim
+	authClaim, err := AuthClaimFromPubKey(X, Y)
+	ExitOnError(err)
+
+	// add auth claim to claimsMT
+	hi, hv, err := authClaim.HiHv()
+	ExitOnError(err)
+	claimsTree.Add(ctx, hi, hv)
+
+	// sign challenge
+	decompressedSig, err := SignBBJJ(key, challenge.Bytes())
+	ExitOnError(err)
+
+	state, err := core.IdenState(claimsTree.Root().BigInt(), big.NewInt(0), big.NewInt(0))
+	ExitOnError(err)
+	// create new identity
+	identifier, err := core.IdGenesisFromIdenState(core.TypeDefault, state)
+	ExitOnError(err)
+
+	// calculate current state
+	currentState, err := merkletree.HashElems(claimsTree.Root().BigInt(),
+		merkletree.HashZero.BigInt(), merkletree.HashZero.BigInt())
+	ExitOnError(err)
+
+	inputs := make(map[string]interface{})
+	inputs["id"] = identifier.BigInt().String()
+	inputs["BBJAx"] = X.String()
+	inputs["BBJAy"] = Y.String()
+	inputs["BBJClaimClaimsTreeRoot"] = claimsTree.Root().BigInt().String()
+	inputs["challenge"] = challenge.String()
+	inputs["challengeSignatureR8x"] = decompressedSig.R8.X.String()
+	inputs["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
+	inputs["challengeSignatureS"] = decompressedSig.S.String()
+	inputs["state"] = currentState.BigInt().String()
+	inputs["authClaim"] = ClaimToString(authClaim)
+	ExitOnError(err)
+
+	return identifier, claimsTree, inputs
+}
+
+func CalcIdentityStateFromRoots(claimsTree *merkletree.MerkleTree, optTrees ...*merkletree.MerkleTree) (*merkletree.Hash, error) {
+	revTreeRoot := merkletree.HashZero.BigInt()
+	rootsTreeRoot := merkletree.HashZero.BigInt()
+	if len(optTrees) > 0 {
+		revTreeRoot = optTrees[0].Root().BigInt()
+	}
+	if len(optTrees) > 1 {
+		rootsTreeRoot = optTrees[1].Root().BigInt()
+	}
+	state, err := merkletree.HashElems(
+		claimsTree.Root().BigInt(),
+		revTreeRoot,
+		rootsTreeRoot)
+	return state, err
+}
+
+func GenerateRelayWithIdenStateClaim(relayPrivKey string, identifier *core.ID, idenState *merkletree.Hash) (*core.Claim, *merkletree.Hash, *merkletree.Hash, *merkletree.Proof) {
+	ctx := context.Background()
+	_, relayClaimsTree, _ := GenerateIdentity(ctx, relayPrivKey, big.NewInt(0))
+
+	valueSlotA, _ := core.NewElemBytesFromInt(idenState.BigInt())
+	var schemaHash core.SchemaHash
+	schemaEncodedBytes, _ := hex.DecodeString("e22dd9c0f7aef15788c130d4d86c7156")
+	copy(schemaHash[:], schemaEncodedBytes)
+	claim, err := core.NewClaim(
+		schemaHash,
+		core.WithIndexID(*identifier),
+		core.WithValueData(valueSlotA, core.ElemBytes{}),
+	)
+	ExitOnError(err)
+
+	proofIdentityIsRelayed, err := AddClaimToTree(relayClaimsTree, claim)
+	ExitOnError(err)
+	relayState, err := CalcIdentityStateFromRoots(relayClaimsTree)
+	ExitOnError(err)
+
+	return claim, relayState, relayClaimsTree.Root(), proofIdentityIsRelayed
+}
+
+func GenerateOnChainSMT(identifier *core.ID, state *merkletree.Hash, treeLevels int) *merkletree.MerkleTree {
+	ctx := context.Background()
+	smt, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 32)
+	ExitOnError(err)
+	err = smt.Add(ctx, identifier.BigInt(), state.BigInt())
+	ExitOnError(err)
+	return smt
+}
+
+func GenerateNullifierHash(claim *core.Claim, correlationID *big.Int) *big.Int {
+	slots := claim.RawSlotsAsInts()
+	hash, err := poseidon.Hash([]*big.Int{correlationID, slots[2], slots[3]})
+	ExitOnError(err)
+	return hash
+}
 
 func ExtractPubXY(privKHex string) (key *babyjub.PrivateKey, x, y *big.Int) {
 	// Extract pubKey

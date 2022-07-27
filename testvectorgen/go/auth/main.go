@@ -22,7 +22,7 @@ Generate test vectors for auth.circom
 func main() {
 	fmt.Println("\n-------\nauth.circom test vector:")
 
-	inputs := make(map[string]string)
+	inputs := make(map[string]interface{})
 	ctx := context.Background()
 
 	useRelay := true
