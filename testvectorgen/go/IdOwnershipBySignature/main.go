@@ -44,6 +44,7 @@ func main() {
 	fmt.Println("Signing key index:", signingKeyIndex)
 	fmt.Println("Number of first keys to revoke:", numberOfFirstClaimsToRevoke)
 	fmt.Println("Use on-chain SMT:", useOnChainSmt)
+	fmt.Println("isUserStateGenesis:", isUserStateGenesis)
 
 	privKeys := createPrivateKeys(privKeysHex[:numberOfKeys])
 	authClaims := createAuthClaims(privKeys)
@@ -80,7 +81,7 @@ func main() {
 	identifier, claimsTree, revTree, userState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke, treeLevels)
 
 	if !isUserStateGenesis {
-		err := claimsTree.Add(ctx, big.NewInt(1), big.NewInt(1))
+		err := claimsTree.Add(ctx, big.NewInt(1), big.NewInt(1)) //this is just to emulate the user state update
 		utils.ExitOnError(err)
 		userState, err = utils.CalcIdentityStateFromRoots(claimsTree, revTree)
 		utils.ExitOnError(err)
@@ -160,7 +161,7 @@ func main() {
 			onChainSMT, err = merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 32)
 			utils.ExitOnError(err)
 		} else {
-			onChainSMT = utils.GenerateOnChainSMT(identifier, userState, onChainSmtTreeLevels)
+			onChainSMT = utils.GenerateOnChainSmtWithIdState(identifier, userState, onChainSmtTreeLevels)
 		}
 
 		//this is just to emulate that some data already exists in the tree
@@ -169,21 +170,25 @@ func main() {
 		err = onChainSMT.Add(ctx, big.NewInt(4), big.NewInt(300))
 		utils.ExitOnError(err)
 
-		proofIdentityInSmt, err := onChainSMT.GenerateCircomVerifierProof(ctx, identifier.BigInt(), nil)
+		proofIdentityInSmt, _, err := onChainSMT.GenerateProof(ctx, identifier.BigInt(), nil)
 		utils.ExitOnError(err)
 
 		testVector["userStateInOnChainSmtRoot"] = onChainSMT.Root().BigInt().String()
-		testVector["userStateInOnChainSmtMtp"] = utils.PadSiblingsToTreeLevels(proofIdentityInSmt.Siblings, onChainSmtTreeLevels)
+		testVector["userStateInOnChainSmtMtp"] = utils.PadSiblingsToTreeLevels(proofIdentityInSmt.AllSiblings(), onChainSmtTreeLevels)
 
-		//todo: is it correct?
-		if proofIdentityInSmt.IsOld0 {
-			testVector["userStateInOnChainSmtMtpNoAux"] = "1"
+		if proofIdentityInSmt.NodeAux == nil {
+			if isUserStateGenesis {
+				testVector["userStateInOnChainSmtMtpNoAux"] = "1"
+			} else {
+				testVector["userStateInOnChainSmtMtpNoAux"] = "0" // need 0 for circuit inputs in any case, because we proof inclusion
+			}
+			testVector["userStateInOnChainSmtMtpAuxHi"] = "0"
+			testVector["userStateInOnChainSmtMtpAuxHv"] = "0"
 		} else {
 			testVector["userStateInOnChainSmtMtpNoAux"] = "0"
+			testVector["userStateInOnChainSmtMtpAuxHi"] = proofIdentityInSmt.NodeAux.Key.BigInt().String()
+			testVector["userStateInOnChainSmtMtpAuxHv"] = proofIdentityInSmt.NodeAux.Value.BigInt().String()
 		}
-
-		testVector["userStateInOnChainSmtMtpAuxHi"] = proofIdentityInSmt.OldKey.BigInt().String()
-		testVector["userStateInOnChainSmtMtpAuxHv"] = proofIdentityInSmt.OldValue.BigInt().String()
 
 		correlationID := big.NewInt(123456789)
 		nh := utils.GenerateNullifierHash(authClaims[signingKeyIndex], correlationID)
