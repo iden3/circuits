@@ -138,7 +138,7 @@ func GenerateRelayWithIdenStateClaim(relayPrivKey string, identifier *core.ID, i
 	return claim, relayState, relayClaimsTree.Root(), proofIdentityIsRelayed
 }
 
-func GenerateOnChainSMT(identifier *core.ID, state *merkletree.Hash, treeLevels int) *merkletree.MerkleTree {
+func GenerateOnChainSmtWithIdState(identifier *core.ID, state *merkletree.Hash, treeLevels int) *merkletree.MerkleTree {
 	ctx := context.Background()
 	smt, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), treeLevels)
 	ExitOnError(err)
