@@ -42,12 +42,12 @@ func AddClaimToTree(tree *merkletree.MerkleTree, claim *core.Claim) (*merkletree
 
 func PrintClaim(claimName string, claim *core.Claim) {
 
-	json, err := json.Marshal(claim)
+	b, err := json.Marshal(claim)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(claimName, string(json))
+	fmt.Println(claimName, string(b))
 }
 
 func GenerateIdentity(ctx context.Context, privKHex string, challenge *big.Int) (*core.ID, *merkletree.MerkleTree, map[string]interface{}) {
@@ -65,7 +65,8 @@ func GenerateIdentity(ctx context.Context, privKHex string, challenge *big.Int) 
 	// add auth claim to claimsMT
 	hi, hv, err := authClaim.HiHv()
 	ExitOnError(err)
-	claimsTree.Add(ctx, hi, hv)
+	err = claimsTree.Add(ctx, hi, hv)
+	ExitOnError(err)
 
 	// sign challenge
 	decompressedSig, err := SignBBJJ(key, challenge.Bytes())
@@ -139,7 +140,7 @@ func GenerateRelayWithIdenStateClaim(relayPrivKey string, identifier *core.ID, i
 
 func GenerateOnChainSMT(identifier *core.ID, state *merkletree.Hash, treeLevels int) *merkletree.MerkleTree {
 	ctx := context.Background()
-	smt, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 32)
+	smt, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), treeLevels)
 	ExitOnError(err)
 	err = smt.Add(ctx, identifier.BigInt(), state.BigInt())
 	ExitOnError(err)
@@ -252,11 +253,10 @@ func MarshalIndent(v interface{}, prefix, indent string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// this is a modified copy from the json package of stdlib
+// this is a modified method from the json package of stdlib
 // it does not print newlines after each item in an array
 // this is to make the output more readable and with much less vertical size
 func Indent(dst *bytes.Buffer, src []byte, prefix, indent string) error {
-	needIndent := false
 	needNewLine := true
 	depth := 0
 	for _, c := range src {
@@ -264,12 +264,14 @@ func Indent(dst *bytes.Buffer, src []byte, prefix, indent string) error {
 		// Add spacing around real punctuation.
 		switch c {
 		case '{':
-			// delay indent so that empty object and array are formatted as {} and [].
-			needIndent = true
 			dst.WriteByte(c)
+			depth++
+			newline(dst, prefix, indent, depth)
+
 		case '[':
-			needNewLine = false
 			dst.WriteByte(c)
+			needNewLine = false
+
 		case ',':
 			dst.WriteByte(c)
 			if needNewLine {
@@ -281,17 +283,14 @@ func Indent(dst *bytes.Buffer, src []byte, prefix, indent string) error {
 			dst.WriteByte(' ')
 
 		case '}':
-			if needIndent {
-				// suppress indent in empty object/array
-				needIndent = false
-			} else {
-				depth--
-				newline(dst, prefix, indent, depth)
-			}
+			depth--
+			newline(dst, prefix, indent, depth)
 			dst.WriteByte(c)
+
 		case ']':
 			needNewLine = true
 			dst.WriteByte(c)
+
 		default:
 			dst.WriteByte(c)
 		}
