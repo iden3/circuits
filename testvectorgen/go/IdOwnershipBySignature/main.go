@@ -180,7 +180,7 @@ func main() {
 			if isUserStateGenesis {
 				testVector["userStateInOnChainSmtMtpNoAux"] = "1"
 			} else {
-				testVector["userStateInOnChainSmtMtpNoAux"] = "0" // need 0 for circuit inputs in any case, because we proof inclusion
+				testVector["userStateInOnChainSmtMtpNoAux"] = "0" // need 0 for circuit inputs in any case, because we prove inclusion
 			}
 			testVector["userStateInOnChainSmtMtpAuxHi"] = "0"
 			testVector["userStateInOnChainSmtMtpAuxHv"] = "0"
