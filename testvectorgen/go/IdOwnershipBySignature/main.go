@@ -31,7 +31,7 @@ func main() {
 
 	useOnChainSmt := true
 	onChainSmtTreeLevels := 32
-	isUserStateGenesis := false
+	isUserStateGenesis := true
 
 	//todo If useOldAndNewStateForChallenge = true then an input for stateTransition circuit is generated
 	// It has correct values but wrong names, which is something that is better to fix
@@ -156,24 +156,24 @@ func main() {
 	testVector["challengeSignatureS"] = decompressedSig.S.String()
 
 	if useOnChainSmt {
-		var onChainSMT *merkletree.MerkleTree
+		var onChainSmt *merkletree.MerkleTree
 		if isUserStateGenesis {
-			onChainSMT, err = merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 32)
+			onChainSmt, err = merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 32)
 			utils.ExitOnError(err)
 		} else {
-			onChainSMT = utils.GenerateOnChainSmtWithIdState(identifier, userState, onChainSmtTreeLevels)
+			onChainSmt = utils.GenerateOnChainSmtWithIdState(identifier, userState, onChainSmtTreeLevels)
 		}
 
-		//this is just to emulate that some data already exists in the tree
-		err = onChainSMT.Add(ctx, big.NewInt(2), big.NewInt(100))
+		//this is just to emulate that some other leaves exist in the tree
+		err = onChainSmt.Add(ctx, big.NewInt(2), big.NewInt(100))
 		utils.ExitOnError(err)
-		err = onChainSMT.Add(ctx, big.NewInt(4), big.NewInt(300))
-		utils.ExitOnError(err)
-
-		proofIdentityInSmt, _, err := onChainSMT.GenerateProof(ctx, identifier.BigInt(), nil)
+		err = onChainSmt.Add(ctx, big.NewInt(4), big.NewInt(300))
 		utils.ExitOnError(err)
 
-		testVector["userStateInOnChainSmtRoot"] = onChainSMT.Root().BigInt().String()
+		proofIdentityInSmt, _, err := onChainSmt.GenerateProof(ctx, identifier.BigInt(), nil)
+		utils.ExitOnError(err)
+
+		testVector["userStateInOnChainSmtRoot"] = onChainSmt.Root().BigInt().String()
 		testVector["userStateInOnChainSmtMtp"] = utils.PadSiblingsToTreeLevels(proofIdentityInSmt.AllSiblings(), onChainSmtTreeLevels)
 
 		if proofIdentityInSmt.NodeAux == nil {
@@ -191,9 +191,9 @@ func main() {
 		}
 
 		correlationID := big.NewInt(123456789)
-		nh := utils.GenerateNullifierHash(authClaims[signingKeyIndex], correlationID)
-		testVector["verifierCorrelationID"] = correlationID.String()
-		testVector["nullifierHash"] = nh.String()
+		nullifier := utils.GenerateNullifier(authClaims[signingKeyIndex], correlationID)
+		testVector["correlationID"] = correlationID.String()
+		testVector["nullifier"] = nullifier.String()
 	}
 
 	fmt.Println()

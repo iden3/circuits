@@ -147,11 +147,11 @@ func GenerateOnChainSmtWithIdState(identifier *core.ID, state *merkletree.Hash, 
 	return smt
 }
 
-func GenerateNullifierHash(claim *core.Claim, correlationID *big.Int) *big.Int {
+func GenerateNullifier(claim *core.Claim, correlationID *big.Int) *big.Int {
 	slots := claim.RawSlotsAsInts()
-	hash, err := poseidon.Hash([]*big.Int{correlationID, slots[2], slots[3]})
+	nullifier, err := poseidon.Hash([]*big.Int{correlationID, slots[2], slots[3]})
 	ExitOnError(err)
-	return hash
+	return nullifier
 }
 
 func ExtractPubXY(privKHex string) (key *babyjub.PrivateKey, x, y *big.Int) {

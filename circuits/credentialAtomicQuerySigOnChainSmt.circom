@@ -3,8 +3,8 @@ pragma circom 2.0.0;
 include "lib/query/credentialAtomicQuerySigOnChainSmt.circom";
 
 component main{public [challenge,
-                        verifierCorrelationID,
-                        nullifierHash,
+                        correlationID,
+                        nullifier,
                         issuerID,
                         issuerClaimNonRevState,
                         claimSchema,
