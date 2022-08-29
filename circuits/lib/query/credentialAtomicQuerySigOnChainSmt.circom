@@ -39,8 +39,8 @@ template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnC
     signal input userStateInOnChainSmtMtpNoAux;
 
     /* Nullifier inputs */
-    signal input correlationID;
-    signal input nullifier;
+    signal input userCorrelationID;
+    signal input userNullifier;
 
     /* userID ownership signals */
     signal input userID;
@@ -142,8 +142,8 @@ template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnC
     userIdOwnership.userStateInOnChainSmtMtpAuxHv <== userStateInOnChainSmtMtpAuxHv;
     userIdOwnership.userStateInOnChainSmtMtpNoAux <== userStateInOnChainSmtMtpNoAux;
 
-    userIdOwnership.correlationID <== correlationID;
-    userIdOwnership.nullifier <== nullifier;
+    userIdOwnership.userCorrelationID <== userCorrelationID;
+    userIdOwnership.userNullifier <== userNullifier;
 
 
     // Check issuerClaim is issued to provided identity

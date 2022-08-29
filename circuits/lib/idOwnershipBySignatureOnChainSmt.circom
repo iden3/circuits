@@ -38,8 +38,8 @@ template IdOwnershipBySignatureOnChainSmt(nLevels, onChainLevels) {
     signal input userStateInOnChainSmtMtpAuxHv;
     signal input userStateInOnChainSmtMtpNoAux;
 
-    signal input correlationID;
-    signal input nullifier;
+    signal input userCorrelationID;
+    signal input userNullifier;
 
     component verifyAuthClaim = VerifyAuthClaimAndSignature(nLevels);
     for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== userAuthClaim[i]; }
@@ -87,8 +87,8 @@ template IdOwnershipBySignatureOnChainSmt(nLevels, onChainLevels) {
     /* Nullifier calculation */
     component checkNullifier = checkNullifier();
     for (var i=0; i<8; i++){ checkNullifier.claim[i] <== userAuthClaim[i]; }
-    checkNullifier.correlationID <== correlationID;
-    checkNullifier.nullifier <== nullifier;
+    checkNullifier.correlationID <== userCorrelationID;
+    checkNullifier.nullifier <== userNullifier;
 }
 
 template checkNullifier() {

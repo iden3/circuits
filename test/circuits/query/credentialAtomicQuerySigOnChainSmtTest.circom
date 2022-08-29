@@ -2,9 +2,10 @@ pragma circom 2.0.0;
 
 include "../../../circuits/lib/query/credentialAtomicQuerySigOnChainSmt.circom";
 
-component main{public [challenge,
-                        correlationID,
-                        nullifier,
+component main{public [userStateInOnChainSmtRoot,
+                        userCorrelationID,
+                        userNullifier,
+                        challenge,
                         issuerID,
                         issuerClaimNonRevState,
                         claimSchema,
