@@ -25,8 +25,6 @@ func main() {
 	inputs := make(map[string]interface{})
 	ctx := context.Background()
 
-	useRelay := true
-
 	privKeyHex := "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69f"
 	var privKey babyjub.PrivateKey
 	if _, err := hex.Decode(privKey[:], []byte(privKeyHex)); err != nil {
@@ -99,18 +97,6 @@ func main() {
 	inputs["challengeSignatureS"] = decompressedSig.S.String()
 
 	utils.PrintMap(inputs)
-
-	if useRelay {
-		userStateInRelayClaim, relayState, relayClaimsTree, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim(
-			"9db637b457c284e844e58955c54cd8e67d989b72ed4b56411eabbeb775fb853a", identifier, currentState)
-
-		fmt.Println("\nrelayState:", relayState.BigInt())
-		utils.PrintSiblings("userStateInRelayClaimMtp:", proofIdenStateInRelay.AllSiblings())
-		utils.PrintClaim("userStateInRelayClaim:", userStateInRelayClaim)
-		fmt.Println("relayProofValidClaimsTreeRoot:", relayClaimsTree.BigInt())
-		fmt.Println("relayProofValidRevTreeRoot: 0")
-		fmt.Println("relayProofValidRootsTreeRoot: 0")
-	}
 }
 
 func createIdentityMultiAuthClaims(

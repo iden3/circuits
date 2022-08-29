@@ -15,34 +15,20 @@ import (
 
 func main() {
 
-	// Generate inputs for credentialAtomicQueryMTPWithRelay.circom and credentialAtomicQueryMTP.circom
+	// Generate inputs for credentialAtomicQueryMTP.circom
 	attributeQuery()
 }
 
 func attributeQuery() {
 	fmt.Println("\n-------\ntest vectors for credentialAtomicQuery:")
 	userPrivKHex := "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69f"
-	relayPrivKHex := "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c40000"
 	issuerPrivKHex := "21a5e7321d0e2f3ca1cc6504396e6594a2211544b08c206847cdee96f832421a"
 	challenge := new(big.Int).SetInt64(12345)
 
 	ctx := context.Background()
 
 	// User
-	userIdentity, userClaimsTree, userInputs := utils.GenerateIdentity(ctx, userPrivKHex, challenge)
-
-	// Relay
-	userState, _ := utils.CalcIdentityStateFromRoots(userClaimsTree)
-
-	idenStateInRelayClaim, reIdenState, relayClaimsTreeRoot, proofIdenStateInRelay := utils.GenerateRelayWithIdenStateClaim(
-		relayPrivKHex, userIdentity, userState)
-
-	fmt.Println("\nreIdenState", reIdenState.BigInt())
-	utils.PrintSiblings("hoStateInRelayClaimMtp:", proofIdenStateInRelay.AllSiblings())
-	utils.PrintClaim("hoStateInRelayClaim:", idenStateInRelayClaim)
-	fmt.Println("reProofValidClaimsTreeRoot:", relayClaimsTreeRoot.BigInt())
-	fmt.Println("reProofValidRevTreeRoot: 0")
-	fmt.Println("reProofValidRootsTreeRoot: 0")
+	userIdentity, _, userInputs := utils.GenerateIdentity(ctx, userPrivKHex, challenge)
 
 	// Issuer
 	_, issuerClaimsTree, issuerInputs := utils.GenerateIdentity(ctx, issuerPrivKHex, challenge)

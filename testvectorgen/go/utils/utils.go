@@ -115,29 +115,6 @@ func CalcIdentityStateFromRoots(claimsTree *merkletree.MerkleTree, optTrees ...*
 	return state, err
 }
 
-func GenerateRelayWithIdenStateClaim(relayPrivKey string, identifier *core.ID, idenState *merkletree.Hash) (*core.Claim, *merkletree.Hash, *merkletree.Hash, *merkletree.Proof) {
-	ctx := context.Background()
-	_, relayClaimsTree, _ := GenerateIdentity(ctx, relayPrivKey, big.NewInt(0))
-
-	valueSlotA, _ := core.NewElemBytesFromInt(idenState.BigInt())
-	var schemaHash core.SchemaHash
-	schemaEncodedBytes, _ := hex.DecodeString("e22dd9c0f7aef15788c130d4d86c7156")
-	copy(schemaHash[:], schemaEncodedBytes)
-	claim, err := core.NewClaim(
-		schemaHash,
-		core.WithIndexID(*identifier),
-		core.WithValueData(valueSlotA, core.ElemBytes{}),
-	)
-	ExitOnError(err)
-
-	proofIdentityIsRelayed, err := AddClaimToTree(relayClaimsTree, claim)
-	ExitOnError(err)
-	relayState, err := CalcIdentityStateFromRoots(relayClaimsTree)
-	ExitOnError(err)
-
-	return claim, relayState, relayClaimsTree.Root(), proofIdentityIsRelayed
-}
-
 func GenerateOnChainSmtWithIdState(identifier *core.ID, state *merkletree.Hash, treeLevels int) *merkletree.MerkleTree {
 	ctx := context.Background()
 	smt, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), treeLevels)
