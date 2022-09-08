@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rm -fR dist",
     "build": "npm run clean && ./node_modules/.bin/tsc --strictNullChecks",
-    "test": "./node_modules/.bin/mocha -p -r ts-node/register 'test/**/*.test.ts'"
+    "test": "./node_modules/.bin/mocha -r ts-node/register 'test/**/*.test.ts'"
   },
   "license": "GPL-3.0",
   "dependencies": {

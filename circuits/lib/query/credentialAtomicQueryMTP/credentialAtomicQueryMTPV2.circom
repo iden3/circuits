@@ -2,6 +2,7 @@ pragma circom 2.0.0;
 include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
+include "../../../node_modules/circomlib/circuits/poseidon.circom";
 include "comparators.circom";
 include "../idOwnershipBySignature.circom";
 include "query.circom";
@@ -80,6 +81,7 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     signal input slotIndex;
     signal input operator;
     signal input value[valueArraySize];
+    signal output valueHash;
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -149,8 +151,28 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     component q = Query(valueArraySize);
     q.in <== getClaimValue.value;
     q.operator <== operator;
-    for(var i = 0; i<valueArraySize; i++){q.value[i] <== value[i];}
+    for(var i = 0; i < valueArraySize; i++) { q.value[i] <== value[i];}
 
+    // Begin Poseidon Hash
+    var maxPoseidonMaxParamSize = valueArraySize > 15 ? 15 : valueArraySize;
+    var poseidonValueArraySize = (valueArraySize - (valueArraySize % maxPoseidonMaxParamSize)) / maxPoseidonMaxParamSize;
+    component fullHash = Poseidon(poseidonValueArraySize); 
+    component partialHash[poseidonValueArraySize]; 
+    var lastIndex = poseidonValueArraySize - 1;
+    for(var i = 0; i < poseidonValueArraySize; i++) {
+        var size = 0;
+        if(i == lastIndex) {
+            size = valueArraySize % maxPoseidonMaxParamSize;
+        } else {
+            size = maxPoseidonMaxParamSize;
+        }
+        partialHash[i] = Poseidon(size);  
+        for(var j = 0; j < size; j++) {
+            partialHash[i].inputs[j] <== value[i*size + j];
+        }     
+        fullHash.inputs[i] <== partialHash[i].out;   
+    }
+    valueHash <== fullHash.out;
+    // End Poseidon Hash
     q.out === 1;
-
 }
