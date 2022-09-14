@@ -9,7 +9,7 @@ include "query.circom";
 
 
 /**
-credentialAtomicQueryMTP.circom - query issuerClaim value and verify issuerClaim MTP
+credentialAtomicQueryMTPV2.circom - query issuerClaim value and verify issuerClaim MTP
 
 checks:
 - identity ownership
@@ -22,11 +22,10 @@ checks:
 
 IdOwnershipLevels - Merkle tree depth level for personal claims
 IssuerLevels - Merkle tree depth level for claims issued by the issuer
-valueLevels - Number of elements in comparison array for in/notin operation if level =3 number of values for
 comparison ["1", "2", "3"]
 
 */
-template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySize) {
+template CredentialAtomicQueryMTPV2(IdOwnershipLevels, IssuerLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -153,22 +152,28 @@ template CredentialAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, valueArraySiz
     q.operator <== operator;
     for(var i = 0; i < valueArraySize; i++) { q.value[i] <== value[i];}
 
-    // Begin Poseidon Hash
-    var maxPoseidonMaxParamSize = valueArraySize > 15 ? 15 : valueArraySize;
-    var poseidonValueArraySize = (valueArraySize - (valueArraySize % maxPoseidonMaxParamSize)) / maxPoseidonMaxParamSize;
-    component fullHash = Poseidon(poseidonValueArraySize); 
-    component partialHash[poseidonValueArraySize]; 
-    var lastIndex = poseidonValueArraySize - 1;
-    for(var i = 0; i < poseidonValueArraySize; i++) {
-        var size = 0;
-        if(i == lastIndex) {
-            size = valueArraySize % maxPoseidonMaxParamSize;
-        } else {
-            size = maxPoseidonMaxParamSize;
+    // Begin Poseidon Hash: max input size is 16
+    // Cout of perameters per partial poseidon hash function
+    var poseidonParamCount = valueArraySize > 16 ? 16 : valueArraySize;
+    // Length of partial poseidon hash functions array
+    var partialHashLength = valueArraySize > 16 ? (valueArraySize - (valueArraySize % poseidonParamCount)) / poseidonParamCount : 1;
+    // in case values has valueArraySize % 16 != 0 we need to add one more iteration
+    partialHashLength = valueArraySize > 16 && (valueArraySize % poseidonParamCount) != 0 ? partialHashLength + 1 : partialHashLength;
+
+    component fullHash = Poseidon(partialHashLength); 
+    component partialHash[partialHashLength]; 
+
+    var lastIndex = partialHashLength - 1;
+    for(var i = 0; i < partialHashLength; i++) {
+         var paramsCount = poseidonParamCount;
+        if(lastIndex == i){
+            if(valueArraySize % poseidonParamCount != 0){
+                paramsCount = valueArraySize % poseidonParamCount;
+            }
         }
-        partialHash[i] = Poseidon(size);  
-        for(var j = 0; j < size; j++) {
-            partialHash[i].inputs[j] <== value[i*size + j];
+        partialHash[i] = Poseidon(paramsCount);  
+        for(var j = 0; j < paramsCount; j++) {
+            partialHash[i].inputs[j] <== value[i*poseidonParamCount + j];
         }     
         fullHash.inputs[i] <== partialHash[i].out;   
     }

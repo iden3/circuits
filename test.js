@@ -1,34 +1,38 @@
 // Begin Poseidon Hash
 
 
-function calcHash(valueArraySize, arr, maxPoseidonMaxParamSize = 16) {
-    const poseidonValueArraySize = (valueArraySize - (valueArraySize % maxPoseidonMaxParamSize)) / maxPoseidonMaxParamSize;
+function calcHash(valueArraySize, arr, poseidonParamCount = 16) {
+    console.log("valueArraySize: ", valueArraySize, arr.length);
+    poseidonParamCount = valueArraySize > 16 ? 16 : valueArraySize;
+    console.log("poseidonParamCount", poseidonParamCount);
+    let partialHashLength = valueArraySize > 16 ? (valueArraySize - (valueArraySize % poseidonParamCount)) / poseidonParamCount : 1;
+    console.log("partialHashLength", partialHashLength);
+    partialHashLength = valueArraySize > 16 && (valueArraySize % poseidonParamCount) != 0 ? partialHashLength + 1 : partialHashLength;
     let valueHash = [];
     const getHash = (arr) => {
         return arr.reduce((a, b) => a + b, 0);
     };
     const partialHash = [];
-    const lastIndex = poseidonValueArraySize - 1;
-    for (var i = 0; i < poseidonValueArraySize; i++) {
-        var size = 0;
-        if (i == lastIndex) {
-            size = valueArraySize % maxPoseidonMaxParamSize;
-        } else {
-            size = maxPoseidonMaxParamSize;
+    const lastIndex = partialHashLength - 1;
+    for (var i = 0; i < partialHashLength; i++) {
+        let paramsCount = poseidonParamCount;
+        if (lastIndex == i) {
+            if (valueArraySize % poseidonParamCount != 0) {
+                paramsCount = valueArraySize % poseidonParamCount;
+                console.log("last index call", lastIndex);
+            }
         }
-        console.log("i", i, "size", size);
+        console.log("iteration", i, "paramsCount", paramsCount)
         partialHash[i] = [];
-        for (var j = 0; j < size; j++) {
-            partialHash[i].push(arr[i * size + j]);
+        for (var j = 0; j < paramsCount; j++) {
+            partialHash[i].push(arr[i * poseidonParamCount + j]);
+            console.log("value Index", i * poseidonParamCount + j);
         }
         valueHash.push(getHash(partialHash[i]));
     }
-    console.log(partialHash);
-    console.log(valueHash);
     return getHash(valueHash);
-
 }
 
-const arrSize = 65
+const arrSize = 6
 const arr = new Array(arrSize).fill('').map((i, idx) => idx);
-console.log(calcHash(arrSize, arr, 12));
+console.log(calcHash(arrSize, arr, 16));
