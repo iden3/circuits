@@ -39,7 +39,7 @@ template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnC
     signal input userStateInOnChainSmtMtpNoAux;
 
     /* Nullifier inputs */
-    signal input userCorrelationID;
+    signal input userSalt;
     signal input userNullifier;
 
     /* userID ownership signals */
@@ -142,7 +142,7 @@ template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnC
     userIdOwnership.userStateInOnChainSmtMtpAuxHv <== userStateInOnChainSmtMtpAuxHv;
     userIdOwnership.userStateInOnChainSmtMtpNoAux <== userStateInOnChainSmtMtpNoAux;
 
-    userIdOwnership.userCorrelationID <== userCorrelationID;
+    userIdOwnership.userSalt <== userSalt;
     userIdOwnership.userNullifier <== userNullifier;
 
 

@@ -124,9 +124,8 @@ func GenerateOnChainSmtWithIdState(identifier *core.ID, state *merkletree.Hash, 
 	return smt
 }
 
-func GenerateNullifier(claim *core.Claim, correlationID *big.Int) *big.Int {
-	slots := claim.RawSlotsAsInts()
-	nullifier, err := poseidon.Hash([]*big.Int{correlationID, slots[2], slots[3]})
+func GenerateNullifier(userID *core.ID, salt *big.Int) *big.Int {
+	nullifier, err := poseidon.Hash([]*big.Int{userID.BigInt(), salt})
 	ExitOnError(err)
 	return nullifier
 }

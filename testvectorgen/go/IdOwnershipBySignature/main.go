@@ -190,10 +190,10 @@ func main() {
 			testVector["userStateInOnChainSmtMtpAuxHv"] = proofIdentityInSmt.NodeAux.Value.BigInt().String()
 		}
 
-		correlationID := big.NewInt(123456789)
-		nullifier := utils.GenerateNullifier(authClaims[signingKeyIndex], correlationID)
-		testVector["correlationID"] = correlationID.String()
-		testVector["nullifier"] = nullifier.String()
+		salt := big.NewInt(123456789)
+		nullifier := utils.GenerateNullifier(identifier, salt)
+		testVector["userSalt"] = salt.String()
+		testVector["userNullifier"] = nullifier.String()
 	}
 
 	fmt.Println()

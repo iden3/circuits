@@ -38,7 +38,7 @@ template IdOwnershipBySignatureOnChainSmt(nLevels, onChainLevels) {
     signal input userStateInOnChainSmtMtpAuxHv;
     signal input userStateInOnChainSmtMtpNoAux;
 
-    signal input userCorrelationID;
+    signal input userSalt;
     signal input userNullifier;
 
     component verifyAuthClaim = VerifyAuthClaimAndSignature(nLevels);
@@ -84,25 +84,9 @@ template IdOwnershipBySignatureOnChainSmt(nLevels, onChainLevels) {
     onChainSmtInclusion.key <== userID;
     onChainSmtInclusion.value <== userState;
 
-    /* Nullifier calculation */
-    component checkNullifier = checkNullifier();
-    for (var i=0; i<8; i++){ checkNullifier.claim[i] <== userAuthClaim[i]; }
-    checkNullifier.correlationID <== userCorrelationID;
-    checkNullifier.nullifier <== userNullifier;
-}
-
-template checkNullifier() {
-    signal input claim[8];
-    signal input correlationID;
-    signal input nullifier;
-
-    component getPubKey = getPubKeyFromClaim();
-    for (var i=0; i<8; i++){ getPubKey.claim[i] <== claim[i]; }
-
-    component poseidon = Poseidon(3);
-    poseidon.inputs[0] <== correlationID;
-    poseidon.inputs[1] <== getPubKey.Ax;
-    poseidon.inputs[2] <== getPubKey.Ay;
-
-    poseidon.out === nullifier;
+    /* Nullifier check */
+    component poseidon = Poseidon(2);
+    poseidon.inputs[0] <== userID;
+    poseidon.inputs[1] <== userSalt;
+    poseidon.out === userNullifier;
 }
