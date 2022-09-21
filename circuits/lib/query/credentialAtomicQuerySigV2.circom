@@ -2,7 +2,6 @@ pragma circom 2.0.0;
 include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
-include "../../../node_modules/circomlib/circuits/poseidon.circom";
 include "comparators.circom";
 include "../idOwnershipBySignature.circom";
 include "query.circom";
@@ -10,7 +9,7 @@ include "../utils/poseidon.util.circom";
 
 
 /**
-credentialAtomicQueryMTPV2.circom - query issuerClaim value and verify issuerClaim MTP
+credentialAtomicQuerySig.circom - query claim value and verify claim issuer signature:
 
 checks:
 - identity ownership
@@ -18,15 +17,16 @@ checks:
 - claim schema
 - claim ownership and issuance state
 - claim non revocation state
-- claim expiration ?
+- claim expiration
 - query data slots
 
 IdOwnershipLevels - Merkle tree depth level for personal claims
 IssuerLevels - Merkle tree depth level for claims issued by the issuer
+valueArraySize - Number of elements in comparison array for in/notin operation if level = 3 number of values for
 comparison ["1", "2", "3"]
 
 */
-template CredentialAtomicQueryMTPV2(IdOwnershipLevels, IssuerLevels, valueArraySize) {
+template CredentialAtomicQuerySigV2(IdOwnershipLevels, IssuerLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -55,13 +55,29 @@ template CredentialAtomicQueryMTPV2(IdOwnershipLevels, IssuerLevels, valueArrayS
     signal input challengeSignatureS;
 
     /* issuerClaim signals */
+
     signal input issuerClaim[8];
-    signal input issuerClaimMtp[IssuerLevels];
-    signal input issuerClaimClaimsTreeRoot;
-    signal input issuerClaimRevTreeRoot;
-    signal input issuerClaimRootsTreeRoot;
-    signal input issuerClaimIdenState;
+    
+    // issuerClaim signature
+    signal input issuerClaimSignatureR8x;
+    signal input issuerClaimSignatureR8y;
+    signal input issuerClaimSignatureS;
+
+    // issuer state
     signal input issuerID;
+
+    signal input issuerAuthClaim[8];
+    signal input issuerAuthClaimMtp[IssuerLevels];
+    // issuer auth claim non rev proof
+    signal input issuerAuthClaimNonRevMtp[IdOwnershipLevels];
+    signal input issuerAuthClaimNonRevMtpNoAux;
+    signal input issuerAuthClaimNonRevMtpAuxHi;
+    signal input issuerAuthClaimNonRevMtpAuxHv;
+
+    signal input issuerAuthClaimsTreeRoot;
+    signal input issuerAuthRevTreeRoot;
+    signal input issuerAuthRootsTreeRoot;
+    signal output issuerAuthState;
 
     // issuerClaim non rev inputs
     signal input issuerClaimNonRevMtp[IssuerLevels];
@@ -92,7 +108,7 @@ template CredentialAtomicQueryMTPV2(IdOwnershipLevels, IssuerLevels, valueArrayS
 
     userIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot; // currentHolderStateClaimsTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
-    for (var i=0; i<8; i++) { userIdOwnership.userAuthClaim[i] <==userAuthClaim[i]; }
+    for (var i=0; i<8; i++) { userIdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
 
     userIdOwnership.userRevTreeRoot <== userRevTreeRoot;  // currentHolderStateClaimsRevTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
@@ -109,24 +125,6 @@ template CredentialAtomicQueryMTPV2(IdOwnershipLevels, IssuerLevels, valueArrayS
 
     userIdOwnership.userState <== userState;
 
-    // verify issuerClaim issued and not revoked
-    component vci = verifyClaimIssuanceNonRev(IssuerLevels);
-    for (var i=0; i<8; i++) { vci.claim[i] <== issuerClaim[i]; }
-    for (var i=0; i<IssuerLevels; i++) { vci.claimIssuanceMtp[i] <== issuerClaimMtp[i]; }
-    vci.claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot;
-    vci.claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot;
-    vci.claimIssuanceRootsTreeRoot <== issuerClaimRootsTreeRoot;
-    vci.claimIssuanceIdenState <== issuerClaimIdenState;
-
-    // non revocation status
-    for (var i=0; i<IssuerLevels; i++) { vci.claimNonRevMtp[i] <== issuerClaimNonRevMtp[i]; }
-    vci.claimNonRevMtpNoAux <== issuerClaimNonRevMtpNoAux;
-    vci.claimNonRevMtpAuxHi <== issuerClaimNonRevMtpAuxHi;
-    vci.claimNonRevMtpAuxHv <== issuerClaimNonRevMtpAuxHv;
-    vci.claimNonRevIssuerClaimsTreeRoot <== issuerClaimNonRevClaimsTreeRoot;
-    vci.claimNonRevIssuerRevTreeRoot <== issuerClaimNonRevRevTreeRoot;
-    vci.claimNonRevIssuerRootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
-    vci.claimNonRevIssuerState <== issuerClaimNonRevState;
 
     // Check issuerClaim is issued to provided identity
     component claimIdCheck = verifyCredentialSubject();
@@ -143,7 +141,71 @@ template CredentialAtomicQueryMTPV2(IdOwnershipLevels, IssuerLevels, valueArrayS
     for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
     claimExpirationCheck.timestamp <== timestamp;
 
-    // Query
+
+    var AUTH_SCHEMA_HASH  = 304427537360709784173770334266246861770;
+    component issuerSchemaCheck = verifyCredentialSchema();
+    for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
+    issuerSchemaCheck.schema <== AUTH_SCHEMA_HASH;
+    // verify authClaim issued and not revoked
+    // calculate issuerAuthState
+    component issuerAuthStateComponent = getIdenState();
+    issuerAuthStateComponent.claimsTreeRoot <== issuerAuthClaimsTreeRoot;
+    issuerAuthStateComponent.revTreeRoot <== issuerAuthRevTreeRoot;
+    issuerAuthStateComponent.rootsTreeRoot <== issuerAuthRootsTreeRoot;
+
+    issuerAuthState <== issuerAuthStateComponent.idenState;
+
+
+    // issuerAuthClaim proof of existence (isProofExist)
+    //
+    component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);
+    for (var i=0; i<8; i++) { smtIssuerAuthClaimExists.claim[i] <== issuerAuthClaim[i]; }
+    for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.claimMTP[i] <== issuerAuthClaimMtp[i]; }
+    smtIssuerAuthClaimExists.treeRoot <== issuerAuthClaimsTreeRoot;
+
+    // issuerAuthClaim proof of non-revocation
+    //
+    component verifyIssuerAuthClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyIssuerAuthClaimNotRevoked.claim[i] <== issuerAuthClaim[i]; }
+    for (var i=0; i<IssuerLevels; i++) {
+        verifyIssuerAuthClaimNotRevoked.claimNonRevMTP[i] <== issuerAuthClaimNonRevMtp[i];
+    }
+    verifyIssuerAuthClaimNotRevoked.noAux <== issuerAuthClaimNonRevMtpNoAux;
+    verifyIssuerAuthClaimNotRevoked.auxHi <== issuerAuthClaimNonRevMtpAuxHi;
+    verifyIssuerAuthClaimNotRevoked.auxHv <== issuerAuthClaimNonRevMtpAuxHv;
+    verifyIssuerAuthClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
+
+    component issuerAuthPubKey = getPubKeyFromClaim();
+    for (var i=0; i<8; i++){ issuerAuthPubKey.claim[i] <== issuerAuthClaim[i]; }
+
+    // issuerClaim  check signature
+    component verifyClaimSig = verifyClaimSignature();
+    for (var i=0; i<8; i++) { verifyClaimSig.claim[i] <== issuerClaim[i]; }
+    verifyClaimSig.sigR8x <== issuerClaimSignatureR8x;
+    verifyClaimSig.sigR8y <== issuerClaimSignatureR8y;
+    verifyClaimSig.sigS <== issuerClaimSignatureS;
+    verifyClaimSig.pubKeyX <== issuerAuthPubKey.Ax;
+    verifyClaimSig.pubKeyY <== issuerAuthPubKey.Ay;
+
+    // verify issuer state includes issuerClaim
+    component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();
+    verifyClaimIssuanceIdenState.claimsTreeRoot <== issuerClaimNonRevClaimsTreeRoot;
+    verifyClaimIssuanceIdenState.revTreeRoot <== issuerClaimNonRevRevTreeRoot;
+    verifyClaimIssuanceIdenState.rootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
+    verifyClaimIssuanceIdenState.expectedState <== issuerClaimNonRevState;
+
+    // non revocation status
+    component verifyClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== issuerClaim[i]; }
+    for (var i=0; i<IssuerLevels; i++) {
+        verifyClaimNotRevoked.claimNonRevMTP[i] <== issuerClaimNonRevMtp[i];
+    }
+    verifyClaimNotRevoked.noAux <== issuerClaimNonRevMtpNoAux;
+    verifyClaimNotRevoked.auxHi <== issuerClaimNonRevMtpAuxHi;
+    verifyClaimNotRevoked.auxHv <== issuerClaimNonRevMtpAuxHv;
+    verifyClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
+
+    // query
     component getClaimValue = getValueByIndex();
     for (var i=0; i<8; i++) { getClaimValue.claim[i] <== issuerClaim[i]; }
     getClaimValue.index <== slotIndex;

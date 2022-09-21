@@ -133,5 +133,37 @@ describe("poseidon test", function () {
         assert.equal(jsOut, "11882816200654282475720830292386643970958445617880627439994635298904836126497", "not equal");
         //assert(poseidon.F.eq(poseidon.F.e("0x11882816200654282475720830292386643970958445617880627439994635298904836126497"), jsOut));
     });
+
+    it("Test poseidon utils using hash for 64 inputs", async () => {
+        const circuit = await tester(
+          path.join(__dirname, "circuits", "poseidon64.circom"),
+          { reduceConstraints: false }
+        );
+    
+        let witness = await circuit.calculateWitness({
+            in: new Array(64).fill(0),
+        });
+        await circuit.checkConstraints(witness);
+        await circuit.assertOut(witness, {
+          out: "172461450423098299779558585913272526184491409754318143466636740798721781531",
+        });
+    
+        witness = await circuit.calculateWitness({
+          in: new Array(64).fill(0).map((_, i) => i + 1),
+        });
+        await circuit.checkConstraints(witness);
+        await circuit.assertOut(witness, {
+          out: "18173841470118503158619573020092343043385785229652304338844607185225534139846",
+        });
+    
+        // check with different inputs
+        witness = await circuit.calculateWitness({
+          in: new Array(64).fill(0).map((_, i) => 64 - i),
+        });
+        await circuit.checkConstraints(witness);
+        await circuit.assertOut(witness, {
+          out: "10381411498701876887882094520133801282308319455700664666280480650283799862086",
+        });
+      });
 });
 

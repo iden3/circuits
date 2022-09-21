@@ -2,13 +2,8 @@ import { describe } from "mocha";
 
 const path = require("path");
 const wasm_tester = require("circom_tester").wasm;
-const chai = require("chai");
-const assert = chai.assert;
-const fs = require("fs");
 
-export {};
-
-describe("Test credential atomic query V2", function () {
+describe("Test credential atomic query MTP V2", function () {
   this.timeout(600000);
 
   let circuit;
@@ -300,7 +295,7 @@ describe("Test credential atomic query V2", function () {
     };
     const expOut = {
       valueHash:
-        "10753515414730943898717882202276263464243999024855806490617783734307917146582",
+        "4044782888831183712183347620047737367287592968870057422868359686203789801751",
       challenge: "583091486781463398742321306787801699791102451699",
       userID:
         "379949150130214723420589610911161895495647789006649785264738141299135414272",
@@ -318,9 +313,7 @@ describe("Test credential atomic query V2", function () {
         "26599707002460144379092755370384635496563807452878989192352627271768342528",
     };
     const w = await circuit.calculateWitness(inputs, true);
-    // console.log(w);
 
-    fs.writeFileSync("witness.json", JSON.stringify(w, null, 2));
     await circuit.checkConstraints(w);
     await circuit.assertOut(w, expOut);
   });
