@@ -3,7 +3,7 @@ include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "comparators.circom";
-include "../idOwnershipBySignatureOnChainSmt.circom";
+include "../authenticationOnChainSmt.circom";
 include "query.circom";
 
 
@@ -114,7 +114,7 @@ template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnC
     */
 
     /* Id ownership check*/
-    component userIdOwnership = IdOwnershipBySignatureOnChainSmt(IdOwnershipLevels, OnChainSmtLevels);
+    component userIdOwnership = VerifyAuthenticationOnChainSmt(IdOwnershipLevels, OnChainSmtLevels);
 
     userIdOwnership.userID <== userID;
     userIdOwnership.userState <== userState;

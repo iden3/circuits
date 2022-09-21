@@ -1,28 +1,20 @@
-/*
-# idOwnershipBySignature.circom
-
-Circuit to check that the prover is the owner of the identity
-- prover is owner of the private key
-- prover public key is in a ClaimKeyBBJJ that is inside its Identity State (in Claim tree)
-*/
-
 pragma circom 2.0.0;
 
-include "utils/claimUtils.circom";
-include "utils/treeUtils.circom";
+include "authentication.circom";
 
-template IdOwnershipBySignatureOnChainSmt(nLevels, onChainLevels) {
+template VerifyAuthenticationOnChainSmt(IdOwnershipLevels, onChainLevels) {
+
     signal input userID;
     signal input userState;
     signal input userSalt;
     signal output userNullifier;
 
 	signal input userClaimsTreeRoot;
-	signal input userAuthClaimMtp[nLevels];
+	signal input userAuthClaimMtp[IdOwnershipLevels];
 	signal input userAuthClaim[8];
 
 	signal input userRevTreeRoot;
-    signal input userAuthClaimNonRevMtp[nLevels];
+    signal input userAuthClaimNonRevMtp[IdOwnershipLevels];
     signal input userAuthClaimNonRevMtpNoAux;
     signal input userAuthClaimNonRevMtpAuxHi;
     signal input userAuthClaimNonRevMtpAuxHv;
@@ -40,26 +32,28 @@ template IdOwnershipBySignatureOnChainSmt(nLevels, onChainLevels) {
     signal input userStateInOnChainSmtMtpAuxHv;
     signal input userStateInOnChainSmtMtpNoAux;
 
-    component verifyAuthClaim = VerifyAuthClaimAndSignature(nLevels);
-    for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== userAuthClaim[i]; }
-	for (var i=0; i<nLevels; i++) { verifyAuthClaim.authClaimMtp[i] <== userAuthClaimMtp[i]; }
-	verifyAuthClaim.claimsTreeRoot <== userClaimsTreeRoot;
-	verifyAuthClaim.revTreeRoot <== userRevTreeRoot;
-	for (var i=0; i<nLevels; i++) { verifyAuthClaim.authClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
-	verifyAuthClaim.authClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
-	verifyAuthClaim.authClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
-	verifyAuthClaim.authClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
+    /* id ownership check */
+    component IdOwnership = VerifyAuthentication(IdOwnershipLevels);
 
-    verifyAuthClaim.challengeSignatureS <== challengeSignatureS;
-    verifyAuthClaim.challengeSignatureR8x <== challengeSignatureR8x;
-    verifyAuthClaim.challengeSignatureR8y <== challengeSignatureR8y;
-    verifyAuthClaim.challenge <== challenge;
+	IdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot;
+	for (var i=0; i<IdOwnershipLevels; i++) {IdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i];}
+	for (var i=0; i<8; i++) { IdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
 
-    component checkUserState = checkIdenStateMatchesRoots();
-    checkUserState.claimsTreeRoot <== userClaimsTreeRoot;
-    checkUserState.revTreeRoot <== userRevTreeRoot;
-    checkUserState.rootsTreeRoot <== userRootsTreeRoot;
-    checkUserState.expectedState <== userState;
+	IdOwnership.userRevTreeRoot <== userRevTreeRoot;
+    for (var i=0; i<IdOwnershipLevels; i++) { IdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
+    IdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
+    IdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
+    IdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
+
+	IdOwnership.userRootsTreeRoot <== userRootsTreeRoot;
+
+	IdOwnership.challenge <== challenge;
+	IdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
+	IdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
+	IdOwnership.challengeSignatureS <== challengeSignatureS;
+
+    IdOwnership.userState <== userState;
+    IdOwnership.userID <== userID;
 
     /* Check on-chain SMT inclusion existence */
     component cutId = cutId();
@@ -83,7 +77,7 @@ template IdOwnershipBySignatureOnChainSmt(nLevels, onChainLevels) {
     onChainSmtInclusion.key <== userID;
     onChainSmtInclusion.value <== userState;
 
-    /* Nullifier check */
+    /* Nullifier calculation */
     component poseidon = Poseidon(2);
     poseidon.inputs[0] <== userID;
     poseidon.inputs[1] <== userSalt;

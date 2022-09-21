@@ -3,7 +3,7 @@ include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "comparators.circom";
-include "../idOwnershipBySignature.circom";
+include "../authentication.circom";
 include "query.circom";
 
 
@@ -103,7 +103,7 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     */
 
     /* Id ownership check*/
-    component userIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
+    component userIdOwnership = VerifyAuthentication(IdOwnershipLevels);
 
     userIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot; // currentHolderStateClaimsTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
@@ -123,6 +123,7 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     userIdOwnership.challengeSignatureS <== challengeSignatureS;
 
     userIdOwnership.userState <== userState;
+    userIdOwnership.userID <== userID;
 
 
     // Check issuerClaim is issued to provided identity
