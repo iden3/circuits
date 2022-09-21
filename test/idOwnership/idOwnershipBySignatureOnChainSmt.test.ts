@@ -33,7 +33,6 @@ describe("idOwnershipBySignatureOnChainSmt", function () {
       "userAuthClaimNonRevMtpNoAux": "1",
       "userClaimsTreeRoot": "9763429684850732628215303952870004997159843236039795272605841029866455670219",
       "userID": "379949150130214723420589610911161895495647789006649785264738141299135414272",
-      "userNullifier": "18968116468485570865854580659399634645721780236139322781445564960051610308120",
       "userRevTreeRoot": "0",
       "userRootsTreeRoot": "0",
       "userSalt": "123456789",
@@ -42,11 +41,16 @@ describe("idOwnershipBySignatureOnChainSmt", function () {
       "userStateInOnChainSmtMtpAuxHi": "4",
       "userStateInOnChainSmtMtpAuxHv": "300",
       "userStateInOnChainSmtMtpNoAux": "0",
-      "userStateInOnChainSmtRoot": "2960269998131412406135915396987536312795307713692807443361231572350088373156"
-    }
+      "userStateInOnChainSmtRoot": "2960269998131412406135915396987536312795307713692807443361231572350088373156",
+    };
+
+    const expOut = {
+      userNullifier: "18968116468485570865854580659399634645721780236139322781445564960051610308120",
+    };
 
     const witness = await circuit.calculateWitness(inputs, true);
     await circuit.checkConstraints(witness);
+    await circuit.assertOut(witness, expOut);
   });
 
   it("Ownership true. User state: not-genesis. Auth claims total/signedWith/revoked: 1/1/none", async () => {
@@ -63,7 +67,6 @@ describe("idOwnershipBySignatureOnChainSmt", function () {
       "userAuthClaimNonRevMtpNoAux": "1",
       "userClaimsTreeRoot": "3325296375493109531775738970103865437471502880293182874312109748701010548081",
       "userID": "379949150130214723420589610911161895495647789006649785264738141299135414272",
-      "userNullifier": "18968116468485570865854580659399634645721780236139322781445564960051610308120",
       "userRevTreeRoot": "0",
       "userRootsTreeRoot": "0",
       "userSalt": "123456789",
@@ -72,11 +75,16 @@ describe("idOwnershipBySignatureOnChainSmt", function () {
       "userStateInOnChainSmtMtpAuxHi": "0",
       "userStateInOnChainSmtMtpAuxHv": "0",
       "userStateInOnChainSmtMtpNoAux": "0",
-      "userStateInOnChainSmtRoot": "2527369248886058159298190241228260543545233125629989424050431010562778308348"
-    }
+      "userStateInOnChainSmtRoot": "2527369248886058159298190241228260543545233125629989424050431010562778308348",
+    };
+
+    const expOut = {
+      userNullifier: "18968116468485570865854580659399634645721780236139322781445564960051610308120",
+    };
 
     const witness = await circuit.calculateWitness(inputs, true);
     await circuit.checkConstraints(witness);
+    await circuit.assertOut(witness, expOut);
   });
 
   it("Ownership true. User state: not-genesis. Auth claims total/signedWith/revoked: 2/2/none", async () => {
@@ -93,7 +101,6 @@ describe("idOwnershipBySignatureOnChainSmt", function () {
       "userAuthClaimNonRevMtpNoAux": "1",
       "userClaimsTreeRoot": "4007604929687835641683076505379836604617083797856462347907321779859723516350",
       "userID": "379949150130214723420589610911161895495647789006649785264738141299135414272",
-      "userNullifier": "18968116468485570865854580659399634645721780236139322781445564960051610308120",
       "userRevTreeRoot": "0",
       "userRootsTreeRoot": "0",
       "userSalt": "123456789",
@@ -102,11 +109,16 @@ describe("idOwnershipBySignatureOnChainSmt", function () {
       "userStateInOnChainSmtMtpAuxHi": "0",
       "userStateInOnChainSmtMtpAuxHv": "0",
       "userStateInOnChainSmtMtpNoAux": "0",
-      "userStateInOnChainSmtRoot": "9868400991696380187039155240914507327007550684366042959000080351486388831719"
-    }
+      "userStateInOnChainSmtRoot": "9868400991696380187039155240914507327007550684366042959000080351486388831719",
+    };
+
+    const expOut = {
+      userNullifier: "18968116468485570865854580659399634645721780236139322781445564960051610308120",
+    };
 
     const witness = await circuit.calculateWitness(inputs, true);
     await circuit.checkConstraints(witness);
+    await circuit.assertOut(witness, expOut);
   });
 
 });

@@ -75,7 +75,8 @@ func main() {
 		//fmt.Println("    GetSchemaHash: ", big.NewInt(0).SetBytes(schema))
 	}
 
-	testVector := make(map[string]interface{})
+	circuitInputs := make(map[string]interface{})
+	circuitOutputs := make(map[string]interface{})
 
 	ctx := context.Background()
 	identifier, claimsTree, revTree, userState := createIdentityMultiAuthClaims(ctx, authClaims, numberOfFirstClaimsToRevoke, treeLevels)
@@ -87,21 +88,21 @@ func main() {
 		utils.ExitOnError(err)
 	}
 
-	testVector["userState"] = userState.BigInt().String()
+	circuitInputs["userState"] = userState.BigInt().String()
 	if useOnChainSmt {
-		testVector["userID"] = identifier.BigInt().String()
+		circuitInputs["userID"] = identifier.BigInt().String()
 	}
 
 	//MTP Claim
-	testVector["userClaimsTreeRoot"] = claimsTree.Root().BigInt().String()
+	circuitInputs["userClaimsTreeRoot"] = claimsTree.Root().BigInt().String()
 	signingAuthClaim := authClaims[signingKeyIndex]
 	hIndex, _, err := signingAuthClaim.HiHv()
 	utils.ExitOnError(err)
 	proof, _, err := claimsTree.GenerateProof(ctx, hIndex, claimsTree.Root())
 	utils.ExitOnError(err)
 	allSiblingsClaimsTree := proof.AllSiblings()
-	testVector["userAuthClaimMtp"] = utils.PadSiblingsToTreeLevels(allSiblingsClaimsTree, treeLevels)
-	testVector["userAuthClaim"] = signingAuthClaim
+	circuitInputs["userAuthClaimMtp"] = utils.PadSiblingsToTreeLevels(allSiblingsClaimsTree, treeLevels)
+	circuitInputs["userAuthClaim"] = signingAuthClaim
 
 	//MTP Claim not revoked
 	revNonce := signingAuthClaim.GetRevocationNonce()
@@ -109,37 +110,37 @@ func main() {
 	proofNotRevoke, _, err := revTree.GenerateProof(ctx, hi, revTree.Root())
 	utils.ExitOnError(err)
 
-	testVector["userRevTreeRoot"] = revTree.Root().BigInt().String()
-	testVector["userAuthClaimNonRevMtp"] = utils.PadSiblingsToTreeLevels(proofNotRevoke.AllSiblings(), treeLevels)
+	circuitInputs["userRevTreeRoot"] = revTree.Root().BigInt().String()
+	circuitInputs["userAuthClaimNonRevMtp"] = utils.PadSiblingsToTreeLevels(proofNotRevoke.AllSiblings(), treeLevels)
 	if proofNotRevoke.NodeAux == nil {
-		testVector["userAuthClaimNonRevMtpNoAux"] = "1"
-		testVector["userAuthClaimNonRevMtpAuxHi"] = "0"
-		testVector["userAuthClaimNonRevMtpAuxHv"] = "0"
+		circuitInputs["userAuthClaimNonRevMtpNoAux"] = "1"
+		circuitInputs["userAuthClaimNonRevMtpAuxHi"] = "0"
+		circuitInputs["userAuthClaimNonRevMtpAuxHv"] = "0"
 	} else {
-		testVector["userAuthClaimNonRevMtpNoAux"] = "0"
-		testVector["userAuthClaimNonRevMtpAuxHi"] = proofNotRevoke.NodeAux.Key.BigInt().String()
-		testVector["userAuthClaimNonRevMtpAuxHv"] = proofNotRevoke.NodeAux.Value.BigInt().String()
+		circuitInputs["userAuthClaimNonRevMtpNoAux"] = "0"
+		circuitInputs["userAuthClaimNonRevMtpAuxHi"] = proofNotRevoke.NodeAux.Key.BigInt().String()
+		circuitInputs["userAuthClaimNonRevMtpAuxHv"] = proofNotRevoke.NodeAux.Value.BigInt().String()
 	}
 
-	testVector["userRootsTreeRoot"] = "0"
+	circuitInputs["userRootsTreeRoot"] = "0"
 
 	var challenge *big.Int
 	// Test signature
 	if useOldAndNewStateForChallenge {
-		testVector["userID"] = identifier.BigInt().String()
-		testVector["oldUserState"] = userState.BigInt().String()
-		testVector["newUserState"] = newState.String()
+		circuitInputs["userID"] = identifier.BigInt().String()
+		circuitInputs["oldUserState"] = userState.BigInt().String()
+		circuitInputs["newUserState"] = newState.String()
 		challenge, _ = poseidon.Hash([]*big.Int{userState.BigInt(), newState})
-		delete(testVector, "challenge")
-		delete(testVector, "userState")
+		delete(circuitInputs, "challenge")
+		delete(circuitInputs, "userState")
 		if numberOfKeys == 1 {
-			testVector["isOldStateGenesis"] = "1"
+			circuitInputs["isOldStateGenesis"] = "1"
 		} else {
-			testVector["isOldStateGenesis"] = "0"
+			circuitInputs["isOldStateGenesis"] = "0"
 		}
 	} else {
 		challenge = big.NewInt(1)
-		testVector["challenge"] = challenge.String()
+		circuitInputs["challenge"] = challenge.String()
 	}
 
 	bjjSigner := primitive.NewBJJSigner(&privKeys[signingKeyIndex])
@@ -151,9 +152,9 @@ func main() {
 	decompressedSig, err = new(babyjub.Signature).Decompress(sig)
 	utils.ExitOnError(err)
 
-	testVector["challengeSignatureR8x"] = decompressedSig.R8.X.String()
-	testVector["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
-	testVector["challengeSignatureS"] = decompressedSig.S.String()
+	circuitInputs["challengeSignatureR8x"] = decompressedSig.R8.X.String()
+	circuitInputs["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
+	circuitInputs["challengeSignatureS"] = decompressedSig.S.String()
 
 	if useOnChainSmt {
 		var onChainSmt *merkletree.MerkleTree
@@ -173,31 +174,35 @@ func main() {
 		proofIdentityInSmt, _, err := onChainSmt.GenerateProof(ctx, identifier.BigInt(), nil)
 		utils.ExitOnError(err)
 
-		testVector["userStateInOnChainSmtRoot"] = onChainSmt.Root().BigInt().String()
-		testVector["userStateInOnChainSmtMtp"] = utils.PadSiblingsToTreeLevels(proofIdentityInSmt.AllSiblings(), onChainSmtTreeLevels)
+		circuitInputs["userStateInOnChainSmtRoot"] = onChainSmt.Root().BigInt().String()
+		circuitInputs["userStateInOnChainSmtMtp"] = utils.PadSiblingsToTreeLevels(proofIdentityInSmt.AllSiblings(), onChainSmtTreeLevels)
 
 		if proofIdentityInSmt.NodeAux == nil {
 			if isUserStateGenesis {
-				testVector["userStateInOnChainSmtMtpNoAux"] = "1"
+				circuitInputs["userStateInOnChainSmtMtpNoAux"] = "1"
 			} else {
-				testVector["userStateInOnChainSmtMtpNoAux"] = "0" // need 0 for circuit inputs in any case, because we prove inclusion
+				circuitInputs["userStateInOnChainSmtMtpNoAux"] = "0" // need 0 for circuit inputs in any case, because we prove inclusion
 			}
-			testVector["userStateInOnChainSmtMtpAuxHi"] = "0"
-			testVector["userStateInOnChainSmtMtpAuxHv"] = "0"
+			circuitInputs["userStateInOnChainSmtMtpAuxHi"] = "0"
+			circuitInputs["userStateInOnChainSmtMtpAuxHv"] = "0"
 		} else {
-			testVector["userStateInOnChainSmtMtpNoAux"] = "0"
-			testVector["userStateInOnChainSmtMtpAuxHi"] = proofIdentityInSmt.NodeAux.Key.BigInt().String()
-			testVector["userStateInOnChainSmtMtpAuxHv"] = proofIdentityInSmt.NodeAux.Value.BigInt().String()
+			circuitInputs["userStateInOnChainSmtMtpNoAux"] = "0"
+			circuitInputs["userStateInOnChainSmtMtpAuxHi"] = proofIdentityInSmt.NodeAux.Key.BigInt().String()
+			circuitInputs["userStateInOnChainSmtMtpAuxHv"] = proofIdentityInSmt.NodeAux.Value.BigInt().String()
 		}
 
 		salt := big.NewInt(123456789)
 		nullifier := utils.GenerateNullifier(identifier, salt)
-		testVector["userSalt"] = salt.String()
-		testVector["userNullifier"] = nullifier.String()
+		circuitInputs["userSalt"] = salt.String()
+		circuitOutputs["userNullifier"] = nullifier.String()
 	}
 
 	fmt.Println()
-	utils.PrintMap(testVector)
+	fmt.Println("Circuit inputs:")
+	utils.PrintMap(circuitInputs)
+	fmt.Println()
+	fmt.Println("Circuit outputs:")
+	utils.PrintMap(circuitOutputs)
 }
 
 func createIdentityMultiAuthClaims(ctx context.Context, authClaims []*core.Claim, numOfFirstClaimsToRevoke int, treeLevels int) (*core.ID, *merkletree.MerkleTree, *merkletree.MerkleTree, *merkletree.Hash) {

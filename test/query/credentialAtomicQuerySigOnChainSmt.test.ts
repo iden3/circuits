@@ -5,7 +5,7 @@ const wasmTester = require("circom_tester").wasm;
 
 export {};
 
-describe("Test CredentialAtomicQuerySigOnChainSmt.circom", function () {
+describe("Test CredentialAtomicQuerySigOnChainSmt.circom", function() {
 
   this.timeout(600000);
 
@@ -75,7 +75,6 @@ describe("Test CredentialAtomicQuerySigOnChainSmt.circom", function () {
       issuerAuthRevTreeRoot: "0",
       issuerAuthRootsTreeRoot: "0",
       userSalt: "123456789",
-      userNullifier: "18968116468485570865854580659399634645721780236139322781445564960051610308120",
       userStateInOnChainSmtMtp: ["0", "2740674427662457332835454792145677734479634481325332115749498841888350110548", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
       userStateInOnChainSmtRoot: "2960269998131412406135915396987536312795307713692807443361231572350088373156",
       userStateInOnChainSmtMtpAuxHi: "4",
@@ -149,7 +148,6 @@ describe("Test CredentialAtomicQuerySigOnChainSmt.circom", function () {
       issuerAuthRevTreeRoot: "0",
       issuerAuthRootsTreeRoot: "0",
       userSalt: "123456789",
-      userNullifier: "18968116468485570865854580659399634645721780236139322781445564960051610308120",
       userStateInOnChainSmtMtp: ["0", "2740674427662457332835454792145677734479634481325332115749498841888350110548", "19991091798052235227442886829713443191817461077589875647331508266325270343516", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
       userStateInOnChainSmtRoot: "2527369248886058159298190241228260543545233125629989424050431010562778308348",
       userStateInOnChainSmtMtpAuxHi: "0",

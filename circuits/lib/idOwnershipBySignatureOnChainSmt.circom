@@ -14,6 +14,8 @@ include "utils/treeUtils.circom";
 template IdOwnershipBySignatureOnChainSmt(nLevels, onChainLevels) {
     signal input userID;
     signal input userState;
+    signal input userSalt;
+    signal output userNullifier;
 
 	signal input userClaimsTreeRoot;
 	signal input userAuthClaimMtp[nLevels];
@@ -37,9 +39,6 @@ template IdOwnershipBySignatureOnChainSmt(nLevels, onChainLevels) {
     signal input userStateInOnChainSmtMtpAuxHi;
     signal input userStateInOnChainSmtMtpAuxHv;
     signal input userStateInOnChainSmtMtpNoAux;
-
-    signal input userSalt;
-    signal input userNullifier;
 
     component verifyAuthClaim = VerifyAuthClaimAndSignature(nLevels);
     for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== userAuthClaim[i]; }
@@ -88,5 +87,5 @@ template IdOwnershipBySignatureOnChainSmt(nLevels, onChainLevels) {
     component poseidon = Poseidon(2);
     poseidon.inputs[0] <== userID;
     poseidon.inputs[1] <== userSalt;
-    poseidon.out === userNullifier;
+    userNullifier <== poseidon.out;
 }

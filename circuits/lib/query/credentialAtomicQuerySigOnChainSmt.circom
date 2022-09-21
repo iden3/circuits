@@ -40,7 +40,7 @@ template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnC
 
     /* Nullifier inputs */
     signal input userSalt;
-    signal input userNullifier;
+    signal output userNullifier;
 
     /* userID ownership signals */
     signal input userID;
@@ -118,6 +118,7 @@ template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnC
 
     userIdOwnership.userID <== userID;
     userIdOwnership.userState <== userState;
+    userIdOwnership.userSalt <== userSalt;
 
     userIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot; // currentHolderStateClaimsTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
@@ -142,8 +143,7 @@ template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnC
     userIdOwnership.userStateInOnChainSmtMtpAuxHv <== userStateInOnChainSmtMtpAuxHv;
     userIdOwnership.userStateInOnChainSmtMtpNoAux <== userStateInOnChainSmtMtpNoAux;
 
-    userIdOwnership.userSalt <== userSalt;
-    userIdOwnership.userNullifier <== userNullifier;
+    userNullifier <== userIdOwnership.userNullifier;
 
 
     // Check issuerClaim is issued to provided identity
