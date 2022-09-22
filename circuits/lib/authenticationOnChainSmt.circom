@@ -62,13 +62,13 @@ template VerifyAuthenticationOnChainSmt(IdOwnershipLevels, onChainLevels) {
     component cutState = cutState();
     cutState.in <== userState;
 
-    component isCutIdEqualToCutState = IsEqual();
-    isCutIdEqualToCutState.in[0] <== cutId.out;
-    isCutIdEqualToCutState.in[1] <== cutState.out;
+    component isStateGenesis = IsEqual();
+    isStateGenesis.in[0] <== cutId.out;
+    isStateGenesis.in[1] <== cutState.out;
 
     component onChainSmtInclusion = SMTVerifier(onChainLevels);
     onChainSmtInclusion.enabled <== 1;
-    onChainSmtInclusion.fnc <== isCutIdEqualToCutState.out; // non-inclusion in case if genesis state, otherwise inclusion
+    onChainSmtInclusion.fnc <== isStateGenesis.out; // non-inclusion in case if genesis state, otherwise inclusion
     onChainSmtInclusion.root <== userStateInOnChainSmtRoot;
     for (var i=0; i<onChainLevels; i++) { onChainSmtInclusion.siblings[i] <== userStateInOnChainSmtMtp[i]; }
     onChainSmtInclusion.oldKey <== userStateInOnChainSmtMtpAuxHi;
