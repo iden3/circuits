@@ -9,22 +9,22 @@ template VerifyAuthenticationOnChainSmt(IdOwnershipLevels, onChainLevels) {
     signal input userSalt;
     signal output userNullifier;
 
-	signal input userClaimsTreeRoot;
-	signal input userAuthClaimMtp[IdOwnershipLevels];
-	signal input userAuthClaim[8];
+    signal input userClaimsTreeRoot;
+    signal input userAuthClaimMtp[IdOwnershipLevels];
+    signal input userAuthClaim[8];
 
-	signal input userRevTreeRoot;
+    signal input userRevTreeRoot;
     signal input userAuthClaimNonRevMtp[IdOwnershipLevels];
     signal input userAuthClaimNonRevMtpNoAux;
     signal input userAuthClaimNonRevMtpAuxHi;
     signal input userAuthClaimNonRevMtpAuxHv;
 
-	signal input userRootsTreeRoot;
+    signal input userRootsTreeRoot;
 
-	signal input challenge;
-	signal input challengeSignatureR8x;
-	signal input challengeSignatureR8y;
-	signal input challengeSignatureS;
+    signal input challenge;
+    signal input challengeSignatureR8x;
+    signal input challengeSignatureR8y;
+    signal input challengeSignatureS;
 
     signal input userStateInOnChainSmtRoot;
     signal input userStateInOnChainSmtMtp[onChainLevels];
@@ -35,22 +35,22 @@ template VerifyAuthenticationOnChainSmt(IdOwnershipLevels, onChainLevels) {
     /* id ownership check */
     component IdOwnership = VerifyAuthentication(IdOwnershipLevels);
 
-	IdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot;
-	for (var i=0; i<IdOwnershipLevels; i++) {IdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i];}
-	for (var i=0; i<8; i++) { IdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
+    IdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot;
+    for (var i=0; i<IdOwnershipLevels; i++) {IdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i];}
+    for (var i=0; i<8; i++) { IdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
 
-	IdOwnership.userRevTreeRoot <== userRevTreeRoot;
+    IdOwnership.userRevTreeRoot <== userRevTreeRoot;
     for (var i=0; i<IdOwnershipLevels; i++) { IdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
     IdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
     IdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
     IdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
 
-	IdOwnership.userRootsTreeRoot <== userRootsTreeRoot;
+    IdOwnership.userRootsTreeRoot <== userRootsTreeRoot;
 
-	IdOwnership.challenge <== challenge;
-	IdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
-	IdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
-	IdOwnership.challengeSignatureS <== challengeSignatureS;
+    IdOwnership.challenge <== challenge;
+    IdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
+    IdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
+    IdOwnership.challengeSignatureS <== challengeSignatureS;
 
     IdOwnership.userState <== userState;
     IdOwnership.userID <== userID;
