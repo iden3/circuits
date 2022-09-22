@@ -1,6 +1,8 @@
 pragma circom 2.0.0;
 
 include "authentication.circom";
+include "../../node_modules/circomlib/circuits/mux1.circom";
+include "../../node_modules/circomlib/circuits/comparators.circom";
 
 template VerifyAuthenticationOnChainSmt(IdOwnershipLevels, onChainLevels) {
 
@@ -78,8 +80,16 @@ template VerifyAuthenticationOnChainSmt(IdOwnershipLevels, onChainLevels) {
     onChainSmtInclusion.value <== userState;
 
     /* Nullifier calculation */
-    component poseidon = Poseidon(2);
-    poseidon.inputs[0] <== userID;
-    poseidon.inputs[1] <== userSalt;
-    userNullifier <== poseidon.out;
+    component calcNul = Poseidon(2);
+    calcNul.inputs[0] <== userID;
+    calcNul.inputs[1] <== userSalt;
+
+    component isSaltZero = IsZero();
+    isSaltZero.in <== userSalt;
+
+    component selectNul = Mux1();
+    selectNul.s <== isSaltZero.out;
+    selectNul.c[0] <== calcNul.out;
+    selectNul.c[1] <== userID;
+    userNullifier <== selectNul.out;
 }
