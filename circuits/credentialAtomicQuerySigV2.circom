@@ -10,4 +10,4 @@ component main{public [challenge,
                         claimSchema,
                         slotIndex,
                         operator,
-                        timestamp]} = CredentialAtomicQuerySig(32, 32, 64);
+                        timestamp]} = CredentialAtomicQuerySigV2(32, 32, 64);
