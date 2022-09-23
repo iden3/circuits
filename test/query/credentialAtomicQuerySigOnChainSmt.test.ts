@@ -5,7 +5,7 @@ const wasmTester = require("circom_tester").wasm;
 
 export {};
 
-describe("Test CredentialAtomicQuerySigOnChainSmt.circom", function() {
+describe("Test CredentialAtomicQuerySigOnChainSmt.circom", function () {
 
   this.timeout(600000);
 
@@ -98,6 +98,7 @@ describe("Test CredentialAtomicQuerySigOnChainSmt.circom", function() {
     }
     const w = await circuit.calculateWitness(inputs, true);
     await circuit.assertOut(w, expOut);
+    await circuit.checkConstraints(w);
   });
 
   it("NOT Genesis state: credentialAtomicQuerySigOnChainSmtTest", async () => {
