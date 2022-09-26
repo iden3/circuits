@@ -3,7 +3,7 @@ include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "comparators.circom";
-include "../authenticationOnChainSmt.circom";
+include "../authV2.circom";
 include "query.circom";
 
 
@@ -25,7 +25,7 @@ valueArraySize - Number of elements in comparison array for in/notin operation i
 comparison ["1", "2", "3"]
 
 */
-template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnChainSmtLevels, valueArraySize) {
+template credentialAtomicQuerySigV2(IdOwnershipLevels, IssuerLevels, OnChainSmtLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -38,12 +38,14 @@ template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnC
     signal input userStateInOnChainSmtMtpAuxHv;
     signal input userStateInOnChainSmtMtpNoAux;
 
-    /* Nullifier inputs */
+    /* Nullifier signals */
     signal input userSalt;
-    signal output userNullifier;
+    // userID output signal will be assigned with nullifier hash(UserID, userSalt),
+    // unless userSalt == 0, in which case userID will be assigned with userClearTextID
+    signal output userID;
 
     /* userID ownership signals */
-    signal input userID;
+    signal input userClearTextID;
     signal input userState;
 
     signal input userClaimsTreeRoot;
@@ -114,9 +116,9 @@ template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnC
     */
 
     /* Id ownership check*/
-    component userIdOwnership = VerifyAuthenticationOnChainSmt(IdOwnershipLevels, OnChainSmtLevels);
+    component userIdOwnership = AuthV2(IdOwnershipLevels, OnChainSmtLevels);
 
-    userIdOwnership.userID <== userID;
+    userIdOwnership.userClearTextID <== userClearTextID;
     userIdOwnership.userState <== userState;
     userIdOwnership.userSalt <== userSalt;
 
@@ -143,13 +145,13 @@ template CredentialAtomicQuerySigOnChainSmt(IdOwnershipLevels, IssuerLevels, OnC
     userIdOwnership.userStateInOnChainSmtMtpAuxHv <== userStateInOnChainSmtMtpAuxHv;
     userIdOwnership.userStateInOnChainSmtMtpNoAux <== userStateInOnChainSmtMtpNoAux;
 
-    userNullifier <== userIdOwnership.userNullifier;
+    userID <== userIdOwnership.userID;
 
 
     // Check issuerClaim is issued to provided identity
     component claimIdCheck = verifyCredentialSubject();
     for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
-    claimIdCheck.id <== userID;
+    claimIdCheck.id <== userClearTextID;
 
     // Verify issuerClaim schema
     component claimSchemaCheck = verifyCredentialSchema();

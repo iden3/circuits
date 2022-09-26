@@ -7,7 +7,7 @@ include "../../node_modules/circomlib/circuits/poseidon.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../../node_modules/circomlib/circuits/smt/smtprocessor.circom";
-include "authentication.circom";
+include "auth.circom";
 
 template StateTransition(nLevels) {
     // we have no constraints for "id" in this circuit, however we introduce "id" input here
@@ -63,7 +63,7 @@ template StateTransition(nLevels) {
     challenge.inputs[0] <== oldUserState;
     challenge.inputs[1] <== newUserState;
 
-    component checkIdOwnership = VerifyAuthentication(nLevels);
+    component checkIdOwnership = Auth(nLevels);
 
     checkIdOwnership.userClaimsTreeRoot <== claimsTreeRoot;
     for (var i=0; i<nLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== authClaimMtp[i]; }

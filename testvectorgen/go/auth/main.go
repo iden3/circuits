@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"math/big"
+
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql"
 	"github.com/iden3/go-merkletree-sql/db/memory"
-	"math/big"
 	"test/utils"
 
 	"test/crypto/primitive"
@@ -29,7 +30,7 @@ func main() {
 	signingKeyIndex := 0
 	treeLevels := 32
 
-	useOnChainSmt := true
+	useNullifier := false
 	onChainSmtTreeLevels := 32
 	isUserStateGenesis := true
 
@@ -43,7 +44,7 @@ func main() {
 	fmt.Println("Number of keys:", numberOfKeys)
 	fmt.Println("Signing key index:", signingKeyIndex)
 	fmt.Println("Number of first keys to revoke:", numberOfFirstClaimsToRevoke)
-	fmt.Println("Use on-chain SMT:", useOnChainSmt)
+	fmt.Println("Use nullifier:", useNullifier)
 	fmt.Println("isUserStateGenesis:", isUserStateGenesis)
 
 	privKeys := createPrivateKeys(privKeysHex[:numberOfKeys])
@@ -89,7 +90,11 @@ func main() {
 	}
 
 	circuitInputs["userState"] = userState.BigInt().String()
-	circuitInputs["userID"] = identifier.BigInt().String()
+	if useNullifier {
+		circuitInputs["userClearTextID"] = identifier.BigInt().String()
+	} else {
+		circuitInputs["userID"] = identifier.BigInt().String()
+	}
 
 	//MTP Claim
 	circuitInputs["userClaimsTreeRoot"] = claimsTree.Root().BigInt().String()
@@ -154,7 +159,7 @@ func main() {
 	circuitInputs["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
 	circuitInputs["challengeSignatureS"] = decompressedSig.S.String()
 
-	if useOnChainSmt {
+	if useNullifier {
 		var onChainSmt *merkletree.MerkleTree
 		if isUserStateGenesis {
 			onChainSmt, err = merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 32)
@@ -192,7 +197,7 @@ func main() {
 		salt := big.NewInt(123456789)
 		nullifier := utils.GenerateNullifier(identifier, salt)
 		circuitInputs["userSalt"] = salt.String()
-		circuitOutputs["userNullifier"] = nullifier.String()
+		circuitOutputs["userID"] = nullifier.String()
 	}
 
 	fmt.Println()

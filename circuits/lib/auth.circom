@@ -3,7 +3,7 @@ pragma circom 2.0.0;
 include "utils/claimUtils.circom";
 include "utils/treeUtils.circom";
 
-template VerifyAuthentication(IdOwnershipLevels) {
+template Auth(IdOwnershipLevels) {
 
     signal input userClaimsTreeRoot;
     signal input userAuthClaimMtp[IdOwnershipLevels];

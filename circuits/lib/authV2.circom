@@ -1,15 +1,17 @@
 pragma circom 2.0.0;
 
-include "authentication.circom";
+include "auth.circom";
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 
-template VerifyAuthenticationOnChainSmt(IdOwnershipLevels, onChainLevels) {
+template AuthV2(IdOwnershipLevels, onChainLevels) {
 
-    signal input userID;
+    signal input userClearTextID;
     signal input userState;
     signal input userSalt;
-    signal output userNullifier;
+    // userID output signal will be assigned with nullifier hash(UserID, userSalt),
+    // unless userSalt == 0, in which case userID will be assigned with userClearTextID
+    signal output userID;
 
     signal input userClaimsTreeRoot;
     signal input userAuthClaimMtp[IdOwnershipLevels];
@@ -35,7 +37,7 @@ template VerifyAuthenticationOnChainSmt(IdOwnershipLevels, onChainLevels) {
     signal input userStateInOnChainSmtMtpNoAux;
 
     /* id ownership check */
-    component IdOwnership = VerifyAuthentication(IdOwnershipLevels);
+    component IdOwnership = Auth(IdOwnershipLevels);
 
     IdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot;
     for (var i=0; i<IdOwnershipLevels; i++) {IdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i];}
@@ -55,11 +57,11 @@ template VerifyAuthenticationOnChainSmt(IdOwnershipLevels, onChainLevels) {
     IdOwnership.challengeSignatureS <== challengeSignatureS;
 
     IdOwnership.userState <== userState;
-    IdOwnership.userID <== userID;
+    IdOwnership.userID <== userClearTextID;
 
     /* Check on-chain SMT inclusion existence */
     component cutId = cutId();
-    cutId.in <== userID;
+    cutId.in <== userClearTextID;
 
     component cutState = cutState();
     cutState.in <== userState;
@@ -68,28 +70,28 @@ template VerifyAuthenticationOnChainSmt(IdOwnershipLevels, onChainLevels) {
     isStateGenesis.in[0] <== cutId.out;
     isStateGenesis.in[1] <== cutState.out;
 
-    component onChainSmtInclusion = SMTVerifier(onChainLevels);
-    onChainSmtInclusion.enabled <== 1;
-    onChainSmtInclusion.fnc <== isStateGenesis.out; // non-inclusion in case if genesis state, otherwise inclusion
-    onChainSmtInclusion.root <== userStateInOnChainSmtRoot;
-    for (var i=0; i<onChainLevels; i++) { onChainSmtInclusion.siblings[i] <== userStateInOnChainSmtMtp[i]; }
-    onChainSmtInclusion.oldKey <== userStateInOnChainSmtMtpAuxHi;
-    onChainSmtInclusion.oldValue <== userStateInOnChainSmtMtpAuxHv;
-    onChainSmtInclusion.isOld0 <== userStateInOnChainSmtMtpNoAux;
-    onChainSmtInclusion.key <== userID;
-    onChainSmtInclusion.value <== userState;
+    component onChainSmtCheck = SMTVerifier(onChainLevels);
+    onChainSmtCheck.enabled <== 1;
+    onChainSmtCheck.fnc <== isStateGenesis.out; // non-inclusion in case if genesis state, otherwise inclusion
+    onChainSmtCheck.root <== userStateInOnChainSmtRoot;
+    for (var i=0; i<onChainLevels; i++) { onChainSmtCheck.siblings[i] <== userStateInOnChainSmtMtp[i]; }
+    onChainSmtCheck.oldKey <== userStateInOnChainSmtMtpAuxHi;
+    onChainSmtCheck.oldValue <== userStateInOnChainSmtMtpAuxHv;
+    onChainSmtCheck.isOld0 <== userStateInOnChainSmtMtpNoAux;
+    onChainSmtCheck.key <== userClearTextID;
+    onChainSmtCheck.value <== userState;
 
     /* Nullifier calculation */
-    component calcNul = Poseidon(2);
-    calcNul.inputs[0] <== userID;
-    calcNul.inputs[1] <== userSalt;
+    component calcNullifier = Poseidon(2);
+    calcNullifier.inputs[0] <== userClearTextID;
+    calcNullifier.inputs[1] <== userSalt;
 
     component isSaltZero = IsZero();
     isSaltZero.in <== userSalt;
 
     component selectNul = Mux1();
     selectNul.s <== isSaltZero.out;
-    selectNul.c[0] <== calcNul.out;
-    selectNul.c[1] <== userID;
-    userNullifier <== selectNul.out;
+    selectNul.c[0] <== calcNullifier.out;
+    selectNul.c[1] <== userClearTextID;
+    userID <== selectNul.out;
 }

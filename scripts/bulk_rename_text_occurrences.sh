@@ -22,7 +22,7 @@ OCCURENCE_AND_REPLACE_FEED=(
 FILES_AND_REGEX_TO_PROCESS=(
   "circuits/lib/idOwnershipBySignature.circom"  " " # will find "x.input1 <== foo" but not "x.foo"
   "circuits/lib/query/credentialAtomicQueryMTP.circom"  "\." # will find "x.foo" but not "x.input1 <== foo"
-  "circuits/lib/authentication.circom"  "\."
+  "circuits/lib/auth.circom"  "\."
   "test/idOwnership/idOwnershipBySignature.test.ts"  "" # will find "foo" word in any place
   "test/circuits/idOwnershipBySignature.circom"  ""
 );
