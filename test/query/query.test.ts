@@ -2,6 +2,7 @@ import {describe} from "mocha";
 
 const path = require("path");
 const wasm_tester = require("circom_tester").wasm;
+const c_tester = require("circom_tester").c;
 const chai = require("chai");
 const assert = chai.assert;
 
@@ -18,7 +19,8 @@ describe("Test query",  function() {
     let circuit;
 
     before(async function() {
-        circuit = await wasm_tester(path.join(__dirname, "../circuits/query/", "queryTest.circom"));
+        this.timeout(60000)
+        circuit = await c_tester(path.join(__dirname, "../circuits/query/", "queryTest.circom"));
     });
 
     describe("#Noop", function() {
