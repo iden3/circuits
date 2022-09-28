@@ -10,7 +10,7 @@
   },
   "license": "GPL-3.0",
   "dependencies": {
-    "circomlib": "^2.0.2"
+    "circomlib": "^2.0.5"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",
