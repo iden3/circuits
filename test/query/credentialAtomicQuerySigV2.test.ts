@@ -97,8 +97,8 @@ describe("Test credentialAtomicQuerySigV2.circom", function () {
       timestamp: "1642074362",
     }
     const w = await circuit.calculateWitness(inputs, true);
-    await circuit.assertOut(w, expOut);
     await circuit.checkConstraints(w);
+    await circuit.assertOut(w, expOut);
   });
 
   it("NOT Genesis state: credentialAtomicQuerySigV2Test", async () => {
