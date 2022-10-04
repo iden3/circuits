@@ -17,6 +17,8 @@ const NOTIN = "5"; // = - notin
 describe("Test query",  function() {
     let circuit;
 
+    this.timeout(600000);
+
     before(async function() {
         circuit = await wasm_tester(path.join(__dirname, "../circuits/query/", "jsonldQueryTest.circom"));
     });
