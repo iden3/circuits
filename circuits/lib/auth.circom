@@ -1,7 +1,6 @@
 pragma circom 2.0.0;
 
-include "utils/claimUtils.circom";
-include "utils/treeUtils.circom";
+include "idOwnership.circom";
 
 template Auth(IdOwnershipLevels) {
 
@@ -27,24 +26,24 @@ template Auth(IdOwnershipLevels) {
     // as it serves as public input which should be the same for prover and verifier
     signal input userID;
 
-    component verifyAuthClaim = VerifyAuthClaimAndSignature(IdOwnershipLevels);
-    for (var i=0; i<8; i++) { verifyAuthClaim.authClaim[i] <== userAuthClaim[i]; }
-    for (var i=0; i<IdOwnershipLevels; i++) { verifyAuthClaim.authClaimMtp[i] <== userAuthClaimMtp[i]; }
-    verifyAuthClaim.claimsTreeRoot <== userClaimsTreeRoot;
-    verifyAuthClaim.revTreeRoot <== userRevTreeRoot;
-    for (var i=0; i<IdOwnershipLevels; i++) { verifyAuthClaim.authClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
-    verifyAuthClaim.authClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
-    verifyAuthClaim.authClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
-    verifyAuthClaim.authClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
+    component checkIdOwnership = IdOwnership(IdOwnershipLevels);
 
-    verifyAuthClaim.challengeSignatureS <== challengeSignatureS;
-    verifyAuthClaim.challengeSignatureR8x <== challengeSignatureR8x;
-    verifyAuthClaim.challengeSignatureR8y <== challengeSignatureR8y;
-    verifyAuthClaim.challenge <== challenge;
+    checkIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot;
+    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
 
-    component checkUserState = checkIdenStateMatchesRoots();
-    checkUserState.claimsTreeRoot <== userClaimsTreeRoot;
-    checkUserState.revTreeRoot <== userRevTreeRoot;
-    checkUserState.rootsTreeRoot <== userRootsTreeRoot;
-    checkUserState.expectedState <== userState;
+    checkIdOwnership.userRevTreeRoot <== userRevTreeRoot;
+    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
+    checkIdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
+    checkIdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
+    checkIdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
+
+    checkIdOwnership.userRootsTreeRoot <== userRootsTreeRoot;
+
+    checkIdOwnership.challenge <== challenge;
+    checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
+    checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
+    checkIdOwnership.challengeSignatureS <== challengeSignatureS;
+
+    checkIdOwnership.userState <== userState;
 }

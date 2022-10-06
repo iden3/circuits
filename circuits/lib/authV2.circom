@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "auth.circom";
+include "idOwnership.circom";
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 
@@ -9,9 +9,6 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     signal input userClearTextID;
     signal input userState;
     signal input userSalt;
-    // userID output signal will be assigned with nullifier hash(UserID, userSalt),
-    // unless userSalt == 0, in which case userID will be assigned with userClearTextID
-    signal output userID;
 
     signal input userClaimsTreeRoot;
     signal input userAuthClaimMtp[IdOwnershipLevels];
@@ -36,28 +33,31 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     signal input userStateInOnChainSmtMtpAuxHv;
     signal input userStateInOnChainSmtMtpNoAux;
 
+    // userID output signal will be assigned with nullifier hash(UserID, userSalt),
+    // unless userSalt == 0, in which case userID will be assigned with userClearTextID
+    signal output userID;
+
     /* id ownership check */
-    component IdOwnership = Auth(IdOwnershipLevels);
+    component checkIdOwnership = IdOwnership(IdOwnershipLevels);
 
-    IdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot;
-    for (var i=0; i<IdOwnershipLevels; i++) {IdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i];}
-    for (var i=0; i<8; i++) { IdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
+    checkIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot;
+    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
 
-    IdOwnership.userRevTreeRoot <== userRevTreeRoot;
-    for (var i=0; i<IdOwnershipLevels; i++) { IdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
-    IdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
-    IdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
-    IdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
+    checkIdOwnership.userRevTreeRoot <== userRevTreeRoot;
+    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
+    checkIdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
+    checkIdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
+    checkIdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
 
-    IdOwnership.userRootsTreeRoot <== userRootsTreeRoot;
+    checkIdOwnership.userRootsTreeRoot <== userRootsTreeRoot;
 
-    IdOwnership.challenge <== challenge;
-    IdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
-    IdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
-    IdOwnership.challengeSignatureS <== challengeSignatureS;
+    checkIdOwnership.challenge <== challenge;
+    checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
+    checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
+    checkIdOwnership.challengeSignatureS <== challengeSignatureS;
 
-    IdOwnership.userState <== userState;
-    IdOwnership.userID <== userClearTextID;
+    checkIdOwnership.userState <== userState;
 
     /* Check on-chain SMT inclusion existence */
     component cutId = cutId();
@@ -89,9 +89,9 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     component isSaltZero = IsZero();
     isSaltZero.in <== userSalt;
 
-    component selectNul = Mux1();
-    selectNul.s <== isSaltZero.out;
-    selectNul.c[0] <== calcNullifier.out;
-    selectNul.c[1] <== userClearTextID;
-    userID <== selectNul.out;
+    component selectNullifier = Mux1();
+    selectNullifier.s <== isSaltZero.out;
+    selectNullifier.c[0] <== calcNullifier.out;
+    selectNullifier.c[1] <== userClearTextID;
+    userID <== selectNullifier.out;
 }
