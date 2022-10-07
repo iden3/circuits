@@ -3,20 +3,20 @@ include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "comparators.circom";
-include "../idOwnershipBySignatureWithRelay.circom";
-include "query.circom";
+include "../idOwnershipBySignature.circom";
+include "jsonldQuery.circom";
 
 
 /**
-credentialAtomicQueryMTPWithRelay.circom - query issuerClaim value and verify issuerClaim MTP
+credentialJsonLDAtomicQueryMTP.circom - query issuerClaim value and verify issuerClaim MTP
 
 checks:
 - identity ownership
-- verify credential subject (verify that identity is an owner of a issuerClaim )
-- issuerClaim schema
-- issuerClaim ownership and issuance state
-- issuerClaim non revocation state
-- issuerClaim expiration ?
+- verify credential subject (verify that identity is an owner of a claim )
+- claim schema
+- claim ownership and issuance state
+- claim non revocation state
+- claim expiration ?
 - query data slots
 
 IdOwnershipLevels - Merkle tree depth level for personal claims
@@ -25,21 +25,15 @@ valueLevels - Number of elements in comparison array for in/notin operation if l
 comparison ["1", "2", "3"]
 
 */
-template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, RelayLevels, valueArraySize) {
+template CredentialJsonLDAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, ClaimLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
-    /* user id ownership signals */
+    /* userID ownership signals */
     signal input userID;
-
-    signal input relayState;
-    signal input userStateInRelayClaimMtp[RelayLevels];
-    signal input userStateInRelayClaim[8];
-	signal input relayProofValidClaimsTreeRoot;
-	signal input relayProofValidRevTreeRoot;
-	signal input relayProofValidRootsTreeRoot;    
+    signal input userState;
 
     signal input userClaimsTreeRoot;
     signal input userAuthClaimMtp[IdOwnershipLevels];
@@ -53,6 +47,7 @@ template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, Rela
 
     signal input userRootsTreeRoot;
 
+    /* signature*/
     signal input challenge;
     signal input challengeSignatureR8x;
     signal input challengeSignatureR8y;
@@ -67,6 +62,7 @@ template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, Rela
     signal input issuerClaimIdenState;
     signal input issuerID;
 
+    // issuerClaim non rev inputs
     signal input issuerClaimNonRevMtp[IssuerLevels];
     signal input issuerClaimNonRevMtpNoAux;
     signal input issuerClaimNonRevMtpAuxHi;
@@ -81,7 +77,13 @@ template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, Rela
 
     /** Query */
     signal input claimSchema;
-    signal input slotIndex;
+    signal input claimPathNotExists; // 0 for inclusion, 1 for non-inclusion
+    signal input claimPathMtp[ClaimLevels];
+    signal input claimPathMtpNoAux; // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+    signal input claimPathMtpAuxHi; // 0 for inclusion proof
+    signal input claimPathMtpAuxHv; // 0 for inclusion proof
+    signal input claimPathKey; // hash of path in merklized json-ld document
+    signal input claimPathValue; // value in this path in merklized json-ld document
     signal input operator;
     signal input value[valueArraySize];
 
@@ -90,33 +92,26 @@ template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, Rela
     */
 
     /* Id ownership check*/
-    component userIdOwnership = IdOwnershipBySignatureWithRelay(IdOwnershipLevels, RelayLevels);
+    component userIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
 
-    userIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot; // currentUserStateClaimsTreeRoot
+    userIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot; // currentHolderStateClaimsTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
-    for (var i=0; i<8; i++) { userIdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
+    for (var i=0; i<8; i++) { userIdOwnership.userAuthClaim[i] <==userAuthClaim[i]; }
 
-    userIdOwnership.userRevTreeRoot <== userRevTreeRoot;  // currentUserStateClaimsRevTreeRoot
+    userIdOwnership.userRevTreeRoot <== userRevTreeRoot;  // currentHolderStateClaimsRevTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
     userIdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
     userIdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
     userIdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
 
-    userIdOwnership.userRootsTreeRoot <== userRootsTreeRoot; // currentUserStateClaimsRootsTreeRoot
+    userIdOwnership.userRootsTreeRoot <== userRootsTreeRoot; // currentHolderStateClaimsRootsTreeRoot
 
     userIdOwnership.challenge <== challenge;
     userIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
     userIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
     userIdOwnership.challengeSignatureS <== challengeSignatureS;
 
-    userIdOwnership.userID <== userID;
-
-    userIdOwnership.relayState <== relayState;
-    for (var i=0; i<RelayLevels; i++) { userIdOwnership.userStateInRelayClaimMtp[i] <== userStateInRelayClaimMtp[i]; }
-    for (var i=0; i<8; i++) { userIdOwnership.userStateInRelayClaim[i] <== userStateInRelayClaim[i]; }
-	userIdOwnership.relayProofValidClaimsTreeRoot <== relayProofValidClaimsTreeRoot;
-	userIdOwnership.relayProofValidRevTreeRoot <== relayProofValidRevTreeRoot;
-	userIdOwnership.relayProofValidRootsTreeRoot <== relayProofValidRootsTreeRoot;
+    userIdOwnership.userState <== userState;
 
     // verify issuerClaim issued and not revoked
     component vci = verifyClaimIssuanceNonRev(IssuerLevels);
@@ -155,13 +150,20 @@ template CredentialAtomicQueryMTPWithRelay(IdOwnershipLevels, IssuerLevels, Rela
     // Query
     component getClaimValue = getValueByIndex();
     for (var i=0; i<8; i++) { getClaimValue.claim[i] <== issuerClaim[i]; }
-    getClaimValue.index <== slotIndex;
+    getClaimValue.index <== 2; // we expect to find json-ld claim tree root in 3rd slot of index
 
-    component q = Query(valueArraySize);
-    q.in <== getClaimValue.value;
+    component q = JsonLDQuery(valueArraySize, ClaimLevels);
+
+    q.jsonldRoot <== getClaimValue.value;
+    q.notExists <== claimPathNotExists;
+    for(var i = 0; i<ClaimLevels; i++){q.mtp[i] <== claimPathMtp[i];}
+    q.auxNodeKey <== claimPathMtpAuxHi;
+    q.auxNodeValue <== claimPathMtpAuxHv;
+    q.auxNodeEmpty <== claimPathMtpNoAux;
+    q.path <== claimPathKey;
+    q.in <== claimPathValue;
     q.operator <== operator;
     for(var i = 0; i<valueArraySize; i++){q.value[i] <== value[i];}
 
     q.out === 1;
-
 }
