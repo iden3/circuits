@@ -1,6 +1,7 @@
 pragma circom 2.0.0;
 
 include "idOwnership.circom";
+include "./utils/idUtils.circom";
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 
@@ -82,9 +83,9 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     onChainSmtCheck.value <== userState;
 
     /* Nullifier calculation */
-    component calcNullifier = Poseidon(2);
-    calcNullifier.inputs[0] <== userClearTextID;
-    calcNullifier.inputs[1] <== userSalt;
+    component calcNullifier = SaltID();
+    calcNullifier.in <== userClearTextID;
+    calcNullifier.salt <== userSalt;
 
     component isSaltZero = IsZero();
     isSaltZero.in <== userSalt;
