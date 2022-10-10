@@ -94,6 +94,6 @@ describe("StateTransition", function () {
             error = err;
         });
 
-        expect(error.message).to.include("Error: Assert Failed. Error in template StateTransition")
+        expect(error.message).to.match(/Error: Assert Failed.\s+Error in template StateTransition/);
     });
 });
