@@ -5,6 +5,7 @@ include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "../../../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "comparators.circom";
+include "query.circom";
 
 /*
   Operators:
@@ -45,45 +46,9 @@ template JsonLDQuery (valueArraySize, mtLevel) {
     valueInMT.key <== path;
     valueInMT.value <== in;
 
-    // operation components
-    component eq = IsEqual();
-    eq.in[0] <== in;
-    eq.in[1] <== value[0];
-
-    // LessThan
-    component lt = LessThan(252);
-    lt.in[0] <== in;
-    lt.in[1] <== value[0];
-
-    component gt = GreaterThan(252);
-    gt.in[0] <== in;
-    gt.in[1] <== value[0];
-
-    // in
-    component inComp = IN(valueArraySize);
-    inComp.in <== in;
-    for(var i = 0; i<valueArraySize; i++){inComp.value[i] <== value[i];}
-
-    // mux
-    component mux = Mux3();
-    component n2b = Num2Bits(3);
-    n2b.in <== operator;
-
-    mux.s[0] <== n2b.out[0];
-    mux.s[1] <== n2b.out[1];
-    mux.s[2] <== n2b.out[2];
-
-    mux.c[0] <== 1; // noop, skip execution
-    mux.c[1] <== eq.out;
-    mux.c[2] <== lt.out;
-    mux.c[3] <== gt.out;
-    mux.c[4] <== inComp.out;
-
-    mux.c[5] <== 1-inComp.out;
-
-    mux.c[6] <== 0; // not in use
-    mux.c[7] <== 0; // not in use
-
-    // output
-    out <== mux.out;
+    component query = Query(valueArraySize);
+    query.in <== in;
+    for (var i=0; i<valueArraySize; i++) { query.value[i] <== value[i]; }
+    query.operator <== operator;
+    out <== query.out;
 }
