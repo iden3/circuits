@@ -7,6 +7,7 @@ component main{public [challenge,
                        userState,
                        claimSchema,
                        issuerID,
+                       claimPathKey,
                        operator,
                        value,
                        timestamp]} = CredentialJsonLDAtomicQueryMTP(32, 32, 32, 64);
