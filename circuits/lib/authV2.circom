@@ -94,5 +94,7 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     selectNullifier.s <== isSaltZero.out;
     selectNullifier.c[0] <== calcNullifier.out;
     selectNullifier.c[1] <== userClearTextID;
+
+    log("User ID:", selectNullifier.out);
     userID <== selectNullifier.out;
 }
