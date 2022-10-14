@@ -7,7 +7,7 @@ include "../../node_modules/circomlib/circuits/comparators.circom";
 
 template AuthV2(IdOwnershipLevels, onChainLevels) {
 
-    signal input userClearTextID;
+    signal input userGenesisID;
     signal input userState;
     signal input userSalt;
 
@@ -35,7 +35,7 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     signal input userStateInOnChainSmtMtpNoAux;
 
     // userID output signal will be assigned with nullifier hash(UserID, userSalt),
-    // unless userSalt == 0, in which case userID will be assigned with userClearTextID
+    // unless userSalt == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
     /* id ownership check */
@@ -62,7 +62,7 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
 
     /* Check on-chain SMT inclusion existence */
     component cutId = cutId();
-    cutId.in <== userClearTextID;
+    cutId.in <== userGenesisID;
 
     component cutState = cutState();
     cutState.in <== userState;
@@ -79,22 +79,21 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     onChainSmtCheck.oldKey <== userStateInOnChainSmtMtpAuxHi;
     onChainSmtCheck.oldValue <== userStateInOnChainSmtMtpAuxHv;
     onChainSmtCheck.isOld0 <== userStateInOnChainSmtMtpNoAux;
-    onChainSmtCheck.key <== userClearTextID;
+    onChainSmtCheck.key <== userGenesisID;
     onChainSmtCheck.value <== userState;
 
-    /* Nullifier calculation */
-    component calcNullifier = SaltID();
-    calcNullifier.in <== userClearTextID;
-    calcNullifier.salt <== userSalt;
+    /* ProfileID calculation */
+    component calcProfile = ProfileID();
+    calcProfile.in <== userGenesisID;
+    calcProfile.salt <== userSalt;
 
     component isSaltZero = IsZero();
     isSaltZero.in <== userSalt;
 
-    component selectNullifier = Mux1();
-    selectNullifier.s <== isSaltZero.out;
-    selectNullifier.c[0] <== calcNullifier.out;
-    selectNullifier.c[1] <== userClearTextID;
+    component selectProfile = Mux1();
+    selectProfile.s <== isSaltZero.out;
+    selectProfile.c[0] <== calcProfile.out;
+    selectProfile.c[1] <== userGenesisID;
 
-    log("User ID:", selectNullifier.out);
-    userID <== selectNullifier.out;
+    userID <== selectProfile.out;
 }
