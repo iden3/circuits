@@ -4,7 +4,7 @@ include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/binsum.circom";
 include "../../../node_modules/circomlib/circuits/eddsaposeidon.circom";
 
-template SaltID(){
+template ProfileID(){
     signal input in;
     signal input salt;
     signal output out;
@@ -25,14 +25,15 @@ template SaltID(){
 
     // calculate checksum 29 (type[2],state[27])
     component checksum = CalculateChecksum(256-24); // 29 byte
-    // fill 27 bytes state
-    for (var i=0; i<256-24-16; i++) {
-        checksum.in[i] <== stateBits.out[i+40];
-    }
     // fill 2 bytes type
     for (var i=256-24-16; i<256-24; i++) {
             checksum.in[i] <== idBits.out[i-216];
     }
+    // fill 27 bytes state
+    for (var i=0; i<256-24-16; i++) {
+        checksum.in[i] <== stateBits.out[i+40];
+    }
+
 
     component res = Bits2Num(256);
 
@@ -86,7 +87,7 @@ template CalculateChecksum(n) {
 
     component sumBits = Num2Bits(16);
     sumBits.in <== sum;
-    log("sum:", sum);
+//    log("sum:", sum);
 
     for (var i=0; i<16; i++) {
         out[i] <== sumBits.out[i];
