@@ -11,32 +11,42 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     signal input userState;
     signal input userSalt;
 
+    // user state
     signal input userClaimsTreeRoot;
-    signal input userAuthClaimMtp[IdOwnershipLevels];
+    signal input userRevTreeRoot;
+    signal input userRootsTreeRoot;
+
+    // Auth claim
     signal input userAuthClaim[8];
 
-    signal input userRevTreeRoot;
+    // auth claim. merkle tree proof of inclusion to claim tree
+    signal input userAuthClaimMtp[IdOwnershipLevels];
+
+    // auth claim - rev nonce. merkle tree proof of non-inclusion to rev tree
     signal input userAuthClaimNonRevMtp[IdOwnershipLevels];
     signal input userAuthClaimNonRevMtpNoAux;
     signal input userAuthClaimNonRevMtpAuxHi;
     signal input userAuthClaimNonRevMtpAuxHv;
 
-    signal input userRootsTreeRoot;
-
+    // challenge signature
     signal input challenge;
     signal input challengeSignatureR8x;
     signal input challengeSignatureR8y;
     signal input challengeSignatureS;
 
-    signal input userStateInOnChainSmtRoot;
-    signal input userStateInOnChainSmtMtp[onChainLevels];
-    signal input userStateInOnChainSmtMtpAuxHi;
-    signal input userStateInOnChainSmtMtpAuxHv;
-    signal input userStateInOnChainSmtMtpNoAux;
+    // global on chain state
+    signal input globalSmtRoot;
+    // proof of inclusion or exclusion of the user in the global state
+    signal input globalSmtMtp[onChainLevels];
+    signal input globalSmtMtpAuxHi;
+    signal input globalSmtMtpAuxHv;
+    signal input globalSmtMtpNoAux;
 
-    // userID output signal will be assigned with nullifier hash(UserID, userSalt),
+    // userID output signal will be assigned with user profile hash(UserID, userSalt),
     // unless userSalt == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
+
+
 
     /* id ownership check */
     component checkIdOwnership = IdOwnership(IdOwnershipLevels);
@@ -74,11 +84,11 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     component onChainSmtCheck = SMTVerifier(onChainLevels);
     onChainSmtCheck.enabled <== 1;
     onChainSmtCheck.fnc <== isStateGenesis.out; // non-inclusion in case if genesis state, otherwise inclusion
-    onChainSmtCheck.root <== userStateInOnChainSmtRoot;
-    for (var i=0; i<onChainLevels; i++) { onChainSmtCheck.siblings[i] <== userStateInOnChainSmtMtp[i]; }
-    onChainSmtCheck.oldKey <== userStateInOnChainSmtMtpAuxHi;
-    onChainSmtCheck.oldValue <== userStateInOnChainSmtMtpAuxHv;
-    onChainSmtCheck.isOld0 <== userStateInOnChainSmtMtpNoAux;
+    onChainSmtCheck.root <== globalSmtRoot;
+    for (var i=0; i<onChainLevels; i++) { onChainSmtCheck.siblings[i] <== globalSmtMtp[i]; }
+    onChainSmtCheck.oldKey <== globalSmtMtpAuxHi;
+    onChainSmtCheck.oldValue <== globalSmtMtpAuxHv;
+    onChainSmtCheck.isOld0 <== globalSmtMtpNoAux;
     onChainSmtCheck.key <== userGenesisID;
     onChainSmtCheck.value <== userState;
 

@@ -61,8 +61,6 @@ template ProfileID(){
     for (var i=256-8; i<256; i++) {
         res.in[i] <== 0;
     }
-
-    log("res.out", res.out);
     out <== res.out;
 }
 
