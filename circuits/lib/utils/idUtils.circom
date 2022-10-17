@@ -17,6 +17,9 @@ template SaltID(){
     hash.inputs[0] <== in;
     hash.inputs[1] <== salt;
 
+    // component genesis = TakeGenesis();
+    // genesis.in <== hash.out;
+
 //    log("hash", hash.out);
 
     // hash bits
@@ -63,6 +66,97 @@ template SaltID(){
 
     log("res.out", res.out);
     out <== res.out;
+}
+
+template NewID() {
+    signal input typ;
+    signal input genesis;
+    signal output out;
+
+    component s = CalculateChecksum2();
+    s.typ <== typ;
+    s.genesis <== genesis;
+
+    // put checksum to 30, 31 bytes
+    var id = (s.out & 0xff) << (30 * 8);
+    id += (s.out & 0xff00) << (28 * 8);
+    s.out & 0xffff === 0;
+    // put genesis to 2-29 bytes
+    id += (genesis & (2 ** (27 * 8) - 1)) << (2 * 8);
+    // put id type
+    id += typ & (2 ** (2 * 8) - 1);
+    out <-- id;
+}
+
+// return 31-byte ID made up from type, genesis and checksum
+template GatherID() {
+    signal input typ;
+    signal input genesis;
+    signal input checksum;
+    signal output out;
+
+    // assert checksum is correct
+    component s = CalculateChecksum2();
+    s.typ <== typ;
+    s.genesis <== genesis;
+    s.out === checksum;
+
+    // put checksum to 30, 31 bytes
+    var id = (checksum & 0xff) << (30 * 8);
+    id += (checksum & 0xff00) << (28 * 8);
+    // put genesis to 2-29 bytes
+    id += (genesis & (2 ** (27 * 8) - 1)) << (2 * 8);
+    // put id type
+    id += typ & (2 ** (2 * 8) - 1);
+    out <-- id;
+}
+
+// take 27-byte genesis from 32-byte int
+template TakeGenesis() {
+    signal input in;
+    signal output out;
+    // We take only most significant 27 * 8 bits from 256 bit number. 
+    // So we strip remaining 40 least significan bits.
+    out <-- in >> 40;
+}
+
+// return uint16 checksum
+template CalculateChecksum2() {
+    signal input typ;
+    signal input genesis;
+    signal output out;
+
+    var acc = 0;
+    var val = typ;
+    component sumTyp = SumModulus(8, 16);
+    sumTyp.in <== typ;
+    sumTyp.start <== 0;
+
+    component sumGen = SumModulus(8, 16);
+    sumGen.in <== genesis;
+    sumGen.start <== sumTyp.out;
+
+    out <== sumGen.out;
+}
+
+// split input into bits of dim size and sum number by modulus 2**mod
+// for example, to split input into bytes (8 bits) and create sum modulus 16 bytes,
+// create template as SumModulus(8, 16)
+template SumModulus(dim, mod) {
+    signal input start; 
+    signal input in;
+    signal output out;
+
+    var val = in;
+    var acc = start;
+    while (val > 0) {
+        // log("[1] ", acc, " ", val & (2 ** dim - 1), " ", val);
+        acc = acc + (val & (2 ** dim - 1));
+        acc = acc % (2 ** mod - 1);
+        val = val >> dim;
+    }
+
+    out <-- acc;
 }
 
 template CalculateChecksum(n) {
