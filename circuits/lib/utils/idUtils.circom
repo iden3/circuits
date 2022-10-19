@@ -68,6 +68,39 @@ template SaltID(){
     out <== res.out;
 }
 
+// Split ID into type, genesys and checksum
+template SplitID() {
+    signal input id;
+    signal output typ;
+    signal output genesis;
+    signal output checksum;
+
+    component bs = Num2Bits(253);
+    bs.in <== id;
+
+    // checksum bytes are swapped in ID. 31-th byte is first and 30-th is second.
+    component checksumBits = Bits2Num(16);
+    for (var i = 0; i < 8; i++) {
+        checksumBits.in[i] <== bs.out[30 * 8 + i];
+    }
+    for (var i = 8; i < 16; i++) {
+        checksumBits.in[i] <== bs.out[29 * 8 + i - 8];
+    }
+    checksum <== checksumBits.out;
+
+    component genesisBits = Bits2Num(216);
+    for (var i = 0; i < 216; i++) {
+        genesisBits.in[i] <== bs.out[i + 16];
+    }
+    genesis <== genesisBits.out;
+
+    component typBits = Bits2Num(16);
+    for (var i = 0; i < 16; i++) {
+        typBits.in[i] <== bs.out[i];
+    }
+    typ <== typBits.out;
+}
+
 template NewID() {
     signal input typ;
     signal input genesis;
@@ -80,7 +113,6 @@ template NewID() {
     // put checksum to 30, 31 bytes
     var id = (s.out & 0xff) << (30 * 8);
     id += (s.out & 0xff00) << (28 * 8);
-    s.out & 0xffff === 0;
     // put genesis to 2-29 bytes
     id += (genesis & (2 ** (27 * 8) - 1)) << (2 * 8);
     // put id type
@@ -118,6 +150,17 @@ template TakeGenesis() {
     // We take only most significant 27 * 8 bits from 256 bit number. 
     // So we strip remaining 40 least significan bits.
     out <-- in >> 40;
+
+    // create constraint
+    component res = Num2Bits(256);
+    res.in <== in;
+    var e2 = 1;
+    var lc1 = 0;
+    for (var i = 40; i < 256; i++) {
+        lc1 += res.out[i] * e2;
+        e2 = e2 + e2;
+    }
+    lc1 === out;
 }
 
 // return uint16 checksum
