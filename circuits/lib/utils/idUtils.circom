@@ -67,6 +67,28 @@ template ProfileID(){
     out <== res.out;
 }
 
+template ProfileID2(){
+    signal input in;
+    signal input salt;
+    signal output out;
+
+    component hash = Poseidon(2);
+    hash.inputs[0] <== in;
+    hash.inputs[1] <== salt;
+
+    component genesis = TakeGenesis();
+    genesis.in <== hash.out;
+
+    component oldIdParts = SplitID();
+    oldIdParts.id <== in;
+
+    component newId = NewID();
+    newId.typ <== oldIdParts.typ;
+    newId.genesis <== genesis.out;
+
+    out <== newId.out;
+}
+
 // Split ID into type, genesys and checksum
 template SplitID() {
     signal input id;
