@@ -17,9 +17,6 @@ template ProfileID(){
     hash.inputs[0] <== in;
     hash.inputs[1] <== salt;
 
-    // component genesis = TakeGenesis();
-    // genesis.in <== hash.out;
-
 //    log("hash", hash.out);
 
     // hash bits
@@ -76,7 +73,7 @@ template ProfileID2(){
     hash.inputs[0] <== in;
     hash.inputs[1] <== salt;
 
-    component genesis = TakeGenesis();
+    component genesis = ShiftRight(40);
     genesis.in <== hash.out;
 
     component oldIdParts = SplitID();
@@ -96,7 +93,7 @@ template SplitID() {
     signal output genesis;
     signal output checksum;
 
-    component bs = Num2Bits(253);
+    component bs = Num2Bits(254);
     bs.in <== id;
 
     // checksum bytes are swapped in ID. 31-th byte is first and 30-th is second.
@@ -131,14 +128,12 @@ template NewID() {
     s.typ <== typ;
     s.genesis <== genesis;
 
-    // put checksum to 30, 31 bytes
-    var id = (s.out & 0xff) << (30 * 8);
-    id += (s.out & 0xff00) << (28 * 8);
-    // put genesis to 2-29 bytes
-    id += (genesis & (2 ** (27 * 8) - 1)) << (2 * 8);
-    // put id type
-    id += typ & (2 ** (2 * 8) - 1);
-    out <-- id;
+    component id = GatherID();
+    id.typ <== typ;
+    id.genesis <== genesis;
+    id.checksum <== s.out;
+
+    out <== id.out;
 }
 
 // return 31-byte ID made up from type, genesis and checksum
@@ -148,40 +143,47 @@ template GatherID() {
     signal input checksum;
     signal output out;
 
-    // assert checksum is correct
-    component s = CalculateChecksum2();
-    s.typ <== typ;
-    s.genesis <== genesis;
-    s.out === checksum;
+    component idBits = Bits2Num(31*8);
 
-    // put checksum to 30, 31 bytes
-    var id = (checksum & 0xff) << (30 * 8);
-    id += (checksum & 0xff00) << (28 * 8);
-    // put genesis to 2-29 bytes
-    id += (genesis & (2 ** (27 * 8) - 1)) << (2 * 8);
-    // put id type
-    id += typ & (2 ** (2 * 8) - 1);
-    out <-- id;
+    component checksumBits = Num2Bits(2*8);
+    checksumBits.in <== checksum;
+    // put 1st byte of checksum into 31th byte of id
+    for (var i = 0; i < 8; i++) {
+        idBits.in[30*8+i] <== checksumBits.out[i];
+    }
+    // put 2nd byte of checksum into 30th byte of id
+    for (var i = 8; i < 16; i++) {
+        idBits.in[29*8+i-8] <== checksumBits.out[i];
+    }
+
+    component genesisBits = Num2Bits(27*8);
+    genesisBits.in <== genesis;
+    for (var i = 0; i < 27 * 8; i++) {
+        idBits.in[2*8+i] <== genesisBits.out[i];
+    }
+
+    component typBits = Num2Bits(2*8);
+    typBits.in <== typ;
+    for (var i = 0; i < 2 * 8; i++) {
+        idBits.in[i] <== typBits.out[i];
+    }
+
+    out <== idBits.out;
 }
 
-// take 27-byte genesis from 32-byte int
-template TakeGenesis() {
+// Shift in right by n bits
+template ShiftRight(n) {
     signal input in;
     signal output out;
-    // We take only most significant 27 * 8 bits from 256 bit number. 
-    // So we strip remaining 40 least significan bits.
-    out <-- in >> 40;
+    // We take only most significant 27 * 8 bits from 254 bit number. 
+    component bits = Num2Bits(254);
+    bits.in <== in;
 
-    // create constraint
-    component res = Num2Bits(256);
-    res.in <== in;
-    var e2 = 1;
-    var lc1 = 0;
-    for (var i = 40; i < 256; i++) {
-        lc1 += res.out[i] * e2;
-        e2 = e2 + e2;
+    component outBits = Bits2Num(254-n);
+    for (var i = n; i < 254; i++) {
+        outBits.in[i-n] <== bits.out[i];
     }
-    lc1 === out;
+    out <== outBits.out;
 }
 
 // return uint16 checksum

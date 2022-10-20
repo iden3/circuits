@@ -23,9 +23,9 @@ describe("idUtils.circom:", async function() {
 
     before(async () => {
         circuit = await wasm_tester(
-            path.join(__dirname, "../circuits", "idUtils_TakeGenesis.circom"),
+            path.join(__dirname, "../circuits", "idUtils_ShiftRight.circom"),
             {
-                output: path.join(__dirname, "../circuits", "build/idUtils_TakeGensis"),
+                output: path.join(__dirname, "../circuits", "build/idUtils_ShiftRight"),
                 recompile: true,
                 reduceConstraints: true,
             },
