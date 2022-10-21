@@ -24,9 +24,9 @@ describe("idUtils.circom:", async function() {
 
     before(async () => {
         circuit = await wasm_tester(
-            path.join(__dirname, "../circuits", "idUtils_ProfileID2.circom"),
+            path.join(__dirname, "../circuits", "idUtils_ProfileID.circom"),
             {
-                output: path.join(__dirname, "../circuits", "build/idUtils_ProfileID2"),
+                output: path.join(__dirname, "../circuits", "build/idUtils_ProfileID"),
                 recompile: true,
                 reduceConstraints: true,
             },
