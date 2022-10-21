@@ -10,23 +10,13 @@ describe("idUtils.circom:", async function() {
         {
             desc: "Salted hash",
             input: {
-                in: "379949150130214723420589610911161895495647789006649785264738141299135414272", //379949150130214723420589610911161895495647789006649785264738141299135414272
-                salt: "10",
+                in: "23630567111950550539435915649280822148510307443797111728722609533581131776", //379949150130214723420589610911161895495647789006649785264738141299135414272
+                nonce: "10",
             },
             output: {
-                out: "86673097869291892577577670655095803058458914610818194234435166934839525376",
+                out: "25425363284463910957419549722021124450832239517990785975889689633068548096",
             },
         },
-        {
-            desc: "Salted hash",
-            input: {
-                in: "415299404698947339257583884918951054741692084831172369057254226634366386176", //379949150130214723420589610911161895495647789006649785264738141299135414272
-                salt: "10",
-            },
-            output: {
-                out: "74283886503142965875513788535494945852492977609287320056134303119186395136",
-            },
-        }
     ];
 
     let circuit;
@@ -34,9 +24,9 @@ describe("idUtils.circom:", async function() {
 
     before(async () => {
         circuit = await wasm_tester(
-            path.join(__dirname, "../circuits", "idUtils.circom"),
+            path.join(__dirname, "../circuits", "idUtils_ProfileID.circom"),
             {
-                output: path.join(__dirname, "../circuits", "build/idUtils"),
+                output: path.join(__dirname, "../circuits", "build/idUtils_ProfileID"),
                 recompile: true,
                 reduceConstraints: true,
             },
