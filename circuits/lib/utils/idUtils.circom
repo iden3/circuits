@@ -124,7 +124,7 @@ template NewID() {
     signal input genesis;
     signal output out;
 
-    component s = CalculateChecksum2();
+    component s = CalculateIdChecksum();
     s.typ <== typ;
     s.genesis <== genesis;
 
@@ -186,43 +186,54 @@ template ShiftRight(n) {
     out <== outBits.out;
 }
 
-// return uint16 checksum
-template CalculateChecksum2() {
+template CalculateIdChecksum() {
     signal input typ;
     signal input genesis;
     signal output out;
 
-    var acc = 0;
-    var val = typ;
-    component sumTyp = SumModulus(8, 16);
-    sumTyp.in <== typ;
-    sumTyp.start <== 0;
+    var sum = 0;
 
-    component sumGen = SumModulus(8, 16);
-    sumGen.in <== genesis;
-    sumGen.start <== sumTyp.out;
+    component typBits = Num2Bits(256);
+    typBits.in <== typ;
+    for (var i = 0; i < 256; i = i + 8) {
+        var lc1 = 0;
+        var e2 = 1;
+        for (var j = 0; j < 8; j++) {
+            lc1 += typBits.out[i + j] * e2;
+            e2 = e2 + e2;
+        }
+        sum += lc1;
+    }
 
-    out <== sumGen.out;
+    component genesisBits = Num2Bits(256);
+    genesisBits.in <== genesis;
+    for (var i = 0; i < 256; i = i + 8) {
+        var lc1 = 0;
+        var e2 = 1;
+        for (var j = 0; j < 8; j++) {
+            lc1 += genesisBits.out[i + j] * e2;
+            e2 = e2 + e2;
+        }
+        sum += lc1;
+    }
+
+    component sumBits = LastNBits(16);
+    sumBits.in <== sum;
+    out <== sumBits.out;
 }
 
-// split input into bits of dim size and sum number by modulus 2**mod
-// for example, to split input into bytes (8 bits) and create sum modulus 16 bytes,
-// create template as SumModulus(8, 16)
-template SumModulus(dim, mod) {
-    signal input start; 
+template LastNBits(n) {
     signal input in;
     signal output out;
 
-    var val = in;
-    var acc = start;
-    while (val > 0) {
-        // log("[1] ", acc, " ", val & (2 ** dim - 1), " ", val);
-        acc = acc + (val & (2 ** dim - 1));
-        acc = acc % (2 ** mod - 1);
-        val = val >> dim;
-    }
+    component inBits = Num2Bits(254);
+    inBits.in <== in;
 
-    out <-- acc;
+    component outBits = Bits2Num(n);
+    for (var i = 0; i < n; i++) {
+        outBits.in[i] <== inBits.out[i];
+    }
+    out <== outBits.out;
 }
 
 template CalculateChecksum(n) {

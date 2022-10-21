@@ -10,31 +10,11 @@ describe("idUtils.circom:", async function() {
         {
             desc: "First",
             input: {
-                in: "825129518415581397661575995183474599806529764871834543166439294091760",
-                start: "0"
+                typ: "49648",
+                genesis: "12590477270745565760216918871818154904274440992307045641577748017",
             },
             output: {
                 out: "4565",
-            },
-        },
-        {
-            desc: "with start",
-            input: {
-                in: "825129518415581397661575995183474599806529764871834543166439294091760",
-                start: "10",
-            },
-            output: {
-                out: "4575",
-            },
-        },
-        {
-            desc: "with overflow",
-            input: {
-                in: "825129518415581397661575995183474599806529764871834543166439294091760",
-                start: "65525",
-            },
-            output: {
-                out: "4555",
             },
         },
     ];
@@ -44,9 +24,9 @@ describe("idUtils.circom:", async function() {
 
     before(async () => {
         circuit = await wasm_tester(
-            path.join(__dirname, "../circuits", "idUtils_SumModulus.circom"),
+            path.join(__dirname, "../circuits", "idUtils_CalculateIdChecksum.circom"),
             {
-                output: path.join(__dirname, "../circuits", "build/idUtils_SumModulus"),
+                output: path.join(__dirname, "../circuits", "build/idUtils_CalculateIdChecksum"),
                 recompile: true,
                 reduceConstraints: true,
             },
