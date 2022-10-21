@@ -95,7 +95,7 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     /* ProfileID calculation */
     component calcProfile = ProfileID();
     calcProfile.in <== userGenesisID;
-    calcProfile.salt <== userSalt;
+    calcProfile.nonce <== userSalt;
 
     component isSaltZero = IsZero();
     isSaltZero.in <== userSalt;

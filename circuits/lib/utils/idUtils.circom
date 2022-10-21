@@ -6,12 +6,12 @@ include "../../../node_modules/circomlib/circuits/eddsaposeidon.circom";
 
 template ProfileID(){
     signal input in;
-    signal input salt;
+    signal input nonce;
     signal output out;
 
     component hash = Poseidon(2);
     hash.inputs[0] <== in;
-    hash.inputs[1] <== salt;
+    hash.inputs[1] <== nonce;
 
     component genesis = TakeNBits(27*8);
     genesis.in <== hash.out;
