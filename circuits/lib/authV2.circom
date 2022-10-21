@@ -4,12 +4,13 @@ include "idOwnership.circom";
 include "./utils/idUtils.circom";
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../../node_modules/circomlib/circuits/eddsaposeidon.circom";
 
 template AuthV2(IdOwnershipLevels, onChainLevels) {
 
     signal input userGenesisID;
     signal input userState;
-    signal input userSalt;
+    signal input nonce; // random number
 
     // user state
     signal input userClaimsTreeRoot;
@@ -42,8 +43,8 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     signal input globalSmtMtpAuxHv;
     signal input globalSmtMtpNoAux;
 
-    // userID output signal will be assigned with user profile hash(UserID, userSalt),
-    // unless userSalt == 0, in which case userID will be assigned with userGenesisID
+    // userID output signal will be assigned with user profile hash(UserID, nonce),
+    // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
 
@@ -81,6 +82,9 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     isStateGenesis.in[0] <== cutId.out;
     isStateGenesis.in[1] <== cutState.out;
 
+    component userGenesisIDhash = Poseidon(1);
+    userGenesisIDhash.inputs[0] <== userGenesisID;
+
     component onChainSmtCheck = SMTVerifier(onChainLevels);
     onChainSmtCheck.enabled <== 1;
     onChainSmtCheck.fnc <== isStateGenesis.out; // non-inclusion in case if genesis state, otherwise inclusion
@@ -89,16 +93,16 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     onChainSmtCheck.oldKey <== globalSmtMtpAuxHi;
     onChainSmtCheck.oldValue <== globalSmtMtpAuxHv;
     onChainSmtCheck.isOld0 <== globalSmtMtpNoAux;
-    onChainSmtCheck.key <== userGenesisID;
+    onChainSmtCheck.key <== userGenesisIDhash.out;
     onChainSmtCheck.value <== userState;
 
     /* ProfileID calculation */
     component calcProfile = ProfileID();
     calcProfile.in <== userGenesisID;
-    calcProfile.nonce <== userSalt;
+    calcProfile.nonce <== nonce;
 
     component isSaltZero = IsZero();
-    isSaltZero.in <== userSalt;
+    isSaltZero.in <== nonce;
 
     component selectProfile = Mux1();
     selectProfile.s <== isSaltZero.out;
