@@ -163,21 +163,6 @@ template GatherID() {
     out <== idBits.out;
 }
 
-// Shift in right by n bits
-template ShiftRight(n) {
-    signal input in;
-    signal output out;
-    // We take only most significant 27 * 8 bits from 254 bit number. 
-    component bits = Num2Bits(254);
-    bits.in <== in;
-
-    component outBits = Bits2Num(254-n);
-    for (var i = n; i < 254; i++) {
-        outBits.in[i-n] <== bits.out[i];
-    }
-    out <== outBits.out;
-}
-
 // Take least significan n bits
 template TakeNBits(n) {
     signal input in;
