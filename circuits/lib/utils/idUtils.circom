@@ -73,7 +73,7 @@ template ProfileID2(){
     hash.inputs[0] <== in;
     hash.inputs[1] <== salt;
 
-    component genesis = ShiftRight(40);
+    component genesis = TakeNBits(27*8);
     genesis.in <== hash.out;
 
     component oldIdParts = SplitID();
@@ -98,11 +98,8 @@ template SplitID() {
 
     // checksum bytes are swapped in ID. 31-th byte is first and 30-th is second.
     component checksumBits = Bits2Num(16);
-    for (var i = 0; i < 8; i++) {
-        checksumBits.in[i] <== bs.out[30 * 8 + i];
-    }
-    for (var i = 8; i < 16; i++) {
-        checksumBits.in[i] <== bs.out[29 * 8 + i - 8];
+    for (var i = 0; i < 16; i++) {
+        checksumBits.in[i] <== bs.out[29 * 8 + i];
     }
     checksum <== checksumBits.out;
 
@@ -147,13 +144,8 @@ template GatherID() {
 
     component checksumBits = Num2Bits(2*8);
     checksumBits.in <== checksum;
-    // put 1st byte of checksum into 31th byte of id
-    for (var i = 0; i < 8; i++) {
-        idBits.in[30*8+i] <== checksumBits.out[i];
-    }
-    // put 2nd byte of checksum into 30th byte of id
-    for (var i = 8; i < 16; i++) {
-        idBits.in[29*8+i-8] <== checksumBits.out[i];
+    for (var i = 0; i < 16; i++) {
+        idBits.in[29*8+i] <== checksumBits.out[i];
     }
 
     component genesisBits = Num2Bits(27*8);
@@ -182,6 +174,21 @@ template ShiftRight(n) {
     component outBits = Bits2Num(254-n);
     for (var i = n; i < 254; i++) {
         outBits.in[i-n] <== bits.out[i];
+    }
+    out <== outBits.out;
+}
+
+// Take least significan n bits
+template TakeNBits(n) {
+    signal input in;
+    signal output out;
+    // We take only least significant 27 * 8 bits from 254 bit number. 
+    component bits = Num2Bits(254);
+    bits.in <== in;
+
+    component outBits = Bits2Num(n);
+    for (var i = 0; i < n; i++) {
+        outBits.in[i] <== bits.out[i];
     }
     out <== outBits.out;
 }

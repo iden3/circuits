@@ -10,12 +10,10 @@ describe("idUtils.circom:", async function() {
         {
             desc: "First",
             input: {
-                typ: "49648",
-                genesis: "12590477270745565760216918871818154904274440992307045641577748017",
-                checksum: "4565",
+                in: "13843376158434186874150155371608112991467708075683980446964675987616037973262",
             },
             output: {
-                out: "31507297202617339271037322087289804665039118987722686458860089520937878000",
+                out: "423621611607500778482958",
             },
         },
     ];
@@ -25,9 +23,9 @@ describe("idUtils.circom:", async function() {
 
     before(async () => {
         circuit = await wasm_tester(
-            path.join(__dirname, "../circuits", "idUtils_GatherID.circom"),
+            path.join(__dirname, "../circuits", "idUtils_TakeNBits.circom"),
             {
-                output: path.join(__dirname, "../circuits", "build/idUtils_GatherID"),
+                output: path.join(__dirname, "../circuits", "build/idUtils_TakeNBits"),
                 recompile: true,
                 reduceConstraints: true,
             },
