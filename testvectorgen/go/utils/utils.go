@@ -6,9 +6,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/iden3/go-iden3-crypto/poseidon"
 	"math/big"
 	"os"
+
+	"github.com/iden3/go-iden3-crypto/poseidon"
 
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
@@ -119,7 +120,11 @@ func GenerateOnChainSmtWithIdState(identifier *core.ID, state *merkletree.Hash, 
 	ctx := context.Background()
 	smt, err := merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), treeLevels)
 	ExitOnError(err)
-	err = smt.Add(ctx, identifier.BigInt(), state.BigInt())
+	fmt.Println("Identifier", identifier.BigInt().String())
+	idHash, err := poseidon.Hash([]*big.Int{identifier.BigInt()})
+	fmt.Println("idHash", idHash.String())
+	ExitOnError(err)
+	err = smt.Add(ctx, idHash, state.BigInt())
 	ExitOnError(err)
 	return smt
 }

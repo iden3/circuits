@@ -30,9 +30,10 @@ func main() {
 	signingKeyIndex := 0
 	treeLevels := 32
 
-	useNullifier := false
+	useNullifier := true
 	onChainSmtTreeLevels := 32
 	isUserStateGenesis := true
+	salt := big.NewInt(10)
 
 	//todo If useOldAndNewStateForChallenge = true then an input for stateTransition circuit is generated
 	// It has correct values but wrong names, which is something that is better to fix
@@ -91,7 +92,7 @@ func main() {
 
 	circuitInputs["userState"] = userState.BigInt().String()
 	if useNullifier {
-		circuitInputs["userClearTextID"] = identifier.BigInt().String()
+		circuitInputs["userGenesisID"] = identifier.BigInt().String()
 	} else {
 		circuitInputs["userID"] = identifier.BigInt().String()
 	}
@@ -174,30 +175,31 @@ func main() {
 		err = onChainSmt.Add(ctx, big.NewInt(4), big.NewInt(300))
 		utils.ExitOnError(err)
 
-		proofIdentityInSmt, _, err := onChainSmt.GenerateProof(ctx, identifier.BigInt(), nil)
+		idHash, err := poseidon.Hash([]*big.Int{identifier.BigInt()})
+		utils.ExitOnError(err)
+		proofIdentityInSmt, _, err := onChainSmt.GenerateProof(ctx, idHash, nil)
 		utils.ExitOnError(err)
 
-		circuitInputs["userStateInOnChainSmtRoot"] = onChainSmt.Root().BigInt().String()
-		circuitInputs["userStateInOnChainSmtMtp"] = utils.PadSiblingsToTreeLevels(proofIdentityInSmt.AllSiblings(), onChainSmtTreeLevels)
+		circuitInputs["globalSmtRoot"] = onChainSmt.Root().BigInt().String()
+		circuitInputs["globalSmtMtp"] = utils.PadSiblingsToTreeLevels(proofIdentityInSmt.AllSiblings(), onChainSmtTreeLevels)
 
 		if proofIdentityInSmt.NodeAux == nil {
 			if isUserStateGenesis {
-				circuitInputs["userStateInOnChainSmtMtpNoAux"] = "1"
+				circuitInputs["globalSmtMtpNoAux"] = "1"
 			} else {
-				circuitInputs["userStateInOnChainSmtMtpNoAux"] = "0" // need 0 for circuit inputs in any case, because we prove inclusion
+				circuitInputs["globalSmtMtpNoAux"] = "0" // need 0 for circuit inputs in any case, because we prove inclusion
 			}
-			circuitInputs["userStateInOnChainSmtMtpAuxHi"] = "0"
-			circuitInputs["userStateInOnChainSmtMtpAuxHv"] = "0"
+			circuitInputs["globalSmtMtpAuxHi"] = "0"
+			circuitInputs["globalSmtMtpAuxHv"] = "0"
 		} else {
-			circuitInputs["userStateInOnChainSmtMtpNoAux"] = "0"
-			circuitInputs["userStateInOnChainSmtMtpAuxHi"] = proofIdentityInSmt.NodeAux.Key.BigInt().String()
-			circuitInputs["userStateInOnChainSmtMtpAuxHv"] = proofIdentityInSmt.NodeAux.Value.BigInt().String()
+			circuitInputs["globalSmtMtpNoAux"] = "0"
+			circuitInputs["globalSmtMtpAuxHi"] = proofIdentityInSmt.NodeAux.Key.BigInt().String()
+			circuitInputs["globalSmtMtpAuxHv"] = proofIdentityInSmt.NodeAux.Value.BigInt().String()
 		}
 
-		salt := big.NewInt(123456789)
-		nullifier := utils.GenerateNullifier(identifier, salt)
+		nullifier, err := core.ProfileID(*identifier, salt)
 		circuitInputs["userSalt"] = salt.String()
-		circuitOutputs["userID"] = nullifier.String()
+		circuitOutputs["userID"] = nullifier.BigInt().String()
 	}
 
 	fmt.Println()
