@@ -2,8 +2,10 @@ module test
 
 go 1.17
 
+replace github.com/iden3/go-iden3-core => ../../../go-iden3-core
+
 require (
-	github.com/iden3/go-iden3-core v0.1.1-0.20221021120133-b70ee94bd9a7
+	github.com/iden3/go-iden3-core v0.1.1-0.20221025125203-647bfb3a986a
 	github.com/iden3/go-iden3-crypto v0.0.13
 	github.com/iden3/go-merkletree-sql v1.0.0-pre9
 	github.com/pkg/errors v0.9.1

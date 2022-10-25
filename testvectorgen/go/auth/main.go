@@ -26,13 +26,13 @@ func main() {
 	}
 
 	numberOfKeys := 1
-	numberOfFirstClaimsToRevoke := 0
+	numberOfFirstClaimsToRevoke := 1
 	signingKeyIndex := 0
 	treeLevels := 32
 
 	useNullifier := true
 	onChainSmtTreeLevels := 32
-	isUserStateGenesis := true
+	isUserStateGenesis := false
 	salt := big.NewInt(10)
 
 	//todo If useOldAndNewStateForChallenge = true then an input for stateTransition circuit is generated
@@ -198,7 +198,7 @@ func main() {
 		}
 
 		nullifier, err := core.ProfileID(*identifier, salt)
-		circuitInputs["userSalt"] = salt.String()
+		circuitInputs["nonce"] = salt.String()
 		circuitOutputs["userID"] = nullifier.BigInt().String()
 	}
 
@@ -225,7 +225,14 @@ func createIdentityMultiAuthClaims(ctx context.Context, authClaims []*core.Claim
 		if i == 0 {
 			state, err := core.IdenState(claimsTree.Root().BigInt(), big.NewInt(0), big.NewInt(0))
 			utils.ExitOnError(err)
-			identifier, err = core.IdGenesisFromIdenState(core.TypeDefault, state)
+
+			typ, _ := core.BuildDIDType(core.DIDMethodIden3, core.Ethereum, core.Main)
+			identifier, err = core.IdGenesisFromIdenState(typ, state)
+			fmt.Println("identifier", identifier.String())
+			fmt.Println("identifier Int", identifier.BigInt().String())
+			did, _ := core.ParseDIDFromID(*identifier)
+			fmt.Println("did", did.String())
+
 			utils.ExitOnError(err)
 		}
 	}
