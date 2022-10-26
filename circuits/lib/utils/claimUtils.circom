@@ -147,6 +147,36 @@ template verifyCredentialSubject() {
     subjectOtherIden.id === id;
 }
 
+// verifyCredentialSubject verifies that claim is issued to a specified identity or identity profile
+// if nonce 0 is used, the claim should be issued to the genesis identity
+template verifyCredentialSubjectProfile() {
+	signal input claim[8];
+	signal input id;
+	signal input nonce;
+
+	component header = getClaimHeader();
+	for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
+
+	component subjectOtherIden = getClaimSubjectOtherIden();
+	for (var i=0; i<8; i++) { subjectOtherIden.claim[i] <== claim[i]; }
+
+
+	/* ProfileID calculation */
+    component calcProfile = ProfileID();
+    calcProfile.in <== id;
+    calcProfile.nonce <== nonce;
+
+    component isSaltZero = IsZero();
+    isSaltZero.in <== nonce;
+
+    component selectProfile = Mux1();
+    selectProfile.s <== isSaltZero.out;
+    selectProfile.c[0] <== calcProfile.out;
+    selectProfile.c[1] <== id;
+
+    subjectOtherIden.id === selectProfile.out;
+}
+
 // verifyCredentialSchema verifies that claim matches provided schema
 template verifyCredentialSchema() {
 	signal input claim[8];
