@@ -32,21 +32,20 @@ template credentialAtomicQuerySigV2(IdOwnershipLevels, IssuerLevels, OnChainSmtL
     */
 
     /* 0n-chain SMT state proof */
-    signal input userStateInOnChainSmtRoot;
-    signal input userStateInOnChainSmtMtp[OnChainSmtLevels];
-    signal input userStateInOnChainSmtMtpAuxHi;
-    signal input userStateInOnChainSmtMtpAuxHv;
-    signal input userStateInOnChainSmtMtpNoAux;
+    signal input globalSmtRoot;
+    signal input globalSmtMtp[OnChainSmtLevels];
+    signal input globalSmtMtpAuxHi;
+    signal input globalSmtMtpAuxHv;
+    signal input globalSmtMtpNoAux;
 
-    /* Nullifier signals */
-    signal input userSalt;
-    // userID output signal will be assigned with nullifier hash(UserID, userSalt),
-    // unless userSalt == 0, in which case userID will be assigned with userClearTextID
+    // userID output signal will be assigned with ProfileID ProfileID(UserID, nonce),
+    // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
     /* userID ownership signals */
-    signal input userClearTextID;
+    signal input userGenesisID;
     signal input userState;
+    signal input nonce; /* random number */
 
     signal input userClaimsTreeRoot;
     signal input userAuthClaimMtp[IdOwnershipLevels];
@@ -67,9 +66,10 @@ template credentialAtomicQuerySigV2(IdOwnershipLevels, IssuerLevels, OnChainSmtL
     signal input challengeSignatureS;
 
     /* issuerClaim signals */
+    signal input claimSubjectProfileNonce; // nonce of the profile that claim is issued to, 0 if claim is issued to genesisID
 
     signal input issuerClaim[8];
-    
+
     // issuerClaim signature
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
@@ -118,9 +118,9 @@ template credentialAtomicQuerySigV2(IdOwnershipLevels, IssuerLevels, OnChainSmtL
     /* Id ownership check*/
     component userIdOwnership = AuthV2(IdOwnershipLevels, OnChainSmtLevels);
 
-    userIdOwnership.userClearTextID <== userClearTextID;
+    userIdOwnership.userGenesisID <== userGenesisID;
     userIdOwnership.userState <== userState;
-    userIdOwnership.userSalt <== userSalt;
+    userIdOwnership.nonce <== nonce;
 
     userIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot; // currentHolderStateClaimsTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
@@ -139,19 +139,20 @@ template credentialAtomicQuerySigV2(IdOwnershipLevels, IssuerLevels, OnChainSmtL
     userIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
     userIdOwnership.challengeSignatureS <== challengeSignatureS;
 
-    userIdOwnership.userStateInOnChainSmtRoot <== userStateInOnChainSmtRoot;
-    for (var i=0; i<OnChainSmtLevels; i++) { userIdOwnership.userStateInOnChainSmtMtp[i] <== userStateInOnChainSmtMtp[i]; }
-    userIdOwnership.userStateInOnChainSmtMtpAuxHi <== userStateInOnChainSmtMtpAuxHi;
-    userIdOwnership.userStateInOnChainSmtMtpAuxHv <== userStateInOnChainSmtMtpAuxHv;
-    userIdOwnership.userStateInOnChainSmtMtpNoAux <== userStateInOnChainSmtMtpNoAux;
+    userIdOwnership.globalSmtRoot <== globalSmtRoot;
+    for (var i=0; i<OnChainSmtLevels; i++) { userIdOwnership.globalSmtMtp[i] <== globalSmtMtp[i]; }
+    userIdOwnership.globalSmtMtpAuxHi <== globalSmtMtpAuxHi;
+    userIdOwnership.globalSmtMtpAuxHv <== globalSmtMtpAuxHv;
+    userIdOwnership.globalSmtMtpNoAux <== globalSmtMtpNoAux;
 
     userID <== userIdOwnership.userID;
 
 
     // Check issuerClaim is issued to provided identity
-    component claimIdCheck = verifyCredentialSubject();
+    component claimIdCheck = verifyCredentialSubjectProfile();
     for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
-    claimIdCheck.id <== userClearTextID;
+    claimIdCheck.id <== userGenesisID;
+    claimIdCheck.nonce <== claimSubjectProfileNonce;
 
     // Verify issuerClaim schema
     component claimSchemaCheck = verifyCredentialSchema();
