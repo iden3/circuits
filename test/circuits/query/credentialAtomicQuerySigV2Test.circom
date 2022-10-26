@@ -2,7 +2,7 @@ pragma circom 2.0.0;
 
 include "../../../circuits/lib/query/credentialAtomicQuerySigV2.circom";
 
-component main{public [userStateInOnChainSmtRoot,
+component main{public [globalSmtRoot,
                         challenge,
                         issuerID,
                         issuerClaimNonRevState,
@@ -11,3 +11,4 @@ component main{public [userStateInOnChainSmtRoot,
                         operator,
                         value,
                         timestamp]} = credentialAtomicQuerySigV2(32, 32, 32, 64);
+
