@@ -6,6 +6,7 @@ include "../lib/query/comparators.circom";
 include "../lib/authV2.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
+include "../lib/query/jsonldQuery.circom";
 
 
 /**
@@ -26,7 +27,7 @@ valueArraySize - Number of elements in comparison array for in/notin operation i
 comparison ["1", "2", "3"]
 
 */
-template credentialAtomicQuerySigV2(IssuerLevels, OnChainSmtLevels, valueArraySize) {
+template credentialAtomicQuerySigV2(IssuerLevels, ClaimLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -109,6 +110,15 @@ template credentialAtomicQuerySigV2(IssuerLevels, OnChainSmtLevels, valueArraySi
 
     /** Query */
     signal input claimSchema;
+
+    signal input claimPathNotExists; // 0 for inclusion, 1 for non-inclusion
+    signal input claimPathMtp[ClaimLevels];
+    signal input claimPathMtpNoAux; // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+    signal input claimPathMtpAuxHi; // 0 for inclusion proof
+    signal input claimPathMtpAuxHv; // 0 for inclusion proof
+    signal input claimPathKey; // hash of path in merklized json-ld document
+    signal input claimPathValue; // value in this path in merklized json-ld document
+
     signal input slotIndex;
     signal input operator;
     signal input value[valueArraySize];
@@ -199,14 +209,37 @@ template credentialAtomicQuerySigV2(IssuerLevels, OnChainSmtLevels, valueArraySi
     verifyClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
 
     // query
+    // TODO: add support for old queries
+//    component getClaimValue = getValueByIndex();
+//    for (var i=0; i<8; i++) { getClaimValue.claim[i] <== issuerClaim[i]; }
+//    getClaimValue.index <== slotIndex;
+//
+//    component q = Query(valueArraySize);
+//    q.in <== getClaimValue.value;
+//    q.operator <== operator;
+//    for(var i = 0; i<valueArraySize; i++){q.value[i] <== value[i];}
+//    q.out === 1;
+
+    // Query
     component getClaimValue = getValueByIndex();
     for (var i=0; i<8; i++) { getClaimValue.claim[i] <== issuerClaim[i]; }
-    getClaimValue.index <== slotIndex;
+    getClaimValue.index <== 2; // we expect to find json-ld claim tree root in 3rd slot of index
 
-    component q = Query(valueArraySize);
-    q.in <== getClaimValue.value;
+    component q = JsonLDQuery(valueArraySize, ClaimLevels);
+
+    log("claim root:", getClaimValue.value);
+
+    q.jsonldRoot <== getClaimValue.value;
+    q.notExists <== claimPathNotExists;
+    for(var i = 0; i<ClaimLevels; i++){q.mtp[i] <== claimPathMtp[i];}
+    q.auxNodeKey <== claimPathMtpAuxHi;
+    q.auxNodeValue <== claimPathMtpAuxHv;
+    q.auxNodeEmpty <== claimPathMtpNoAux;
+    q.path <== claimPathKey;
+    q.in <== claimPathValue;
     q.operator <== operator;
     for(var i = 0; i<valueArraySize; i++){q.value[i] <== value[i];}
+
     q.out === 1;
 
 
