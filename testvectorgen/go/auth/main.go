@@ -30,12 +30,12 @@ func main() {
 	signingKeyIndex := 0
 	treeLevels := 32
 
-	useNullifier := true
+	useProfile := true
 	onChainSmtTreeLevels := 32
 	isUserStateGenesis := false
 	salt := big.NewInt(10)
 
-	//todo If useOldAndNewStateForChallenge = true then an input for stateTransition circuit is generated
+	// todo If useOldAndNewStateForChallenge = true then an input for stateTransition circuit is generated
 	// It has correct values but wrong names, which is something that is better to fix
 	useOldAndNewStateForChallenge := false
 	newState, _ := big.NewInt(0).SetString("8061408109549794622894897529509400209321866093562736009325703847306244896707", 10)
@@ -45,7 +45,7 @@ func main() {
 	fmt.Println("Number of keys:", numberOfKeys)
 	fmt.Println("Signing key index:", signingKeyIndex)
 	fmt.Println("Number of first keys to revoke:", numberOfFirstClaimsToRevoke)
-	fmt.Println("Use nullifier:", useNullifier)
+	fmt.Println("Use profile:", useProfile)
 	fmt.Println("isUserStateGenesis:", isUserStateGenesis)
 
 	privKeys := createPrivateKeys(privKeysHex[:numberOfKeys])
@@ -91,7 +91,7 @@ func main() {
 	}
 
 	circuitInputs["userState"] = userState.BigInt().String()
-	if useNullifier {
+	if useProfile {
 		circuitInputs["userGenesisID"] = identifier.BigInt().String()
 	} else {
 		circuitInputs["userID"] = identifier.BigInt().String()
@@ -160,7 +160,7 @@ func main() {
 	circuitInputs["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
 	circuitInputs["challengeSignatureS"] = decompressedSig.S.String()
 
-	if useNullifier {
+	if useProfile {
 		var onChainSmt *merkletree.MerkleTree
 		if isUserStateGenesis {
 			onChainSmt, err = merkletree.NewMerkleTree(ctx, memory.NewMemoryStorage(), 32)
@@ -197,9 +197,9 @@ func main() {
 			circuitInputs["globalSmtMtpAuxHv"] = proofIdentityInSmt.NodeAux.Value.BigInt().String()
 		}
 
-		nullifier, err := core.ProfileID(*identifier, salt)
+		profile, err := core.ProfileID(*identifier, salt)
 		circuitInputs["nonce"] = salt.String()
-		circuitOutputs["userID"] = nullifier.BigInt().String()
+		circuitOutputs["userID"] = profile.BigInt().String()
 	}
 
 	fmt.Println()
