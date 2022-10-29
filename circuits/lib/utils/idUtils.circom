@@ -16,11 +16,11 @@ template ProfileID(){
     component genesis = TakeNBits(27*8);
     genesis.in <== hash.out;
 
-    component oldIdParts = SplitID();
-    oldIdParts.id <== in;
+    component genesisIdParts = SplitID();
+    genesisIdParts.id <== in;
 
     component newId = NewID();
-    newId.typ <== oldIdParts.typ;
+    newId.typ <== genesisIdParts.typ;
     newId.genesis <== genesis.out;
 
     out <== newId.out;
