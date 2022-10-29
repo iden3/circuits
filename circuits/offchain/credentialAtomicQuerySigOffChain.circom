@@ -33,43 +33,16 @@ template credentialAtomicQuerySigV2(IssuerLevels, ClaimLevels, valueArraySize) {
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
-    /* 0n-chain SMT state proof */
-//    signal input globalSmtRoot;
-//    signal input globalSmtMtp[OnChainSmtLevels];
-//    signal input globalSmtMtpAuxHi;
-//    signal input globalSmtMtpAuxHv;
-//    signal input globalSmtMtpNoAux;
-
     // userID output signal will be assigned with ProfileID ProfileID(UserID, nonce),
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
     /* userID ownership signals */
     signal input userGenesisID;
-//    signal input userState;
     signal input nonce; /* random number */
-
-//    signal input userClaimsTreeRoot;
-//    signal input userAuthClaimMtp[IdOwnershipLevels];
-//    signal input userAuthClaim[8];
-
-//    signal input userRevTreeRoot;
-//    signal input userAuthClaimNonRevMtp[IdOwnershipLevels];
-//    signal input userAuthClaimNonRevMtpNoAux;
-//    signal input userAuthClaimNonRevMtpAuxHi;
-//    signal input userAuthClaimNonRevMtpAuxHv;
-
-//    signal input userRootsTreeRoot;
-
-    /* signature*/
-//    signal input challenge;
-//    signal input challengeSignatureR8x;
-//    signal input challengeSignatureR8y;
-//    signal input challengeSignatureS;
 
     /* issuerClaim signals */
     signal input claimSubjectProfileNonce; // nonce of the profile that claim is issued to, 0 if claim is issued to genesisID
-
 
     // issuer state
     signal input issuerID;
