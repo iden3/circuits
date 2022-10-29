@@ -227,8 +227,6 @@ template credentialAtomicQuerySigV2(IssuerLevels, ClaimLevels, valueArraySize) {
 
     component q = JsonLDQuery(valueArraySize, ClaimLevels);
 
-    log("claim root:", getClaimValue.value);
-
     q.jsonldRoot <== getClaimValue.value;
     q.notExists <== claimPathNotExists;
     for(var i = 0; i<ClaimLevels; i++){q.mtp[i] <== claimPathMtp[i];}
@@ -258,7 +256,4 @@ template credentialAtomicQuerySigV2(IssuerLevels, ClaimLevels, valueArraySize) {
     selectProfile.c[1] <== userGenesisID;
 
     userID <== selectProfile.out;
-    log("userID", userGenesisID);
-    log("nonce", nonce);
-    log("ProfileID", selectProfile.out);
 }
