@@ -163,19 +163,11 @@ template verifyCredentialSubjectProfile() {
 
 
     /* ProfileID calculation */
-    component calcProfile = ProfileID();
-    calcProfile.in <== id;
-    calcProfile.nonce <== nonce;
+    component profile = SelectProfile();
+    profile.in <== id;
+    profile.nonce <== nonce;
 
-    component isSaltZero = IsZero();
-    isSaltZero.in <== nonce;
-
-    component selectProfile = Mux1();
-    selectProfile.s <== isSaltZero.out;
-    selectProfile.c[0] <== calcProfile.out;
-    selectProfile.c[1] <== id;
-
-    subjectOtherIden.id === selectProfile.out;
+    subjectOtherIden.id === profile.out;
 }
 
 // verifyCredentialSchema verifies that claim matches provided schema

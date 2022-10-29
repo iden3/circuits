@@ -10,7 +10,9 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
 
     signal input userGenesisID;
     signal input userState;
-    signal input nonce; // random number
+    // random number, which should be stored by user
+    // if there is a need to generate the same userID (ProfileID) output for different proofs
+    signal input nonce;
 
     // user state
     signal input userClaimsTreeRoot;
@@ -97,17 +99,9 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     onChainSmtCheck.value <== userState;
 
     /* ProfileID calculation */
-    component calcProfile = ProfileID();
+    component calcProfile = SelectProfile();
     calcProfile.in <== userGenesisID;
     calcProfile.nonce <== nonce;
 
-    component isSaltZero = IsZero();
-    isSaltZero.in <== nonce;
-
-    component selectProfile = Mux1();
-    selectProfile.s <== isSaltZero.out;
-    selectProfile.c[0] <== calcProfile.out;
-    selectProfile.c[1] <== userGenesisID;
-
-    userID <== selectProfile.out;
+    userID <== calcProfile.out;
 }

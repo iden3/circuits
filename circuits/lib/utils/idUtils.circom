@@ -3,6 +3,7 @@ pragma circom 2.0.9;
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/binsum.circom";
 include "../../../node_modules/circomlib/circuits/eddsaposeidon.circom";
+include "../../../node_modules/circomlib/circuits/mux1.circom";
 
 template ProfileID(){
     signal input in;
@@ -166,4 +167,27 @@ template LastNBits(n) {
         outBits.in[i] <== inBits.out[i];
     }
     out <== outBits.out;
+}
+
+// SelectProfile `out` output signal will be assigned with user profile,
+// unless nonce == 0, in which case profile will be assigned with `in` id
+template SelectProfile() {
+    signal input in;
+    signal input nonce;
+
+    signal output out;
+
+    component calcProfile = ProfileID();
+    calcProfile.in <== in;
+    calcProfile.nonce <== nonce;
+
+    component isSaltZero = IsZero();
+    isSaltZero.in <== nonce;
+
+    component selectProfile = Mux1();
+    selectProfile.s <== isSaltZero.out;
+    selectProfile.c[0] <== calcProfile.out;
+    selectProfile.c[1] <== in;
+
+    out <== selectProfile.out;
 }
