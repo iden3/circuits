@@ -8,7 +8,7 @@ include "lib/authV2.circom";
 * Auth claim should be in the user state and not revoked.
 * User state should be genesis or added to the global state tree (available in the smart contract).
 * The state is verified out of circuits by a verifier.
-* verification inputs:
+* public signals:
     - userID
     - challenge
     - globalSmtRoot
