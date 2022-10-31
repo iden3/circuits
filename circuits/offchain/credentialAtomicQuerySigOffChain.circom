@@ -213,20 +213,11 @@ template credentialAtomicQuerySigV2(IssuerLevels, ClaimLevels, valueArraySize) {
 
     q.out === 1;
 
-
     // TODO calculate USERID
     /* ProfileID calculation */
-    component calcProfile = ProfileID();
-    calcProfile.in <== userGenesisID;
-    calcProfile.nonce <== nonce;
-
-    component isSaltZero = IsZero();
-    isSaltZero.in <== nonce;
-
-    component selectProfile = Mux1();
-    selectProfile.s <== isSaltZero.out;
-    selectProfile.c[0] <== calcProfile.out;
-    selectProfile.c[1] <== userGenesisID;
+    component selectProfile = SelectProfile();
+    selectProfile.in <== userGenesisID;
+    selectProfile.nonce <== nonce;
 
     userID <== selectProfile.out;
 }
