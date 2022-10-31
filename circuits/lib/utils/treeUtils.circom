@@ -5,6 +5,7 @@ include "../../../node_modules/circomlib/circuits/eddsaposeidon.circom";
 include "../../../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../../../node_modules/circomlib/circuits/mux3.circom";
 include "../../../node_modules/circomlib/circuits/mux1.circom";
+include "claimUtils.circom";
 
 // getIdenState caclulates the Identity state out of the claims tree root,
 // revocations tree root and roots tree root.
