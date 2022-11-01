@@ -27,11 +27,18 @@ valueArraySize - Number of elements in comparison array for in/notin operation i
 comparison ["1", "2", "3"]
 
 */
-template credentialAtomicQuerySigV2(IssuerLevels, ClaimLevels, valueArraySize) {
+template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
+
+    // flag indicates if merkleized flag set in issuer claim (if set MTP is used to verify that
+    // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed
+    // on root stored in the index or value slot
+    // if it is not set verification is performed on according to the slotIndex. Value selected from the
+    // provided slot. For example if slotIndex is `1` value gets from `i_1` slot. If `4` from `v_1`.
+    signal output merklized;
 
     // userID output signal will be assigned with ProfileID ProfileID(UserID, nonce),
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
@@ -181,43 +188,48 @@ template credentialAtomicQuerySigV2(IssuerLevels, ClaimLevels, valueArraySize) {
     verifyClaimNotRevoked.auxHv <== issuerClaimNonRevMtpAuxHv;
     verifyClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
 
-    // query
-    // TODO: add support for old queries
-//    component getClaimValue = getValueByIndex();
-//    for (var i=0; i<8; i++) { getClaimValue.claim[i] <== issuerClaim[i]; }
-//    getClaimValue.index <== slotIndex;
-//
-//    component q = Query(valueArraySize);
-//    q.in <== getClaimValue.value;
-//    q.operator <== operator;
-//    for(var i = 0; i<valueArraySize; i++){q.value[i] <== value[i];}
-//    q.out === 1;
+    component merklize = getClaimMerklizeRoot();
+    for (var i=0; i<8; i++) { merklize.claim[i] <== issuerClaim[i]; }
 
-    // Query
+    // check path/in node exists in merkletree specified by jsonldRoot
+    component valueInMT = SMTVerifier(ClaimLevels);
+    valueInMT.enabled <== merklize.flag;  // if merklize flag 0 skip MTP verification
+    valueInMT.fnc <== claimPathNotExists; // inclusion
+    valueInMT.root <== merklize.out;
+    for (var i=0; i<ClaimLevels; i++) { valueInMT.siblings[i] <== claimPathMtp[i]; }
+    valueInMT.oldKey <== claimPathMtpAuxHi;
+    valueInMT.oldValue <== claimPathMtpAuxHv;
+    valueInMT.isOld0 <== claimPathMtpNoAux;
+    valueInMT.key <== claimPathKey;
+    valueInMT.value <== claimPathValue;
+
+    // select value from claim by slot index (0-7)
     component getClaimValue = getValueByIndex();
     for (var i=0; i<8; i++) { getClaimValue.claim[i] <== issuerClaim[i]; }
-    getClaimValue.index <== 2; // we expect to find json-ld claim tree root in 3rd slot of index
+    getClaimValue.index <== slotIndex;
 
-    component q = JsonLDQuery(valueArraySize, ClaimLevels);
+    // select value for query verification,
+    // if claim is merklized merklizeFlag = `1|2`, take claimPathValue
+    // if not merklized merklizeFlag = `0`, take value from selected slot
+    component queryValue = Mux1();
+    queryValue.s <== merklize.flag;
+    queryValue.c[0] <== getClaimValue.value;
+    queryValue.c[1] <== claimPathValue;
 
-    q.jsonldRoot <== getClaimValue.value;
-    q.notExists <== claimPathNotExists;
-    for(var i = 0; i<ClaimLevels; i++){q.mtp[i] <== claimPathMtp[i];}
-    q.auxNodeKey <== claimPathMtpAuxHi;
-    q.auxNodeValue <== claimPathMtpAuxHv;
-    q.auxNodeEmpty <== claimPathMtpNoAux;
-    q.path <== claimPathKey;
-    q.in <== claimPathValue;
-    q.operator <== operator;
-    for(var i = 0; i<valueArraySize; i++){q.value[i] <== value[i];}
+    // verify query
+    component query = Query(valueArraySize);
+    query.in <== queryValue.out;
+    for (var i=0; i<valueArraySize; i++) { query.value[i] <== value[i]; }
+    query.operator <== operator;
 
-    q.out === 1;
+    query.out === 1;
 
-    // TODO calculate USERID
+
     /* ProfileID calculation */
     component selectProfile = SelectProfile();
     selectProfile.in <== userGenesisID;
     selectProfile.nonce <== nonce;
 
     userID <== selectProfile.out;
+    merklized <== merklize.flag;
 }
