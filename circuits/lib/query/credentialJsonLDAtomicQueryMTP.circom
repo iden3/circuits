@@ -3,7 +3,7 @@ include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "comparators.circom";
-include "../idOwnershipBySignature.circom";
+include "../idOwnership.circom";
 include "jsonldQuery.circom";
 
 
@@ -93,7 +93,7 @@ template CredentialJsonLDAtomicQueryMTP(IdOwnershipLevels, IssuerLevels, ClaimLe
     */
 
     /* Id ownership check*/
-    component userIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
+    component userIdOwnership = IdOwnership(IdOwnershipLevels);
 
     userIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot; // currentHolderStateClaimsTreeRoot
     for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
