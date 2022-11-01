@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	core "github.com/iden3/go-iden3-core"
+	"github.com/iden3/go-merkletree-sql"
 	"github.com/iden3/go-schema-processor/merklize"
 	"github.com/stretchr/testify/require"
 	"test/utils"
@@ -74,6 +75,7 @@ type CredentialAtomicSigOffChainV2Outputs struct {
 	Operator               int      `json:"operator"`
 	Value                  []string `json:"value"`
 	Timestamp              string   `json:"timestamp"`
+	Merklized              string   `json:"merklized"`
 }
 
 type TestDataSigV2 struct {
@@ -84,41 +86,50 @@ type TestDataSigV2 struct {
 
 func Test_UserID_Subject(t *testing.T) {
 
-	desc := "UserID = Subject. UserID out. User nonce = 0, Subject nonce = 0 claim issued on userID"
+	desc := "UserID = Subject. UserID out. User nonce = 0, Subject nonce = 0 claim issued on userID (Merklized claim)"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
-	generateTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "userID_subject")
+	generateJSONLDTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "userID_subject")
 }
 
 func Test_IssueClaimToProfile(t *testing.T) {
 
-	desc := "UserID != Subject. UserID out. User nonce = 0. Claim issued on Profile (subject nonce = 999)"
+	desc := "UserID != Subject. UserID out. User nonce = 0. Claim issued on Profile (subject nonce = 999) (Merklized claim)"
 	isUserIDProfile := false
 	isSubjectIDProfile := true
 
-	generateTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "profileID_subject")
+	generateJSONLDTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "profileID_subject")
 }
 
 func Test_IssueClaimToProfile_2(t *testing.T) {
 
-	desc := "UserID != Subject. UserProfile out. User nonce = 10. Claim issued on Profile (subject nonce = 0)"
+	desc := "UserID != Subject. UserProfile out. User nonce = 10. Claim issued on Profile (subject nonce = 0) (Merklized claim)"
 	isUserIDProfile := true
 	isSubjectIDProfile := false
 
-	generateTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "profileID_subject_userid")
+	generateJSONLDTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "profileID_subject_userid")
 }
 
 func Test_IssueClaimToProfile_3(t *testing.T) {
 
-	desc := "UserID == Subject. UserProfile out. User nonce = 10. Claim issued on Profile (subject nonce = 999)"
+	desc := "UserID == Subject. UserProfile out. User nonce = 10. Claim issued on Profile (subject nonce = 999) (Merklized claim)"
 	isUserIDProfile := true
 	isSubjectIDProfile := true
 
-	generateTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "profileID_subject_profileID2")
+	generateJSONLDTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "profileID_subject_profileID2")
 }
 
-func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
+func Test_RegularClaim(t *testing.T) {
+
+	desc := "UserID == Subject. UserID out. User nonce = 0, Subject nonce = 0 claim issued on userID (Claim)"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+
+	generateTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "regular_claim")
+}
+
+func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
 	user, err := utils.NewIdentity(userPK)
 	require.NoError(t, err)
 
@@ -229,6 +240,137 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		Operator:               utils.EQ,
 		Value:                  []string{"1420070400000000000", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
 		Timestamp:              timestamp,
+		Merklized:              "1",
+	}
+
+	json, err := json2.Marshal(TestDataSigV2{
+		desc,
+		inputs,
+		out,
+	})
+	require.NoError(t, err)
+
+	utils.SaveTestVector(t, fileName, string(json))
+}
+
+func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
+	user, err := utils.NewIdentity(userPK)
+	require.NoError(t, err)
+
+	issuer, err := utils.NewIdentity(issuerPK)
+	require.NoError(t, err)
+
+	userProfileID := user.ID
+	nonce := big.NewInt(0)
+	if isUserIDProfile {
+		nonce = big.NewInt(10)
+		userProfileID, err = core.ProfileID(user.ID, nonce)
+		require.NoError(t, err)
+	}
+
+	subjectID := user.ID
+	nonceSubject := big.NewInt(0)
+	if isSubjectIDProfile {
+		nonceSubject = big.NewInt(999)
+		subjectID, err = core.ProfileID(user.ID, nonceSubject)
+		require.NoError(t, err)
+	}
+
+	claim, err := utils.DefaultUserClaim(subjectID)
+	require.NoError(t, err)
+
+	//mz, claim, err := utils.DefaultJSONUserClaim(subjectID)
+	//require.NoError(t, err)
+	//
+	//path, err := merklize.NewPath(
+	//	"https://www.w3.org/2018/credentials#credentialSubject",
+	//	"https://w3id.org/citizenship#residentSince")
+	//require.NoError(t, err)
+	//
+	//jsonP, value, err := mz.Proof(context.Background(), path)
+	//
+	//valueKey, err := mz.HashValue(value)
+	//require.NoError(t, err)
+	//
+	//claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
+	//
+	//pathKey, err := path.Key()
+	//require.NoError(t, err)
+
+	// Sig claim
+	claimSig, err := issuer.SignClaimBBJJ(claim)
+	require.NoError(t, err)
+
+	issuerClaimNonRevState, err := issuer.State()
+	require.NoError(t, err)
+
+	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
+	require.NoError(t, err)
+
+	issuerAuthClaimMtp, issuerAuthClaimNodeAux, err := issuer.ClaimRevMTP(issuer.AuthClaim)
+
+	emptyPathMtp := utils.PrepareSiblingsStr([]*merkletree.Hash{&merkletree.HashZero}, 32)
+
+	inputs := CredentialAtomicSigOffChainV2Inputs{
+		UserGenesisID:                   user.ID.BigInt().String(),
+		Nonce:                           nonce.String(),
+		ClaimSubjectProfileNonce:        nonceSubject.String(),
+		IssuerID:                        issuer.ID.BigInt().String(),
+		IssuerClaim:                     claim,
+		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root().BigInt().String(),
+		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root().BigInt().String(),
+		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root().BigInt().String(),
+		IssuerClaimNonRevState:          issuerClaimNonRevState.String(),
+		IssuerClaimNonRevMtp:            issuerClaimNonRevMtp,
+		IssuerClaimNonRevMtpAuxHi:       issuerClaimNonRevAux.Key,
+		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
+		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
+		IssuerClaimSignatureR8X:         claimSig.R8.X.String(),
+		IssuerClaimSignatureR8Y:         claimSig.R8.Y.String(),
+		IssuerClaimSignatureS:           claimSig.S.String(),
+		IssuerAuthClaim:                 issuer.AuthClaim,
+		IssuerAuthClaimMtp:              issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtp:        issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtpAuxHi:   issuerAuthClaimNodeAux.Key,
+		IssuerAuthClaimNonRevMtpAuxHv:   issuerAuthClaimNodeAux.Value,
+		IssuerAuthClaimNonRevMtpNoAux:   issuerAuthClaimNodeAux.NoAux,
+		IssuerAuthClaimsTreeRoot:        issuer.Clt.Root().BigInt().String(),
+		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
+		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
+		ClaimSchema:                     "180410020913331409885634153623124536270",
+
+		ClaimPathNotExists: "0", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:       emptyPathMtp,
+		ClaimPathMtpNoAux:  "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi:  "0", // 0 for inclusion proof
+		ClaimPathMtpAuxHv:  "0", // 0 for inclusion proof
+		ClaimPathKey:       "0", // hash of path in merklized json-ld document
+		ClaimPathValue:     "0", // value in this path in merklized json-ld document
+		// value in this path in merklized json-ld document
+
+		Operator:  utils.EQ,
+		SlotIndex: 2,
+		Timestamp: timestamp,
+		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
+			"0", "0",
+			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+	}
+
+	issuerAuthState, err := issuer.State()
+	require.NoError(t, err)
+
+	out := CredentialAtomicSigOffChainV2Outputs{
+		UserID:                 userProfileID.BigInt().String(),
+		IssuerID:               issuer.ID.BigInt().String(),
+		IssuerAuthState:        issuerAuthState.String(),
+		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
+		ClaimSchema:            "180410020913331409885634153623124536270",
+		SlotIndex:              "2",
+		Operator:               utils.EQ,
+		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
+			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Timestamp: timestamp,
+		Merklized: "0",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
