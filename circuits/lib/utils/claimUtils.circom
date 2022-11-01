@@ -36,6 +36,44 @@ template getClaimSubjectOtherIden() {
     id <== mux.out;
 }
 
+// getClaimMerkilizeFlag checks that a claim flag is set and return merklized slot.
+template getClaimMerklizeRoot() {
+    signal input claim[8];
+    signal output flag; // 0 non merklized, 1 merklized
+
+    // merklizeFlag = 0 out = 0 , non merkilized
+    // merklizeFlag = 1 out=claim_i_2, root is stored in index slot 2 (i_2)
+    // merklizeFlag = 2 out=claim_v_2, root is stored in value slot 2 (v_2)
+    signal output out;
+
+    // get header flags from claim.
+    component header = getClaimHeader();
+    for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
+
+    // get subject location from header flags.
+    component merklizeLocation = getMerklizeLocation();
+    for (var i = 0; i < 32; i++) { merklizeLocation.claimFlags[i] <== header.claimFlags[i]; }
+
+    component mux = Mux2();
+    component n2b = Num2Bits(2);
+    n2b.in <== merklizeLocation.out;
+
+    mux.s[0] <== n2b.out[0];
+    mux.s[1] <== n2b.out[1];
+
+    mux.c[0] <== 0;
+    mux.c[1] <== claim[0*4 +2];
+    mux.c[2] <== claim[1*4 +2];
+    mux.c[3] <== 0;
+
+    out <== mux.out;
+
+    component gt = GreaterThan(252);
+    gt.in[0] <== merklizeLocation.out;
+    gt.in[1] <== 0;
+    flag <== gt.out;
+}
+
 
 // getClaimHeader gets the header of a claim, outputing the claimType as an
 // integer and the claimFlags as a bit array.
@@ -307,6 +345,21 @@ template getSubjectLocation() {
     }
 
     out <== subjectBits.out;
+}
+
+// getMerklizeLocation extract merklize from claim flags.
+// 0 - not merklized, 1 - root in index slot i_2[root], 2 - root in value slot v_2[root]
+template getMerklizeLocation() {
+    signal input claimFlags[32];
+    signal output out;
+
+    component mtBits = Bits2Num(3);
+
+    for (var i=5; i<8; i++) {
+        mtBits.in[i-5] <== claimFlags[i];
+    }
+
+    out <== mtBits.out;
 }
 
 // isExpirable return 1 if expiration flag is set otherwise 0.
