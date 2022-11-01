@@ -260,7 +260,8 @@ func DefaultJSONUserClaim(subject core.ID) (*merklize.Merklizer, *core.Claim, er
 		core.WithIndexID(subject),
 		core.WithIndexData(dataSlotA, core.ElemBytes{}),
 		core.WithExpirationDate(time.Unix(1669884010, 0)), //Thu Dec 01 2022 08:40:10 GMT+0000
-		core.WithRevocationNonce(uint64(nonce)))
+		core.WithRevocationNonce(uint64(nonce)),
+		core.WithFlagMerklized(core.MerklizePositionIndex))
 
 	return mz, claim, err
 }
