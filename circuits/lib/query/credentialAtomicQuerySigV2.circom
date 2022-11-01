@@ -3,7 +3,7 @@ include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "comparators.circom";
-include "../idOwnership.circom";
+include "../authV2.circom";
 include "query.circom";
 
 
@@ -25,15 +25,27 @@ valueArraySize - Number of elements in comparison array for in/notin operation i
 comparison ["1", "2", "3"]
 
 */
-template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySize) {
+template credentialAtomicQuerySigV2(IdOwnershipLevels, IssuerLevels, OnChainSmtLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
+    /* 0n-chain SMT state proof */
+    signal input globalSmtRoot;
+    signal input globalSmtMtp[OnChainSmtLevels];
+    signal input globalSmtMtpAuxHi;
+    signal input globalSmtMtpAuxHv;
+    signal input globalSmtMtpNoAux;
+
+    // userID output signal will be assigned with ProfileID ProfileID(UserID, nonce),
+    // unless nonce == 0, in which case userID will be assigned with userGenesisID
+    signal output userID;
+
     /* userID ownership signals */
-    signal input userID;
+    signal input userGenesisID;
     signal input userState;
+    signal input nonce; /* random number */
 
     signal input userClaimsTreeRoot;
     signal input userAuthClaimMtp[IdOwnershipLevels];
@@ -54,9 +66,10 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     signal input challengeSignatureS;
 
     /* issuerClaim signals */
+    signal input claimSubjectProfileNonce; // nonce of the profile that claim is issued to, 0 if claim is issued to genesisID
 
     signal input issuerClaim[8];
-    
+
     // issuerClaim signature
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
@@ -103,32 +116,43 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     */
 
     /* Id ownership check*/
-    component checkIdOwnership = IdOwnership(IdOwnershipLevels);
+    component userIdOwnership = AuthV2(IdOwnershipLevels, OnChainSmtLevels);
 
-    checkIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot;
-    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
-    for (var i=0; i<8; i++) { checkIdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
+    userIdOwnership.userGenesisID <== userGenesisID;
+    userIdOwnership.userState <== userState;
+    userIdOwnership.nonce <== nonce;
 
-    checkIdOwnership.userRevTreeRoot <== userRevTreeRoot;
-    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
-    checkIdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
-    checkIdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
-    checkIdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
+    userIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot; // currentHolderStateClaimsTreeRoot
+    for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
+    for (var i=0; i<8; i++) { userIdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
 
-    checkIdOwnership.userRootsTreeRoot <== userRootsTreeRoot;
+    userIdOwnership.userRevTreeRoot <== userRevTreeRoot;  // currentHolderStateClaimsRevTreeRoot
+    for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
+    userIdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
+    userIdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
+    userIdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
 
-    checkIdOwnership.challenge <== challenge;
-    checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
-    checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
-    checkIdOwnership.challengeSignatureS <== challengeSignatureS;
+    userIdOwnership.userRootsTreeRoot <== userRootsTreeRoot; // currentHolderStateClaimsRootsTreeRoot
 
-    checkIdOwnership.userState <== userState;
+    userIdOwnership.challenge <== challenge;
+    userIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
+    userIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
+    userIdOwnership.challengeSignatureS <== challengeSignatureS;
+
+    userIdOwnership.globalSmtRoot <== globalSmtRoot;
+    for (var i=0; i<OnChainSmtLevels; i++) { userIdOwnership.globalSmtMtp[i] <== globalSmtMtp[i]; }
+    userIdOwnership.globalSmtMtpAuxHi <== globalSmtMtpAuxHi;
+    userIdOwnership.globalSmtMtpAuxHv <== globalSmtMtpAuxHv;
+    userIdOwnership.globalSmtMtpNoAux <== globalSmtMtpNoAux;
+
+    userID <== userIdOwnership.userID;
 
 
     // Check issuerClaim is issued to provided identity
-    component claimIdCheck = verifyCredentialSubject();
+    component claimIdCheck = verifyCredentialSubjectProfile();
     for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
-    claimIdCheck.id <== userID;
+    claimIdCheck.id <== userGenesisID;
+    claimIdCheck.nonce <== claimSubjectProfileNonce;
 
     // Verify issuerClaim schema
     component claimSchemaCheck = verifyCredentialSchema();

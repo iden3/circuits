@@ -11,7 +11,7 @@ pragma circom 2.0.0;
 include "utils/claimUtils.circom";
 include "utils/treeUtils.circom";
 
-template IdOwnershipBySignature(nLevels) {
+template IdOwnership(nLevels) {
     signal input userState;
 
 	signal input userClaimsTreeRoot;
@@ -53,4 +53,3 @@ template IdOwnershipBySignature(nLevels) {
     checkUserState.rootsTreeRoot <== userRootsTreeRoot;
     checkUserState.expectedState <== userState;
 }
-

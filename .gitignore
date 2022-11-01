@@ -2,3 +2,4 @@ node_modules
 build
 .idea
 .vscode
+.DS_Store
