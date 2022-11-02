@@ -12,6 +12,7 @@ component main{public [issuerID,
                        claimSchema,
                        slotIndex,
                        claimPathKey,
+                       claimPathNotExists,
                        operator,
                        value,
                        timestamp]} = credentialAtomicQuerySigOffChain(32, 32, 64);
