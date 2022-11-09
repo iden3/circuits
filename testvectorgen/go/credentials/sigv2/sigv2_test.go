@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	core "github.com/iden3/go-iden3-core"
-	"github.com/iden3/go-merkletree-sql"
+	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-schema-processor/merklize"
 	"github.com/stretchr/testify/require"
 	"test/utils"
@@ -174,12 +174,12 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 
 	jsonP, value, err := mz.Proof(context.Background(), path)
 
-	valueKey, err := mz.HashValue(value)
+	valueKey, err := value.MtEntry()
 	require.NoError(t, err)
 
 	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
 
-	pathKey, err := path.Key()
+	pathKey, err := path.MtEntry()
 	require.NoError(t, err)
 
 	// Sig claim
@@ -291,24 +291,6 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 
 	claim, err := utils.DefaultUserClaim(subjectID)
 	require.NoError(t, err)
-
-	//mz, claim, err := utils.DefaultJSONUserClaim(subjectID)
-	//require.NoError(t, err)
-	//
-	//path, err := merklize.NewPath(
-	//	"https://www.w3.org/2018/credentials#credentialSubject",
-	//	"https://w3id.org/citizenship#residentSince")
-	//require.NoError(t, err)
-	//
-	//jsonP, value, err := mz.Proof(context.Background(), path)
-	//
-	//valueKey, err := mz.HashValue(value)
-	//require.NoError(t, err)
-	//
-	//claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
-	//
-	//pathKey, err := path.Key()
-	//require.NoError(t, err)
 
 	// Sig claim
 	claimSig, err := issuer.SignClaimBBJJ(claim)
@@ -436,7 +418,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 
 	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
 
-	pathKey, err := path.Key()
+	pathKey, err := path.MtEntry()
 	require.NoError(t, err)
 
 	// Sig claim
