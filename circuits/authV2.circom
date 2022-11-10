@@ -11,6 +11,6 @@ include "lib/authV2.circom";
 * public signals:
     - userID
     - challenge
-    - globalSmtRoot
+    - gistRoot
 */
-component main {public [challenge, globalSmtRoot]} = AuthV2(32,32);
+component main {public [challenge, gistRoot]} = AuthV2(32,32);

@@ -3,7 +3,7 @@ module test
 go 1.18
 
 require (
-	github.com/iden3/go-iden3-core v0.1.1-0.20221108150644-c0b53ebc36d1
+	github.com/iden3/go-iden3-core v0.1.1-0.20221109163857-44d9c2816b2f
 	github.com/iden3/go-iden3-crypto v0.0.13
 	github.com/iden3/go-merkletree-sql v1.0.2
 	github.com/iden3/go-merkletree-sql/v2 v2.0.0
