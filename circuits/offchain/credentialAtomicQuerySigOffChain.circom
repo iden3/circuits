@@ -40,7 +40,7 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
     // provided slot. For example if slotIndex is `1` value gets from `i_1` slot. If `4` from `v_1`.
     signal output merklized;
 
-    // userID output signal will be assigned with ProfileID ProfileID(UserID, nonce),
+    // userID output signal will be assigned with ProfileID SelectProfile(UserGenesisID, nonce)
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
