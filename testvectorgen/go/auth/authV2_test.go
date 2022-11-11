@@ -123,6 +123,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 		// add auth claim to claimsMT
 		hi, hv, err := authClaim2.HiHv()
+		require.NoError(t, err)
 
 		err = user.Clt.Add(context.Background(), hi, hv)
 		require.NoError(t, err)
@@ -131,7 +132,8 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 			// revoke auth claim
 			revNonce := user.AuthClaim.GetRevocationNonce()
-			user.Ret.Add(context.Background(), new(big.Int).SetUint64(revNonce), big.NewInt(0))
+			err = user.Ret.Add(context.Background(), new(big.Int).SetUint64(revNonce), big.NewInt(0))
+			require.NoError(t, err)
 
 			// set new auth claim
 			user.AuthClaim = authClaim2
@@ -139,10 +141,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 		}
 
-		userState, err := user.State()
-		require.NoError(t, err)
-
-		err = gisTree.Add(context.Background(), user.IDHash(), userState)
+		err = gisTree.Add(context.Background(), user.IDHash(), user.State(t))
 		require.NoError(t, err)
 
 	}
@@ -154,9 +153,6 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 	authNonRevMTProof, nodeAuxNonRev, err := user.ClaimRevMTP(user.AuthClaim)
 
 	sig, err := user.SignBBJJ(challenge.Bytes())
-	require.NoError(t, err)
-
-	userState, err := user.State()
 	require.NoError(t, err)
 
 	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(), nil)
@@ -181,7 +177,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 		UserClaimsTreeRoot:          user.Clt.Root().BigInt().String(),
 		UserRevTreeRoot:             user.Ret.Root().BigInt().String(),
 		UserRootsTreeRoot:           user.Rot.Root().BigInt().String(),
-		UserState:                   userState.String(),
+		UserState:                   user.State(t).String(),
 		GistRoot:                    gistRoot.BigInt().String(),
 		GistMtp:                     gistProof,
 		GistMtpAuxHi:                gistNodAux.Key,

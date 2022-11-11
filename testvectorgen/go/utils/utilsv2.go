@@ -32,8 +32,12 @@ func (it *IdentityTest) SignBBJJ(challenge []byte) (*babyjub.Signature, error) {
 	return SignBBJJ(it.PK, challenge)
 }
 
-func (it *IdentityTest) State() (*big.Int, error) {
-	return core.IdenState(it.Clt.Root().BigInt(), it.Ret.Root().BigInt(), it.Rot.Root().BigInt())
+func (it *IdentityTest) State(t testing.TB) *big.Int {
+	state, err := core.IdenState(it.Clt.Root().BigInt(), it.Ret.Root().BigInt(), it.Rot.Root().BigInt())
+	if err != nil {
+		t.Fatalf("Error calculating state: %v", err)
+	}
+	return state
 }
 
 func (it *IdentityTest) AuthMTPStrign() (proof []string, err error) {
@@ -155,10 +159,7 @@ func NewIdentity(t testing.TB, privKHex string) *IdentityTest {
 		t.Fatalf("Error adding Auth claim to Claims merkle tree: %v", err)
 	}
 
-	state, err := it.State()
-	if err != nil {
-		t.Fatalf("Error adding Auth claim to Claims merkle tree: %v", err)
-	}
+	state := it.State(t)
 
 	identifier, err := IDFromState(state)
 	if err != nil {

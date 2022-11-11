@@ -185,8 +185,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	claimSig, err := issuer.SignClaimBBJJ(claim)
 	require.NoError(t, err)
 
-	issuerClaimNonRevState, err := issuer.State()
-	require.NoError(t, err)
+	issuerClaimNonRevState := issuer.State(t)
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
 	require.NoError(t, err)
@@ -238,8 +237,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
 	}
 
-	issuerAuthState, err := issuer.State()
-	require.NoError(t, err)
+	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
 		UserID:                 userProfileID.BigInt().String(),
@@ -297,8 +295,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	claimSig, err := issuer.SignClaimBBJJ(claim)
 	require.NoError(t, err)
 
-	issuerClaimNonRevState, err := issuer.State()
-	require.NoError(t, err)
+	issuerClaimNonRevState := issuer.State(t)
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
 	require.NoError(t, err)
@@ -352,8 +349,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
 	}
 
-	issuerAuthState, err := issuer.State()
-	require.NoError(t, err)
+	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
 		UserID:                 userProfileID.BigInt().String(),
@@ -423,8 +419,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	claimSig, err := issuer.SignClaimBBJJ(claim)
 	require.NoError(t, err)
 
-	issuerClaimNonRevState, err := issuer.State()
-	require.NoError(t, err)
+	issuerClaimNonRevState := issuer.State(t)
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
 	require.NoError(t, err)
@@ -476,8 +471,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
 	}
 
-	issuerAuthState, err := issuer.State()
-	require.NoError(t, err)
+	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
 		UserID:                 userProfileID.BigInt().String(),
