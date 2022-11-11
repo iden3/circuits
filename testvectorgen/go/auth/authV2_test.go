@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	core "github.com/iden3/go-iden3-core"
-	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 	"github.com/stretchr/testify/require"
@@ -118,9 +117,9 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 	if genesis == false {
 		// extract pubKey
-		pk2, X, Y := utils.ExtractPubXY(userPK2)
-		// create auth claim
-		authClaim2, err := utils.AuthClaimFromPubKey(X, Y)
+		authClaim2, pk2, err := utils.NewAuthClaim(userPK2)
+		require.NoError(t, err)
+
 		// add auth claim to claimsMT
 		hi, hv, err := authClaim2.HiHv()
 
@@ -139,11 +138,10 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 		}
 
-		idHash, err := poseidon.Hash([]*big.Int{user.ID.BigInt()})
 		userState, err := user.State()
 		require.NoError(t, err)
 
-		err = gisTree.Add(context.Background(), idHash, userState)
+		err = gisTree.Add(context.Background(), user.IDHash(), userState)
 		require.NoError(t, err)
 
 	}
@@ -160,10 +158,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 	userState, err := user.State()
 	require.NoError(t, err)
 
-	idHash, err := poseidon.Hash([]*big.Int{user.ID.BigInt()})
-	require.NoError(t, err)
-
-	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), idHash, nil)
+	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(), nil)
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
