@@ -101,8 +101,9 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 	challenge := big.NewInt(12345)
 
-	user, err := utils.NewIdentity(userPK)
-	require.NoError(t, err)
+	user := utils.NewIdentity(t, userPK)
+
+	var err error
 
 	userProfile := user.ID
 	if profile {

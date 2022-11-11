@@ -13,8 +13,7 @@ const userPK = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e
 
 func Test_IdentityData(t *testing.T) {
 
-	id, err := NewIdentity(userPK)
-	require.NoError(t, err)
+	id := NewIdentity(t, userPK)
 
 	state, err := id.State()
 	require.NoError(t, err)

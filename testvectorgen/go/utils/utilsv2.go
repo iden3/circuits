@@ -119,7 +119,7 @@ func (it *IdentityTest) IDHash() *big.Int {
 	return idHash
 }
 
-func NewIdentity(privKHex string) (*IdentityTest, error) {
+func NewIdentity(t testing.TB, privKHex string) *IdentityTest {
 
 	it := IdentityTest{}
 	var err error
@@ -128,20 +128,20 @@ func NewIdentity(privKHex string) (*IdentityTest, error) {
 
 	it.Clt, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 4)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error creating Claims merkle tree: %v", err)
 	}
 	it.Ret, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 4)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error creating Revocation merkle tree: %v", err)
 	}
 	it.Rot, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 4)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error creating Roots merkle tree: %v", err)
 	}
 
 	authClaim, key, err := NewAuthClaim(privKHex)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error creating Auth claim: %v", err)
 	}
 
 	it.AuthClaim = authClaim
@@ -152,22 +152,22 @@ func NewIdentity(privKHex string) (*IdentityTest, error) {
 
 	err = it.Clt.Add(context.Background(), hi, hv)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error adding Auth claim to Claims merkle tree: %v", err)
 	}
 
 	state, err := it.State()
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error adding Auth claim to Claims merkle tree: %v", err)
 	}
 
 	identifier, err := IDFromState(state)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error generating id from state: %v", err)
 	}
 
 	it.ID = *identifier
 
-	return &it, nil
+	return &it
 }
 
 func NewAuthClaim(privKHex string) (auth *core.Claim, key *babyjub.PrivateKey, err error) {

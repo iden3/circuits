@@ -142,11 +142,10 @@ func Test_JSON_LD_Proof_non_inclusion(t *testing.T) {
 }
 
 func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
-	user, err := utils.NewIdentity(userPK)
-	require.NoError(t, err)
+	var err error
 
-	issuer, err := utils.NewIdentity(issuerPK)
-	require.NoError(t, err)
+	user := utils.NewIdentity(t, userPK)
+	issuer := utils.NewIdentity(t, issuerPK)
 
 	userProfileID := user.ID
 	nonce := big.NewInt(0)
@@ -267,10 +266,12 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 }
 
 func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
-	user, err := utils.NewIdentity(userPK)
+	var err error
+
+	user := utils.NewIdentity(t, userPK)
 	require.NoError(t, err)
 
-	issuer, err := utils.NewIdentity(issuerPK)
+	issuer := utils.NewIdentity(t, issuerPK)
 	require.NoError(t, err)
 
 	userProfileID := user.ID
@@ -381,11 +382,11 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 
 func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
 	fileName string) {
-	user, err := utils.NewIdentity(userPK)
-	require.NoError(t, err)
 
-	issuer, err := utils.NewIdentity(issuerPK)
-	require.NoError(t, err)
+	var err error
+
+	user := utils.NewIdentity(t, userPK)
+	issuer := utils.NewIdentity(t, issuerPK)
 
 	userProfileID := user.ID
 	nonce := big.NewInt(0)
@@ -412,9 +413,6 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	require.NoError(t, err)
 
 	jsonP, _, err := mz.Proof(context.Background(), path)
-
-	//valueKey, err := mz.HashValue(value)
-	//require.NoError(t, err)
 
 	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
 
