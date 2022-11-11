@@ -22,7 +22,7 @@ checks:
 IdOwnershipLevels - Merkle tree depth level for personal claims
 IssuerLevels - Merkle tree depth level for claims issued by the issuer
 ClaimLevels - Merkle tree depth level for claim JSON-LD document
-valueLevels - Number of elements in comparison array for in/notin operation if level =3 number of values for
+valueArraySize - Number of elements in comparison array for in/notin operation if level =3 number of values for
 comparison ["1", "2", "3"]
 
 */
