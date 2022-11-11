@@ -228,69 +228,34 @@ func DefaultUserClaim(subject core.ID) (*core.Claim, error) {
 }
 
 const TestClaimDocument = `{
-  "id": "8b71762d-8744-4237-9d48-4aba63848e90",
-  "@context": [
-    "https://www.w3.org/2018/credentials/v1",
-    "https://raw.githubusercontent.com/iden3/claim-schema-vocab/main/schemas/json-ld/iden3credential-v2.json-ld",
-    "https://raw.githubusercontent.com/iden3/claim-schema-vocab/main/schemas/json-ld/kyc-v2.json-ld"
-  ],
-  "@type": [
-    "VerifiableCredential",
-    "Iden3Credential",
-    "KYCAgeCredential"
-  ],
-  "expirationDate": "2361-03-21T21:14:48+02:00",
-  "updatable": false,
-  "version": 0,
-  "rev_nonce": 127366661,
-  "credentialSubject": {
-    "birthday": 19960424,
-    "documentType": 1,
-    "id": "did:iden3:polygon:mumbai:wyFiV4w71QgWPn6bYLsZoysFay66gKtVa9kfu6yMZ",
-    "type": "KYCAgeCredential"
-  },
-  "credentialStatus": {
-    "id": "http://localhost:8001/api/v1/identities/1195DjqzhZ9zpHbezahSevDMcxN41vs3Y6gb4noRW/claims/revocation/status/127366661",
-    "type": "Iden3SparseMerkleTreeProof"
-  },
-  "subject_position": "index",
-  "credentialSchema": {
-    "id": "https://raw.githubusercontent.com/iden3/claim-schema-vocab/main/schemas/json-ld/kyc-v2.json-ld",
-    "type": "KYCAgeCredential"
-  },
-  "merklizedRootPosition": "index",
-  "proof": [
-    {
-      "type": "BJJSignature2021",
-      "issuer_data": {
-        "id": "did:iden3:polygon:mumbai:x2Uw18ATvY7mEsgfrrDipBmQQdPWAao4NmF56wGvp",
-        "state": {
-          "claims_tree_root": "feb0be3ec46d2c1be2c6dc1c853e1d8a7dbf6b100682fc07dd0634fe8ea82b26",
-          "value": "0a12a41a5a0310e2b19a775509a430bfae9e7cf9769aaaa2e35bcc4d4b113e07"
-        },
-        "auth_claim": [
-          "304427537360709784173770334266246861770",
-          "0",
-          "15617506294650956210680908108123934928756816089326409752193546503042051388780",
-          "19048678283950551654871559449894565507673603294047370154250506544091413152142",
-          "0",
-          "0",
-          "0",
-          "0"
-        ],
-        "mtp": {
-          "existence": true,
-          "siblings": []
-        },
-        "revocation_status": {
-          "id": "http://localhost:8001/api/v1/identities/1195DjqzhZ9zpHbezahSevDMcxN41vs3Y6gb4noRW/claims/revocation/status/0",
-          "type": "Iden3SparseMerkleTreeProof"
-        }
-      },
-      "signature": "716c532dc08c14b10214d95fe3e0f85704114a060a2d4cdaff1938a1c2356681ebff57b4efe51dae00094924c6d8835b8de819369bd9473f02f48fc3b4959304"
-    }
-  ]
-}`
+   "@context": [
+     "https://www.w3.org/2018/credentials/v1",
+     "https://w3id.org/citizenship/v1",
+     "https://w3id.org/security/bbs/v1"
+   ],
+   "id": "https://issuer.oidp.uscis.gov/credentials/83627465",
+   "type": ["VerifiableCredential", "PermanentResidentCard"],
+   "issuer": "did:example:489398593",
+   "identifier": 83627465,
+   "name": "Permanent Resident Card",
+   "description": "Government of Example Permanent Resident Card.",
+   "issuanceDate": "2019-12-03T12:19:52Z",
+   "expirationDate": "2029-12-03T12:19:52Z",
+   "credentialSubject": {
+     "id": "did:example:b34ca6cd37bbf23",
+     "type": ["PermanentResident", "Person"],
+     "givenName": "JOHN",
+     "familyName": "SMITH",
+     "gender": "Male",
+     "image": "data:image/png;base64,iVBORw0KGgokJggg==",
+     "residentSince": "2015-01-01",
+     "lprCategory": "C09",
+     "lprNumber": "999-999-999",
+     "commuterClassification": "C1",
+     "birthCountry": "Bahamas",
+     "birthDate": "1958-07-17"
+   }
+ }`
 
 func DefaultJSONUserClaim(subject core.ID) (*merklize.Merklizer, *core.Claim, error) {
 	mz, err := merklize.MerklizeJSONLD(context.Background(), strings.NewReader(TestClaimDocument))
