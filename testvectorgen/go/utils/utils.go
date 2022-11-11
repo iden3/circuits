@@ -13,8 +13,8 @@ import (
 
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
-	"github.com/iden3/go-merkletree-sql"
-	"github.com/iden3/go-merkletree-sql/db/memory"
+	"github.com/iden3/go-merkletree-sql/v2"
+	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 	"test/crypto/primitive"
 )
 
@@ -94,6 +94,7 @@ func GenerateIdentity(ctx context.Context, privKHex string, challenge *big.Int) 
 	inputs["challengeSignatureR8y"] = decompressedSig.R8.Y.String()
 	inputs["challengeSignatureS"] = decompressedSig.S.String()
 	inputs["state"] = currentState.BigInt().String()
+	inputs["issuerAuthClaimsTreeRoot"] = claimsTree.Root().BigInt()
 	inputs["authClaim"] = ClaimToString(authClaim)
 	ExitOnError(err)
 
