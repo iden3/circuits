@@ -107,6 +107,14 @@ func Test_ClaimIssuedOnUserProfileID2(t *testing.T) {
 	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "claimIssuedOnProfileID2")
 }
 
+func Test_ClaimNonMerklized(t *testing.T) {
+	desc := "User == Subject. Claim non merklized claim"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+
+	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "claimNonMerklized")
+}
+
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
 	var err error
 
@@ -200,6 +208,98 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		Timestamp:              timestamp,
 		Merklized:              "1",
 		ClaimPathKey:           pathKey.String(),
+		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
+	}
+
+	json, err := json2.Marshal(TestDataMTPV2{
+		desc,
+		inputs,
+		out,
+	})
+	require.NoError(t, err)
+
+	utils.SaveTestVector(t, fileName, string(json))
+
+}
+
+func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
+	var err error
+
+	user := utils.NewIdentity(t, userPK)
+	issuer := utils.NewIdentity(t, issuerPK)
+
+	userProfileID := user.ID
+	nonce := big.NewInt(0)
+	if isUserIDProfile {
+		nonce = big.NewInt(10)
+		userProfileID, err = core.ProfileID(user.ID, nonce)
+		require.NoError(t, err)
+	}
+
+	subjectID := user.ID
+	nonceSubject := big.NewInt(0)
+	if isSubjectIDProfile {
+		nonceSubject = big.NewInt(999)
+		subjectID, err = core.ProfileID(user.ID, nonceSubject)
+		require.NoError(t, err)
+	}
+
+	claim, err := utils.DefaultUserClaim(subjectID)
+	require.NoError(t, err)
+
+	issuer.AddClaim(t, claim)
+
+	issuerClaimMtp, _, err := issuer.ClaimMTP(claim)
+	require.NoError(t, err)
+
+	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
+	require.NoError(t, err)
+
+	inputs := CredentialAtomicMTPOffChainV2Inputs{
+		UserGenesisID:                   user.ID.BigInt().String(),
+		Nonce:                           nonce.String(),
+		ClaimSubjectProfileNonce:        nonceSubject.String(),
+		IssuerID:                        issuer.ID.BigInt().String(),
+		IssuerClaim:                     claim,
+		IssuerClaimMtp:                  issuerClaimMtp,
+		IssuerClaimClaimsTreeRoot:       issuer.Clt.Root(),
+		IssuerClaimRevTreeRoot:          issuer.Ret.Root(),
+		IssuerClaimRootsTreeRoot:        issuer.Rot.Root(),
+		IssuerClaimIdenState:            issuer.State(t).String(),
+		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root(),
+		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root(),
+		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root(),
+		IssuerClaimNonRevState:          issuer.State(t).String(),
+		IssuerClaimNonRevMtp:            issuerClaimNonRevMtp,
+		IssuerClaimNonRevMtpAuxHi:       issuerClaimNonRevAux.Key,
+		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
+		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
+		ClaimSchema:                     "180410020913331409885634153623124536270",
+		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:                    utils.PrepareStrArray([]string{}, 32),
+		ClaimPathMtpNoAux:               "0",
+		ClaimPathMtpAuxHi:               "0",
+		ClaimPathMtpAuxHv:               "0",
+		ClaimPathKey:                    "0",
+		ClaimPathValue:                  "0",
+		Operator:                        utils.EQ,
+		SlotIndex:                       2,
+		Timestamp:                       timestamp,
+		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
+	}
+
+	out := CredentialAtomicMTPOffChainV2Outputs{
+		UserID:                 userProfileID.BigInt().String(),
+		IssuerID:               issuer.ID.BigInt().String(),
+		IssuerClaimIdenState:   issuer.State(t).String(),
+		IssuerClaimNonRevState: issuer.State(t).String(),
+		ClaimSchema:            "180410020913331409885634153623124536270",
+		SlotIndex:              "2",
+		Operator:               utils.EQ,
+		Value:                  utils.PrepareStrArray([]string{"10"}, 64),
+		Timestamp:              timestamp,
+		Merklized:              "0",
+		ClaimPathKey:           "0",
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 	}
 
