@@ -89,7 +89,22 @@ func Test_ClaimIssuedOnUserID(t *testing.T) {
 	isSubjectIDProfile := false
 
 	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "claimIssuedOnUserID")
+}
 
+func Test_ClaimIssuedOnUserProfileID(t *testing.T) {
+	desc := "User != Subject. Claim issued on ProfileID"
+	isUserIDProfile := false
+	isSubjectIDProfile := true
+
+	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "claimIssuedOnProfileID")
+}
+
+func Test_ClaimIssuedOnUserProfileID2(t *testing.T) {
+	desc := "User == Subject. Claim issued on ProfileID"
+	isUserIDProfile := true
+	isSubjectIDProfile := true
+
+	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "claimIssuedOnProfileID2")
 }
 
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
