@@ -15,8 +15,7 @@ func Test_IdentityData(t *testing.T) {
 
 	id := NewIdentity(t, userPK)
 
-	state, err := id.State()
-	require.NoError(t, err)
+	state := id.State(t)
 
 	mtp, err := id.AuthMTPStrign()
 

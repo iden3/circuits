@@ -123,6 +123,19 @@ func (it *IdentityTest) IDHash() *big.Int {
 	return idHash
 }
 
+func (it *IdentityTest) AddClaim(t *testing.T, claim *core.Claim) {
+	// add auth claim to claimsMT
+	hi, hv, err := claim.HiHv()
+	if err != nil {
+		t.Fatalf("Error calculating hi and hv: %v", err)
+	}
+
+	err = it.Clt.Add(context.Background(), hi, hv)
+	if err != nil {
+		t.Fatalf("Error adding claim to claimsMT: %v", err)
+	}
+}
+
 func NewIdentity(t testing.TB, privKHex string) *IdentityTest {
 
 	it := IdentityTest{}
@@ -199,6 +212,14 @@ func PrepareSiblingsStr(siblings []*merkletree.Hash, levels int) []string {
 		siblings = append(siblings, &merkletree.HashZero)
 	}
 	return HashToStr(siblings)
+}
+
+func PrepareStrArray(siblings []string, levels int) []string {
+	// Add the rest of empty levels to the array
+	for i := len(siblings); i < levels; i++ {
+		siblings = append(siblings, "0")
+	}
+	return siblings
 }
 
 func HashToStr(siblings []*merkletree.Hash) []string {
