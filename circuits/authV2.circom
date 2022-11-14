@@ -1,4 +1,4 @@
-pragma circom 2.0.9;
+pragma circom 2.0.0;
 
 include "lib/authV2.circom";
 
