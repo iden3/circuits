@@ -32,8 +32,12 @@ func (it *IdentityTest) SignBBJJ(challenge []byte) (*babyjub.Signature, error) {
 	return SignBBJJ(it.PK, challenge)
 }
 
-func (it *IdentityTest) State() (*big.Int, error) {
-	return core.IdenState(it.Clt.Root().BigInt(), it.Ret.Root().BigInt(), it.Rot.Root().BigInt())
+func (it *IdentityTest) State(t testing.TB) *big.Int {
+	state, err := core.IdenState(it.Clt.Root().BigInt(), it.Ret.Root().BigInt(), it.Rot.Root().BigInt())
+	if err != nil {
+		t.Fatalf("Error calculating state: %v", err)
+	}
+	return state
 }
 
 func (it *IdentityTest) AuthMTPStrign() (proof []string, err error) {
@@ -111,7 +115,28 @@ func (it *IdentityTest) ClaimRevMTP(claim *core.Claim) (sibling []string, nodeAu
 
 }
 
-func NewIdentity(privKHex string) (*IdentityTest, error) {
+func (it *IdentityTest) IDHash() *big.Int {
+	idHash, err := poseidon.Hash([]*big.Int{it.ID.BigInt()})
+	if err != nil {
+		panic(err)
+	}
+	return idHash
+}
+
+func (it *IdentityTest) AddClaim(t *testing.T, claim *core.Claim) {
+	// add auth claim to claimsMT
+	hi, hv, err := claim.HiHv()
+	if err != nil {
+		t.Fatalf("Error calculating hi and hv: %v", err)
+	}
+
+	err = it.Clt.Add(context.Background(), hi, hv)
+	if err != nil {
+		t.Fatalf("Error adding claim to claimsMT: %v", err)
+	}
+}
+
+func NewIdentity(t testing.TB, privKHex string) *IdentityTest {
 
 	it := IdentityTest{}
 	var err error
@@ -120,46 +145,55 @@ func NewIdentity(privKHex string) (*IdentityTest, error) {
 
 	it.Clt, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 4)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error creating Claims merkle tree: %v", err)
 	}
 	it.Ret, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 4)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error creating Revocation merkle tree: %v", err)
 	}
 	it.Rot, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 4)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error creating Roots merkle tree: %v", err)
 	}
 
-	// extract pubKey
-	key, X, Y := ExtractPubXY(privKHex)
-	it.PK = key
+	authClaim, key, err := NewAuthClaim(privKHex)
+	if err != nil {
+		t.Fatalf("Error creating Auth claim: %v", err)
+	}
 
-	// create auth claim
-	authClaim, err := AuthClaimFromPubKey(X, Y)
 	it.AuthClaim = authClaim
+	it.PK = key
 
 	// add auth claim to claimsMT
 	hi, hv, err := authClaim.HiHv()
 
 	err = it.Clt.Add(context.Background(), hi, hv)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error adding Auth claim to Claims merkle tree: %v", err)
 	}
 
-	state, err := it.State()
-	if err != nil {
-		return nil, err
-	}
+	state := it.State(t)
 
 	identifier, err := IDFromState(state)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Error generating id from state: %v", err)
 	}
 
 	it.ID = *identifier
 
-	return &it, nil
+	return &it
+}
+
+func NewAuthClaim(privKHex string) (auth *core.Claim, key *babyjub.PrivateKey, err error) {
+	// extract pubKey
+	key, X, Y := ExtractPubXY(privKHex)
+
+	// create auth claim
+	authClaim, err := AuthClaimFromPubKey(X, Y)
+	if err != nil {
+		return nil, nil, err
+	}
+	return authClaim, key, nil
 }
 
 func IDFromState(state *big.Int) (*core.ID, error) {
@@ -178,6 +212,14 @@ func PrepareSiblingsStr(siblings []*merkletree.Hash, levels int) []string {
 		siblings = append(siblings, &merkletree.HashZero)
 	}
 	return HashToStr(siblings)
+}
+
+func PrepareStrArray(siblings []string, levels int) []string {
+	// Add the rest of empty levels to the array
+	for i := len(siblings); i < levels; i++ {
+		siblings = append(siblings, "0")
+	}
+	return siblings
 }
 
 func HashToStr(siblings []*merkletree.Hash) []string {

@@ -37,13 +37,13 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     signal input challengeSignatureR8y;
     signal input challengeSignatureS;
 
-    // global on chain state
-    signal input globalSmtRoot;
+    // global identity state tree on chain
+    signal input gistRoot;
     // proof of inclusion or exclusion of the user in the global state
-    signal input globalSmtMtp[onChainLevels];
-    signal input globalSmtMtpAuxHi;
-    signal input globalSmtMtpAuxHv;
-    signal input globalSmtMtpNoAux;
+    signal input gistMtp[onChainLevels];
+    signal input gistMtpAuxHi;
+    signal input gistMtpAuxHv;
+    signal input gistMtpNoAux;
 
     // userID output signal will be assigned with user profile hash(UserID, nonce),
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
@@ -87,16 +87,16 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     component userGenesisIDhash = Poseidon(1);
     userGenesisIDhash.inputs[0] <== userGenesisID;
 
-    component onChainSmtCheck = SMTVerifier(onChainLevels);
-    onChainSmtCheck.enabled <== 1;
-    onChainSmtCheck.fnc <== isStateGenesis.out; // non-inclusion in case if genesis state, otherwise inclusion
-    onChainSmtCheck.root <== globalSmtRoot;
-    for (var i=0; i<onChainLevels; i++) { onChainSmtCheck.siblings[i] <== globalSmtMtp[i]; }
-    onChainSmtCheck.oldKey <== globalSmtMtpAuxHi;
-    onChainSmtCheck.oldValue <== globalSmtMtpAuxHv;
-    onChainSmtCheck.isOld0 <== globalSmtMtpNoAux;
-    onChainSmtCheck.key <== userGenesisIDhash.out;
-    onChainSmtCheck.value <== userState;
+    component gistCheck = SMTVerifier(onChainLevels);
+    gistCheck.enabled <== 1;
+    gistCheck.fnc <== isStateGenesis.out; // non-inclusion in case if genesis state, otherwise inclusion
+    gistCheck.root <== gistRoot;
+    for (var i=0; i<onChainLevels; i++) { gistCheck.siblings[i] <== gistMtp[i]; }
+    gistCheck.oldKey <== gistMtpAuxHi;
+    gistCheck.oldValue <== gistMtpAuxHv;
+    gistCheck.isOld0 <== gistMtpNoAux;
+    gistCheck.key <== userGenesisIDhash.out;
+    gistCheck.value <== userState;
 
     /* ProfileID calculation */
     component calcProfile = SelectProfile();

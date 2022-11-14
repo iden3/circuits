@@ -142,11 +142,10 @@ func Test_JSON_LD_Proof_non_inclusion(t *testing.T) {
 }
 
 func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
-	user, err := utils.NewIdentity(userPK)
-	require.NoError(t, err)
+	var err error
 
-	issuer, err := utils.NewIdentity(issuerPK)
-	require.NoError(t, err)
+	user := utils.NewIdentity(t, userPK)
+	issuer := utils.NewIdentity(t, issuerPK)
 
 	userProfileID := user.ID
 	nonce := big.NewInt(0)
@@ -186,8 +185,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	claimSig, err := issuer.SignClaimBBJJ(claim)
 	require.NoError(t, err)
 
-	issuerClaimNonRevState, err := issuer.State()
-	require.NoError(t, err)
+	issuerClaimNonRevState := issuer.State(t)
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
 	require.NoError(t, err)
@@ -239,8 +237,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
 	}
 
-	issuerAuthState, err := issuer.State()
-	require.NoError(t, err)
+	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
 		UserID:                 userProfileID.BigInt().String(),
@@ -267,10 +264,12 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 }
 
 func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
-	user, err := utils.NewIdentity(userPK)
+	var err error
+
+	user := utils.NewIdentity(t, userPK)
 	require.NoError(t, err)
 
-	issuer, err := utils.NewIdentity(issuerPK)
+	issuer := utils.NewIdentity(t, issuerPK)
 	require.NoError(t, err)
 
 	userProfileID := user.ID
@@ -296,8 +295,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	claimSig, err := issuer.SignClaimBBJJ(claim)
 	require.NoError(t, err)
 
-	issuerClaimNonRevState, err := issuer.State()
-	require.NoError(t, err)
+	issuerClaimNonRevState := issuer.State(t)
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
 	require.NoError(t, err)
@@ -351,8 +349,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
 	}
 
-	issuerAuthState, err := issuer.State()
-	require.NoError(t, err)
+	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
 		UserID:                 userProfileID.BigInt().String(),
@@ -381,11 +378,11 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 
 func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
 	fileName string) {
-	user, err := utils.NewIdentity(userPK)
-	require.NoError(t, err)
 
-	issuer, err := utils.NewIdentity(issuerPK)
-	require.NoError(t, err)
+	var err error
+
+	user := utils.NewIdentity(t, userPK)
+	issuer := utils.NewIdentity(t, issuerPK)
 
 	userProfileID := user.ID
 	nonce := big.NewInt(0)
@@ -413,9 +410,6 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 
 	jsonP, _, err := mz.Proof(context.Background(), path)
 
-	//valueKey, err := mz.HashValue(value)
-	//require.NoError(t, err)
-
 	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
 
 	pathKey, err := path.MtEntry()
@@ -425,8 +419,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	claimSig, err := issuer.SignClaimBBJJ(claim)
 	require.NoError(t, err)
 
-	issuerClaimNonRevState, err := issuer.State()
-	require.NoError(t, err)
+	issuerClaimNonRevState := issuer.State(t)
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
 	require.NoError(t, err)
@@ -478,8 +471,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
 	}
 
-	issuerAuthState, err := issuer.State()
-	require.NoError(t, err)
+	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
 		UserID:                 userProfileID.BigInt().String(),

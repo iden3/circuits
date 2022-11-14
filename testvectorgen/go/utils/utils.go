@@ -10,11 +10,11 @@ import (
 	"os"
 
 	"github.com/iden3/go-iden3-crypto/poseidon"
+	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-merkletree-sql/v2"
-	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 	"test/crypto/primitive"
 )
 
