@@ -84,7 +84,7 @@ type TestDataMTPV2 struct {
 }
 
 func Test_ClaimIssuedOnUserID(t *testing.T) {
-	desc := "User = Subject. Claim issued on UserID"
+	desc := "User == Subject. Claim issued on UserID"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
