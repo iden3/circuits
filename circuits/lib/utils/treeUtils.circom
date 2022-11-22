@@ -150,7 +150,9 @@ template VerifyAuthClaimAndSignature(nLevels) {
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
-    var AUTH_SCHEMA_HASH  = 304427537360709784173770334266246861770;
+    // AuthHash 013fd3f623559d850fb5b02ff012d0e2
+    // https://raw.githubusercontent.com/iden3/claim-schema-vocab/main/schemas/json/auth-v1.json#AuthBJJCredential
+    var AUTH_SCHEMA_HASH  = 301485908906857522017021291028488077057;
     component verifyAuthSchema  = verifyCredentialSchema();
     for (var i=0; i<8; i++) {
             verifyAuthSchema.claim[i] <== authClaim[i];
