@@ -143,15 +143,15 @@ func NewIdentity(t testing.TB, privKHex string) *IdentityTest {
 
 	// init claims tree
 
-	it.Clt, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 4)
+	it.Clt, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
 	if err != nil {
 		t.Fatalf("Error creating Claims merkle tree: %v", err)
 	}
-	it.Ret, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 4)
+	it.Ret, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
 	if err != nil {
 		t.Fatalf("Error creating Revocation merkle tree: %v", err)
 	}
-	it.Rot, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 4)
+	it.Rot, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
 	if err != nil {
 		t.Fatalf("Error creating Roots merkle tree: %v", err)
 	}
