@@ -288,8 +288,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		require.NoError(t, err)
 	}
 
-	claim, err := utils.DefaultUserClaim(subjectID)
-	require.NoError(t, err)
+	claim := utils.DefaultUserClaim(t, subjectID)
 
 	// Sig claim
 	claimSig, err := issuer.SignClaimBBJJ(claim)

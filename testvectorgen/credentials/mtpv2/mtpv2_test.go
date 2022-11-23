@@ -243,8 +243,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		require.NoError(t, err)
 	}
 
-	claim, err := utils.DefaultUserClaim(subjectID)
-	require.NoError(t, err)
+	claim := utils.DefaultUserClaim(t, subjectID)
 
 	issuer.AddClaim(t, claim)
 

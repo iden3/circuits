@@ -107,8 +107,7 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 		authNonRevMTProof, nodeAuxNonRev, err = user.ClaimRevMTP(user.AuthClaim)
 		require.NoError(t, err)
 
-		claim1, err := utils.DefaultUserClaim(user.ID)
-		require.NoError(t, err)
+		claim1 := utils.DefaultUserClaim(t, user.ID)
 
 		// add auth claim to claimsMT
 		hi, hv, err := claim1.HiHv()

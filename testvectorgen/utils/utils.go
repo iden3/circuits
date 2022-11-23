@@ -45,22 +45,31 @@ func DefaultJSONUserClaim(t testing.TB, subject core.ID) (*merklize.Merklizer, *
 	return mz, claim
 }
 
-func DefaultUserClaim(subject core.ID) (*core.Claim, error) {
-	dataSlotA, _ := core.NewElemBytesFromInt(big.NewInt(10))
+func DefaultUserClaim(t testing.TB, subject core.ID) *core.Claim {
+	dataSlotA, err := core.NewElemBytesFromInt(big.NewInt(10))
+	if err != nil {
+		t.Fatalf("failed get NewElemBytesFromInt %v", err)
+	}
+
 	nonce := 1
 	var schemaHash core.SchemaHash
 	schemaBytes, err := hex.DecodeString("ce6bb12c96bfd1544c02c289c6b4b987")
 	if err != nil {
-		return nil, err
+		t.Fatalf("failed decode schema hash %v", err)
 	}
 	copy(schemaHash[:], schemaBytes)
 
-	return core.NewClaim(
+	claim, err := core.NewClaim(
 		schemaHash,
 		core.WithIndexID(subject),
 		core.WithIndexData(dataSlotA, core.ElemBytes{}),
 		core.WithExpirationDate(time.Unix(1669884010, 0)), //Thu Dec 01 2022 08:40:10 GMT+0000
 		core.WithRevocationNonce(uint64(nonce)))
+	if err != nil {
+		t.Fatalf("failed create new claim %v", err)
+	}
+
+	return claim
 
 }
 
