@@ -7,7 +7,6 @@ import (
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-iden3-crypto/poseidon"
-	"test/crypto/primitive"
 )
 
 func ExtractPubXY(privKHex string) (key *babyjub.PrivateKey, x, y *big.Int) {
@@ -37,17 +36,4 @@ func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 	return core.NewClaim(schemaHash,
 		core.WithIndexDataInts(X, Y),
 		core.WithRevocationNonce(revNonce.Uint64()))
-}
-
-func SignBBJJ(key *babyjub.PrivateKey, sigInput []byte) (*babyjub.Signature, error) {
-	bjjSigner := primitive.NewBJJSigner(key)
-	signature, err := bjjSigner.Sign(sigInput)
-	if err != nil {
-		return nil, err
-	}
-
-	var sig [64]byte
-	copy(sig[:], signature)
-
-	return new(babyjub.Signature).Decompress(sig)
 }

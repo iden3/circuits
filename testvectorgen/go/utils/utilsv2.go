@@ -15,7 +15,6 @@ import (
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 	"github.com/iden3/go-schema-processor/merklize"
-	"test/crypto/primitive"
 )
 
 type IdentityTest struct {
@@ -25,11 +24,6 @@ type IdentityTest struct {
 	Rot       *merkletree.MerkleTree
 	AuthClaim *core.Claim
 	PK        *babyjub.PrivateKey
-}
-
-func (it *IdentityTest) SignBBJJ(challenge []byte) (*babyjub.Signature, error) {
-	// sign challenge
-	return SignBBJJ(it.PK, challenge)
 }
 
 func (it *IdentityTest) Sign(challenge *big.Int) *babyjub.Signature {
@@ -60,16 +54,7 @@ func (it *IdentityTest) SignClaimBBJJ(claim *core.Claim) (*babyjub.Signature, er
 		return nil, err
 	}
 
-	bjjSigner := primitive.NewBJJSigner(it.PK)
-	sigBytes, err := bjjSigner.Sign(commonHash.Bytes())
-	if err != nil {
-		return nil, err
-	}
-
-	var sig [64]byte
-	copy(sig[:], sigBytes)
-	return new(babyjub.Signature).Decompress(sig)
-
+	return it.PK.SignPoseidon(commonHash), nil
 }
 
 func (it *IdentityTest) ClaimMTPRaw(claim *core.Claim) (proof *merkletree.Proof, value *big.Int, err error) {
