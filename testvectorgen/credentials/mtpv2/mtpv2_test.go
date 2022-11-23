@@ -145,6 +145,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	require.NoError(t, err)
 
 	jsonP, value, err := mz.Proof(context.Background(), path)
+	require.NoError(t, err)
 
 	valueKey, err := value.MtEntry()
 	require.NoError(t, err)
@@ -159,7 +160,6 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
-	require.NoError(t, err)
 
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
