@@ -41,18 +41,18 @@ func (it *IdentityTest) AuthMTPStrign(t testing.TB) []string {
 	return PrepareSiblingsStr(p.AllSiblings(), 32)
 }
 
-func (it *IdentityTest) SignClaimBBJJ(claim *core.Claim) (*babyjub.Signature, error) {
+func (it *IdentityTest) SignClaim(t testing.TB, claim *core.Claim) *babyjub.Signature {
 	hashIndex, hashValue, err := claim.HiHv()
 	if err != nil {
-		return nil, err
+		t.Fatalf("can't get hash index/value from claim %v", err)
 	}
 
 	commonHash, err := poseidon.Hash([]*big.Int{hashIndex, hashValue})
 	if err != nil {
-		return nil, err
+		t.Fatalf("can't hash index and value")
 	}
 
-	return it.PK.SignPoseidon(commonHash), nil
+	return it.PK.SignPoseidon(commonHash)
 }
 
 func (it *IdentityTest) ClaimMTPRaw(claim *core.Claim) (proof *merkletree.Proof, value *big.Int, err error) {

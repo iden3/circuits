@@ -182,8 +182,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	require.NoError(t, err)
 
 	// Sig claim
-	claimSig, err := issuer.SignClaimBBJJ(claim)
-	require.NoError(t, err)
+	claimSig := issuer.SignClaim(t, claim)
 
 	issuerClaimNonRevState := issuer.State(t)
 
@@ -291,8 +290,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	claim := utils.DefaultUserClaim(t, subjectID)
 
 	// Sig claim
-	claimSig, err := issuer.SignClaimBBJJ(claim)
-	require.NoError(t, err)
+	claimSig := issuer.SignClaim(t, claim)
 
 	issuerClaimNonRevState := issuer.State(t)
 
@@ -414,8 +412,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	require.NoError(t, err)
 
 	// Sig claim
-	claimSig, err := issuer.SignClaimBBJJ(claim)
-	require.NoError(t, err)
+	claimSig := issuer.SignClaim(t, claim)
 
 	issuerClaimNonRevState := issuer.State(t)
 
