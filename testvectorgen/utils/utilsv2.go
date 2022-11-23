@@ -81,11 +81,15 @@ func (it *IdentityTest) ClaimMTP(t testing.TB, claim *core.Claim) (sibling []str
 	return PrepareProof(proof)
 }
 
-func (it *IdentityTest) ClaimRevMTPRaw(claim *core.Claim) (proof *merkletree.Proof, value *big.Int, err error) {
+func (it *IdentityTest) ClaimRevMTPRaw(t testing.TB, claim *core.Claim) (*merkletree.Proof, *big.Int) {
 	// add auth claim to claimsMT
 	revNonce := claim.GetRevocationNonce()
 
-	return it.Ret.GenerateProof(context.Background(), new(big.Int).SetUint64(revNonce), nil)
+	proof, value, err := it.Ret.GenerateProof(context.Background(), new(big.Int).SetUint64(revNonce), nil)
+	if err != nil {
+		t.Fatalf("can't generate proof %v", err)
+	}
+	return proof, value
 }
 
 func (it *IdentityTest) ClaimRevMTP(claim *core.Claim) (sibling []string, nodeAux *NodeAuxValue, err error) {
