@@ -66,20 +66,19 @@ func (it *IdentityTest) ClaimMTPRaw(t testing.TB, claim *core.Claim) (*merkletre
 	return proof, value
 }
 
-func (it *IdentityTest) ClaimMTP(claim *core.Claim) (sibling []string, nodeAux *NodeAuxValue, err error) {
+func (it *IdentityTest) ClaimMTP(t testing.TB, claim *core.Claim) (sibling []string, nodeAux NodeAuxValue) {
 	// add auth claim to claimsMT
 	hi, _, err := claim.HiHv()
 	if err != nil {
-		return nil, nil, err
+		t.Fatalf("can't get claim index hash %v", err)
 	}
 
 	proof, _, err := it.Clt.GenerateProof(context.Background(), hi, nil)
 	if err != nil {
-		return nil, nil, err
+		t.Fatalf("can't generate proof %v", err)
 	}
 
-	sib, aux := PrepareProof(proof)
-	return sib, &aux, err
+	return PrepareProof(proof)
 }
 
 func (it *IdentityTest) ClaimRevMTPRaw(claim *core.Claim) (proof *merkletree.Proof, value *big.Int, err error) {

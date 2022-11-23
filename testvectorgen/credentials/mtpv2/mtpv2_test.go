@@ -156,8 +156,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 	issuer.AddClaim(t, claim)
 
-	issuerClaimMtp, _, err := issuer.ClaimMTP(claim)
-	require.NoError(t, err)
+	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
 	require.NoError(t, err)
@@ -247,7 +246,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 
 	issuer.AddClaim(t, claim)
 
-	issuerClaimMtp, _, err := issuer.ClaimMTP(claim)
+	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
 	require.NoError(t, err)
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
