@@ -34,10 +34,7 @@ func (it *IdentityTest) State(t testing.TB) *big.Int {
 }
 
 func (it *IdentityTest) AuthMTPStrign(t testing.TB) []string {
-	p, _, err := it.ClaimMTPRaw(it.AuthClaim)
-	if err != nil {
-		t.Fatalf("failed generate auth claim mpt %v", err)
-	}
+	p, _ := it.ClaimMTPRaw(t, it.AuthClaim)
 	return PrepareSiblingsStr(p.AllSiblings(), 32)
 }
 
@@ -55,14 +52,18 @@ func (it *IdentityTest) SignClaim(t testing.TB, claim *core.Claim) *babyjub.Sign
 	return it.PK.SignPoseidon(commonHash)
 }
 
-func (it *IdentityTest) ClaimMTPRaw(claim *core.Claim) (proof *merkletree.Proof, value *big.Int, err error) {
+func (it *IdentityTest) ClaimMTPRaw(t testing.TB, claim *core.Claim) (*merkletree.Proof, *big.Int) {
 	// add auth claim to claimsMT
 	hi, _, err := claim.HiHv()
 	if err != nil {
-		return nil, nil, err
+		t.Fatalf("can't get claim hash index %v", err)
 	}
 
-	return it.Clt.GenerateProof(context.Background(), hi, nil)
+	proof, value, err := it.Clt.GenerateProof(context.Background(), hi, nil)
+	if err != nil {
+		t.Fatalf("can't generate proof %v", err)
+	}
+	return proof, value
 }
 
 func (it *IdentityTest) ClaimMTP(claim *core.Claim) (sibling []string, nodeAux *NodeAuxValue, err error) {
