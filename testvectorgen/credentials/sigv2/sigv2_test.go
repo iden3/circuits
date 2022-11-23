@@ -186,10 +186,9 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 
 	issuerClaimNonRevState := issuer.State(t)
 
-	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
-	require.NoError(t, err)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
-	issuerAuthClaimMtp, issuerAuthClaimNodeAux, err := issuer.ClaimRevMTP(issuer.AuthClaim)
+	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
@@ -294,10 +293,9 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 
 	issuerClaimNonRevState := issuer.State(t)
 
-	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
-	require.NoError(t, err)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
-	issuerAuthClaimMtp, issuerAuthClaimNodeAux, err := issuer.ClaimRevMTP(issuer.AuthClaim)
+	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
 	emptyPathMtp := utils.PrepareSiblingsStr([]*merkletree.Hash{&merkletree.HashZero}, 32)
 
@@ -416,10 +414,9 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 
 	issuerClaimNonRevState := issuer.State(t)
 
-	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
-	require.NoError(t, err)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
-	issuerAuthClaimMtp, issuerAuthClaimNodeAux, err := issuer.ClaimRevMTP(issuer.AuthClaim)
+	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),

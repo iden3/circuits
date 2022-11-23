@@ -149,7 +149,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 	// user
 	authMTProof := user.AuthMTPStrign(t)
 
-	authNonRevMTProof, nodeAuxNonRev, err := user.ClaimRevMTP(user.AuthClaim)
+	authNonRevMTProof, nodeAuxNonRev := user.ClaimRevMTP(t, user.AuthClaim)
 
 	sig := user.Sign(challenge)
 

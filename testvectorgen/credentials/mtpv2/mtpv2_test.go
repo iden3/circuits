@@ -158,7 +158,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
 
-	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 	require.NoError(t, err)
 
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
@@ -249,8 +249,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
 	require.NoError(t, err)
 
-	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
-	require.NoError(t, err)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),

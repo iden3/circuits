@@ -92,17 +92,16 @@ func (it *IdentityTest) ClaimRevMTPRaw(t testing.TB, claim *core.Claim) (*merkle
 	return proof, value
 }
 
-func (it *IdentityTest) ClaimRevMTP(claim *core.Claim) (sibling []string, nodeAux *NodeAuxValue, err error) {
+func (it *IdentityTest) ClaimRevMTP(t testing.TB, claim *core.Claim) (sibling []string, nodeAux NodeAuxValue) {
 	// add auth claim to claimsMT
 	revNonce := claim.GetRevocationNonce()
 
 	proof, _, err := it.Ret.GenerateProof(context.Background(), new(big.Int).SetUint64(revNonce), nil)
 	if err != nil {
-		return nil, nil, err
+		t.Fatalf("can't generate proof %v", err)
 	}
 
-	sib, aux := PrepareProof(proof)
-	return sib, &aux, err
+	return PrepareProof(proof)
 
 }
 
