@@ -146,10 +146,7 @@ func NewIdentity(t testing.TB, privKHex string) *IdentityTest {
 		t.Fatalf("Error creating Roots merkle tree: %v", err)
 	}
 
-	authClaim, key, err := NewAuthClaim(privKHex)
-	if err != nil {
-		t.Fatalf("Error creating Auth claim: %v", err)
-	}
+	authClaim, key := NewAuthClaim(t, privKHex)
 
 	it.AuthClaim = authClaim
 	it.PK = key

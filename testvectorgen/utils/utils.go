@@ -121,16 +121,16 @@ func PrepareSiblingsStr(siblings []*merkletree.Hash, levels int) []string {
 	return HashToStr(siblings)
 }
 
-func NewAuthClaim(privKHex string) (auth *core.Claim, key *babyjub.PrivateKey, err error) {
+func NewAuthClaim(t testing.TB, privKHex string) (auth *core.Claim, key *babyjub.PrivateKey) {
 	// extract pubKey
 	key, X, Y := ExtractPubXY(privKHex)
 
 	// create auth claim
 	authClaim, err := AuthClaimFromPubKey(X, Y)
 	if err != nil {
-		return nil, nil, err
+		t.Fatalf("can't create auth claim from pub key %v", err)
 	}
-	return authClaim, key, nil
+	return authClaim, key
 }
 
 func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {

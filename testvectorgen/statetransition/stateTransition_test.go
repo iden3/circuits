@@ -83,8 +83,7 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 
 	//if genesis == false {
 	// extract pubKey
-	authClaim2, _, err := utils.NewAuthClaim(userPK2)
-	require.NoError(t, err)
+	authClaim2, _ := utils.NewAuthClaim(t, userPK2)
 
 	user.AddClaim(t, authClaim2)
 
@@ -98,7 +97,6 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 		authMTProof = user.AuthMTPStrign(t)
 
 		authNonRevMTProof, nodeAuxNonRev = user.ClaimRevMTP(t, user.AuthClaim)
-		require.NoError(t, err)
 
 		claim1 := utils.DefaultUserClaim(t, user.ID)
 
