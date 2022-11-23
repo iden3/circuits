@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	json2 "encoding/json"
 	"math/big"
 	"testing"
@@ -87,12 +86,7 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 	authClaim2, _, err := utils.NewAuthClaim(userPK2)
 	require.NoError(t, err)
 
-	// add auth claim to claimsMT
-	hi, hv, err := authClaim2.HiHv()
-	require.NoError(t, err)
-
-	err = user.Clt.Add(context.Background(), hi, hv)
-	require.NoError(t, err)
+	user.AddClaim(t, authClaim2)
 
 	if genesis {
 		isGenesis = "0"
@@ -108,19 +102,14 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 
 		claim1 := utils.DefaultUserClaim(t, user.ID)
 
-		// add auth claim to claimsMT
-		hi, hv, err := claim1.HiHv()
-		require.NoError(t, err)
-
-		err = user.Clt.Add(context.Background(), hi, hv)
-		require.NoError(t, err)
+		user.AddClaim(t, claim1)
 	}
 
 	hashOldAndNewStates, err := poseidon.Hash(
 		[]*big.Int{oldState, user.State(t)})
 	require.NoError(t, err)
 
-	sig := user.PK.SignPoseidon(hashOldAndNewStates)
+	sig := user.Sign(hashOldAndNewStates)
 	require.NoError(t, err)
 
 	inputs := StateTransitionInputs{
