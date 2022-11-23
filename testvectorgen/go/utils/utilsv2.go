@@ -32,6 +32,10 @@ func (it *IdentityTest) SignBBJJ(challenge []byte) (*babyjub.Signature, error) {
 	return SignBBJJ(it.PK, challenge)
 }
 
+func (it *IdentityTest) Sign(challenge *big.Int) *babyjub.Signature {
+	return it.PK.SignPoseidon(challenge)
+}
+
 func (it *IdentityTest) State(t testing.TB) *big.Int {
 	state, err := core.IdenState(it.Clt.Root().BigInt(), it.Ret.Root().BigInt(), it.Rot.Root().BigInt())
 	if err != nil {

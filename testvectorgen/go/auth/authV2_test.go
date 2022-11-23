@@ -152,8 +152,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 	authNonRevMTProof, nodeAuxNonRev, err := user.ClaimRevMTP(user.AuthClaim)
 
-	sig, err := user.SignBBJJ(challenge.Bytes())
-	require.NoError(t, err)
+	sig := user.Sign(challenge)
 
 	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(), nil)
 	require.NoError(t, err)
