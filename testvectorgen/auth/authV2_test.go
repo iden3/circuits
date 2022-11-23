@@ -147,8 +147,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 	}
 
 	// user
-	authMTProof, err := user.AuthMTPStrign()
-	require.NoError(t, err)
+	authMTProof := user.AuthMTPStrign(t)
 
 	authNonRevMTProof, nodeAuxNonRev, err := user.ClaimRevMTP(user.AuthClaim)
 

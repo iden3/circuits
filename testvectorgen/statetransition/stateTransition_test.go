@@ -73,8 +73,7 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 	isGenesis := "1"
 
 	// user
-	authMTProof, err := user.AuthMTPStrign()
-	require.NoError(t, err)
+	authMTProof := user.AuthMTPStrign(t)
 
 	authNonRevMTProof, nodeAuxNonRev, err := user.ClaimRevMTP(user.AuthClaim)
 
@@ -102,8 +101,8 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 		oldCltRoot = user.Clt.Root().BigInt().String()
 		oldRevRoot = user.Ret.Root().BigInt().String()
 		oldRotRoot = user.Rot.Root().BigInt().String()
-		authMTProof, err = user.AuthMTPStrign()
-		require.NoError(t, err)
+		authMTProof = user.AuthMTPStrign(t)
+
 		authNonRevMTProof, nodeAuxNonRev, err = user.ClaimRevMTP(user.AuthClaim)
 		require.NoError(t, err)
 

@@ -33,9 +33,12 @@ func (it *IdentityTest) State(t testing.TB) *big.Int {
 	return state
 }
 
-func (it *IdentityTest) AuthMTPStrign() (proof []string, err error) {
+func (it *IdentityTest) AuthMTPStrign(t testing.TB) []string {
 	p, _, err := it.ClaimMTPRaw(it.AuthClaim)
-	return PrepareSiblingsStr(p.AllSiblings(), 32), err
+	if err != nil {
+		t.Fatalf("failed generate auth claim mpt %v", err)
+	}
+	return PrepareSiblingsStr(p.AllSiblings(), 32)
 }
 
 func (it *IdentityTest) SignClaimBBJJ(claim *core.Claim) (*babyjub.Signature, error) {
