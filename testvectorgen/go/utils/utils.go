@@ -2,9 +2,7 @@ package utils
 
 import (
 	"encoding/hex"
-	"fmt"
 	"math/big"
-	"os"
 
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
@@ -22,13 +20,6 @@ func ExtractPubXY(privKHex string) (key *babyjub.PrivateKey, x, y *big.Int) {
 	return &k, pk.X, pk.Y
 }
 
-func ExitOnError(err error) {
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
-
 func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 	var schemaHash core.SchemaHash
 	//schemaEncodedBytes, _ := hex.DecodeString("ca938857241db9451ea329256b9c06e5") // V1
@@ -39,7 +30,9 @@ func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 	// We don't use random number here because this test vectors will be used for tests
 	// and have randomization inside tests is usually a bad idea
 	revNonce, err := poseidon.Hash([]*big.Int{X})
-	ExitOnError(err)
+	if err != nil {
+		return nil, err
+	}
 
 	return core.NewClaim(schemaHash,
 		core.WithIndexDataInts(X, Y),
@@ -49,7 +42,9 @@ func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 func SignBBJJ(key *babyjub.PrivateKey, sigInput []byte) (*babyjub.Signature, error) {
 	bjjSigner := primitive.NewBJJSigner(key)
 	signature, err := bjjSigner.Sign(sigInput)
-	ExitOnError(err)
+	if err != nil {
+		return nil, err
+	}
 
 	var sig [64]byte
 	copy(sig[:], signature)
