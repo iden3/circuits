@@ -163,8 +163,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		require.NoError(t, err)
 	}
 
-	mz, claim, err := utils.DefaultJSONUserClaim(subjectID)
-	require.NoError(t, err)
+	mz, claim := utils.DefaultJSONUserClaim(t, subjectID)
 
 	path, err := merklize.NewPath(
 		"https://www.w3.org/2018/credentials#credentialSubject",
@@ -172,6 +171,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	require.NoError(t, err)
 
 	jsonP, value, err := mz.Proof(context.Background(), path)
+	require.NoError(t, err)
 
 	valueKey, err := value.MtEntry()
 	require.NoError(t, err)
@@ -400,8 +400,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		require.NoError(t, err)
 	}
 
-	mz, claim, err := utils.DefaultJSONUserClaim(subjectID)
-	require.NoError(t, err)
+	mz, claim := utils.DefaultJSONUserClaim(t, subjectID)
 
 	path, err := merklize.NewPath(
 		"https://www.w3.org/2018/credentials#credentialSubject",

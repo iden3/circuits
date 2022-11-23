@@ -16,28 +16,17 @@ import (
 	"github.com/iden3/go-schema-processor/merklize"
 )
 
-func PrepareProof(proof *merkletree.Proof) ([]string, NodeAuxValue) {
-	return PrepareSiblingsStr(proof.AllSiblings(), 32), getNodeAuxValue(proof)
-}
-
-func ExtractPubXY(privKHex string) (key *babyjub.PrivateKey, x, y *big.Int) {
-	// Extract pubKey
-	var k babyjub.PrivateKey
-	if _, err := hex.Decode(k[:], []byte(privKHex)); err != nil {
-		panic(err)
-	}
-	pk := k.Public()
-	return &k, pk.X, pk.Y
-}
-
-func DefaultJSONUserClaim(subject core.ID) (*merklize.Merklizer, *core.Claim, error) {
+func DefaultJSONUserClaim(t testing.TB, subject core.ID) (*merklize.Merklizer, *core.Claim) {
 	mz, err := merklize.MerklizeJSONLD(context.Background(), strings.NewReader(TestClaimDocument))
 	if err != nil {
-		return nil, nil, err
+		t.Fatalf("failed marklize claim: %v", err)
 	}
 
 	var schemaHash core.SchemaHash
 	schemaBytes, err := hex.DecodeString("ce6bb12c96bfd1544c02c289c6b4b987")
+	if err != nil {
+		t.Fatalf("failed decode schema hash string %v", err)
+	}
 	copy(schemaHash[:], schemaBytes)
 
 	nonce := 10
@@ -49,15 +38,11 @@ func DefaultJSONUserClaim(subject core.ID) (*merklize.Merklizer, *core.Claim, er
 		core.WithRevocationNonce(uint64(nonce)),
 		core.WithIndexMerklizedRoot(mz.Root().BigInt()))
 
-	return mz, claim, err
-}
-
-func HashToStr(siblings []*merkletree.Hash) []string {
-	siblingsStr := make([]string, len(siblings))
-	for i, sibling := range siblings {
-		siblingsStr[i] = sibling.BigInt().String()
+	if err != nil {
+		t.Fatalf("failed generate core claim %v", err)
 	}
-	return siblingsStr
+
+	return mz, claim
 }
 
 func DefaultUserClaim(subject core.ID) (*core.Claim, error) {
@@ -77,6 +62,28 @@ func DefaultUserClaim(subject core.ID) (*core.Claim, error) {
 		core.WithExpirationDate(time.Unix(1669884010, 0)), //Thu Dec 01 2022 08:40:10 GMT+0000
 		core.WithRevocationNonce(uint64(nonce)))
 
+}
+
+func PrepareProof(proof *merkletree.Proof) ([]string, NodeAuxValue) {
+	return PrepareSiblingsStr(proof.AllSiblings(), 32), getNodeAuxValue(proof)
+}
+
+func ExtractPubXY(privKHex string) (key *babyjub.PrivateKey, x, y *big.Int) {
+	// Extract pubKey
+	var k babyjub.PrivateKey
+	if _, err := hex.Decode(k[:], []byte(privKHex)); err != nil {
+		panic(err)
+	}
+	pk := k.Public()
+	return &k, pk.X, pk.Y
+}
+
+func HashToStr(siblings []*merkletree.Hash) []string {
+	siblingsStr := make([]string, len(siblings))
+	for i, sibling := range siblings {
+		siblingsStr[i] = sibling.BigInt().String()
+	}
+	return siblingsStr
 }
 
 func PrepareStrArray(siblings []string, levels int) []string {

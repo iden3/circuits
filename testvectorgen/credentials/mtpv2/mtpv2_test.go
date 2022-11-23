@@ -137,8 +137,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		require.NoError(t, err)
 	}
 
-	mz, claim, err := utils.DefaultJSONUserClaim(subjectID)
-	require.NoError(t, err)
+	mz, claim := utils.DefaultJSONUserClaim(t, subjectID)
 
 	path, err := merklize.NewPath(
 		"https://www.w3.org/2018/credentials#credentialSubject",
