@@ -141,7 +141,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 		}
 
-		err = gisTree.Add(context.Background(), user.IDHash(), user.State(t))
+		err = gisTree.Add(context.Background(), user.IDHash(t), user.State(t))
 		require.NoError(t, err)
 
 	}
@@ -153,7 +153,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 	sig := user.Sign(challenge)
 
-	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(), nil)
+	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()

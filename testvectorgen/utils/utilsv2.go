@@ -105,10 +105,10 @@ func (it *IdentityTest) ClaimRevMTP(t testing.TB, claim *core.Claim) (sibling []
 
 }
 
-func (it *IdentityTest) IDHash() *big.Int {
+func (it *IdentityTest) IDHash(t testing.TB) *big.Int {
 	idHash, err := poseidon.Hash([]*big.Int{it.ID.BigInt()})
 	if err != nil {
-		panic(err)
+		t.Fatalf("can't hash id %v", err)
 	}
 	return idHash
 }
