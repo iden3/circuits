@@ -265,10 +265,8 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
-	require.NoError(t, err)
 
 	issuer := utils.NewIdentity(t, issuerPK)
-	require.NoError(t, err)
 
 	userProfileID := user.ID
 	nonce := big.NewInt(0)
