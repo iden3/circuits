@@ -28,20 +28,20 @@ template IN (valueArraySize){
 }
 
 // As LessThan but for all possible numbers from field (not only 252-bit-max like LessThan)
-template LessThan2() {
+template LessThan254() {
     signal input in[2];
     signal output out;
 
-    component n0b = Num2Bits(256);
+    component n0b = Num2Bits(254);
     n0b.in <== in[0];
 
-    component n1b = Num2Bits(256);
+    component n1b = Num2Bits(254);
     n1b.in <== in[1];
 
     // numbers for high 4 bits
-    component h0  = Bits2Num(4);
-    component h1  = Bits2Num(4);
-    for(var i = 252; i < 256; i++) {
+    component h0  = Bits2Num(2);
+    component h1  = Bits2Num(2);
+    for(var i = 252; i < 254; i++) {
         h0.in[i-252] <== n0b.out[i];
         h1.in[i-252] <== n1b.out[i];
     }
