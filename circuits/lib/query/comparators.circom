@@ -70,3 +70,14 @@ template LessThan254() {
 
     out <== (hiBitEq.out * lt.out) + (hiBitLt.out * 1) + (hiBitGt.out * 0);
 }
+
+template GreaterThan254() {
+    signal input in[2];
+    signal output out;
+
+    component lt = LessThan254();
+
+    lt.in[0] <== in[1];
+    lt.in[1] <== in[0];
+    lt.out ==> out;
+}
