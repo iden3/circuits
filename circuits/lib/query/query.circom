@@ -26,7 +26,7 @@ template Query (valueArraySize) {
     eq.in[1] <== value[0];
 
     // LessThan
-    component lt = LessThan(252);
+    component lt = LessThan254();
     lt.in[0] <== in;
     lt.in[1] <== value[0];
 

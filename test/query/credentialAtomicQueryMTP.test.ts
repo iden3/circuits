@@ -7,7 +7,7 @@ const assert = chai.assert;
 
 export {};
 
-describe("Test credential atomic query", function () {
+describe.skip("Test credential atomic query", function () {
 
     this.timeout(600000);
 

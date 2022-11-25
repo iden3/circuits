@@ -20,11 +20,11 @@ OCCURENCE_AND_REPLACE_FEED=(
 # find ".foo" in "someCircuitName.foo" text but will not find anythin in "var x=foo"
 # for the adjustment "" it will find the word "foo" anywhere
 FILES_AND_REGEX_TO_PROCESS=(
-  "circuits/lib/idOwnershipBySignatureWithRelay.circom"  " " # will find "x.input1 <== foo" but not "x.foo"
-  "circuits/lib/query/credentialAtomicQueryMTPWithRelay.circom"  "\." # will find "x.foo" but not "x.input1 <== foo"
-  "circuits/lib/authenticationWithRelay.circom"  "\."
-  "test/idOwnership/idOwnershipBySignatureWithRelay.test.ts"  "" # will find "foo" word in any place
-  "test/circuits/idOwnershipBySignatureWithRelay.circom"  ""
+  "circuits/lib/idOwnershipBySignature.circom"  " " # will find "x.input1 <== foo" but not "x.foo"
+  "circuits/lib/query/credentialAtomicQueryMTP.circom"  "\." # will find "x.foo" but not "x.input1 <== foo"
+  "circuits/lib/auth.circom"  "\."
+  "test/idOwnership/idOwnershipBySignature.test.ts"  "" # will find "foo" word in any place
+  "test/circuits/idOwnershipBySignature.circom"  ""
 );
 
 OCCURENCE_AND_REPLACE_FEED_LENGTH=${#OCCURENCE_AND_REPLACE_FEED}

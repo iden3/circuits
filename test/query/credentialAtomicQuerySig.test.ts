@@ -7,7 +7,7 @@ const assert = chai.assert;
 
 export {};
 
-describe("Test CredentialAtomicQuerySig.circom", function() {
+describe.skip("Test CredentialAtomicQuerySig.circom", function() {
 
     this.timeout(600000);
 
@@ -95,6 +95,7 @@ describe("Test CredentialAtomicQuerySig.circom", function() {
             timestamp: "1642074362",
         }
         const w = await circuit.calculateWitness(inputs, true);
+        await circuit.checkConstraints(w);
         await circuit.assertOut(w, expOut);
     })
     ;
