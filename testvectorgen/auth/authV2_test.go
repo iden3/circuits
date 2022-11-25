@@ -118,15 +118,9 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 	if genesis == false {
 		// extract pubKey
-		authClaim2, pk2, err := utils.NewAuthClaim(userPK2)
-		require.NoError(t, err)
+		authClaim2, pk2 := utils.NewAuthClaim(t, userPK2)
 
-		// add auth claim to claimsMT
-		hi, hv, err := authClaim2.HiHv()
-		require.NoError(t, err)
-
-		err = user.Clt.Add(context.Background(), hi, hv)
-		require.NoError(t, err)
+		user.AddClaim(t, authClaim2)
 
 		if isSecondAuthClaim {
 
@@ -141,21 +135,19 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 		}
 
-		err = gisTree.Add(context.Background(), user.IDHash(), user.State(t))
+		err = gisTree.Add(context.Background(), user.IDHash(t), user.State(t))
 		require.NoError(t, err)
 
 	}
 
 	// user
-	authMTProof, err := user.AuthMTPStrign()
-	require.NoError(t, err)
+	authMTProof := user.AuthMTPStrign(t)
 
-	authNonRevMTProof, nodeAuxNonRev, err := user.ClaimRevMTP(user.AuthClaim)
+	authNonRevMTProof, nodeAuxNonRev := user.ClaimRevMTP(t, user.AuthClaim)
 
-	sig, err := user.SignBBJJ(challenge.Bytes())
-	require.NoError(t, err)
+	sig := user.Sign(challenge)
 
-	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(), nil)
+	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()

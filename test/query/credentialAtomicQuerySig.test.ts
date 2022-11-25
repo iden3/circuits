@@ -7,7 +7,7 @@ const assert = chai.assert;
 
 export {};
 
-describe("Test CredentialAtomicQuerySig.circom", function() {
+describe.skip("Test CredentialAtomicQuerySig.circom", function() {
 
     this.timeout(600000);
 

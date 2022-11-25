@@ -165,7 +165,7 @@ template credentialAtomicQuerySigV2(IdOwnershipLevels, IssuerLevels, OnChainSmtL
     claimExpirationCheck.timestamp <== timestamp;
 
 
-    var AUTH_SCHEMA_HASH  = 304427537360709784173770334266246861770;
+    var AUTH_SCHEMA_HASH  = 301485908906857522017021291028488077057;
     component issuerSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
     issuerSchemaCheck.schema <== AUTH_SCHEMA_HASH;

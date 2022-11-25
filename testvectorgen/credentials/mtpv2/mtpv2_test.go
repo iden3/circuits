@@ -84,7 +84,7 @@ type TestDataMTPV2 struct {
 }
 
 func Test_ClaimIssuedOnUserID(t *testing.T) {
-	desc := "User = Subject. Claim issued on UserID"
+	desc := "User == Subject. Claim issued on UserID"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
@@ -137,8 +137,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		require.NoError(t, err)
 	}
 
-	mz, claim, err := utils.DefaultJSONUserClaim(subjectID)
-	require.NoError(t, err)
+	mz, claim := utils.DefaultJSONUserClaim(t, subjectID)
 
 	path, err := merklize.NewPath(
 		"https://www.w3.org/2018/credentials#credentialSubject",
@@ -146,6 +145,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	require.NoError(t, err)
 
 	jsonP, value, err := mz.Proof(context.Background(), path)
+	require.NoError(t, err)
 
 	valueKey, err := value.MtEntry()
 	require.NoError(t, err)
@@ -157,11 +157,9 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 	issuer.AddClaim(t, claim)
 
-	issuerClaimMtp, _, err := issuer.ClaimMTP(claim)
-	require.NoError(t, err)
+	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
 
-	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
-	require.NoError(t, err)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
@@ -244,16 +242,14 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		require.NoError(t, err)
 	}
 
-	claim, err := utils.DefaultUserClaim(subjectID)
-	require.NoError(t, err)
+	claim := utils.DefaultUserClaim(t, subjectID)
 
 	issuer.AddClaim(t, claim)
 
-	issuerClaimMtp, _, err := issuer.ClaimMTP(claim)
+	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
 	require.NoError(t, err)
 
-	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
-	require.NoError(t, err)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),

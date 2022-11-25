@@ -15,10 +15,6 @@ func Test_IdentityData(t *testing.T) {
 
 	id := NewIdentity(t, userPK)
 
-	state := id.State(t)
-
-	mtp, err := id.AuthMTPStrign()
-
 	r := struct {
 		IssuerID                 *big.Int    `json:"issuerID"`
 		IssuerAuthClaim          *core.Claim `json:"issuerAuthClaim"`
@@ -30,11 +26,11 @@ func Test_IdentityData(t *testing.T) {
 	}{
 		IssuerID:                 id.ID.BigInt(),
 		IssuerAuthClaim:          id.AuthClaim,
-		IssuerAuthClaimMtp:       mtp,
+		IssuerAuthClaimMtp:       id.AuthMTPStrign(t),
 		IssuerAuthClaimsTreeRoot: id.Clt.Root().BigInt(),
 		IssuerAuthRevTreeRoot:    id.Ret.Root().BigInt(),
 		IssuerAuthRootsTreeRoot:  id.Rot.Root().BigInt(),
-		IssuerAuthState:          state,
+		IssuerAuthState:          id.State(t),
 	}
 
 	json, err := json2.Marshal(r)

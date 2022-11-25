@@ -163,8 +163,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		require.NoError(t, err)
 	}
 
-	mz, claim, err := utils.DefaultJSONUserClaim(subjectID)
-	require.NoError(t, err)
+	mz, claim := utils.DefaultJSONUserClaim(t, subjectID)
 
 	path, err := merklize.NewPath(
 		"https://www.w3.org/2018/credentials#credentialSubject",
@@ -172,6 +171,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	require.NoError(t, err)
 
 	jsonP, value, err := mz.Proof(context.Background(), path)
+	require.NoError(t, err)
 
 	valueKey, err := value.MtEntry()
 	require.NoError(t, err)
@@ -182,15 +182,13 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	require.NoError(t, err)
 
 	// Sig claim
-	claimSig, err := issuer.SignClaimBBJJ(claim)
-	require.NoError(t, err)
+	claimSig := issuer.SignClaim(t, claim)
 
 	issuerClaimNonRevState := issuer.State(t)
 
-	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
-	require.NoError(t, err)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
-	issuerAuthClaimMtp, issuerAuthClaimNodeAux, err := issuer.ClaimRevMTP(issuer.AuthClaim)
+	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
@@ -267,10 +265,8 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
-	require.NoError(t, err)
 
 	issuer := utils.NewIdentity(t, issuerPK)
-	require.NoError(t, err)
 
 	userProfileID := user.ID
 	nonce := big.NewInt(0)
@@ -288,19 +284,16 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		require.NoError(t, err)
 	}
 
-	claim, err := utils.DefaultUserClaim(subjectID)
-	require.NoError(t, err)
+	claim := utils.DefaultUserClaim(t, subjectID)
 
 	// Sig claim
-	claimSig, err := issuer.SignClaimBBJJ(claim)
-	require.NoError(t, err)
+	claimSig := issuer.SignClaim(t, claim)
 
 	issuerClaimNonRevState := issuer.State(t)
 
-	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
-	require.NoError(t, err)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
-	issuerAuthClaimMtp, issuerAuthClaimNodeAux, err := issuer.ClaimRevMTP(issuer.AuthClaim)
+	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
 	emptyPathMtp := utils.PrepareSiblingsStr([]*merkletree.Hash{&merkletree.HashZero}, 32)
 
@@ -400,8 +393,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		require.NoError(t, err)
 	}
 
-	mz, claim, err := utils.DefaultJSONUserClaim(subjectID)
-	require.NoError(t, err)
+	mz, claim := utils.DefaultJSONUserClaim(t, subjectID)
 
 	path, err := merklize.NewPath(
 		"https://www.w3.org/2018/credentials#credentialSubject",
@@ -416,15 +408,13 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	require.NoError(t, err)
 
 	// Sig claim
-	claimSig, err := issuer.SignClaimBBJJ(claim)
-	require.NoError(t, err)
+	claimSig := issuer.SignClaim(t, claim)
 
 	issuerClaimNonRevState := issuer.State(t)
 
-	issuerClaimNonRevMtp, issuerClaimNonRevAux, err := issuer.ClaimRevMTP(claim)
-	require.NoError(t, err)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
-	issuerAuthClaimMtp, issuerAuthClaimNodeAux, err := issuer.ClaimRevMTP(issuer.AuthClaim)
+	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
