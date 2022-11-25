@@ -7,13 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/iden3/circom:0.0.1
-      options: --user 1001 # https://github.com/cypress-io/github-action/issues/446#issuecomment-987015822
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
     steps:
     - uses: actions/checkout@v2
     - name: modules-cache
@@ -21,6 +14,13 @@ jobs:
       with:
         path: '**/node_modules'
         key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
+
+    - name: Setup other deps
+      run: sudo apt-get update && sudo apt-get install -y wget nlohmann-json3-dev libgmp-dev nasm g++ build-essential
+
+    - name: Setup Circom
+      run: wget https://github.com/iden3/circom/releases/latest/download/circom-linux-amd64 && sudo mv ./circom-linux-amd64 /usr/bin/circom && sudo chmod +x /usr/bin/circom
+
     - name: Install node_modules
       if: steps.modules-cache.outputs.cache-hit != 'true'
       run: npm install
