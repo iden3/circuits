@@ -30,7 +30,7 @@ template Query (valueArraySize) {
     lt.in[0] <== in;
     lt.in[1] <== value[0];
 
-    component gt = GreaterThan(252);
+    component gt = GreaterThan254();
     gt.in[0] <== in;
     gt.in[1] <== value[0];
 
