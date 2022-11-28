@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/hex"
 	json2 "encoding/json"
+	"fmt"
 	"math/big"
 	"testing"
 
@@ -20,22 +22,22 @@ const (
 )
 
 type AuthV2Inputs struct {
-	UserGenesisID               string      `json:"userGenesisID"`
-	Nonce                       string      `json:"nonce"`
-	UserAuthClaim               *core.Claim `json:"userAuthClaim"`
-	UserAuthClaimMtp            []string    `json:"userAuthClaimMtp"`
-	UserAuthClaimNonRevMtp      []string    `json:"userAuthClaimNonRevMtp"`
-	UserAuthClaimNonRevMtpAuxHi string      `json:"userAuthClaimNonRevMtpAuxHi"`
-	UserAuthClaimNonRevMtpAuxHv string      `json:"userAuthClaimNonRevMtpAuxHv"`
-	UserAuthClaimNonRevMtpNoAux string      `json:"userAuthClaimNonRevMtpNoAux"`
+	UserGenesisID               string      `json:"genesisID"`
+	Nonce                       string      `json:"profileNonce"`
+	UserAuthClaim               *core.Claim `json:"authClaim"`
+	UserAuthClaimMtp            []string    `json:"authClaimIncMtp"`
+	UserAuthClaimNonRevMtp      []string    `json:"authClaimNonRevMtp"`
+	UserAuthClaimNonRevMtpAuxHi string      `json:"authClaimNonRevMtpAuxHi"`
+	UserAuthClaimNonRevMtpAuxHv string      `json:"authClaimNonRevMtpAuxHv"`
+	UserAuthClaimNonRevMtpNoAux string      `json:"authClaimNonRevMtpNoAux"`
 	Challenge                   string      `json:"challenge"`
 	ChallengeSignatureR8X       string      `json:"challengeSignatureR8x"`
 	ChallengeSignatureR8Y       string      `json:"challengeSignatureR8y"`
 	ChallengeSignatureS         string      `json:"challengeSignatureS"`
-	UserClaimsTreeRoot          string      `json:"userClaimsTreeRoot"`
-	UserRevTreeRoot             string      `json:"userRevTreeRoot"`
-	UserRootsTreeRoot           string      `json:"userRootsTreeRoot"`
-	UserState                   string      `json:"userState"`
+	UserClaimsTreeRoot          string      `json:"claimsTreeRoot"`
+	UserRevTreeRoot             string      `json:"revTreeRoot"`
+	UserRootsTreeRoot           string      `json:"rootsTreeRoot"`
+	UserState                   string      `json:"state"`
 	GistRoot                    string      `json:"gistRoot"`
 	GistMtp                     []string    `json:"gistMtp"`
 	GistMtpAuxHi                string      `json:"gistMtpAuxHi"`
@@ -191,4 +193,68 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 	require.NoError(t, err)
 
 	utils.SaveTestVector(t, fileName, string(json))
+}
+
+func TestTre(t *testing.T) {
+
+	tree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	require.Nil(t, err)
+
+	X, ok := new(big.Int).SetString("17640206035128972995519606214765283372613874593503528180869261482403155458945", 10)
+	require.True(t, ok)
+
+	Y, ok := new(big.Int).SetString("20634138280259599560273310290025659992320584624461316485434108770067472477956", 10)
+	require.True(t, ok)
+
+	var schemaHash core.SchemaHash
+	schemaEncodedBytes, _ := hex.DecodeString("ca938857241db9451ea329256b9c06e5") // V1
+	//schemaEncodedBytes, _ := hex.DecodeString("013fd3f623559d850fb5b02ff012d0e2") // V2
+	copy(schemaHash[:], schemaEncodedBytes)
+
+	// NOTE: We take nonce as hash of public key to make it random
+	// We don't use random number here because this test vectors will be used for tests
+	// and have randomization inside tests is usually a bad idea
+	revNonce := uint64(15930428023331155902)
+	require.NoError(t, err)
+
+	claim, err := core.NewClaim(schemaHash,
+		core.WithIndexDataInts(X, Y),
+		core.WithRevocationNonce(revNonce))
+	require.NoError(t, err)
+
+	marshal, err := json2.Marshal(claim)
+	require.NoError(t, err)
+	fmt.Println(string(marshal))
+
+	hi, hv, err := claim.HiHv()
+	require.NoError(t, err)
+
+	fmt.Println("hi", hi)
+	fmt.Println("hv", hv)
+
+	err = tree.Add(context.Background(), hi, hv)
+	require.NoError(t, err)
+
+	fmt.Println("root", tree.Root().BigInt())
+
+	clr, _ := new(big.Int).SetString("9763429684850732628215303952870004997159843236039795272605841029866455670219", 10)
+	state, err := core.IdenState(clr, big.NewInt(0), big.NewInt(0))
+	require.NoError(t, err)
+
+	typ, err := core.BuildDIDType(core.DIDMethodIden3, core.Polygon, core.Mumbai)
+	require.NoError(t, err)
+	id, err := core.IdGenesisFromIdenState(typ, state)
+	require.NoError(t, err)
+
+	fmt.Println("id", id.BigInt())
+	fmt.Println("id", id.String())
+
+	did, err := core.ParseDIDFromID(*id)
+	require.NoError(t, err)
+	fmt.Println("did", did.String())
+
+	//{“schema":"ca938857241db9451ea329256b9c06e5",
+	//"nonce":"15930428023331155902"," +
+	//"indexSlotA":"17640206035128972995519606214765283372613874593503528180869261482403155458945",
+	// "indexSlotB":"20634138280259599560273310290025659992320584624461316485434108770067472477956"}
 }
