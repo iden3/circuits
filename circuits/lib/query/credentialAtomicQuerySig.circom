@@ -3,7 +3,7 @@ include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "comparators.circom";
-include "../idOwnershipBySignature.circom";
+include "../idOwnership.circom";
 include "query.circom";
 
 
@@ -103,26 +103,26 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     */
 
     /* Id ownership check*/
-    component userIdOwnership = IdOwnershipBySignature(IdOwnershipLevels);
+    component checkIdOwnership = IdOwnership(IdOwnershipLevels);
 
-    userIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot; // currentHolderStateClaimsTreeRoot
-    for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
-    for (var i=0; i<8; i++) { userIdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
+    checkIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot;
+    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
 
-    userIdOwnership.userRevTreeRoot <== userRevTreeRoot;  // currentHolderStateClaimsRevTreeRoot
-    for (var i=0; i<IdOwnershipLevels; i++) { userIdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
-    userIdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
-    userIdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
-    userIdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
+    checkIdOwnership.userRevTreeRoot <== userRevTreeRoot;
+    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
+    checkIdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
+    checkIdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
+    checkIdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
 
-    userIdOwnership.userRootsTreeRoot <== userRootsTreeRoot; // currentHolderStateClaimsRootsTreeRoot
+    checkIdOwnership.userRootsTreeRoot <== userRootsTreeRoot;
 
-    userIdOwnership.challenge <== challenge;
-    userIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
-    userIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
-    userIdOwnership.challengeSignatureS <== challengeSignatureS;
+    checkIdOwnership.challenge <== challenge;
+    checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
+    checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
+    checkIdOwnership.challengeSignatureS <== challengeSignatureS;
 
-    userIdOwnership.userState <== userState;
+    checkIdOwnership.userState <== userState;
 
 
     // Check issuerClaim is issued to provided identity

@@ -1,5 +1,5 @@
 pragma circom 2.0.0;
 
-include "../../circuits/lib/authentication.circom";
+include "../../circuits/lib/auth.circom";
 
-component main {public [challenge,userState]} = VerifyAuthentication(32);
+component main {public [userID,challenge,userState]} = Auth(32);

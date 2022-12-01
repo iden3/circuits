@@ -7,22 +7,20 @@ include "../../node_modules/circomlib/circuits/poseidon.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../../node_modules/circomlib/circuits/smt/smtprocessor.circom";
-include "idOwnershipBySignature.circom";
+include "idOwnership.circom";
 
-template StateTransition(nLevels) {
-    // we have no constraints for "id" in this circuit, however we introduce "id" input here
-    // as it serves as public input which should be the same for prover and verifier
+template StateTransition(IdOwnershipLevels) {
     signal input userID;
     signal input oldUserState;
     signal input newUserState;
     signal input isOldStateGenesis;
 
     signal input claimsTreeRoot;
-    signal input authClaimMtp[nLevels];
+    signal input authClaimMtp[IdOwnershipLevels];
     signal input authClaim[8];
 
     signal input revTreeRoot;
-    signal input authClaimNonRevMtp[nLevels];
+    signal input authClaimNonRevMtp[IdOwnershipLevels];
     signal input authClaimNonRevMtpNoAux;
     signal input authClaimNonRevMtpAuxHv;
     signal input authClaimNonRevMtpAuxHi;
@@ -63,14 +61,14 @@ template StateTransition(nLevels) {
     challenge.inputs[0] <== oldUserState;
     challenge.inputs[1] <== newUserState;
 
-    component checkIdOwnership = IdOwnershipBySignature(nLevels);
+    component checkIdOwnership = IdOwnership(IdOwnershipLevels);
 
     checkIdOwnership.userClaimsTreeRoot <== claimsTreeRoot;
-    for (var i=0; i<nLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== authClaimMtp[i]; }
+    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== authClaimMtp[i]; }
     for (var i=0; i<8; i++) { checkIdOwnership.userAuthClaim[i] <== authClaim[i]; }
 
     checkIdOwnership.userRevTreeRoot <== revTreeRoot;
-    for (var i=0; i<nLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
+    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
     checkIdOwnership.userAuthClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
     checkIdOwnership.userAuthClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
     checkIdOwnership.userAuthClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
