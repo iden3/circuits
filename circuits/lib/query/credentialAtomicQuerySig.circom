@@ -165,6 +165,7 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     // issuerAuthClaim proof of non-revocation
     //
     component verifyIssuerAuthClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
+    verifyIssuerAuthClaimNotRevoked.enabled <== 1;
     for (var i=0; i<8; i++) { verifyIssuerAuthClaimNotRevoked.claim[i] <== issuerAuthClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) {
         verifyIssuerAuthClaimNotRevoked.claimNonRevMTP[i] <== issuerAuthClaimNonRevMtp[i];
@@ -195,6 +196,7 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
 
     // non revocation status
     component verifyClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
+    verifyClaimNotRevoked.enabled <== 1;
     for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== issuerClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) {
         verifyClaimNotRevoked.claimNonRevMTP[i] <== issuerClaimNonRevMtp[i];
