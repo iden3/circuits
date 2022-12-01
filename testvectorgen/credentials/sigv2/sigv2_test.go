@@ -62,6 +62,7 @@ type CredentialAtomicSigOffChainV2Inputs struct {
 	Operator  int      `json:"operator"`
 	SlotIndex int      `json:"slotIndex"`
 	Timestamp string   `json:"timestamp"`
+	IsRevocationChecked int `json:"isRevocationChecked"`
 	Value     []string `json:"value"`
 }
 
@@ -230,6 +231,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		Operator:  utils.EQ,
 		SlotIndex: 2,
 		Timestamp: timestamp,
+		IsRevocationChecked: 1,
 		Value: []string{valueKey.String(), "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
 			"0", "0",
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
@@ -337,6 +339,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		Operator:  utils.EQ,
 		SlotIndex: 2,
 		Timestamp: timestamp,
+		IsRevocationChecked: 1,
 		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
 			"0", "0",
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
@@ -456,6 +459,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		Operator:  utils.NOOP,
 		SlotIndex: 0,
 		Timestamp: timestamp,
+		IsRevocationChecked: 1,
 		Value: []string{"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
 			"0", "0",
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
