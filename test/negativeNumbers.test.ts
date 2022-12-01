@@ -62,7 +62,7 @@ describe("WASM: Eq", function ()  {
     }
 });
 
-describe("C: Eq", function ()  {
+describe.skip("C: Eq", function ()  {
     let circuit;
     this.timeout(100000);
 

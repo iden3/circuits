@@ -207,7 +207,7 @@ describe("Test query",  function() {
         });
     });
 
-    describe("#LessThan bug.", function() {
+    describe.skip("#LessThan bug.", function() {
         it("#LessThan: -1 < 10 should be true but false", async () => {
             const w = await circuit.calculateWitness({
                 in: "-1",

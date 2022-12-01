@@ -64,7 +64,7 @@ const test_vectors = {
 };
 
 
-describe("WASM: Less than", function ()  {
+describe.skip("WASM: Less than", function ()  {
     let circuit;
     this.timeout(100000);
 
@@ -83,7 +83,7 @@ describe("WASM: Less than", function ()  {
     }
 });
 
-describe("C: Less than", function ()  {
+describe.skip("C: Less than", function ()  {
     let circuit;
     this.timeout(100000);
 
