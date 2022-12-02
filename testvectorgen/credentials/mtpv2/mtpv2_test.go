@@ -6,11 +6,12 @@ import (
 	"math/big"
 	"testing"
 
+	"test/utils"
+
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-schema-processor/merklize"
 	"github.com/stretchr/testify/require"
-	"test/utils"
 )
 
 const (
@@ -35,6 +36,7 @@ type CredentialAtomicMTPOffChainV2Inputs struct {
 	IssuerClaimRootsTreeRoot  *merkletree.Hash `json:"issuerClaimRootsTreeRoot"`
 	IssuerClaimIdenState      string           `json:"issuerClaimIdenState"`
 
+	IsRevocationChecked             int              `json:"isRevocationChecked"`
 	IssuerClaimNonRevClaimsTreeRoot *merkletree.Hash `json:"issuerClaimNonRevClaimsTreeRoot"`
 	IssuerClaimNonRevRevTreeRoot    *merkletree.Hash `json:"issuerClaimNonRevRevTreeRoot"`
 	IssuerClaimNonRevRootsTreeRoot  *merkletree.Hash `json:"issuerClaimNonRevRootsTreeRoot"`
@@ -172,6 +174,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		IssuerClaimRevTreeRoot:          issuer.Ret.Root(),
 		IssuerClaimRootsTreeRoot:        issuer.Rot.Root(),
 		IssuerClaimIdenState:            issuer.State(t).String(),
+		IsRevocationChecked:             1,
 		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root(),
 		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root(),
 		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root(),
