@@ -94,6 +94,7 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 	signal input claimIssuanceRootsTreeRoot;
 	signal input claimIssuanceIdenState;
 
+	signal input enabledNonRevCheck;
 	signal input claimNonRevMtp[IssuerLevels];
 	signal input claimNonRevMtpNoAux;
 	signal input claimNonRevMtpAuxHi;
@@ -118,7 +119,7 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 
     // check non-revocation proof for claim
     component verifyClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
-	verifyClaimNotRevoked.enabled <== 1;
+	verifyClaimNotRevoked.enabled <== enabledNonRevCheck;
     for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== claim[i]; }
     for (var i=0; i<IssuerLevels; i++) {
         verifyClaimNotRevoked.claimNonRevMTP[i] <== claimNonRevMtp[i];
