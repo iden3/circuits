@@ -3,7 +3,7 @@ const AdmZip = require('adm-zip');
 const path = require('path');
 
 const BUCKET_NAME = 'iden3-circuits-bucket';
-const FILES_TO_INCLUDE = ['.wasm', 'final.zkey', 'key.json', 'readme'];
+const FILES_TO_INCLUDE = ['circuit.wasm', 'circuit_final.zkey', 'verification_key.json'];
 const FOLDER_TO_COMPRESS = './build';
 const OPERATIONS = ['add', 'rm', 'zip'];
 
@@ -87,7 +87,7 @@ function uploadZipFile(zipName) {
 function makeZip() {
     console.info(`Starting creation of zip file...`);
     const zip = new AdmZip();
-    zip.addLocalFolder(FOLDER_TO_COMPRESS, '', name => FILES_TO_INCLUDE.some(ext => name.includes(ext)));
+    zip.addLocalFolder(FOLDER_TO_COMPRESS, '', name => FILES_TO_INCLUDE.some(ext => name.endsWith(ext)));
     return zip;
 }
 

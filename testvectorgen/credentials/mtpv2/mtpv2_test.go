@@ -21,6 +21,8 @@ const (
 )
 
 type CredentialAtomicMTPOffChainV2Inputs struct {
+	RequestID string `json:"requestID"`
+
 	// user data
 	UserGenesisID            string `json:"userGenesisID"`            //
 	Nonce                    string `json:"nonce"`                    //
@@ -65,6 +67,7 @@ type CredentialAtomicMTPOffChainV2Inputs struct {
 }
 
 type CredentialAtomicMTPOffChainV2Outputs struct {
+	RequestID              string   `json:"requestID"`
 	UserID                 string   `json:"userID"`
 	IssuerID               string   `json:"issuerID"`
 	IssuerClaimIdenState   string   `json:"issuerClaimIdenState"`
@@ -279,6 +282,8 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
 	var err error
 
+	requestID := big.NewInt(23)
+
 	user := utils.NewIdentity(t, userPK)
 	issuer := utils.NewIdentity(t, issuerPK)
 
@@ -323,6 +328,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		Nonce:                           nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -357,6 +363,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	}
 
 	out := CredentialAtomicMTPOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -384,6 +391,8 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
 	var err error
+
+	requestID := big.NewInt(23)
 
 	user := utils.NewIdentity(t, userPK)
 	issuer := utils.NewIdentity(t, issuerPK)
@@ -414,6 +423,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		Nonce:                           nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -448,6 +458,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	}
 
 	out := CredentialAtomicMTPOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),

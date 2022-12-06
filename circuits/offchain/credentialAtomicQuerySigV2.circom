@@ -8,7 +8,8 @@ include "credentialAtomicQuerySigOffChain.circom";
  merklized - `1` if claim is merklized
  issuerAuthState
 */
-component main{public [issuerID,
+component main{public [requestID,
+                       issuerID,
                        issuerClaimNonRevState,
                        claimSchema,
                        slotIndex,

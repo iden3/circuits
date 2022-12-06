@@ -32,6 +32,9 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
+    // we have no constraints for "requestID" in this circuit, it is used as a unique identifier for the request
+    // and verifier can use it to identify the request, and verify the proof of specific request in case of multiple query requests
+    signal input requestID;
 
     // flag indicates if merkleized flag set in issuer claim (if set MTP is used to verify that
     // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed

@@ -8,28 +8,28 @@ include "../../node_modules/circomlib/circuits/eddsaposeidon.circom";
 
 template AuthV2(IdOwnershipLevels, onChainLevels) {
 
-    signal input userGenesisID;
-    signal input userState;
+    signal input genesisID;
     // random number, which should be stored by user
     // if there is a need to generate the same userID (ProfileID) output for different proofs
-    signal input nonce;
+    signal input profileNonce;
 
     // user state
-    signal input userClaimsTreeRoot;
-    signal input userRevTreeRoot;
-    signal input userRootsTreeRoot;
+    signal input state;
+    signal input claimsTreeRoot;
+    signal input revTreeRoot;
+    signal input rootsTreeRoot;
 
     // Auth claim
-    signal input userAuthClaim[8];
+    signal input authClaim[8];
 
     // auth claim. merkle tree proof of inclusion to claim tree
-    signal input userAuthClaimMtp[IdOwnershipLevels];
+    signal input authClaimIncMtp[IdOwnershipLevels];
 
     // auth claim - rev nonce. merkle tree proof of non-inclusion to rev tree
-    signal input userAuthClaimNonRevMtp[IdOwnershipLevels];
-    signal input userAuthClaimNonRevMtpNoAux;
-    signal input userAuthClaimNonRevMtpAuxHi;
-    signal input userAuthClaimNonRevMtpAuxHv;
+    signal input authClaimNonRevMtp[IdOwnershipLevels];
+    signal input authClaimNonRevMtpNoAux;
+    signal input authClaimNonRevMtpAuxHi;
+    signal input authClaimNonRevMtpAuxHv;
 
     // challenge signature
     signal input challenge;
@@ -54,38 +54,38 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     /* id ownership check */
     component checkIdOwnership = IdOwnership(IdOwnershipLevels);
 
-    checkIdOwnership.userClaimsTreeRoot <== userClaimsTreeRoot;
-    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== userAuthClaimMtp[i]; }
-    for (var i=0; i<8; i++) { checkIdOwnership.userAuthClaim[i] <== userAuthClaim[i]; }
+    checkIdOwnership.userClaimsTreeRoot <== claimsTreeRoot;
+    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== authClaimIncMtp[i]; }
+    for (var i=0; i<8; i++) { checkIdOwnership.userAuthClaim[i] <== authClaim[i]; }
 
-    checkIdOwnership.userRevTreeRoot <== userRevTreeRoot;
-    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== userAuthClaimNonRevMtp[i]; }
-    checkIdOwnership.userAuthClaimNonRevMtpNoAux <== userAuthClaimNonRevMtpNoAux;
-    checkIdOwnership.userAuthClaimNonRevMtpAuxHv <== userAuthClaimNonRevMtpAuxHv;
-    checkIdOwnership.userAuthClaimNonRevMtpAuxHi <== userAuthClaimNonRevMtpAuxHi;
+    checkIdOwnership.userRevTreeRoot <== revTreeRoot;
+    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
+    checkIdOwnership.userAuthClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
+    checkIdOwnership.userAuthClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
+    checkIdOwnership.userAuthClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
 
-    checkIdOwnership.userRootsTreeRoot <== userRootsTreeRoot;
+    checkIdOwnership.userRootsTreeRoot <== rootsTreeRoot;
 
     checkIdOwnership.challenge <== challenge;
     checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
     checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
     checkIdOwnership.challengeSignatureS <== challengeSignatureS;
 
-    checkIdOwnership.userState <== userState;
+    checkIdOwnership.userState <== state;
 
     /* Check on-chain SMT inclusion existence */
     component cutId = cutId();
-    cutId.in <== userGenesisID;
+    cutId.in <== genesisID;
 
     component cutState = cutState();
-    cutState.in <== userState;
+    cutState.in <== state;
 
     component isStateGenesis = IsEqual();
     isStateGenesis.in[0] <== cutId.out;
     isStateGenesis.in[1] <== cutState.out;
 
-    component userGenesisIDhash = Poseidon(1);
-    userGenesisIDhash.inputs[0] <== userGenesisID;
+    component genesisIDhash = Poseidon(1);
+    genesisIDhash.inputs[0] <== genesisID;
 
     component gistCheck = SMTVerifier(onChainLevels);
     gistCheck.enabled <== 1;
@@ -95,13 +95,13 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     gistCheck.oldKey <== gistMtpAuxHi;
     gistCheck.oldValue <== gistMtpAuxHv;
     gistCheck.isOld0 <== gistMtpNoAux;
-    gistCheck.key <== userGenesisIDhash.out;
-    gistCheck.value <== userState;
+    gistCheck.key <== genesisIDhash.out;
+    gistCheck.value <== state;
 
     /* ProfileID calculation */
     component calcProfile = SelectProfile();
-    calcProfile.in <== userGenesisID;
-    calcProfile.nonce <== nonce;
+    calcProfile.in <== genesisID;
+    calcProfile.nonce <== profileNonce;
 
     userID <== calcProfile.out;
 }

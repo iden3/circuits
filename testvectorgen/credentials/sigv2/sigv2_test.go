@@ -20,6 +20,8 @@ const (
 )
 
 type CredentialAtomicSigOffChainV2Inputs struct {
+	RequestID string `json:"requestID"`
+
 	// user data
 	UserGenesisID            string `json:"userGenesisID"`
 	Nonce                    string `json:"nonce"`
@@ -67,6 +69,7 @@ type CredentialAtomicSigOffChainV2Inputs struct {
 }
 
 type CredentialAtomicSigOffChainV2Outputs struct {
+	RequestID              string   `json:"requestID"`
 	UserID                 string   `json:"userID"`
 	IssuerID               string   `json:"issuerID"`
 	IssuerAuthState        string   `json:"issuerAuthState"`
@@ -333,6 +336,8 @@ func Test_JSON_LD_Proof_non_inclusion(t *testing.T) {
 func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
 	var err error
 
+	requestID := big.NewInt(23)
+
 	user := utils.NewIdentity(t, userPK)
 	issuer := utils.NewIdentity(t, issuerPK)
 
@@ -380,6 +385,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		Nonce:                           nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -428,6 +434,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -453,6 +460,8 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 
 func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
 	var err error
+
+	requestID := big.NewInt(23)
 
 	user := utils.NewIdentity(t, userPK)
 
@@ -488,6 +497,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	emptyPathMtp := utils.PrepareSiblingsStr([]*merkletree.Hash{&merkletree.HashZero}, 32)
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		Nonce:                           nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -536,6 +546,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -564,6 +575,8 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	fileName string) {
 
 	var err error
+
+	requestID := big.NewInt(23)
 
 	user := utils.NewIdentity(t, userPK)
 	issuer := utils.NewIdentity(t, issuerPK)
@@ -608,6 +621,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		Nonce:                           nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -656,6 +670,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
