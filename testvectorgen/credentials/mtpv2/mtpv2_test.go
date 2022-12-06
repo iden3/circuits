@@ -117,6 +117,165 @@ func Test_ClaimNonMerklized(t *testing.T) {
 	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "claimNonMerklized")
 }
 
+func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
+	desc := "User's claim revoked and the circuit checking for revocation status (expected to fail)"
+	fileName := "revoked_claim_with_revocation_check"
+
+	user := utils.NewIdentity(t, userPK)
+	issuer := utils.NewIdentity(t, issuerPK)
+
+	nonce := big.NewInt(0)
+
+	nonceSubject := big.NewInt(0)
+
+	claim := utils.DefaultUserClaim(t, user.ID)
+	issuer.AddClaim(t, claim)
+
+	revNonce := claim.GetRevocationNonce()
+	revNonceBigInt := new(big.Int).SetUint64(revNonce)
+	issuer.Ret.Add(context.Background(), revNonceBigInt, big.NewInt(0))
+
+	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
+
+	inputs := CredentialAtomicMTPOffChainV2Inputs{
+		UserGenesisID:                   user.ID.BigInt().String(),
+		Nonce:                           nonce.String(),
+		ClaimSubjectProfileNonce:        nonceSubject.String(),
+		IssuerID:                        issuer.ID.BigInt().String(),
+		IssuerClaim:                     claim,
+		IssuerClaimMtp:                  issuerClaimMtp,
+		IssuerClaimClaimsTreeRoot:       issuer.Clt.Root(),
+		IssuerClaimRevTreeRoot:          issuer.Ret.Root(),
+		IssuerClaimRootsTreeRoot:        issuer.Rot.Root(),
+		IssuerClaimIdenState:            issuer.State(t).String(),
+		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root(),
+		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root(),
+		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root(),
+		IssuerClaimNonRevState:          issuer.State(t).String(),
+		IssuerClaimNonRevMtp:            issuerClaimNonRevMtp,
+		IssuerClaimNonRevMtpAuxHi:       issuerClaimNonRevAux.Key,
+		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
+		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
+		ClaimSchema:                     "180410020913331409885634153623124536270",
+		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:                    utils.PrepareStrArray([]string{}, 32),
+		ClaimPathMtpNoAux:               "0",
+		ClaimPathMtpAuxHi:               "0",
+		ClaimPathMtpAuxHv:               "0",
+		ClaimPathKey:                    "0",
+		ClaimPathValue:                  "0",
+		IsRevocationChecked:             1,
+		Operator:                        utils.EQ,
+		SlotIndex:                       2,
+		Timestamp:                       timestamp,
+		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
+	}
+
+	out := CredentialAtomicMTPOffChainV2Outputs{
+		UserID:                 user.ID.BigInt().String(),
+		IssuerID:               issuer.ID.BigInt().String(),
+		IssuerClaimIdenState:   issuer.State(t).String(),
+		IssuerClaimNonRevState: issuer.State(t).String(),
+		ClaimSchema:            "180410020913331409885634153623124536270",
+		SlotIndex:              "2",
+		Operator:               utils.EQ,
+		Value:                  utils.PrepareStrArray([]string{"10"}, 64),
+		Timestamp:              timestamp,
+		Merklized:              "0",
+		ClaimPathKey:           "0",
+		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
+	}
+
+	json, err := json2.Marshal(TestDataMTPV2{
+		desc,
+		inputs,
+		out,
+	})
+	require.NoError(t, err)
+
+	utils.SaveTestVector(t, fileName, string(json))
+}
+
+func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
+	desc := "User's claim revoked and the circuit not checking for revocation status (expected to fail)"
+	fileName := "revoked_claim_without_revocation_check"
+
+	user := utils.NewIdentity(t, userPK)
+	issuer := utils.NewIdentity(t, issuerPK)
+
+	nonce := big.NewInt(0)
+
+	nonceSubject := big.NewInt(0)
+
+	claim := utils.DefaultUserClaim(t, user.ID)
+	issuer.AddClaim(t, claim)
+
+	revNonce := claim.GetRevocationNonce()
+	revNonceBigInt := new(big.Int).SetUint64(revNonce)
+	issuer.Ret.Add(context.Background(), revNonceBigInt, big.NewInt(0))
+
+	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
+
+	inputs := CredentialAtomicMTPOffChainV2Inputs{
+		UserGenesisID:                   user.ID.BigInt().String(),
+		Nonce:                           nonce.String(),
+		ClaimSubjectProfileNonce:        nonceSubject.String(),
+		IssuerID:                        issuer.ID.BigInt().String(),
+		IssuerClaim:                     claim,
+		IssuerClaimMtp:                  issuerClaimMtp,
+		IssuerClaimClaimsTreeRoot:       issuer.Clt.Root(),
+		IssuerClaimRevTreeRoot:          issuer.Ret.Root(),
+		IssuerClaimRootsTreeRoot:        issuer.Rot.Root(),
+		IssuerClaimIdenState:            issuer.State(t).String(),
+		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root(),
+		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root(),
+		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root(),
+		IssuerClaimNonRevState:          issuer.State(t).String(),
+		IssuerClaimNonRevMtp:            issuerClaimNonRevMtp,
+		IssuerClaimNonRevMtpAuxHi:       issuerClaimNonRevAux.Key,
+		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
+		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
+		ClaimSchema:                     "180410020913331409885634153623124536270",
+		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:                    utils.PrepareStrArray([]string{}, 32),
+		ClaimPathMtpNoAux:               "0",
+		ClaimPathMtpAuxHi:               "0",
+		ClaimPathMtpAuxHv:               "0",
+		ClaimPathKey:                    "0",
+		ClaimPathValue:                  "0",
+		IsRevocationChecked:             0,
+		Operator:                        utils.EQ,
+		SlotIndex:                       2,
+		Timestamp:                       timestamp,
+		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
+	}
+
+	out := CredentialAtomicMTPOffChainV2Outputs{
+		UserID:                 user.ID.BigInt().String(),
+		IssuerID:               issuer.ID.BigInt().String(),
+		IssuerClaimIdenState:   issuer.State(t).String(),
+		IssuerClaimNonRevState: issuer.State(t).String(),
+		ClaimSchema:            "180410020913331409885634153623124536270",
+		SlotIndex:              "2",
+		Operator:               utils.EQ,
+		Value:                  utils.PrepareStrArray([]string{"10"}, 64),
+		Timestamp:              timestamp,
+		Merklized:              "0",
+		ClaimPathKey:           "0",
+		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
+	}
+
+	json, err := json2.Marshal(TestDataMTPV2{
+		desc,
+		inputs,
+		out,
+	})
+	require.NoError(t, err)
+
+	utils.SaveTestVector(t, fileName, string(json))
+}
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
 	var err error
 
@@ -281,6 +440,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		ClaimPathMtpAuxHv:               "0",
 		ClaimPathKey:                    "0",
 		ClaimPathValue:                  "0",
+		IsRevocationChecked:             1,
 		Operator:                        utils.EQ,
 		SlotIndex:                       2,
 		Timestamp:                       timestamp,
@@ -310,5 +470,4 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	require.NoError(t, err)
 
 	utils.SaveTestVector(t, fileName, string(json))
-
 }
