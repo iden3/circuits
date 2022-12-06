@@ -59,11 +59,11 @@ type CredentialAtomicSigOffChainV2Inputs struct {
 	ClaimPathKey       string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
 	ClaimPathValue     string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
 
-	Operator  int      `json:"operator"`
-	SlotIndex int      `json:"slotIndex"`
-	Timestamp string   `json:"timestamp"`
-	IsRevocationChecked int `json:"isRevocationChecked"`
-	Value     []string `json:"value"`
+	Operator            int      `json:"operator"`
+	SlotIndex           int      `json:"slotIndex"`
+	Timestamp           string   `json:"timestamp"`
+	IsRevocationChecked int      `json:"isRevocationChecked"`
+	Value               []string `json:"value"`
 }
 
 type CredentialAtomicSigOffChainV2Outputs struct {
@@ -129,6 +129,194 @@ func Test_RegularClaim(t *testing.T) {
 	isSubjectIDProfile := false
 
 	generateTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "regular_claim")
+}
+
+func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
+	desc := "User's claim revoked and the circuit not checking for revocation status"
+	fileName := "revoked_claim_without_revocation_check"
+	user := utils.NewIdentity(t, userPK)
+	issuer := utils.NewIdentity(t, issuerPK)
+
+	nonce := big.NewInt(0)
+	nonceSubject := big.NewInt(0)
+
+	claim := utils.DefaultUserClaim(t, user.ID)
+	claimSig := issuer.SignClaim(t, claim)
+
+	revNonce := claim.GetRevocationNonce()
+	revNonceBigInt := new(big.Int).SetUint64(revNonce)
+	issuer.Ret.Add(context.Background(), revNonceBigInt, big.NewInt(0))
+	emptyPathMtp := utils.PrepareSiblingsStr([]*merkletree.Hash{&merkletree.HashZero}, 32)
+
+	issuerClaimNonRevState := issuer.State(t)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
+	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
+
+	inputs := CredentialAtomicSigOffChainV2Inputs{
+		UserGenesisID:                   user.ID.BigInt().String(),
+		Nonce:                           nonce.String(),
+		ClaimSubjectProfileNonce:        nonceSubject.String(),
+		IssuerID:                        issuer.ID.BigInt().String(),
+		IssuerClaim:                     claim,
+		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root().BigInt().String(),
+		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root().BigInt().String(),
+		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root().BigInt().String(),
+		IssuerClaimNonRevState:          issuerClaimNonRevState.String(),
+		IssuerClaimNonRevMtp:            issuerClaimNonRevMtp,
+		IssuerClaimNonRevMtpAuxHi:       issuerClaimNonRevAux.Key,
+		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
+		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
+		IssuerClaimSignatureR8X:         claimSig.R8.X.String(),
+		IssuerClaimSignatureR8Y:         claimSig.R8.Y.String(),
+		IssuerClaimSignatureS:           claimSig.S.String(),
+		IssuerAuthClaim:                 issuer.AuthClaim,
+		IssuerAuthClaimMtp:              issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtp:        issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtpAuxHi:   issuerAuthClaimNodeAux.Key,
+		IssuerAuthClaimNonRevMtpAuxHv:   issuerAuthClaimNodeAux.Value,
+		IssuerAuthClaimNonRevMtpNoAux:   issuerAuthClaimNodeAux.NoAux,
+		IssuerAuthClaimsTreeRoot:        issuer.Clt.Root().BigInt().String(),
+		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
+		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
+		ClaimSchema:                     "180410020913331409885634153623124536270",
+
+		ClaimPathNotExists: "0", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:       emptyPathMtp,
+		ClaimPathMtpNoAux:  "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi:  "0", // 0 for inclusion proof
+		ClaimPathMtpAuxHv:  "0", // 0 for inclusion proof
+		ClaimPathKey:       "0", // hash of path in merklized json-ld document
+		ClaimPathValue:     "0", // value in this path in merklized json-ld document
+		// value in this path in merklized json-ld document
+
+		Operator:            utils.EQ,
+		SlotIndex:           2,
+		Timestamp:           timestamp,
+		IsRevocationChecked: 0,
+		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
+			"0", "0",
+			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+	}
+
+	issuerAuthState := issuer.State(t)
+
+	out := CredentialAtomicSigOffChainV2Outputs{
+		UserID:                 user.ID.BigInt().String(),
+		IssuerID:               issuer.ID.BigInt().String(),
+		IssuerAuthState:        issuerAuthState.String(),
+		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
+		ClaimSchema:            "180410020913331409885634153623124536270",
+		SlotIndex:              "2",
+		Operator:               utils.EQ,
+		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
+			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Timestamp:          timestamp,
+		Merklized:          "0",
+		ClaimPathNotExists: "0",
+	}
+
+	json, err := json2.Marshal(TestDataSigV2{
+		desc,
+		inputs,
+		out,
+	})
+	require.NoError(t, err)
+
+	utils.SaveTestVector(t, fileName, string(json))
+}
+
+func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
+	desc := "User's claim revoked and the circuit checking for revocation status (expected to fail)"
+	fileName := "revoked_claim_with_revocation_check"
+	user := utils.NewIdentity(t, userPK)
+	issuer := utils.NewIdentity(t, issuerPK)
+
+	nonce := big.NewInt(0)
+	nonceSubject := big.NewInt(0)
+
+	claim := utils.DefaultUserClaim(t, user.ID)
+	claimSig := issuer.SignClaim(t, claim)
+
+	revNonce := claim.GetRevocationNonce()
+	revNonceBigInt := new(big.Int).SetUint64(revNonce)
+	issuer.Ret.Add(context.Background(), revNonceBigInt, big.NewInt(0))
+	emptyPathMtp := utils.PrepareSiblingsStr([]*merkletree.Hash{&merkletree.HashZero}, 32)
+
+	issuerClaimNonRevState := issuer.State(t)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
+	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
+
+	inputs := CredentialAtomicSigOffChainV2Inputs{
+		UserGenesisID:                   user.ID.BigInt().String(),
+		Nonce:                           nonce.String(),
+		ClaimSubjectProfileNonce:        nonceSubject.String(),
+		IssuerID:                        issuer.ID.BigInt().String(),
+		IssuerClaim:                     claim,
+		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root().BigInt().String(),
+		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root().BigInt().String(),
+		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root().BigInt().String(),
+		IssuerClaimNonRevState:          issuerClaimNonRevState.String(),
+		IssuerClaimNonRevMtp:            issuerClaimNonRevMtp,
+		IssuerClaimNonRevMtpAuxHi:       issuerClaimNonRevAux.Key,
+		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
+		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
+		IssuerClaimSignatureR8X:         claimSig.R8.X.String(),
+		IssuerClaimSignatureR8Y:         claimSig.R8.Y.String(),
+		IssuerClaimSignatureS:           claimSig.S.String(),
+		IssuerAuthClaim:                 issuer.AuthClaim,
+		IssuerAuthClaimMtp:              issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtp:        issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtpAuxHi:   issuerAuthClaimNodeAux.Key,
+		IssuerAuthClaimNonRevMtpAuxHv:   issuerAuthClaimNodeAux.Value,
+		IssuerAuthClaimNonRevMtpNoAux:   issuerAuthClaimNodeAux.NoAux,
+		IssuerAuthClaimsTreeRoot:        issuer.Clt.Root().BigInt().String(),
+		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
+		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
+		ClaimSchema:                     "180410020913331409885634153623124536270",
+
+		ClaimPathNotExists: "0", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:       emptyPathMtp,
+		ClaimPathMtpNoAux:  "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi:  "0", // 0 for inclusion proof
+		ClaimPathMtpAuxHv:  "0", // 0 for inclusion proof
+		ClaimPathKey:       "0", // hash of path in merklized json-ld document
+		ClaimPathValue:     "0", // value in this path in merklized json-ld document
+		// value in this path in merklized json-ld document
+
+		Operator:            utils.EQ,
+		SlotIndex:           2,
+		Timestamp:           timestamp,
+		IsRevocationChecked: 1,
+		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
+			"0", "0",
+			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+	}
+
+	issuerAuthState := issuer.State(t)
+
+	out := CredentialAtomicSigOffChainV2Outputs{
+		UserID:                 user.ID.BigInt().String(),
+		IssuerID:               issuer.ID.BigInt().String(),
+		IssuerAuthState:        issuerAuthState.String(),
+		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
+		ClaimSchema:            "180410020913331409885634153623124536270",
+		SlotIndex:              "2",
+		Operator:               utils.EQ,
+		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
+			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Timestamp:          timestamp,
+		Merklized:          "0",
+		ClaimPathNotExists: "0",
+	}
+
+	json, err := json2.Marshal(TestDataSigV2{
+		desc,
+		inputs,
+		out,
+	})
+	require.NoError(t, err)
+
+	utils.SaveTestVector(t, fileName, string(json))
 }
 
 func Test_JSON_LD_Proof_non_inclusion(t *testing.T) {
@@ -228,9 +416,9 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		ClaimPathValue:     valueKey.String(),         // value in this path in merklized json-ld document
 		// value in this path in merklized json-ld document
 
-		Operator:  utils.EQ,
-		SlotIndex: 2,
-		Timestamp: timestamp,
+		Operator:            utils.EQ,
+		SlotIndex:           2,
+		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
 		Value: []string{valueKey.String(), "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
 			"0", "0",
@@ -336,9 +524,9 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		ClaimPathValue:     "0", // value in this path in merklized json-ld document
 		// value in this path in merklized json-ld document
 
-		Operator:  utils.EQ,
-		SlotIndex: 2,
-		Timestamp: timestamp,
+		Operator:            utils.EQ,
+		SlotIndex:           2,
+		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
 		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
 			"0", "0",
@@ -456,9 +644,9 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		ClaimPathValue:     "0",                       // value in this path in merklized json-ld document
 		// value in this path in merklized json-ld document
 
-		Operator:  utils.NOOP,
-		SlotIndex: 0,
-		Timestamp: timestamp,
+		Operator:            utils.NOOP,
+		SlotIndex:           0,
+		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
 		Value: []string{"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
 			"0", "0",
