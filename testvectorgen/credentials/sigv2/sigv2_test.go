@@ -154,7 +154,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
-		Nonce:                           nonce.String(),
+		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
@@ -179,14 +179,13 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
 		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
 		ClaimSchema:                     "180410020913331409885634153623124536270",
-
-		ClaimPathNotExists: "0", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:       emptyPathMtp,
-		ClaimPathMtpNoAux:  "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-		ClaimPathMtpAuxHi:  "0", // 0 for inclusion proof
-		ClaimPathMtpAuxHv:  "0", // 0 for inclusion proof
-		ClaimPathKey:       "0", // hash of path in merklized json-ld document
-		ClaimPathValue:     "0", // value in this path in merklized json-ld document
+		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:                    emptyPathMtp,
+		ClaimPathMtpNoAux:               "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi:               "0", // 0 for inclusion proof
+		ClaimPathMtpAuxHv:               "0", // 0 for inclusion proof
+		ClaimPathKey:                    "0", // hash of path in merklized json-ld document
+		ClaimPathValue:                  "0", // value in this path in merklized json-ld document
 		// value in this path in merklized json-ld document
 
 		Operator:            utils.EQ,
@@ -248,7 +247,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
-		Nonce:                           nonce.String(),
+		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,

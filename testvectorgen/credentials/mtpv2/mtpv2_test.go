@@ -140,7 +140,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
-		Nonce:                           nonce.String(),
+		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
@@ -220,7 +220,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
-		Nonce:                           nonce.String(),
+		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
