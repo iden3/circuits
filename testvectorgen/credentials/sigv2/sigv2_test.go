@@ -22,7 +22,7 @@ const (
 type CredentialAtomicSigOffChainV2Inputs struct {
 	// user data
 	UserGenesisID            string `json:"userGenesisID"`
-	Nonce                    string `json:"nonce"`
+	ProfileNonce             string `json:"profileNonce"`
 	ClaimSubjectProfileNonce string `json:"claimSubjectProfileNonce"`
 
 	IssuerID string `json:"issuerID"`
@@ -381,7 +381,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
-		Nonce:                           nonce.String(),
+		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
@@ -489,7 +489,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
-		Nonce:                           nonce.String(),
+		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
@@ -609,7 +609,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 
 	inputs := CredentialAtomicSigOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
-		Nonce:                           nonce.String(),
+		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,

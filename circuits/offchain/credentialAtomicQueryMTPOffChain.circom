@@ -46,7 +46,7 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
 
     /* userID ownership signals */
     signal input userGenesisID;
-    signal input nonce; /* random number */
+    signal input profileNonce; /* random number */
 
     /* issuerClaim signals */
     signal input claimSubjectProfileNonce; // nonce of the profile that claim is issued to, 0 if claim is issued to genesisID
@@ -173,7 +173,7 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
     /* ProfileID calculation */
     component selectProfile = SelectProfile();
     selectProfile.in <== userGenesisID;
-    selectProfile.nonce <== nonce;
+    selectProfile.nonce <== profileNonce;
 
     userID <== selectProfile.out;
 }

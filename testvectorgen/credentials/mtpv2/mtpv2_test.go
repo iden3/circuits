@@ -23,7 +23,7 @@ const (
 type CredentialAtomicMTPOffChainV2Inputs struct {
 	// user data
 	UserGenesisID            string `json:"userGenesisID"`            //
-	Nonce                    string `json:"nonce"`                    //
+	ProfileNonce             string `json:"profileNonce"`             //
 	ClaimSubjectProfileNonce string `json:"claimSubjectProfileNonce"` //
 
 	IssuerID string `json:"issuerID"`
@@ -324,7 +324,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
-		Nonce:                           nonce.String(),
+		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
@@ -415,7 +415,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
 		UserGenesisID:                   user.ID.BigInt().String(),
-		Nonce:                           nonce.String(),
+		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
