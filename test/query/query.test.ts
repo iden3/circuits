@@ -2,7 +2,6 @@ import {describe} from "mocha";
 
 const path = require("path");
 const wasm_tester = require("circom_tester").wasm;
-const c_tester = require("circom_tester").c;
 const chai = require("chai");
 const assert = chai.assert;
 
@@ -19,8 +18,7 @@ describe("Test query",  function() {
     let circuit;
 
     before(async function() {
-        this.timeout(60000)
-        circuit = await c_tester(path.join(__dirname, "../circuits/query/", "queryTest.circom"));
+        circuit = await wasm_tester(path.join(__dirname, "../circuits/query/", "queryTest.circom"));
     });
 
     describe("#Noop", function() {
@@ -201,62 +199,6 @@ describe("Test query",  function() {
             }, true);
 
             const expOut = {out: 0, value: ["0", "0", "0"]}
-
-            await circuit.assertOut(w, expOut);
-            await circuit.checkConstraints(w);
-        });
-    });
-
-    describe.skip("#LessThan bug.", function() {
-        it("#LessThan: -1 < 10 should be true but false", async () => {
-            const w = await circuit.calculateWitness({
-                in: "-1",
-                operator: LESS,
-                value: ["10", "0", "0"],
-            }, false);
-
-            const expOut = {out: 1, value: ["10", "0", "0"]}
-
-            await circuit.assertOut(w, expOut);
-            await circuit.checkConstraints(w);
-        });
-
-        it("#LessThan: -4294967290 < 10 should be true and it is", async () => {
-            const w = await circuit.calculateWitness({
-                in: "-4294967290",
-                operator: LESS,
-                value: ["10", "0", "0"],
-            }, false);
-
-            const expOut = {out: 1, value: ["10", "0", "0"]}
-
-            await circuit.assertOut(w, expOut);
-            await circuit.checkConstraints(w);
-        });
-
-        it("#LessThan: -345345345345345114294967290 < 10 should be true and it is", async () => {
-            const w = await circuit.calculateWitness({
-                in: "-345345345345345114294967290",
-                // 1111111111111111111111111110011001100011011111010011010000000110
-                // 111111101110001001010110010010000101000011100001100000100111000000101101001001000010010000000110
-                operator: LESS,
-                value: ["10", "0", "0"],
-            }, false);
-
-            const expOut = {out: 1, value: ["10", "0", "0"]}
-
-            await circuit.assertOut(w, expOut);
-            await circuit.checkConstraints(w);
-        });
-
-        it("#LessThan: 1465...3131 < 10 should be false but fails in Num2Bits_2 line: 38", async () => {
-            const w = await circuit.calculateWitness({
-                in: "14651237294507013008273219182214280847718990358813499091232105186081237893131",
-                operator: LESS,
-                value: ["10", "0", "0"],
-            }, false);
-
-            const expOut = {out: 0, value: ["10", "0", "0"]}
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);

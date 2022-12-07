@@ -97,5 +97,7 @@ describe.skip("Test CredentialAtomicQuerySig.circom", function() {
         const w = await circuit.calculateWitness(inputs, true);
         await circuit.checkConstraints(w);
         await circuit.assertOut(w, expOut);
-    });
-});
+    })
+    ;
+})
+;
