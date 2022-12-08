@@ -6,11 +6,12 @@ import (
 	"math/big"
 	"testing"
 
+	"test/utils"
+
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-schema-processor/merklize"
 	"github.com/stretchr/testify/require"
-	"test/utils"
 )
 
 const (
@@ -20,6 +21,8 @@ const (
 )
 
 type CredentialAtomicSigOffChainV2Inputs struct {
+	RequestID string `json:"requestID"`
+
 	// user data
 	UserGenesisID            string `json:"userGenesisID"`
 	ProfileNonce             string `json:"profileNonce"`
@@ -67,6 +70,7 @@ type CredentialAtomicSigOffChainV2Inputs struct {
 }
 
 type CredentialAtomicSigOffChainV2Outputs struct {
+	RequestID              string   `json:"requestID"`
 	UserID                 string   `json:"userID"`
 	IssuerID               string   `json:"issuerID"`
 	IssuerAuthState        string   `json:"issuerAuthState"`
@@ -152,7 +156,10 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
+	requestID := big.NewInt(23)
+
 	inputs := CredentialAtomicSigOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -200,6 +207,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -245,7 +253,10 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
+	requestID := big.NewInt(23)
+
 	inputs := CredentialAtomicSigOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -294,6 +305,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -378,7 +390,10 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 
 	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
+	requestID := big.NewInt(23)
+
 	inputs := CredentialAtomicSigOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -427,6 +442,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -486,7 +502,10 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 
 	emptyPathMtp := utils.PrepareSiblingsStr([]*merkletree.Hash{&merkletree.HashZero}, 32)
 
+	requestID := big.NewInt(23)
+
 	inputs := CredentialAtomicSigOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -535,6 +554,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -606,7 +626,10 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 
 	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
+	requestID := big.NewInt(23)
+
 	inputs := CredentialAtomicSigOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -655,6 +678,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	issuerAuthState := issuer.State(t)
 
 	out := CredentialAtomicSigOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),

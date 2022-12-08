@@ -21,6 +21,8 @@ const (
 )
 
 type CredentialAtomicMTPOffChainV2Inputs struct {
+	RequestID string `json:"requestID"`
+
 	// user data
 	UserGenesisID            string `json:"userGenesisID"`            //
 	ProfileNonce             string `json:"profileNonce"`             //
@@ -65,6 +67,7 @@ type CredentialAtomicMTPOffChainV2Inputs struct {
 }
 
 type CredentialAtomicMTPOffChainV2Outputs struct {
+	RequestID              string   `json:"requestID"`
 	UserID                 string   `json:"userID"`
 	IssuerID               string   `json:"issuerID"`
 	IssuerClaimIdenState   string   `json:"issuerClaimIdenState"`
@@ -138,7 +141,10 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
+	requestID := big.NewInt(23)
+
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -173,6 +179,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	}
 
 	out := CredentialAtomicMTPOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -218,7 +225,10 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
+	requestID := big.NewInt(23)
+
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -253,6 +263,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	}
 
 	out := CredentialAtomicMTPOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -322,7 +333,10 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
+	requestID := big.NewInt(23)
+
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -357,6 +371,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	}
 
 	out := CredentialAtomicMTPOffChainV2Outputs{
+		RequestID:              inputs.RequestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -413,7 +428,10 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
+	requestID := big.NewInt(23)
+
 	inputs := CredentialAtomicMTPOffChainV2Inputs{
+		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
@@ -448,6 +466,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	}
 
 	out := CredentialAtomicMTPOffChainV2Outputs{
+		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
