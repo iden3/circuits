@@ -7,8 +7,7 @@ include "credentialAtomicQueryMTPOffChain.circom";
  userID - user profile id
  merklized - `1` if claim is merklized
 */
-component main{public [requestID,
-                       issuerID,
+component main{public [issuerID,
                        issuerClaimIdenState,
                        issuerClaimNonRevState,
                        claimSchema,
@@ -17,4 +16,4 @@ component main{public [requestID,
                        claimPathNotExists,
                        operator,
                        value,
-                       timestamp]} = CredentialAtomicQueryMTPOffChain(32, 32, 64);
+                       timestamp, isRevocationChecked]} = CredentialAtomicQueryMTPOffChain(32, 32, 64);

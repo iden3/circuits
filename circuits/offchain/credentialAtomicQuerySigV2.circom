@@ -8,8 +8,7 @@ include "credentialAtomicQuerySigOffChain.circom";
  merklized - `1` if claim is merklized
  issuerAuthState
 */
-component main{public [requestID,
-                       issuerID,
+component main{public [issuerID,
                        issuerClaimNonRevState,
                        claimSchema,
                        slotIndex,
@@ -17,4 +16,4 @@ component main{public [requestID,
                        claimPathNotExists,
                        operator,
                        value,
-                       timestamp]} = credentialAtomicQuerySigOffChain(32, 32, 64);
+                       timestamp, isRevocationChecked]} = credentialAtomicQuerySigOffChain(32, 32, 64);
