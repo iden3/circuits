@@ -40,7 +40,7 @@ compile_and_ts() {
     time snarkjs zkey beacon circuit_0003.zkey circuit_final.zkey 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10 -n="Final Beacon phase2"
     time snarkjs zkey verify circuit.r1cs "$PTAU" circuit_final.zkey
     time snarkjs zkey export verificationkey circuit_final.zkey verification_key.json
-    time snarkjs zkey export json circuit_final.zkey circuit_final.zkey.json
+    #time snarkjs zkey export json circuit_final.zkey circuit_final.zkey.json
 
     time snarkjs zkey export solidityverifier circuit_final.zkey verifier.sol
     set +x
