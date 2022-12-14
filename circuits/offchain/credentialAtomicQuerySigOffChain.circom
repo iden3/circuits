@@ -35,7 +35,7 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
     // we have no constraints for "requestID" in this circuit, it is used as a unique identifier for the request
     // and verifier can use it to identify the request, and verify the proof of specific request in case of multiple query requests
     signal input requestID;
-
+    
     // flag indicates if merkleized flag set in issuer claim (if set MTP is used to verify that
     // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed
     // on root stored in the index or value slot
@@ -74,6 +74,7 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
     // claim issued by issuer to the user
     signal input issuerClaim[8];
     // issuerClaim non rev inputs
+    signal input isRevocationChecked;
     signal input issuerClaimNonRevMtp[IssuerLevels];
     signal input issuerClaimNonRevMtpNoAux;
     signal input issuerClaimNonRevMtpAuxHi;
@@ -141,7 +142,6 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
 
     issuerAuthState <== issuerAuthStateComponent.idenState;
 
-
     // issuerAuthClaim proof of existence (isProofExist)
     //
     component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);
@@ -152,6 +152,7 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
     // issuerAuthClaim proof of non-revocation
     //
     component verifyIssuerAuthClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
+    verifyIssuerAuthClaimNotRevoked.enabled <== 1;
     for (var i=0; i<8; i++) { verifyIssuerAuthClaimNotRevoked.claim[i] <== issuerAuthClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) {
         verifyIssuerAuthClaimNotRevoked.claimNonRevMTP[i] <== issuerAuthClaimNonRevMtp[i];
@@ -182,6 +183,7 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
 
     // non revocation status
     component verifyClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
+    verifyClaimNotRevoked.enabled <== isRevocationChecked;
     for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== issuerClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) {
         verifyClaimNotRevoked.claimNonRevMTP[i] <== issuerClaimNonRevMtp[i];

@@ -46,6 +46,7 @@ template checkClaimExists(IssuerLevels) {
 }
 
 template checkClaimNotRevoked(treeLevels) {
+	signal input enabled;
     signal input claim[8];
     signal input claimNonRevMTP[treeLevels];
     signal input treeRoot;
@@ -57,7 +58,7 @@ template checkClaimNotRevoked(treeLevels) {
 	for (var i=0; i<8; i++) { claimRevNonce.claim[i] <== claim[i]; }
 
     component smtClaimNotExists = SMTVerifier(treeLevels);
-    smtClaimNotExists.enabled <== 1;
+    smtClaimNotExists.enabled <== enabled;
     smtClaimNotExists.fnc <== 1; // Non-inclusion
     smtClaimNotExists.root <== treeRoot;
     for (var i=0; i<treeLevels; i++) { smtClaimNotExists.siblings[i] <== claimNonRevMTP[i]; }
@@ -93,6 +94,7 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 	signal input claimIssuanceRootsTreeRoot;
 	signal input claimIssuanceIdenState;
 
+	signal input enabledNonRevCheck;
 	signal input claimNonRevMtp[IssuerLevels];
 	signal input claimNonRevMtpNoAux;
 	signal input claimNonRevMtpAuxHi;
@@ -117,6 +119,7 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 
     // check non-revocation proof for claim
     component verifyClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
+	verifyClaimNotRevoked.enabled <== enabledNonRevCheck;
     for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== claim[i]; }
     for (var i=0; i<IssuerLevels; i++) {
         verifyClaimNotRevoked.claimNonRevMTP[i] <== claimNonRevMtp[i];
@@ -165,6 +168,7 @@ template VerifyAuthClaimAndSignature(nLevels) {
     claimExists.treeRoot <== claimsTreeRoot;
 
     component smtClaimNotRevoked = checkClaimNotRevoked(nLevels);
+	smtClaimNotRevoked.enabled <== 1;
     for (var i=0; i<8; i++) { smtClaimNotRevoked.claim[i] <== authClaim[i]; }
     for (var i=0; i<nLevels; i++) {
         smtClaimNotRevoked.claimNonRevMTP[i] <== authClaimNonRevMtp[i];
