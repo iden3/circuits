@@ -19,4 +19,4 @@ include "sybilResCredentialAtomicQuerySigOffChain.circom";
 //                        value,
 //                        timestamp]} = SybilResCredentialAtomicQuerySigOffChain(32, 32, 64);
 
-component main{public []} = SybilResCredentialAtomicQuerySigOffChain(32, 32, 64);
+component main{public []} = SybilResCredentialAtomicQuerySigOffChain(32, 32, 64, 32);

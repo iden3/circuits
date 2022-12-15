@@ -19,4 +19,20 @@ include "sybilResCredentialAtomicQueryMTPOffChain.circom";
 //                        value,
 //                        timestamp]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32, 64);
 
-component main{public []} = SybilResCredentialAtomicQueryMTPOffChain(32, 32, 64);
+
+// Public
+// ---------
+// IssuerState (states, 1-state: for the issuance of the kyc-claim, 2-state: latest state of the issuer)
+// kycClaimSchemaID (~claim_of_uniqueness)
+// stateCommitmentSchemaID - need to be defined
+// Reference GIST 
+// CRS
+//
+
+component main{public [
+                        issuerClaimIdenState,
+                        issuerClaimNonRevState,
+                        ClaimSchema,
+                        SecretClaimSchema,
+                        
+                    ]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32, 64, 32);
