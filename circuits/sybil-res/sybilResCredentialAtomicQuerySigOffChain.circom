@@ -1,8 +1,9 @@
 pragma circom 2.0.0;
 
+include "sybilUtils.circom";
+
 template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArraySize, gistLevels) {
     
-
     /* userID ownership signals */
     signal input userGenesisID;
     signal input profileNonce; /* random number */
@@ -52,22 +53,14 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, val
     signal input claimPathKey; // hash of path in merklized json-ld document
     signal input claimPathValue; // value in this path in merklized json-ld document
 
-
-
     signal output sybilID;
     signal output userID;
 
 
-
-    // TODO
-    // 1. Verify uniClaim - 
-    //      A. Verify issued and not revoked
-    //      B. Verify claim schema
-    //      C. Verify claim index check
-    //      D. Verify Issued to provided identity
-    //      E. Return hash of claim
     component verifyUniClaim = VerifyAndHashUniClaim();
-    uniClaimHash <== verifyUniClaim.hash;
+    for (var i=0; i<8; i++) { verifyUniClaim.claim[i] <== issuerClaim[i]; }
+
+    verifyUniClaim.hash ==> uniClaimHash;
 
     // 2. VerifySecret
     //      A. Verify claim is included in claims tree
@@ -88,8 +81,8 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, val
     // 4. Compute sybil
     component computeSybilID = ComputeSybilID();
     computeSybilID.crs <== crs;
-    computeSybilID.state_cm_secret <== secret;
-    computeSybilID.unique_claim <== uniClaimHash;
+    computeSybilID.stateSecret <== secret;
+    computeSybilID.claimHash <== uniClaimHash;
     sybilId <== computeSybilID,out;
 }
 
@@ -135,8 +128,10 @@ template VerifyAndHashUniClaim(){
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
-    //      A. Verify issued and not revoked
 
+    signal output claimHash;
+
+    //  A. Verify issued and not revoked
     var AUTH_SCHEMA_HASH  = 301485908906857522017021291028488077057;
     component issuerSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
@@ -150,9 +145,7 @@ template VerifyAndHashUniClaim(){
 
     issuerAuthState <== issuerAuthStateComponent.idenState;
 
-
     // issuerAuthClaim proof of existence (isProofExist)
-    //
     component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);
     for (var i=0; i<8; i++) { smtIssuerAuthClaimExists.claim[i] <== issuerAuthClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.claimMTP[i] <== issuerAuthClaimMtp[i]; }
@@ -226,20 +219,7 @@ template VerifyAndHashUniClaim(){
     claimIdCheck.nonce <== claimSubjectProfileNonce;
 
     //      D. Return hash of claim
-    component claimHash = getClaimHash()
-    claimHash.claim <== issuerClaim;
-    hash <== claimHash.hash;
-}
-
-
-
-    // 2. VerifySecret
-    //      A. Verify claim is included in claims tree
-    //      B. Verify state includes claims tree
-    //      C. Verify claim schema.
-    //      D. Verify GIST
-    //      E. Verify claim index
-    //      F. Return secret
-template VerifyAndExtractValStateSecret(){
-    // same implemtation as MTP 
+    component hasher = getClaimHash()
+    hasher.claim <== issuerClaim;
+    claimHash <== hasher.hash;
 }
