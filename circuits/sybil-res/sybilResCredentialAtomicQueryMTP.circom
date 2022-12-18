@@ -35,4 +35,4 @@ component main{public [
                         ClaimSchema,
                         SecretClaimSchema,
                         
-                    ]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32, 64, 32);
+                    ]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32);

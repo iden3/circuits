@@ -2,7 +2,7 @@ pragma circom 2.0.0;
 
 include "sybilUtils.circom";
 
-template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArraySize, gistLevels) {
+template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, gistLevels) {
     
     /* userID ownership signals */
     signal input userGenesisID;

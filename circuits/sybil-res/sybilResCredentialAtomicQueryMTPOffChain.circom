@@ -26,7 +26,7 @@ include "sybilUtils.circom";
 // ProfileID
 // SybilID
 
-template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArraySize, gistLevels) {
+template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, gistLevels) {
 
     // claim of uniqueness 
     signal input issuerClaim[8];
@@ -54,6 +54,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, val
     signal input holderClaimRevRoot;
     signal input holderClaimRootsRoot;
     signal input holderClaimIdenState;
+    
     signal input holderClaimSchema;
 
     // GIST and path to holderState
