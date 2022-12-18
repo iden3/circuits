@@ -14,9 +14,9 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, val
     // issuer auth proof of existence
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimMtp[IssuerLevels];
-    signal input issuerAuthClaimsTreeRoot;
-    signal input issuerAuthRevTreeRoot;
-    signal input issuerAuthRootsTreeRoot;
+    signal input issuerAuthClaimsRoot;
+    signal input issuerAuthRevRoot;
+    signal input issuerAuthRootsRoot;
     signal output issuerAuthState;
 
     // issuer auth claim non rev proof
@@ -32,9 +32,9 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, val
     signal input issuerClaimNonRevMtpNoAux;
     signal input issuerClaimNonRevMtpAuxHi;
     signal input issuerClaimNonRevMtpAuxHv;
-    signal input issuerClaimNonRevClaimsTreeRoot;
-    signal input issuerClaimNonRevRevTreeRoot;
-    signal input issuerClaimNonRevRootsTreeRoot;
+    signal input issuerClaimNonRevClaimsRoot;
+    signal input issuerClaimNonRevRevRoot;
+    signal input issuerClaimNonRevRootsRoot;
     signal input issuerClaimNonRevState;
 
     // issuerClaim signature
@@ -53,25 +53,76 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, val
     signal input claimPathKey; // hash of path in merklized json-ld document
     signal input claimPathValue; // value in this path in merklized json-ld document
 
+  // claim of state secret stateSecret
+    signal input holderClaim[8];
+    signal input holderClaimMtp[holderLevels];
+    signal input holderClaimClaimsRoot;
+    signal input holderClaimRevRoot;
+    signal input holderClaimRootsRoot;
+    signal input holderClaimIdenState;
+    
+    signal input holderClaimSchema;
+
+    // GIST and path to holderState
+    signal input gist;
+    signal input gistMtp[GistLevels];
+    signal input idenGistState;
+
+    signal input crs;
+
+    signal input userGenesisID;
+    signal input profileNonce;
+
     signal output sybilID;
     signal output userID;
 
 
-    component verifyUniClaim = VerifyAndHashUniClaim();
-    for (var i=0; i<8; i++) { verifyUniClaim.claim[i] <== issuerClaim[i]; }
+    component verifyUniClaim = VerifyAndHashUniClaim(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyUniClaim.issuerAuthClaim[i] <== issuerClaim[i]; }
+    for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerAuthClaimMtp[i] <== issuerAuthClaimMtp[i]; }
+    verifyUniClaim.issuerAuthClaimsRoot <== issuerAuthClaimsRoot;
+    verifyUniClaim.issuerAuthRevRoot <== issuerAuthRevRoot;
+    verifyUniClaim.issuerAuthRootsRoot <== issuerAuthRootsRoot;
+    verifyUniClaim.issuerAuthState <== issuerAuthState;
+
+    for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerAuthClaimNonRevMtp[i] <== issuerAuthClaimNonRevMtp[i]; }
+    verifyUniClaim.issuerAuthClaimNonRevMtpNoAux <== issuerAuthClaimNonRevMtpNoAux;
+    verifyUniClaim.issuerAuthClaimNonRevMtpAuxHi <== issuerAuthClaimNonRevMtpAuxHi;
+    verifyUniClaim.issuerAuthClaimNonRevMtpAuxHv <== issuerAuthClaimNonRevMtpAuxHv;
+
+    for (var i=0; i<8; i++) { verifyUniClaim.issuerClaim[i] <== issuerClaim[i]; }
+
+    for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerClaimNonRevMtp[i] <== issuerClaimNonRevMtp[i]; }
+    verifyUniClaim.issuerClaimNonRevMtpNoAux <== issuerClaimNonRevMtpNoAux;
+    verifyUniClaim.issuerClaimNonRevMtpAuxHi <== issuerClaimNonRevMtpAuxHi;
+    verifyUniClaim.issuerClaimNonRevMtpAuxHv <== issuerClaimNonRevMtpAuxHv;
+    verifyUniClaim.issuerClaimNonRevClaimsRoot <== issuerClaimNonRevClaimsRoot;
+    verifyUniClaim.issuerClaimNonRevRevRoot <== issuerClaimNonRevRevRoot;
+    verifyUniClaim.issuerClaimNonRevRootsRoot <== issuerClaimNonRevRootsRoot;
+    verifyUniClaim.issuerClaimNonRevState <== issuerClaimNonRevState;
+
+    verifyUniClaim.issuerClaimSignatureR8x <== issuerClaimSignatureR8x;
+    verifyUniClaim.issuerClaimSignatureR8y <== issuerClaimSignatureR8y;
+    verifyUniClaim.issuerClaimSignatureS <== issuerClaimSignatureS;
 
     verifyUniClaim.hash ==> uniClaimHash;
 
-    // 2. VerifySecret
-    //      A. Verify claim is included in claims tree
-    //      B. Verify state includes claims tree
-    //      C. Verify claim schema.
-    //      D. Verify GIST
-    //      E. Verify claim index
-    //      F. Return secret
-    component verifyStateSecret = VerifyAndExtractValStateSecret()
-    secret <== verifyStateSecret.secret;
 
+    component verifyStateSecret = VerifyAndExtractValStateSecret()
+    for (var i=0; i<8; i++) { verifyStateSecret.claim[i] <== holderClaim[i]; }
+    for (var i=0; i<holderLevels; i++) { verifyStateSecret.claimMtp[i] <== holderClaimMtp[i]; }
+    verifyStateSecret.claimIssuanceClaimsRoot <== holderClaimClaimsRoot;
+    verifyStateSecret.claimIssuanceRevRoot <== holderClaimRevRoot;
+    verifyStateSecret.claimIssuanceRootsRoot <== holderClaimRootsRoot;
+    verifyStateSecret.claimIssuanceIdenState <== holderClaimIdenState;
+
+    verifyStateSecret.claimSchema <== holderClaimSchema;
+
+    for (var i=0; i<gistLevels; i++) { verifyStateSecret.idenGistMtp[i] <== idenGistMtp[i]; }
+    for (var i=0; i<8; i++) { verifyStateSecret.idenGistState[i] <== idenGistState[i]; }                // double check this declration 
+    verifyStateSecret.gist <== gist;
+
+    verifyStateSecret.secret ==> secret;
     // 3. Compute profile.
     component selectProfile = SelectProfile();
     selectProfile.in <== userGenesisID;
@@ -98,12 +149,12 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, val
     //      C. Verify claim index check
     //      D. Verify Issued to provided identity
     //      E. Return hash of claim
-template VerifyAndHashUniClaim(){
+template VerifyAndHashUniClaim(IssuerLevels){
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimMtp[IssuerLevels];
-    signal input issuerAuthClaimsTreeRoot;
-    signal input issuerAuthRevTreeRoot;
-    signal input issuerAuthRootsTreeRoot;
+    signal input issuerAuthClaimsRoot;
+    signal input issuerAuthRevRoot;
+    signal input issuerAuthRootsRoot;
     signal output issuerAuthState;
 
     // issuer auth claim non rev proof
@@ -119,9 +170,9 @@ template VerifyAndHashUniClaim(){
     signal input issuerClaimNonRevMtpNoAux;
     signal input issuerClaimNonRevMtpAuxHi;
     signal input issuerClaimNonRevMtpAuxHv;
-    signal input issuerClaimNonRevClaimsTreeRoot;
-    signal input issuerClaimNonRevRevTreeRoot;
-    signal input issuerClaimNonRevRootsTreeRoot;
+    signal input issuerClaimNonRevClaimsRoot;
+    signal input issuerClaimNonRevRevRoot;
+    signal input issuerClaimNonRevRootsRoot;
     signal input issuerClaimNonRevState;
 
     // issuerClaim signature
@@ -139,9 +190,9 @@ template VerifyAndHashUniClaim(){
     // verify authClaim issued and not revoked
     // calculate issuerAuthState
     component issuerAuthStateComponent = getIdenState();
-    issuerAuthStateComponent.claimsTreeRoot <== issuerAuthClaimsTreeRoot;
-    issuerAuthStateComponent.revTreeRoot <== issuerAuthRevTreeRoot;
-    issuerAuthStateComponent.rootsTreeRoot <== issuerAuthRootsTreeRoot;
+    issuerAuthStateComponent.claimsTreeRoot <== issuerAuthClaimsRoot;
+    issuerAuthStateComponent.revTreeRoot <== issuerAuthRevRoot;
+    issuerAuthStateComponent.rootsTreeRoot <== issuerAuthRootsRoot;
 
     issuerAuthState <== issuerAuthStateComponent.idenState;
 
@@ -149,7 +200,7 @@ template VerifyAndHashUniClaim(){
     component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);
     for (var i=0; i<8; i++) { smtIssuerAuthClaimExists.claim[i] <== issuerAuthClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.claimMTP[i] <== issuerAuthClaimMtp[i]; }
-    smtIssuerAuthClaimExists.treeRoot <== issuerAuthClaimsTreeRoot;
+    smtIssuerAuthClaimExists.treeRoot <== issuerAuthClaimsRoot;
 
     component verifyIssuerAuthClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
     for (var i=0; i<8; i++) { verifyIssuerAuthClaimNotRevoked.claim[i] <== issuerAuthClaim[i]; }
@@ -175,9 +226,9 @@ template VerifyAndHashUniClaim(){
 
     // verify issuer state includes issuerClaim
     component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();
-    verifyClaimIssuanceIdenState.claimsTreeRoot <== issuerClaimNonRevClaimsTreeRoot;
-    verifyClaimIssuanceIdenState.revTreeRoot <== issuerClaimNonRevRevTreeRoot;
-    verifyClaimIssuanceIdenState.rootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
+    verifyClaimIssuanceIdenState.claimsTreeRoot <== issuerClaimNonRevClaimsRoot;
+    verifyClaimIssuanceIdenState.revTreeRoot <== issuerClaimNonRevRevRoot;
+    verifyClaimIssuanceIdenState.rootsTreeRoot <== issuerClaimNonRevRootsRoot;
     verifyClaimIssuanceIdenState.expectedState <== issuerClaimNonRevState;
 
     // non revocation status
@@ -195,7 +246,7 @@ template VerifyAndHashUniClaim(){
     component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);   
     for (var i=0; i<8; i++) { smtIssuerAuthClaimExists.claim[i] <== issuerAuthClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.claimMTP[i] <== issuerAuthClaimMtp[i]; }
-    smtIssuerAuthClaimExists.treeRoot <== issuerAuthClaimsTreeRoot;
+    smtIssuerAuthClaimExists.treeRoot <== issuerAuthClaimsRoot;
 
     component verifyIssuerAuthClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
     for (var i=0; i<8; i++) { verifyIssuerAuthClaimNotRevoked.claim[i] <== issuerAuthClaim[i]; }
