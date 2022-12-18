@@ -3,29 +3,6 @@ pragma circom 2.0.0;
 include "sybilUtils.circom";
 
 
-
-// Public
-// ---------
-// IssuerState (states)
-// HolderState (states)
-// kycClaimSchemaID (~claim_of_uniqueness)
-// stateCommitmentSchemaID - need to be defined
-// Reference GIST 
-// CRS                          V
-
-// Private
-// ---------
-// uniquenessClaim              V
-// identiifer/userGenesisID     V
-// profileNonce                 V
-// stateCommitmentSecret        V
-
-
-// Outputs
-// --------
-// ProfileID
-// SybilID
-
 template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, gistLevels) {
 
     // claim of uniqueness 

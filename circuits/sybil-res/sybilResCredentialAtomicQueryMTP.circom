@@ -30,9 +30,14 @@ include "sybilResCredentialAtomicQueryMTPOffChain.circom";
 //
 
 component main{public [
+                        // uniqueness claim
                         issuerClaimIdenState,
                         issuerClaimNonRevState,
-                        ClaimSchema,
-                        SecretClaimSchema,
+                        issuerClaimSchema,
                         
+                        // state secret claim
+                        holderClaimIdenState,
+                        holderClaimSchema,
+                        crs,
+                        gist
                     ]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32);

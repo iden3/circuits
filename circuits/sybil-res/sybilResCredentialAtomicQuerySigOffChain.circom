@@ -43,7 +43,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, gis
     signal input issuerClaimSignatureS;
 
     /** Query */
-    signal input claimSchema;
+    signal input issuerClaimSchema;
 
     signal input claimPathNotExists; // 0 for inclusion, 1 for non-inclusion
     signal input claimPathMtp[ClaimLevels];
@@ -105,6 +105,8 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, gis
     verifyUniClaim.issuerClaimSignatureR8y <== issuerClaimSignatureR8y;
     verifyUniClaim.issuerClaimSignatureS <== issuerClaimSignatureS;
 
+    verifyUniClaim.issuerClaimSchema <== issuerClaimSchema;
+
     verifyUniClaim.hash ==> uniClaimHash;
 
 
@@ -138,17 +140,6 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, gis
 }
 
 
-
-
-
-
-
-    // 1. Verify uniClaim - 
-    //      A. Verify issued and not revoked
-    //      B. Verify claim schema
-    //      C. Verify claim index check
-    //      D. Verify Issued to provided identity
-    //      E. Return hash of claim
 template VerifyAndHashUniClaim(IssuerLevels){
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimMtp[IssuerLevels];
@@ -179,6 +170,8 @@ template VerifyAndHashUniClaim(IssuerLevels){
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
+
+    signal input issuerClaimSchema;
 
     signal output claimHash;
 
@@ -261,7 +254,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     //      B. Verify claim schema
     component claimSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
-    claimSchemaCheck.schema <== claimSchema;
+    claimSchemaCheck.schema <== issuerClaimSchema;
 
     //      C. Verify Issued to provided identity
     component claimIdCheck = verifyCredentialSubjectProfile();
