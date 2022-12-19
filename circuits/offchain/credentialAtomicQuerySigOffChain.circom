@@ -129,7 +129,10 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
     claimExpirationCheck.timestamp <== timestamp;
 
 
-    var AUTH_SCHEMA_HASH  = 301485908906857522017021291028488077057;
+    // AuthHash cca3371a6cb1b715004407e325bd993c
+    // BigInt: 80551937543569765027552589160822318028
+    // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
+    var AUTH_SCHEMA_HASH  = 80551937543569765027552589160822318028;
     component issuerSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
     issuerSchemaCheck.schema <== AUTH_SCHEMA_HASH;
