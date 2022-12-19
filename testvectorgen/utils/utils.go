@@ -134,10 +134,6 @@ func NewAuthClaim(t testing.TB, privKHex string) (auth *core.Claim, key *babyjub
 }
 
 func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
-	var schemaHash core.SchemaHash
-	//schemaEncodedBytes, _ := hex.DecodeString("ca938857241db9451ea329256b9c06e5") // V1
-	schemaEncodedBytes, _ := hex.DecodeString("013fd3f623559d850fb5b02ff012d0e2") // V2
-	copy(schemaHash[:], schemaEncodedBytes)
 
 	// NOTE: We take nonce as hash of public key to make it random
 	// We don't use random number here because this test vectors will be used for tests
@@ -147,7 +143,7 @@ func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 		return nil, err
 	}
 
-	return core.NewClaim(schemaHash,
+	return core.NewClaim(core.AuthSchemaHash,
 		core.WithIndexDataInts(X, Y),
 		core.WithRevocationNonce(revNonce.Uint64()))
 }
