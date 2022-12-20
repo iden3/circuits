@@ -2,6 +2,7 @@ package sybil
 
 import (
 	"encoding/json"
+	core "github.com/iden3/go-iden3-core"
 	"github.com/stretchr/testify/require"
 	"math/big"
 	"test/utils"
@@ -17,9 +18,9 @@ func generateTestData(t *testing.T, desc, fileName string) {
 	userProfileID := user.ID
 	nonce := big.NewInt(0)
 	//if isUserIDProfile {
-	//	nonce = big.NewInt(10)
-	//	userProfileID, err = core.ProfileID(user.ID, nonce)
-	//	require.NoError(t, err)
+		nonce = big.NewInt(10)
+		userProfileID, err = core.ProfileID(user.ID, nonce)
+		require.NoError(t, err)
 	//}
 
 	subjectID := user.ID
@@ -34,53 +35,56 @@ func generateTestData(t *testing.T, desc, fileName string) {
 
 	issuer.AddClaim(t, claim)
 
-	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
-	require.NoError(t, err)
-
-	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
+	//issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
+	//require.NoError(t, err)
+	//
+	//issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
 	inputs := Inputs{
+
+		//IssuerClaim:           claim,
+		//IssuerClaimMtp:        issuerClaimMtp,
+		//IssuerClaimClaimsRoot: issuer.Clt.Root(),
+		//IssuerClaimRevRoot:    issuer.Ret.Root(),
+		//IssuerClaimRootsRoot:  issuer.Rot.Root(),
+		//IssuerClaimIdenState:  issuer.State(t).String(),
+		//
+		//IssuerClaimNonRevMtp:      issuerClaimNonRevMtp,
+		//IssuerClaimNonRevMtpAuxHi: issuerClaimNonRevAux.Key,
+		//IssuerClaimNonRevMtpAuxHv: issuerClaimNonRevAux.Value,
+		//IssuerClaimNonRevMtpNoAux: issuerClaimNonRevAux.NoAux,
+		//
+		//IssuerClaimNonRevClaimsRoot: issuer.Clt.Root(),
+		//IssuerClaimNonRevRevRoot:    issuer.Ret.Root(),
+		//IssuerClaimNonRevRootsRoot:  issuer.Rot.Root(),
+		//IssuerClaimNonRevState:      issuer.State(t).String(),
+		//
+		//IssuerClaimSchema: "",
+
+		//holderClaim:           "",
+		//holderClaimMtp:        []string{""},
+		//holderClaimClaimsRoot: "",
+		//holderClaimRevRoot:    "",
+		//holderClaimRootsRoot:  "",
+		//holderClaimIdenState:  "",
+		//holderClaimSchema:     "",
+		//
+		//GistRoot:     "",
+		//GistMtp:      []string{""},
+		//GistMtpAuxHi: "",
+		//GistMtpAuxHv: "",
+		//GistMtpNoAux: "",
+		//
+		//CRS: "",
+
 		UserGenesisID: user.ID.BigInt().String(),
 		ProfileNonce:  nonce.String(),
-		//ClaimSubjectProfileNonce:        nonceSubject.String(),
-		IssuerID:                        issuer.ID.BigInt().String(),
-		IssuerClaim:                     claim,
-		IssuerClaimMtp:                  issuerClaimMtp,
-		IssuerClaimClaimsTreeRoot:       issuer.Clt.Root(),
-		IssuerClaimRevTreeRoot:          issuer.Ret.Root(),
-		IssuerClaimRootsTreeRoot:        issuer.Rot.Root(),
-		IssuerClaimIdenState:            issuer.State(t).String(),
-		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root(),
-		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root(),
-		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root(),
-		IssuerClaimNonRevState:          issuer.State(t).String(),
-		IssuerClaimNonRevMtp:            issuerClaimNonRevMtp,
-		IssuerClaimNonRevMtpAuxHi:       issuerClaimNonRevAux.Key,
-		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
-		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
-		ClaimSchema:                     "180410020913331409885634153623124536270",
-		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:                    utils.PrepareStrArray([]string{}, 32),
-		ClaimPathMtpNoAux:               "0",
-		ClaimPathMtpAuxHi:               "0",
-		ClaimPathMtpAuxHv:               "0",
-		ClaimPathKey:                    "0",
-		ClaimPathValue:                  "0",
+		//ClaimSubjectProfileNonce:        nonceSubject.String()
 	}
 
 	out := Outputs{
-		UserID:                 userProfileID.BigInt().String(),
-		IssuerID:               issuer.ID.BigInt().String(),
-		IssuerClaimIdenState:   issuer.State(t).String(),
-		IssuerClaimNonRevState: issuer.State(t).String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               utils.EQ,
-		Value:                  utils.PrepareStrArray([]string{"10"}, 64),
-		Timestamp:              timestamp,
-		Merklized:              "0",
-		ClaimPathKey:           "0",
-		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
+		UserID:  userProfileID.BigInt().String(),
+		SybilID: issuer.ID.BigInt().String(),
 	}
 
 	jsonTestData, err := json.Marshal(TestDataMTPV2{
@@ -91,5 +95,4 @@ func generateTestData(t *testing.T, desc, fileName string) {
 	require.NoError(t, err)
 
 	utils.SaveTestVector(t, fileName, string(jsonTestData))
-
 }

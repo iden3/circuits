@@ -13,57 +13,59 @@ const (
 
 type Inputs struct {
 
+
+
+	// claim of uniqueness
+	IssuerClaim *core.Claim `json:"issuerClaim"`
+	IssuerClaimMtp            []string         `json:"issuerClaimMtp"`
+	IssuerClaimClaimsRoot *merkletree.Hash `json:"issuerClaimClaimsRoot"`
+	IssuerClaimRevRoot    *merkletree.Hash `json:"issuerClaimRevRoot"`
+	IssuerClaimRootsRoot  *merkletree.Hash `json:"issuerClaimRootsRoot"`
+	IssuerClaimIdenState      string           `json:"issuerClaimIdenState"`
+
+	IssuerClaimNonRevMtp            []string         `json:"issuerClaimNonRevMtp"`
+	IssuerClaimNonRevMtpNoAux       string           `json:"issuerClaimNonRevMtpNoAux"`
+	IssuerClaimNonRevMtpAuxHi       string           `json:"issuerClaimNonRevMtpAuxHi"`
+	IssuerClaimNonRevMtpAuxHv       string           `json:"issuerClaimNonRevMtpAuxHv"`
+
+	IssuerClaimNonRevClaimsRoot *merkletree.Hash `json:"issuerClaimNonRevClaimsRoot"`
+	IssuerClaimNonRevRevRoot    *merkletree.Hash `json:"issuerClaimNonRevRevRoot"`
+	IssuerClaimNonRevRootsRoot  *merkletree.Hash `json:"issuerClaimNonRevRootsRoot"`
+	IssuerClaimNonRevState          string           `json:"issuerClaimNonRevState"`
+
+	IssuerClaimSchema string `json:"issuerClaimSchema"`
+
+	// claim of state-secret (Holder's claim)
+
+	holderClaim *core.Claim `json:"holderClaim"`
+	holderClaimMtp            []string         `json:"holderClaimMtp"`
+	holderClaimClaimsRoot *merkletree.Hash `json:"holderClaimClaimsRoot"`
+	holderClaimRevRoot    *merkletree.Hash `json:"holderClaimRevRoot"`
+	holderClaimRootsRoot  *merkletree.Hash `json:"holderClaimRootsRoot"`
+	holderClaimIdenState      string           `json:"holderClaimIdenState"`
+
+	holderClaimSchema string `json:"issuerClaimSchema"`
+
+	GistRoot                    string      `json:"gistRoot"`
+	GistMtp                     []string    `json:"gistMtp"`
+	GistMtpAuxHi                string      `json:"gistMtpAuxHi"`
+	GistMtpAuxHv                string      `json:"gistMtpAuxHv"`
+	GistMtpNoAux                string      `json:"gistMtpNoAux"`
+
+
+	CRS  string `json:"crs"`
+
 	// user data
 	UserGenesisID string `json:"userGenesisID"` //
 	ProfileNonce  string `json:"profileNonce"`  //
 	//ClaimSubjectProfileNonce string `json:"claimSubjectProfileNonce"` //
 
-	IssuerID string `json:"issuerID"`
-	// Claim
-	IssuerClaim *core.Claim `json:"issuerClaim"`
-	// Inclusion
-	IssuerClaimMtp            []string         `json:"issuerClaimMtp"`
-	IssuerClaimClaimsTreeRoot *merkletree.Hash `json:"issuerClaimClaimsTreeRoot"`
-	IssuerClaimRevTreeRoot    *merkletree.Hash `json:"issuerClaimRevTreeRoot"`
-	IssuerClaimRootsTreeRoot  *merkletree.Hash `json:"issuerClaimRootsTreeRoot"`
-	IssuerClaimIdenState      string           `json:"issuerClaimIdenState"`
-
-	IssuerClaimNonRevClaimsTreeRoot *merkletree.Hash `json:"issuerClaimNonRevClaimsTreeRoot"`
-	IssuerClaimNonRevRevTreeRoot    *merkletree.Hash `json:"issuerClaimNonRevRevTreeRoot"`
-	IssuerClaimNonRevRootsTreeRoot  *merkletree.Hash `json:"issuerClaimNonRevRootsTreeRoot"`
-	IssuerClaimNonRevState          string           `json:"issuerClaimNonRevState"`
-	IssuerClaimNonRevMtp            []string         `json:"issuerClaimNonRevMtp"`
-	IssuerClaimNonRevMtpAuxHi       string           `json:"issuerClaimNonRevMtpAuxHi"`
-	IssuerClaimNonRevMtpAuxHv       string           `json:"issuerClaimNonRevMtpAuxHv"`
-	IssuerClaimNonRevMtpNoAux       string           `json:"issuerClaimNonRevMtpNoAux"`
-
-	ClaimSchema string `json:"claimSchema"`
-
-	// Query
-	// JSON path
-	ClaimPathNotExists string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
-	ClaimPathMtp       []string `json:"claimPathMtp"`
-	ClaimPathMtpNoAux  string   `json:"claimPathMtpNoAux"` // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-	ClaimPathMtpAuxHi  string   `json:"claimPathMtpAuxHi"` // 0 for inclusion proof
-	ClaimPathMtpAuxHv  string   `json:"claimPathMtpAuxHv"` // 0 for inclusion proof
-	ClaimPathKey       string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
-	ClaimPathValue     string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
 
 }
 
 type Outputs struct {
 	UserID                 string   `json:"userID"`
-	IssuerID               string   `json:"issuerID"`
-	IssuerClaimIdenState   string   `json:"issuerClaimIdenState"`
-	IssuerClaimNonRevState string   `json:"issuerClaimNonRevState"`
-	ClaimSchema            string   `json:"claimSchema"`
-	SlotIndex              string   `json:"slotIndex"`
-	Operator               int      `json:"operator"`
-	Value                  []string `json:"value"`
-	Timestamp              string   `json:"timestamp"`
-	Merklized              string   `json:"merklized"`
-	ClaimPathKey           string   `json:"claimPathKey"`
-	ClaimPathNotExists     string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
+	SybilID               string   `json:"sybilID"`
 }
 
 type TestDataMTPV2 struct {
