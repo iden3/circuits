@@ -20,7 +20,7 @@ describe("Test query",  function() {
 
     before(async function() {
         this.timeout(60000)
-        circuit = await c_tester(path.join(__dirname, "../circuits/query/", "queryTest.circom"));
+        circuit = await wasm_tester(path.join(__dirname, "../circuits/query/", "queryTest.circom"));
     });
 
     describe("#Noop", function() {

@@ -153,9 +153,10 @@ template VerifyAuthClaimAndSignature(nLevels) {
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
-    // AuthHash 013fd3f623559d850fb5b02ff012d0e2
-    // https://raw.githubusercontent.com/iden3/claim-schema-vocab/main/schemas/json/auth-v1.json#AuthBJJCredential
-    var AUTH_SCHEMA_HASH  = 301485908906857522017021291028488077057;
+    // AuthHash cca3371a6cb1b715004407e325bd993c
+    // BigInt: 80551937543569765027552589160822318028
+    // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
+    var AUTH_SCHEMA_HASH  = 80551937543569765027552589160822318028;
     component verifyAuthSchema  = verifyCredentialSchema();
     for (var i=0; i<8; i++) {
             verifyAuthSchema.claim[i] <== authClaim[i];
