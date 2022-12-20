@@ -36,8 +36,7 @@ component main{public [
                         issuerClaimSchema,
                         
                         // state secret claim
-                        holderClaimIdenState,
-                        holderClaimSchema,
+                        holderClaimSchema,  // <--- should be hard coded 
                         crs,
-                        gist
+                        gistRoot
                     ]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32);

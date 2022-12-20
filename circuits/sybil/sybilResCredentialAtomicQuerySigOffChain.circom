@@ -64,9 +64,9 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, gis
     signal input holderClaimSchema;
 
     // GIST and path to holderState
-    signal input gist;
+    signal input gistRoot;
     signal input gistMtp[GistLevels];
-    signal input idenGistState;
+    // signal input idenGistState;
 
     signal input crs;
 
@@ -121,10 +121,11 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, gis
     verifyStateSecret.claimSchema <== holderClaimSchema;
 
     for (var i=0; i<gistLevels; i++) { verifyStateSecret.idenGistMtp[i] <== idenGistMtp[i]; }
-    for (var i=0; i<8; i++) { verifyStateSecret.idenGistState[i] <== idenGistState[i]; }                // double check this declration 
-    verifyStateSecret.gist <== gist;
+    // for (var i=0; i<8; i++) { verifyStateSecret.idenGistState[i] <== idenGistState[i]; }                // double check this declration 
+    verifyStateSecret.gistRoot <== gistRoot;
 
     verifyStateSecret.secret ==> secret;
+    
     // 3. Compute profile.
     component selectProfile = SelectProfile();
     selectProfile.in <== userGenesisID;
@@ -197,9 +198,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
 
     component verifyIssuerAuthClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
     for (var i=0; i<8; i++) { verifyIssuerAuthClaimNotRevoked.claim[i] <== issuerAuthClaim[i]; }
-    for (var i=0; i<IssuerLevels; i++) {
-        verifyIssuerAuthClaimNotRevoked.claimNonRevMTP[i] <== issuerAuthClaimNonRevMtp[i];
-    }
+    for (var i=0; i<IssuerLevels; i++) {verifyIssuerAuthClaimNotRevoked.claimNonRevMTP[i] <== issuerAuthClaimNonRevMtp[i];}
     verifyIssuerAuthClaimNotRevoked.noAux <== issuerAuthClaimNonRevMtpNoAux;
     verifyIssuerAuthClaimNotRevoked.auxHi <== issuerAuthClaimNonRevMtpAuxHi;
     verifyIssuerAuthClaimNotRevoked.auxHv <== issuerAuthClaimNonRevMtpAuxHv;
@@ -217,39 +216,21 @@ template VerifyAndHashUniClaim(IssuerLevels){
     verifyClaimSig.pubKeyX <== issuerAuthPubKey.Ax;
     verifyClaimSig.pubKeyY <== issuerAuthPubKey.Ay;
 
+    // check issuer-claim is not revoked (uniqueness claim is not revoled)
+    component verifyClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== issuerClaim[i]; }
+    for (var i=0; i<IssuerLevels; i++) {verifyClaimNotRevoked.claimNonRevMTP[i] <== issuerClaimNonRevMtp[i];}
+    verifyClaimNotRevoked.noAux <== issuerClaimNonRevMtpNoAux;
+    verifyClaimNotRevoked.auxHi <== issuerClaimNonRevMtpAuxHi;
+    verifyClaimNotRevoked.auxHv <== issuerClaimNonRevMtpAuxHv;
+    verifyClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
+
     // verify issuer state includes issuerClaim
     component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();
     verifyClaimIssuanceIdenState.claimsTreeRoot <== issuerClaimNonRevClaimsRoot;
     verifyClaimIssuanceIdenState.revTreeRoot <== issuerClaimNonRevRevRoot;
     verifyClaimIssuanceIdenState.rootsTreeRoot <== issuerClaimNonRevRootsRoot;
     verifyClaimIssuanceIdenState.expectedState <== issuerClaimNonRevState;
-
-    // non revocation status
-    component verifyClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
-    for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== issuerClaim[i]; }
-    for (var i=0; i<IssuerLevels; i++) {
-        verifyClaimNotRevoked.claimNonRevMTP[i] <== issuerClaimNonRevMtp[i];
-    }
-    verifyClaimNotRevoked.noAux <== issuerClaimNonRevMtpNoAux;
-    verifyClaimNotRevoked.auxHi <== issuerClaimNonRevMtpAuxHi;
-    verifyClaimNotRevoked.auxHv <== issuerClaimNonRevMtpAuxHv;
-    verifyClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
-
-
-    component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);   
-    for (var i=0; i<8; i++) { smtIssuerAuthClaimExists.claim[i] <== issuerAuthClaim[i]; }
-    for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.claimMTP[i] <== issuerAuthClaimMtp[i]; }
-    smtIssuerAuthClaimExists.treeRoot <== issuerAuthClaimsRoot;
-
-    component verifyIssuerAuthClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
-    for (var i=0; i<8; i++) { verifyIssuerAuthClaimNotRevoked.claim[i] <== issuerAuthClaim[i]; }
-    for (var i=0; i<IssuerLevels; i++) {
-        verifyIssuerAuthClaimNotRevoked.claimNonRevMTP[i] <== issuerAuthClaimNonRevMtp[i];
-    }
-    verifyIssuerAuthClaimNotRevoked.noAux <== issuerAuthClaimNonRevMtpNoAux;
-    verifyIssuerAuthClaimNotRevoked.auxHi <== issuerAuthClaimNonRevMtpAuxHi;
-    verifyIssuerAuthClaimNotRevoked.auxHv <== issuerAuthClaimNonRevMtpAuxHv;
-    verifyIssuerAuthClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
 
     //      B. Verify claim schema
     component claimSchemaCheck = verifyCredentialSchema();

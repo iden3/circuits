@@ -17,6 +17,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, gistLevels) {
     signal input issuerClaimNonRevMtpNoAux;
     signal input issuerClaimNonRevMtpAuxHi;
     signal input issuerClaimNonRevMtpAuxHv;
+
     signal input issuerClaimNonRevClaimsRoot;
     signal input issuerClaimNonRevRevRoot;
     signal input issuerClaimNonRevRootsRoot;
@@ -35,9 +36,9 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, gistLevels) {
     signal input holderClaimSchema;
 
     // GIST and path to holderState
-    signal input gist;
+    signal input gistRoot;
     signal input gistMtp[GistLevels];
-    signal input idenGistState;
+    // signal input idenGistState;
 
     signal input crs;
 
@@ -77,23 +78,24 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, gistLevels) {
     verifyUniClaim.hash  ==> uniClaimHash;
 
 
-    component verifyStateSecret = VerifyAndExtractValStateSecret(IssuerLevels, gistLevels)
-    for (var i=0; i<8; i++) { verifyStateSecret.claim[i] <== holderClaim[i]; }
-    for (var i=0; i<holderLevels; i++) { verifyStateSecret.claimMtp[i] <== holderClaimMtp[i]; }
-    verifyStateSecret.claimIssuanceClaimsRoot <== holderClaimClaimsRoot;
-    verifyStateSecret.claimIssuanceRevRoot <== holderClaimRevRoot;
-    verifyStateSecret.claimIssuanceRootsRoot <== holderClaimRootsRoot;
-    verifyStateSecret.claimIssuanceIdenState <== holderClaimIdenState;
+    // component verifyStateSecret = VerifyAndExtractValStateSecret(IssuerLevels, gistLevels)
+    // for (var i=0; i<8; i++) { verifyStateSecret.claim[i] <== holderClaim[i]; }
+    // for (var i=0; i<holderLevels; i++) { verifyStateSecret.claimMtp[i] <== holderClaimMtp[i]; }
+    // verifyStateSecret.claimIssuanceClaimsRoot <== holderClaimClaimsRoot;
+    // verifyStateSecret.claimIssuanceRevRoot <== holderClaimRevRoot;
+    // verifyStateSecret.claimIssuanceRootsRoot <== holderClaimRootsRoot;
+    // verifyStateSecret.claimIssuanceIdenState <== holderClaimIdenState;
 
-    verifyStateSecret.claimSchema <== holderClaimSchema;
+    // verifyStateSecret.claimSchema <== holderClaimSchema;
 
-    for (var i=0; i<gistLevels; i++) { verifyStateSecret.idenGistMtp[i] <== idenGistMtp[i]; }
-    for (var i=0; i<8; i++) { verifyStateSecret.idenGistState[i] <== idenGistState[i]; }                // double check this declration 
+    // for (var i=0; i<gistLevels; i++) { verifyStateSecret.idenGistMtp[i] <== idenGistMtp[i]; }
+    // // for (var i=0; i<8; i++) { verifyStateSecret.idenGistState[i] <== idenGistState[i]; }                // double check this declration 
 
-    verifyStateSecret.gist <== gist;
+    // verifyStateSecret.gistRoot <== gistRoot;
 
-    verifyStateSecret.secret ==> secret;
-
+    // verifyStateSecret.secret ==> secret;
+    secret <== 301485908906857522017021291028488077057;
+    
     // Compute SybilId
     component computeSybilID = ComputeSybilID();
     computeSybilID.crs <== crs;
