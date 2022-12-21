@@ -2,7 +2,6 @@ package sybil
 
 import (
 	"encoding/json"
-	core "github.com/iden3/go-iden3-core"
 	"github.com/stretchr/testify/require"
 	"math/big"
 	"test/utils"
@@ -18,9 +17,9 @@ func generateTestData(t *testing.T, desc, fileName string) {
 	userProfileID := user.ID
 	nonce := big.NewInt(0)
 	//if isUserIDProfile {
-		nonce = big.NewInt(10)
-		userProfileID, err = core.ProfileID(user.ID, nonce)
-		require.NoError(t, err)
+	//	nonce = big.NewInt(10)
+	//	userProfileID, err = core.ProfileID(user.ID, nonce)
+	//	require.NoError(t, err)
 	//}
 
 	subjectID := user.ID
@@ -31,51 +30,58 @@ func generateTestData(t *testing.T, desc, fileName string) {
 	//	require.NoError(t, err)
 	//}
 
-	claim := utils.DefaultUserClaim(t, subjectID)
+	uniClaim := utils.DefaultUserClaim(t, subjectID)
 
-	issuer.AddClaim(t, claim)
+	issuer.AddClaim(t, uniClaim)
 
-	//issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
-	//require.NoError(t, err)
-	//
-	//issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
+	issuerClaimMtp, _ := issuer.ClaimMTP(t, uniClaim)
+	require.NoError(t, err)
+
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, uniClaim)
+
+	ssClaim := utils.CreateStateSecretClaim(t, subjectID)
+
+	user.AddClaim(t, ssClaim)
+
+	userClaimMtp, _ := user.ClaimMTP(t, ssClaim)
+	require.NoError(t, err)
+
+	//userClaimNonRevMtp, userClaimNonRevAux := user.ClaimRevMTP(t, ssClaim)
+
 
 	inputs := Inputs{
 
-		//IssuerClaim:           claim,
-		//IssuerClaimMtp:        issuerClaimMtp,
-		//IssuerClaimClaimsRoot: issuer.Clt.Root(),
-		//IssuerClaimRevRoot:    issuer.Ret.Root(),
-		//IssuerClaimRootsRoot:  issuer.Rot.Root(),
-		//IssuerClaimIdenState:  issuer.State(t).String(),
-		//
-		//IssuerClaimNonRevMtp:      issuerClaimNonRevMtp,
-		//IssuerClaimNonRevMtpAuxHi: issuerClaimNonRevAux.Key,
-		//IssuerClaimNonRevMtpAuxHv: issuerClaimNonRevAux.Value,
-		//IssuerClaimNonRevMtpNoAux: issuerClaimNonRevAux.NoAux,
-		//
-		//IssuerClaimNonRevClaimsRoot: issuer.Clt.Root(),
-		//IssuerClaimNonRevRevRoot:    issuer.Ret.Root(),
-		//IssuerClaimNonRevRootsRoot:  issuer.Rot.Root(),
-		//IssuerClaimNonRevState:      issuer.State(t).String(),
-		//
-		//IssuerClaimSchema: "",
+		IssuerClaim:           uniClaim,
+		IssuerClaimMtp:        issuerClaimMtp,
+		IssuerClaimClaimsRoot: issuer.Clt.Root(),
+		IssuerClaimRevRoot:    issuer.Ret.Root(),
+		IssuerClaimRootsRoot:  issuer.Rot.Root(),
+		IssuerClaimIdenState:  issuer.State(t).String(),
 
-		//holderClaim:           "",
-		//holderClaimMtp:        []string{""},
-		//holderClaimClaimsRoot: "",
-		//holderClaimRevRoot:    "",
-		//holderClaimRootsRoot:  "",
-		//holderClaimIdenState:  "",
-		//holderClaimSchema:     "",
-		//
-		//GistRoot:     "",
-		//GistMtp:      []string{""},
-		//GistMtpAuxHi: "",
-		//GistMtpAuxHv: "",
-		//GistMtpNoAux: "",
-		//
-		//CRS: "",
+		IssuerClaimNonRevMtp:      issuerClaimNonRevMtp,
+		IssuerClaimNonRevMtpAuxHi: issuerClaimNonRevAux.Key,
+		IssuerClaimNonRevMtpAuxHv: issuerClaimNonRevAux.Value,
+		IssuerClaimNonRevMtpNoAux: issuerClaimNonRevAux.NoAux,
+
+		IssuerClaimNonRevClaimsRoot: issuer.Clt.Root(),
+		IssuerClaimNonRevRevRoot:    issuer.Ret.Root(),
+		IssuerClaimNonRevRootsRoot:  issuer.Rot.Root(),
+		IssuerClaimNonRevState:      issuer.State(t).String(),
+
+		holderClaim:           ssClaim,
+		holderClaimMtp:        userClaimMtp,
+		holderClaimClaimsRoot: user.Clt.Root(),
+		holderClaimRevRoot:    user.Ret.Root(),
+		holderClaimRootsRoot:  user.Rot.Root(),
+		holderClaimIdenState:  user.State(t).String(),
+
+		GistRoot:     issuer.Clt.Root(),
+		GistMtp:      issuerClaimMtp,
+		GistMtpAuxHi: "0",
+		GistMtpAuxHv: "0",
+		GistMtpNoAux: "0",
+
+		CRS: big.NewInt(123456789).String(),
 
 		UserGenesisID: user.ID.BigInt().String(),
 		ProfileNonce:  nonce.String(),
