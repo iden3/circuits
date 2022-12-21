@@ -76,7 +76,6 @@ template VerifyAndExtractValStateSecret(holderLevels, gistLevels){
     claimSchemaCheck.schema <== stateSecretSchema;
 
     // (3) Verify issuer state is in GIST 
-
     component genesisIDhash = Poseidon(1);
     genesisIDhash.inputs[0] <== userId;
 
@@ -95,19 +94,12 @@ template VerifyAndExtractValStateSecret(holderLevels, gistLevels){
     component constClaimIdx = GetStateSecretIndex();
     expectedClaimIdx <== constClaimIdx.out;
 
-    component claimHash = getClaimHash();
-    for (var i=0; i<8; i++) { claimHash.claim[i] <== claim[i]; }
-    expectedClaimIdx == claimHash.hi;
-
     component protocolClaimSlot = GetStateSecretSlot();
     protocolClaimSlotIdx <== protocolClaimSlot.out;
 
-    // 5. Get the state-secret property value and return it
-    // component getValByIdx = getValueByIndex();
-    // for (var i=0; i<8; i++) { getValByIdx.claim[i] <== claim[i]; }
-    // getValByIdx.index <== protocolClaimSlotIdx;           // pre-defined in the protcol 
-    // secret <== getValByIdx.value;
-    component claimValHash = getClaimHiHv();
+    // (5) Get the state-secret property value and return it
+    component claimHash = getClaimHiHv();
     for (var i=0; i<8; i++) { claimHash.claim[i] <== claim[i]; }
+    expectedClaimIdx == claimHash.hi;
     secret <== claimHash.hv;
 }

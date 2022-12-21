@@ -40,11 +40,11 @@ type Inputs struct {
 	holderClaimRootsRoot  *merkletree.Hash `json:"holderClaimRootsRoot"`
 	holderClaimIdenState  string           `json:"holderClaimIdenState"`
 
-	GistRoot     *merkletree.Hash   `json:"gistRoot"`
-	GistMtp      []string `json:"gistMtp"`
-	GistMtpAuxHi string   `json:"gistMtpAuxHi"`
-	GistMtpAuxHv string   `json:"gistMtpAuxHv"`
-	GistMtpNoAux string   `json:"gistMtpNoAux"`
+	GistRoot     *merkletree.Hash `json:"gistRoot"`
+	GistMtp      []string         `json:"gistMtp"`
+	GistMtpAuxHi string           `json:"gistMtpAuxHi"`
+	GistMtpAuxHv string           `json:"gistMtpAuxHv"`
+	GistMtpNoAux string           `json:"gistMtpNoAux"`
 
 	CRS string `json:"crs"`
 

@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	core "github.com/iden3/go-iden3-core"
-	"github.com/iden3/go-schema-processor/loaders"
-	jsonldSuite "github.com/iden3/go-schema-processor/json-ld"
 	"github.com/ethereum/go-ethereum/crypto"
+	core "github.com/iden3/go-iden3-core"
+	jsonldSuite "github.com/iden3/go-schema-processor/json-ld"
+	"github.com/iden3/go-schema-processor/loaders"
 
 	"github.com/iden3/go-schema-processor/processor"
 	"net/url"
