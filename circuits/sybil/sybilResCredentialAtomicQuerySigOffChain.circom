@@ -45,13 +45,13 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, gis
     /** Query */
     signal input issuerClaimSchema;
 
-    signal input claimPathNotExists; // 0 for inclusion, 1 for non-inclusion
-    signal input claimPathMtp[ClaimLevels];
-    signal input claimPathMtpNoAux; // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-    signal input claimPathMtpAuxHi; // 0 for inclusion proof
-    signal input claimPathMtpAuxHv; // 0 for inclusion proof
-    signal input claimPathKey; // hash of path in merklized json-ld document
-    signal input claimPathValue; // value in this path in merklized json-ld document
+    // signal input claimPathNotExists; // 0 for inclusion, 1 for non-inclusion
+    // signal input claimPathMtp[ClaimLevels];
+    // signal input claimPathMtpNoAux; // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+    // signal input claimPathMtpAuxHi; // 0 for inclusion proof
+    // signal input claimPathMtpAuxHv; // 0 for inclusion proof
+    // signal input claimPathKey; // hash of path in merklized json-ld document
+    // signal input claimPathValue; // value in this path in merklized json-ld document
 
   // claim of state secret stateSecret
     signal input holderClaim[8];
