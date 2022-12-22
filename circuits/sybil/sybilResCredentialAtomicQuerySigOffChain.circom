@@ -65,46 +65,38 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     // signal output sybilID;
     signal output userID;
 
-    component issuerAuthStateComponent = getIdenState();
-    issuerAuthStateComponent.claimsTreeRoot <== issuerAuthClaimsRoot;
-    issuerAuthStateComponent.revTreeRoot <== issuerAuthRevRoot;
-    issuerAuthStateComponent.rootsTreeRoot <== issuerAuthRootsRoot;
+    component verifyUniClaim = VerifyAndHashUniClaim(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyUniClaim.issuerAuthClaim[i] <== issuerAuthClaim[i]; }
+    for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerAuthClaimMtp[i] <== issuerAuthClaimMtp[i]; }
+    verifyUniClaim.issuerAuthClaimsRoot <== issuerAuthClaimsRoot;
+    verifyUniClaim.issuerAuthRevRoot <== issuerAuthRevRoot;
+    verifyUniClaim.issuerAuthRootsRoot <== issuerAuthRootsRoot;
 
-    // component verifyUniClaim = VerifyAndHashUniClaim(IssuerLevels);
-    // for (var i=0; i<8; i++) { verifyUniClaim.issuerAuthClaim[i] <== issuerAuthClaim[i]; }
-    // for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerAuthClaimMtp[i] <== issuerAuthClaimMtp[i]; }
-    // verifyUniClaim.issuerAuthClaimsRoot <== issuerAuthClaimsRoot;
-    // verifyUniClaim.issuerAuthRevRoot <== issuerAuthRevRoot;
-    // verifyUniClaim.issuerAuthRootsRoot <== issuerAuthRootsRoot;
-    // verifyUniClaim.issuerAuthState <== issuerAuthStateComponent.idenState;
+    for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerAuthClaimNonRevMtp[i] <== issuerAuthClaimNonRevMtp[i]; }
+    verifyUniClaim.issuerAuthClaimNonRevMtpNoAux <== issuerAuthClaimNonRevMtpNoAux;
+    verifyUniClaim.issuerAuthClaimNonRevMtpAuxHi <== issuerAuthClaimNonRevMtpAuxHi;
+    verifyUniClaim.issuerAuthClaimNonRevMtpAuxHv <== issuerAuthClaimNonRevMtpAuxHv;
 
-    // for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerAuthClaimNonRevMtp[i] <== issuerAuthClaimNonRevMtp[i]; }
-    // verifyUniClaim.issuerAuthClaimNonRevMtpNoAux <== issuerAuthClaimNonRevMtpNoAux;
-    // verifyUniClaim.issuerAuthClaimNonRevMtpAuxHi <== issuerAuthClaimNonRevMtpAuxHi;
-    // verifyUniClaim.issuerAuthClaimNonRevMtpAuxHv <== issuerAuthClaimNonRevMtpAuxHv;
+    for (var i=0; i<8; i++) { verifyUniClaim.issuerClaim[i] <== issuerClaim[i]; }
 
-    // for (var i=0; i<8; i++) { verifyUniClaim.issuerClaim[i] <== issuerClaim[i]; }
+    for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerClaimNonRevMtp[i] <== issuerClaimNonRevMtp[i]; }
+    verifyUniClaim.issuerClaimNonRevMtpNoAux <== issuerClaimNonRevMtpNoAux;
+    verifyUniClaim.issuerClaimNonRevMtpAuxHi <== issuerClaimNonRevMtpAuxHi;
+    verifyUniClaim.issuerClaimNonRevMtpAuxHv <== issuerClaimNonRevMtpAuxHv;
+    verifyUniClaim.issuerClaimNonRevClaimsRoot <== issuerClaimNonRevClaimsRoot;
+    verifyUniClaim.issuerClaimNonRevRevRoot <== issuerClaimNonRevRevRoot;
+    verifyUniClaim.issuerClaimNonRevRootsRoot <== issuerClaimNonRevRootsRoot;
+    verifyUniClaim.issuerClaimNonRevState <== issuerClaimNonRevState;
 
-    // for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerClaimNonRevMtp[i] <== issuerClaimNonRevMtp[i]; }
-    // verifyUniClaim.issuerClaimNonRevMtpNoAux <== issuerClaimNonRevMtpNoAux;
-    // verifyUniClaim.issuerClaimNonRevMtpAuxHi <== issuerClaimNonRevMtpAuxHi;
-    // verifyUniClaim.issuerClaimNonRevMtpAuxHv <== issuerClaimNonRevMtpAuxHv;
-    // verifyUniClaim.issuerClaimNonRevClaimsRoot <== issuerClaimNonRevClaimsRoot;
-    // verifyUniClaim.issuerClaimNonRevRevRoot <== issuerClaimNonRevRevRoot;
-    // verifyUniClaim.issuerClaimNonRevRootsRoot <== issuerClaimNonRevRootsRoot;
-    // verifyUniClaim.issuerClaimNonRevState <== issuerClaimNonRevState;
+    verifyUniClaim.issuerClaimSignatureR8x <== issuerClaimSignatureR8x;
+    verifyUniClaim.issuerClaimSignatureR8y <== issuerClaimSignatureR8y;
+    verifyUniClaim.issuerClaimSignatureS <== issuerClaimSignatureS;
 
-    // verifyUniClaim.issuerClaimSignatureR8x <== issuerClaimSignatureR8x;
-    // verifyUniClaim.issuerClaimSignatureR8y <== issuerClaimSignatureR8y;
-    // verifyUniClaim.issuerClaimSignatureS <== issuerClaimSignatureS;
-
-    // // verifyUniClaim.holderClaimIdenState <== holderClaimIdenState;
-
-    // component uniClaimSchemaHash = GetUniquenessSchemaHash();
-    // verifyUniClaim.issuerClaimSchema <== uniClaimSchemaHash.schemaHash;
-    // verifyUniClaim.profileNonce <== profileNonce;
-    // verifyUniClaim.userGenesisID <== userGenesisID;
-    // verifyUniClaim.claimHash ==> uniClaimHash;
+    component uniClaimSchemaHash = GetUniquenessSchemaHash();
+    verifyUniClaim.issuerClaimSchema <== uniClaimSchemaHash.schemaHash;
+    verifyUniClaim.profileNonce <== profileNonce;
+    verifyUniClaim.userGenesisID <== userGenesisID;
+    verifyUniClaim.claimHash ==> uniClaimHash;
 
     component verifyStateSecret = VerifyAndExtractValStateSecret(HolderLevel, GistLevels);
     // for (var i=0; i<8; i++) { verifyStateSecret.claim[i] <== holderClaim[i]; }
@@ -145,7 +137,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     signal input issuerAuthClaimsRoot;
     signal input issuerAuthRevRoot;
     signal input issuerAuthRootsRoot;
-    signal output issuerAuthState;
+    // signal input issuerAuthState;
 
     // issuer auth claim non rev proof
     signal input issuerAuthClaimNonRevMtp[IssuerLevels];
@@ -176,7 +168,8 @@ template VerifyAndHashUniClaim(IssuerLevels){
     signal input profileNonce;
 
     // inter-signal
-    signal uniClaimHash;
+    signal issuerAuthState;
+    // signal uniClaimHash;
 
     signal output claimHash;
 
@@ -185,6 +178,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     component issuerSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
     issuerSchemaCheck.schema <== AUTH_SCHEMA_HASH;
+
     // verify authClaim issued and not revoked
     // calculate issuerAuthState
     component issuerAuthStateComponent = getIdenState();

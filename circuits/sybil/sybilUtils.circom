@@ -79,13 +79,10 @@ template VerifyAndExtractValStateSecret(holderLevels, gistLevels){
     // component claimSchemaCheck = verifyCredentialSchema();
     // for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== claim[i]; }
     // claimSchemaCheck.schema <== stateSecretSchema;
-    log("1");
 
     // (3) Verify issuer state is in GIST 
     component genesisIDhash = Poseidon(1);
     genesisIDhash.inputs[0] <== genesisID;
-
-    log("2");
 
     component gistCheck = SMTVerifier(gistLevels);
     gistCheck.enabled <== 1;
@@ -97,7 +94,6 @@ template VerifyAndExtractValStateSecret(holderLevels, gistLevels){
     gistCheck.isOld0 <== gistMtpNoAux; // should be 0
     gistCheck.key <== genesisIDhash.out;
     gistCheck.value <== claimIssuanceIdenState;
-    log("3");
 
     // (4) Verify claim's index is the same as the hard-coded index
     // component constClaimIdx = GetStateSecretIndex();
