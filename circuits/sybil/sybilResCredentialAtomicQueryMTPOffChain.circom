@@ -28,11 +28,11 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     signal input issuerClaimNonRevState;
 
     // claim of state secret stateSecret
-    // signal input holderClaim[8];
-    // signal input holderClaimMtp[holderLevels];
-    // signal input holderClaimClaimsRoot;
-    // signal input holderClaimRevRoot;
-    // signal input holderClaimRootsRoot;
+    signal input holderClaim[8];
+    signal input holderClaimMtp[HolderLevel];
+    signal input holderClaimClaimsRoot;
+    signal input holderClaimRevRoot;
+    signal input holderClaimRootsRoot;
     signal input holderClaimIdenState;
     
     // GIST and path to holderState
@@ -52,7 +52,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
 
     // inter-signal
     signal uniClaimHash;
-    // signal secret;
+    signal secretClaimHash;
 
 
     component verifyUniClaim = VerifyAndHashUniClaim(IssuerLevels);
@@ -81,14 +81,13 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     verifyUniClaim.claimHash  ==> uniClaimHash;
 
     component verifyStateSecret = VerifyAndExtractValStateSecret(HolderLevel, GistLevels);
-    // for (var i=0; i<8; i++) { verifyStateSecret.claim[i] <== holderClaim[i]; }
-    // for (var i=0; i<holderLevels; i++) { verifyStateSecret.claimMtp[i] <== holderClaimMtp[i]; }
-    // verifyStateSecret.claimIssuanceClaimsRoot <== holderClaimClaimsRoot;
-    // verifyStateSecret.claimIssuanceRevRoot <== holderClaimRevRoot;
-    // verifyStateSecret.claimIssuanceRootsRoot <== holderClaimRootsRoot;
+    for (var i=0; i<8; i++) { verifyStateSecret.claim[i] <== holderClaim[i]; }
+    for (var i=0; i<HolderLevel; i++) { verifyStateSecret.claimIssuanceMtp[i] <== holderClaimMtp[i]; }
+    verifyStateSecret.claimIssuanceClaimsRoot <== holderClaimClaimsRoot;
+    verifyStateSecret.claimIssuanceRevRoot <== holderClaimRevRoot;
+    verifyStateSecret.claimIssuanceRootsRoot <== holderClaimRootsRoot;
     verifyStateSecret.claimIssuanceIdenState <== holderClaimIdenState;
 
-    // verifyStateSecret.claimSchema <== holderClaimSchema;
     verifyStateSecret.genesisID <== userGenesisID; 
 
     for (var i=0; i<GistLevels; i++) { verifyStateSecret.gistMtp[i] <== gistMtp[i]; }
@@ -97,15 +96,14 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     verifyStateSecret.gistMtpAuxHv <== gistMtpAuxHv;
     verifyStateSecret.gistMtpNoAux <== gistMtpNoAux;
 
-    // verifyStateSecret.secret ==> secret;
-    // secret <== 301485908906857522017021291028488077057; // hard coded for tests purposes 
+    verifyStateSecret.secretClaimHash ==> secretClaimHash;
     
     // Compute SybilId
-    // component computeSybilID = ComputeSybilID();
-    // computeSybilID.crs <== crs;
-    // computeSybilID.stateSecret <== secret;
-    // computeSybilID.claimHash <== uniClaimHash;
-    // sybilId <== computeSybilID.out;
+    component computeSybilID = ComputeSybilID();
+    computeSybilID.crs <== crs;
+    computeSybilID.stateSecret <== secretClaimHash;
+    computeSybilID.claimHash <== uniClaimHash;
+    sybilID <== computeSybilID.out;
 
     // Compute UserId
     component selectProfile = SelectProfile();

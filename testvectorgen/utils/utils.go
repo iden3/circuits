@@ -77,6 +77,31 @@ func DefaultUserClaim(t testing.TB, subject core.ID) *core.Claim {
 
 }
 
+func UserStateSecretClaim(t testing.TB, secret *big.Int) *core.Claim {
+	dataSlotA, err := core.NewElemBytesFromInt(secret)
+	if err != nil {
+		t.Fatalf("failed get NewElemBytesFromInt %v", err)
+	}
+
+	nonce := 145645
+	var schemaHash core.SchemaHash
+	schemaBytes, err := hex.DecodeString("da5b2efc8386250550e458a33b7926c5")
+	if err != nil {
+		t.Fatalf("failed decode schema hash %v", err)
+	}
+	copy(schemaHash[:], schemaBytes)
+
+	claim, err := core.NewClaim(
+		schemaHash,
+		core.WithValueData(dataSlotA, core.ElemBytes{}),
+		core.WithRevocationNonce(uint64(nonce)))
+	if err != nil {
+		t.Fatalf("failed create new claim %v", err)
+	}
+
+	return claim
+}
+
 func PrepareProof(proof *merkletree.Proof) ([]string, NodeAuxValue) {
 	return PrepareSiblingsStr(proof.AllSiblings(), 32), getNodeAuxValue(proof)
 }
@@ -155,7 +180,6 @@ func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 		core.WithIndexDataInts(X, Y),
 		core.WithRevocationNonce(revNonce.Uint64()))
 }
-
 
 func SaveTestVector(t *testing.T, fileName string, data string) {
 	t.Helper()

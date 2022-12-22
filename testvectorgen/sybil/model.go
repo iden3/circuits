@@ -34,13 +34,12 @@ type InputsMTP struct {
 	IssuerClaimNonRevState      string           `json:"issuerClaimNonRevState"`
 
 	// claim of state-secret (Holder's claim)
-
-	// HolderClaim           *core.Claim      `json:"holderClaim"`
-	// HolderClaimMtp        []string         `json:"holderClaimMtp"`
-	// HolderClaimClaimsRoot *merkletree.Hash `json:"holderClaimClaimsRoot"`
-	// HolderClaimRevRoot    *merkletree.Hash `json:"holderClaimRevRoot"`
-	// HolderClaimRootsRoot  *merkletree.Hash `json:"holderClaimRootsRoot"`
-	HolderClaimIdenState string `json:"holderClaimIdenState"`
+	HolderClaim           *core.Claim      `json:"holderClaim"`
+	HolderClaimMtp        []string         `json:"holderClaimMtp"`
+	HolderClaimClaimsRoot *merkletree.Hash `json:"holderClaimClaimsRoot"`
+	HolderClaimRevRoot    *merkletree.Hash `json:"holderClaimRevRoot"`
+	HolderClaimRootsRoot  *merkletree.Hash `json:"holderClaimRootsRoot"`
+	HolderClaimIdenState  string           `json:"holderClaimIdenState"`
 
 	GistRoot     *merkletree.Hash `json:"gistRoot"`
 	GistMtp      []string         `json:"gistMtp"`
@@ -85,13 +84,12 @@ type InputsSig struct {
 	IssuerClaimSignatureS   string `json:"issuerClaimSignatureS"`
 
 	// claim of state-secret (Holder's claim)
-
-	// HolderClaim           *core.Claim      `json:"holderClaim"`
-	// HolderClaimMtp        []string         `json:"holderClaimMtp"`
-	// HolderClaimClaimsRoot *merkletree.Hash `json:"holderClaimClaimsRoot"`
-	// HolderClaimRevRoot    *merkletree.Hash `json:"holderClaimRevRoot"`
-	// HolderClaimRootsRoot  *merkletree.Hash `json:"holderClaimRootsRoot"`
-	HolderClaimIdenState string `json:"holderClaimIdenState"`
+	HolderClaim           *core.Claim      `json:"holderClaim"`
+	HolderClaimMtp        []string         `json:"holderClaimMtp"`
+	HolderClaimClaimsRoot *merkletree.Hash `json:"holderClaimClaimsRoot"`
+	HolderClaimRevRoot    *merkletree.Hash `json:"holderClaimRevRoot"`
+	HolderClaimRootsRoot  *merkletree.Hash `json:"holderClaimRootsRoot"`
+	HolderClaimIdenState  string           `json:"holderClaimIdenState"`
 
 	GistRoot     *merkletree.Hash `json:"gistRoot"`
 	GistMtp      []string         `json:"gistMtp"`
