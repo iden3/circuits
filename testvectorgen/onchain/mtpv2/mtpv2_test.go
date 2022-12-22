@@ -109,14 +109,14 @@ type TestDataMTPV2 struct {
 }
 
 func Test_ClaimIssuedOnUserID(t *testing.T) {
-	desc := "User == Subject. Claim issued on UserID"
+	desc := "OnChain: User == Subject. Claim issued on UserID"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "claimIssuedOnUserID")
 }
 
 func Test_ClaimIssuedOnUserProfileID(t *testing.T) {
-	desc := "User != Subject. Claim issued on ProfileID"
+	desc := "OnChain: User != Subject. Claim issued on ProfileID"
 	isUserIDProfile := false
 	isSubjectIDProfile := true
 
@@ -124,7 +124,7 @@ func Test_ClaimIssuedOnUserProfileID(t *testing.T) {
 }
 
 func Test_ClaimIssuedOnUserProfileID2(t *testing.T) {
-	desc := "User == Subject. Claim issued on ProfileID"
+	desc := "OnChain: User == Subject. Claim issued on ProfileID"
 	isUserIDProfile := true
 	isSubjectIDProfile := true
 
@@ -132,7 +132,7 @@ func Test_ClaimIssuedOnUserProfileID2(t *testing.T) {
 }
 
 func Test_ClaimNonMerklized(t *testing.T) {
-	desc := "User == Subject. Claim non merklized claim"
+	desc := "OnChain: User == Subject. Claim non merklized claim"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
@@ -140,7 +140,7 @@ func Test_ClaimNonMerklized(t *testing.T) {
 }
 
 func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
-	desc := "User's claim revoked and the circuit checking for revocation status (expected to fail)"
+	desc := "OnChain: User's claim revoked and the circuit checking for revocation status"
 	fileName := "revoked_claim_with_revocation_check"
 
 	user := utils.NewIdentity(t, userPK)
@@ -261,7 +261,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 }
 
 func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
-	desc := "User's claim revoked and the circuit not checking for revocation status (expected to fail)"
+	desc := "OnChain: Checking revoked status when claim is revoked onchain (MTP)"
 	fileName := "revoked_claim_without_revocation_check"
 
 	user := utils.NewIdentity(t, userPK)

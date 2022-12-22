@@ -173,7 +173,7 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     // check user ownership
 
     // verify issuerClaim issued and not revoked
-    component vci = verifyClaimIssuanceNonRev( issuerLevels);
+    component vci = verifyClaimIssuanceNonRev(issuerLevels);
     for (var i = 0; i < 8; i++) { vci.claim[i] <== issuerClaim[i]; }
     for (var i = 0; i < issuerLevels; i++) { vci.claimIssuanceMtp[i] <== issuerClaimMtp[i]; }
     vci.claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot;
