@@ -3,7 +3,7 @@ pragma circom 2.0.0;
 include "../../../node_modules/circomlib/circuits/poseidon.circom";
 
 // Because of the way the Poseidon hash function is implemented for Solidity, the max number of inputs must be 6
-template ValuesHasher(valueArraySize) {
+template ValueHasher(valueArraySize) {
 	signal input in[valueArraySize];
 	signal output out;
     // batch size is 5 because 1 input is reserved for the hash of the previous iteration

@@ -6,7 +6,7 @@ const relativePath = "../circuits";
 const generateTemplate = (templateName: string, size: number): void => {
     const template = `
 pragma circom 2.0.0;
-include "../../circuits/lib/utils/valuesHasher.circom";
+include "../../circuits/lib/utils/valueHasher.circom";
 template ${templateName}Test() {
 signal input in[{{n}}];
 signal output out;
@@ -31,8 +31,8 @@ component main = ${templateName}Test();
 
 describe("Value Hasher tests", function () {
     this.timeout(200000);
-    it("Test ValuesHasher util using hash for different size inputs", async () => {
-        const templateName = "ValuesHasher";
+    it("Test ValueHasher util using hash for different size inputs", async () => {
+        const templateName = "ValueHasher";
         const testCases = [
             new Array(64).fill(0),
             new Array(63).fill(0).map((_, i) => i + 1),
