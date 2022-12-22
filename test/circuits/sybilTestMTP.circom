@@ -18,5 +18,7 @@ include "../../circuits/sybil/sybilResCredentialAtomicQueryMTPOffChain.circom";
 
 component main{public [
                         issuerClaimIdenState,
-                        issuerClaimNonRevState
-                        ]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32);
+                        issuerClaimNonRevState,
+                        crs,
+                        gistRoot
+                        ]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32, 32);

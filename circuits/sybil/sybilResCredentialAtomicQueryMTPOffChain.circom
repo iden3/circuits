@@ -7,7 +7,7 @@ include "../lib/utils/claimUtils.circom";
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 
-template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, gistLevels) {
+template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, GistLevels) {
 
     // claim of uniqueness 
     signal input issuerClaim[8];
@@ -33,15 +33,14 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, gistLevels) {
     // signal input holderClaimClaimsRoot;
     // signal input holderClaimRevRoot;
     // signal input holderClaimRootsRoot;
-    // signal input holderClaimIdenState;
+    signal input holderClaimIdenState;
     
     // GIST and path to holderState
-    // signal input gistRoot;
-    // signal input gistMtp[GistLevels];
-    // signal input idenGistState;
-    // signal input gistMtpAuxHi;
-    // signal input gistMtpAuxHv;
-    // signal input gistMtpNoAux;
+    signal input gistRoot;
+    signal input gistMtp[GistLevels];
+    signal input gistMtpAuxHi;
+    signal input gistMtpAuxHv;
+    signal input gistMtpNoAux;
 
     signal input crs;
 
@@ -73,31 +72,30 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, gistLevels) {
     verifyUniClaim.claimNonRevRootsRoot  <== issuerClaimNonRevRootsRoot;
     verifyUniClaim.claimNonRevState  <== issuerClaimNonRevState;
 
-    verifyUniClaim.claimSchema  <== 180410020913331409885634153623124536270;    // uniqueness claim schema
+    component uniClaimSchemaHash = GetUniquenessSchemaHash();
+    verifyUniClaim.claimSchema  <== uniClaimSchemaHash.schemaHash;
 
     verifyUniClaim.userGenesisID  <== userGenesisID;
     verifyUniClaim.profileNonce <== profileNonce;
 
     verifyUniClaim.claimHash  ==> uniClaimHash;
-    log("uniClaimHash", uniClaimHash);
 
-    // component verifyStateSecret = VerifyAndExtractValStateSecret(IssuerLevels, gistLevels)
+    component verifyStateSecret = VerifyAndExtractValStateSecret(HolderLevel, GistLevels);
     // for (var i=0; i<8; i++) { verifyStateSecret.claim[i] <== holderClaim[i]; }
     // for (var i=0; i<holderLevels; i++) { verifyStateSecret.claimMtp[i] <== holderClaimMtp[i]; }
     // verifyStateSecret.claimIssuanceClaimsRoot <== holderClaimClaimsRoot;
     // verifyStateSecret.claimIssuanceRevRoot <== holderClaimRevRoot;
     // verifyStateSecret.claimIssuanceRootsRoot <== holderClaimRootsRoot;
-    // verifyStateSecret.claimIssuanceIdenState <== holderClaimIdenState;
+    verifyStateSecret.claimIssuanceIdenState <== holderClaimIdenState;
 
     // verifyStateSecret.claimSchema <== holderClaimSchema;
+    verifyStateSecret.genesisID <== userGenesisID; 
 
-    // for (var i=0; i<gistLevels; i++) { verifyStateSecret.idenGistMtp[i] <== idenGistMtp[i]; }
-    // // for (var i=0; i<8; i++) { verifyStateSecret.idenGistState[i] <== idenGistState[i]; }                // double check this declration 
-
-    // verifyStateSecret.gistRoot <== gistRoot;
-    // verifyStateSecret.gistMtpAuxHi <== gistMtpAuxHi;
-    // verifyStateSecret.gistMtpAuxHv <== gistMtpAuxHv;
-    // verifyStateSecret.gistMtpNoAux <== gistMtpNoAux;
+    for (var i=0; i<GistLevels; i++) { verifyStateSecret.gistMtp[i] <== gistMtp[i]; }
+    verifyStateSecret.gistRoot <== gistRoot;
+    verifyStateSecret.gistMtpAuxHi <== gistMtpAuxHi;
+    verifyStateSecret.gistMtpAuxHv <== gistMtpAuxHv;
+    verifyStateSecret.gistMtpNoAux <== gistMtpNoAux;
 
     // verifyStateSecret.secret ==> secret;
     // secret <== 301485908906857522017021291028488077057; // hard coded for tests purposes 

@@ -2,9 +2,16 @@ package sybil
 
 import "testing"
 
-func TestHappyFlow(t *testing.T) {
+func TestHappyFlowMTP(t *testing.T) {
 
 	desc := "Sybil resistance - Happy flow test"
 
-	generateTestData(t, desc, "happyflow")
+	generateTestDataMTP(t, desc, "happyflow - MTP")
+}
+
+func TestHappyFlowSig(t *testing.T) {
+
+	desc := "Sybil resistance - Happy flow test"
+
+	generateTestDataSig(t, desc, "happyflow - Sig")
 }

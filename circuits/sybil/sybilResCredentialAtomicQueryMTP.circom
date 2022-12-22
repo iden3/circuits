@@ -12,4 +12,4 @@ component main{public [
                         holderClaimSchema,  // <--- should be hard coded 
                         crs,
                         gistRoot
-                    ]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32);
+                    ]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32, 32);

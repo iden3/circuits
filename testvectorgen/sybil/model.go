@@ -6,12 +6,14 @@ import (
 )
 
 const (
-	userPK    = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
-	issuerPK  = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
-	timestamp = "1642074362"
+	mtpUserPK   = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
+	mtpIssuerPK = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
+
+	sigUserPK   = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
+	sigIssuerPK = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
 )
 
-type Inputs struct {
+type InputsMTP struct {
 
 	// claim of uniqueness
 	IssuerClaim           *core.Claim      `json:"issuerClaim"`
@@ -33,12 +35,12 @@ type Inputs struct {
 
 	// claim of state-secret (Holder's claim)
 
-	holderClaim           *core.Claim      `json:"holderClaim"`
-	holderClaimMtp        []string         `json:"holderClaimMtp"`
-	holderClaimClaimsRoot *merkletree.Hash `json:"holderClaimClaimsRoot"`
-	holderClaimRevRoot    *merkletree.Hash `json:"holderClaimRevRoot"`
-	holderClaimRootsRoot  *merkletree.Hash `json:"holderClaimRootsRoot"`
-	holderClaimIdenState  string           `json:"holderClaimIdenState"`
+	// HolderClaim           *core.Claim      `json:"holderClaim"`
+	// HolderClaimMtp        []string         `json:"holderClaimMtp"`
+	// HolderClaimClaimsRoot *merkletree.Hash `json:"holderClaimClaimsRoot"`
+	// HolderClaimRevRoot    *merkletree.Hash `json:"holderClaimRevRoot"`
+	// HolderClaimRootsRoot  *merkletree.Hash `json:"holderClaimRootsRoot"`
+	HolderClaimIdenState string `json:"holderClaimIdenState"`
 
 	GistRoot     *merkletree.Hash `json:"gistRoot"`
 	GistMtp      []string         `json:"gistMtp"`
@@ -49,10 +51,59 @@ type Inputs struct {
 	CRS string `json:"crs"`
 
 	// user data
-	UserGenesisID string `json:"userGenesisID"` //
-	ProfileNonce  string `json:"profileNonce"`  //
-	//ClaimSubjectProfileNonce string `json:"claimSubjectProfileNonce"` //
+	UserGenesisID string `json:"userGenesisID"`
+	ProfileNonce  string `json:"profileNonce"`
+}
 
+type InputsSig struct {
+
+	// claim of uniqueness
+	IssuerAuthClaim      *core.Claim `json:"issuerAuthClaim"`
+	IssuerAuthClaimMtp   []string    `json:"issuerAuthClaimMtp"`
+	IssuerAuthClaimsRoot string      `json:"issuerAuthClaimsRoot"`
+	IssuerAuthRevRoot    string      `json:"issuerAuthRevRoot"`
+	IssuerAuthRootsRoot  string      `json:"issuerAuthRootsRoot"`
+
+	IssuerAuthClaimNonRevMtp      []string `json:"issuerAuthClaimNonRevMtp"`
+	IssuerAuthClaimNonRevMtpAuxHi string   `json:"issuerAuthClaimNonRevMtpAuxHi"`
+	IssuerAuthClaimNonRevMtpAuxHv string   `json:"issuerAuthClaimNonRevMtpAuxHv"`
+	IssuerAuthClaimNonRevMtpNoAux string   `json:"issuerAuthClaimNonRevMtpNoAux"`
+
+	IssuerClaim                 *core.Claim `json:"issuerClaim"`
+	IssuerClaimNonRevClaimsRoot string      `json:"issuerClaimNonRevClaimsRoot"`
+	IssuerClaimNonRevRevRoot    string      `json:"issuerClaimNonRevRevRoot"`
+	IssuerClaimNonRevRootsRoot  string      `json:"issuerClaimNonRevRootsRoot"`
+
+	IssuerClaimNonRevState    string   `json:"issuerClaimNonRevState"`
+	IssuerClaimNonRevMtp      []string `json:"issuerClaimNonRevMtp"`
+	IssuerClaimNonRevMtpAuxHi string   `json:"issuerClaimNonRevMtpAuxHi"`
+	IssuerClaimNonRevMtpAuxHv string   `json:"issuerClaimNonRevMtpAuxHv"`
+	IssuerClaimNonRevMtpNoAux string   `json:"issuerClaimNonRevMtpNoAux"`
+
+	IssuerClaimSignatureR8X string `json:"issuerClaimSignatureR8x"`
+	IssuerClaimSignatureR8Y string `json:"issuerClaimSignatureR8y"`
+	IssuerClaimSignatureS   string `json:"issuerClaimSignatureS"`
+
+	// claim of state-secret (Holder's claim)
+
+	// HolderClaim           *core.Claim      `json:"holderClaim"`
+	// HolderClaimMtp        []string         `json:"holderClaimMtp"`
+	// HolderClaimClaimsRoot *merkletree.Hash `json:"holderClaimClaimsRoot"`
+	// HolderClaimRevRoot    *merkletree.Hash `json:"holderClaimRevRoot"`
+	// HolderClaimRootsRoot  *merkletree.Hash `json:"holderClaimRootsRoot"`
+	HolderClaimIdenState string `json:"holderClaimIdenState"`
+
+	GistRoot     *merkletree.Hash `json:"gistRoot"`
+	GistMtp      []string         `json:"gistMtp"`
+	GistMtpAuxHi string           `json:"gistMtpAuxHi"`
+	GistMtpAuxHv string           `json:"gistMtpAuxHv"`
+	GistMtpNoAux string           `json:"gistMtpNoAux"`
+
+	CRS string `json:"crs"`
+
+	// user data
+	UserGenesisID string `json:"userGenesisID"`
+	ProfileNonce  string `json:"profileNonce"`
 }
 
 type Outputs struct {
@@ -60,8 +111,14 @@ type Outputs struct {
 	SybilID string `json:"sybilID"`
 }
 
-type TestDataMTPV2 struct {
-	Desc string  `json:"desc"`
-	In   Inputs  `json:"inputs"`
-	Out  Outputs `json:"expOut"`
+type TestDataMTP struct {
+	Desc string    `json:"desc"`
+	In   InputsMTP `json:"inputs"`
+	Out  Outputs   `json:"expOut"`
+}
+
+type TestDataSig struct {
+	Desc string    `json:"desc"`
+	In   InputsSig `json:"inputs"`
+	Out  Outputs   `json:"expOut"`
 }
