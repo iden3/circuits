@@ -5,13 +5,8 @@ include "sybilResCredentialAtomicQuerySigOffChain.circom";
 component main{public [
                         // uniqueness claim
                         issuerClaimNonRevState,
-                        issuerClaimSchema,
-                        claimPathKey,
-                        claimPathNotExists,
 
                         // state secret claim
-                        holderClaimIdenState,
-                        holderClaimSchema,
                         crs,
-                        gist
+                        gistRoot
 ]} = SybilResCredentialAtomicQuerySigOffChain(32, 32, 32);
