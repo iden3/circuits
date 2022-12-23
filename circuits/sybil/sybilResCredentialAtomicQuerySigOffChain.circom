@@ -207,6 +207,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     verifyIssuerAuthClaimNotRevoked.auxHi <== issuerAuthClaimNonRevMtpAuxHi;
     verifyIssuerAuthClaimNotRevoked.auxHv <== issuerAuthClaimNonRevMtpAuxHv;
     verifyIssuerAuthClaimNotRevoked.treeRoot <== issuerClaimNonRevRevRoot;
+    verifyIssuerAuthClaimNotRevoked.enabled <== 1;
 
     component issuerAuthPubKey = getPubKeyFromClaim();
     for (var i=0; i<8; i++){ issuerAuthPubKey.claim[i] <== issuerAuthClaim[i]; }
@@ -228,6 +229,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     verifyClaimNotRevoked.auxHi <== issuerClaimNonRevMtpAuxHi;
     verifyClaimNotRevoked.auxHv <== issuerClaimNonRevMtpAuxHv;
     verifyClaimNotRevoked.treeRoot <== issuerClaimNonRevRevRoot;
+    verifyClaimNotRevoked.enabled <== 1;
 
     // verify issuer state includes issuerClaim
     component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();

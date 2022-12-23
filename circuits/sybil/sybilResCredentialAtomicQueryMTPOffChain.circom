@@ -148,6 +148,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     vci.claimIssuanceRevTreeRoot <== claimRevRoot;
     vci.claimIssuanceRootsTreeRoot <== claimRootsRoot;
     vci.claimIssuanceIdenState <== claimIdenState;
+    vci.enabledNonRevCheck <== 1;
 
     // (2) And non revocation status
     for (var i=0; i<IssuerLevels; i++) { vci.claimNonRevMtp[i] <== claimNonRevMtp[i]; }
