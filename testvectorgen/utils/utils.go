@@ -2,16 +2,13 @@ package utils
 
 import (
 	"context"
-	//"encoding/binary"
 	"encoding/hex"
-	//"fmt"
-	//"github.com/iden3/go-schema-processor/processor"
+
 	"math/big"
 	"os"
 	"strings"
 	"testing"
 	"time"
-	//"crypto/rand"
 
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"

@@ -71,8 +71,6 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     for (var i=0; i<8; i++) { verifyUniClaim.issuerAuthClaim[i] <== issuerAuthClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerAuthClaimMtp[i] <== issuerAuthClaimMtp[i]; }
     verifyUniClaim.issuerAuthClaimsRoot <== issuerAuthClaimsRoot;
-    verifyUniClaim.issuerAuthRevRoot <== issuerAuthRevRoot;
-    verifyUniClaim.issuerAuthRootsRoot <== issuerAuthRootsRoot;
 
     for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerAuthClaimNonRevMtp[i] <== issuerAuthClaimNonRevMtp[i]; }
     verifyUniClaim.issuerAuthClaimNonRevMtpNoAux <== issuerAuthClaimNonRevMtpNoAux;
@@ -140,9 +138,6 @@ template VerifyAndHashUniClaim(IssuerLevels){
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimMtp[IssuerLevels];
     signal input issuerAuthClaimsRoot;
-    signal input issuerAuthRevRoot;
-    signal input issuerAuthRootsRoot;
-    // signal input issuerAuthState;
 
     // issuer auth claim non rev proof
     signal input issuerAuthClaimNonRevMtp[IssuerLevels];
@@ -152,6 +147,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
 
     // claim issued by issuer to the user
     signal input issuerClaim[8];
+
     // issuerClaim non rev inputs
     signal input issuerClaimNonRevMtp[IssuerLevels];
     signal input issuerClaimNonRevMtpNoAux;
@@ -173,10 +169,6 @@ template VerifyAndHashUniClaim(IssuerLevels){
     signal input profileNonce;
     signal input claimSubjectProfileNonce;
 
-    // inter-signal
-    signal issuerAuthState;
-    // signal uniClaimHash;
-
     signal output claimHash;
 
     //  A. Verify issued and not revoked
@@ -184,15 +176,6 @@ template VerifyAndHashUniClaim(IssuerLevels){
     component issuerSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
     issuerSchemaCheck.schema <== AUTH_SCHEMA_HASH;
-
-    // verify authClaim issued and not revoked
-    // calculate issuerAuthState
-    component issuerAuthStateComponent = getIdenState();
-    issuerAuthStateComponent.claimsTreeRoot <== issuerAuthClaimsRoot;
-    issuerAuthStateComponent.revTreeRoot <== issuerAuthRevRoot;
-    issuerAuthStateComponent.rootsTreeRoot <== issuerAuthRootsRoot;
-
-    issuerAuthState <== issuerAuthStateComponent.idenState;
 
     // issuerAuthClaim proof of existence (isProofExist)
     component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);

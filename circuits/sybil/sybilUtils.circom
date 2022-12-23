@@ -19,16 +19,13 @@ template GetStateSecretPosition() {
     out <== 1974680877085411137074044236594333239180760340473446672920498187419060160560;
 }
 
-template GetStateSecretSlot() {
-    signal output out;
-    out <== 3;
-}
-
+// A template to retrieve the hash of the uniqueness schema
 template GetUniquenessSchemaHash(){
     signal output schemaHash;
     schemaHash <== 180410020913331409885634153623124536270;
 }
 
+// A template to retrieve the hash of the state secret schema
 template GetStateSecretSchemaHash(){
     signal output schemaHash;
     schemaHash <== 262057681346829900854325169563380898778;

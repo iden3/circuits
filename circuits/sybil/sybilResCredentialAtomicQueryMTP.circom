@@ -6,5 +6,4 @@ component main{public [
                         issuerClaimIdenState,
                         issuerClaimNonRevState,
                         crs,
-                        gistRoot
-                    ]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32, 32);
+                        gistRoot]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32, 32);
