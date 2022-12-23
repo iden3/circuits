@@ -3,6 +3,9 @@ package sybil
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	core "github.com/iden3/go-iden3-core"
+	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 	"github.com/stretchr/testify/require"
@@ -11,7 +14,7 @@ import (
 	"testing"
 )
 
-func generateTestDataMTP(t *testing.T, desc, fileName string) {
+func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, invalidIdentity, isUserIDProfile, isSubjectIDProfile bool) {
 	var err error
 
 	user := utils.NewIdentity(t, mtpUserPK)
@@ -19,19 +22,21 @@ func generateTestDataMTP(t *testing.T, desc, fileName string) {
 
 	userProfileID := user.ID
 	nonce := big.NewInt(0)
-	//if isUserIDProfile {
-	//	nonce = big.NewInt(10)
-	//	userProfileID, err = core.ProfileID(user.ID, nonce)
-	//	require.NoError(t, err)
-	//}
+	if isUserIDProfile {
+		nonce = big.NewInt(10)
+		userProfileID, err = core.ProfileID(user.ID, nonce)
+		require.NoError(t, err)
+	}
 
+	expectedSybilID := "20862964869267347971331838950951441214503092363786002222571056178548832852731"
 	subjectID := user.ID
-	//nonceSubject := big.NewInt(0)
-	//if isSubjectIDProfile {
-	//	nonceSubject = big.NewInt(999)
-	//	subjectID, err = core.ProfileID(user.ID, nonceSubject)
-	//	require.NoError(t, err)
-	//}
+	nonceSubject := big.NewInt(0)
+	if isSubjectIDProfile {
+		nonceSubject = big.NewInt(999)
+		subjectID, err = core.ProfileID(user.ID, nonceSubject)
+		require.NoError(t, err)
+		expectedSybilID = "18782255017969163123601059576915295547702993380263687303967330844086007845814"
+	}
 
 	// unique claim
 	uniClaim := utils.DefaultUserClaim(t, subjectID)
@@ -47,14 +52,34 @@ func generateTestDataMTP(t *testing.T, desc, fileName string) {
 	// gist
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
 	require.Nil(t, err)
-	gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
+	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
+	require.Nil(t, err)
 
 	err = gisTree.Add(context.Background(), user.IDHash(t), user.State(t))
 	require.Nil(t, err)
 
+	if invalidGist {
+		gisTree, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+		require.Nil(t, err)
+		err = gisTree.Add(context.Background(), big.NewInt(3), big.NewInt(3))
+		require.Nil(t, err)
+
+		err = gisTree.Add(context.Background(), big.NewInt(4), big.NewInt(4))
+		require.Nil(t, err)
+
+		err = gisTree.Add(context.Background(), big.NewInt(5), big.NewInt(5))
+		require.Nil(t, err)
+	}
+
 	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+
+	if invalidIdentity {
+		sk := babyjub.NewRandPrivKey()
+		skB := sk.Scalar().BigInt().Bytes()
+		user = utils.NewIdentity(t, fmt.Sprintf("%x", skB))
+	}
 
 	inputs := InputsMTP{
 		IssuerClaim:           uniClaim,
@@ -89,13 +114,14 @@ func generateTestDataMTP(t *testing.T, desc, fileName string) {
 
 		CRS: big.NewInt(123456789).String(),
 
-		UserGenesisID: user.ID.BigInt().String(),
-		ProfileNonce:  nonce.String(),
+		UserGenesisID:            user.ID.BigInt().String(),
+		ProfileNonce:             nonce.String(),
+		ClaimSubjectProfileNonce: nonceSubject.String(),
 	}
 
 	out := Outputs{
 		UserID:  userProfileID.BigInt().String(),
-		SybilID: "20862964869267347971331838950951441214503092363786002222571056178548832852731",
+		SybilID: expectedSybilID,
 	}
 
 	jsonTestData, err := json.Marshal(TestDataMTP{
@@ -108,28 +134,32 @@ func generateTestDataMTP(t *testing.T, desc, fileName string) {
 	utils.SaveTestVector(t, fileName, string(jsonTestData))
 }
 
-func generateTestDataSig(t *testing.T, desc, fileName string) {
+func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, invalidIdentity, isUserIDProfile, isSubjectIDProfile bool) {
 	user := utils.NewIdentity(t, mtpUserPK)
 	issuer := utils.NewIdentity(t, mtpIssuerPK)
 
 	userProfileID := user.ID
 	nonce := big.NewInt(0)
-	//if isUserIDProfile {
-	//	nonce = big.NewInt(10)
-	//	userProfileID, err = core.ProfileID(user.ID, nonce)
-	//	require.NoError(t, err)
-	//}
+	var err error
+	if isUserIDProfile {
+		nonce = big.NewInt(10)
+		userProfileID, err = core.ProfileID(user.ID, nonce)
+		require.NoError(t, err)
+	}
 
+	expectedSybilID := "20862964869267347971331838950951441214503092363786002222571056178548832852731"
 	subjectID := user.ID
-	//nonceSubject := big.NewInt(0)
-	//if isSubjectIDProfile {
-	//	nonceSubject = big.NewInt(999)
-	//	subjectID, err = core.ProfileID(user.ID, nonceSubject)
-	//	require.NoError(t, err)
-	//}
+	nonceSubject := big.NewInt(0)
+	if isSubjectIDProfile {
+		nonceSubject = big.NewInt(999)
+		subjectID, err = core.ProfileID(user.ID, nonceSubject)
+		require.NoError(t, err)
+		expectedSybilID = "18782255017969163123601059576915295547702993380263687303967330844086007845814"
+	}
 
 	// Sig claim
 	claim := utils.DefaultUserClaim(t, subjectID)
+
 	claimSig := issuer.SignClaim(t, claim)
 	issuerClaimNonRevState := issuer.State(t)
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
@@ -143,12 +173,34 @@ func generateTestDataSig(t *testing.T, desc, fileName string) {
 	// gist
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
 	require.Nil(t, err)
-	gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
+	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
+	require.Nil(t, err)
+
 	err = gisTree.Add(context.Background(), user.IDHash(t), user.State(t))
 	require.Nil(t, err)
+
+	if invalidGist {
+		gisTree, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+		require.Nil(t, err)
+		err = gisTree.Add(context.Background(), big.NewInt(3), big.NewInt(3))
+		require.Nil(t, err)
+
+		err = gisTree.Add(context.Background(), big.NewInt(4), big.NewInt(4))
+		require.Nil(t, err)
+
+		err = gisTree.Add(context.Background(), big.NewInt(5), big.NewInt(5))
+		require.Nil(t, err)
+	}
+
 	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+
+	if invalidIdentity {
+		sk := babyjub.NewRandPrivKey()
+		skB := sk.Scalar().BigInt().Bytes()
+		user = utils.NewIdentity(t, fmt.Sprintf("%x", skB))
+	}
 
 	inputs := InputsSig{
 		IssuerClaim:                   claim,
@@ -194,7 +246,7 @@ func generateTestDataSig(t *testing.T, desc, fileName string) {
 
 	out := Outputs{
 		UserID:  userProfileID.BigInt().String(),
-		SybilID: "20862964869267347971331838950951441214503092363786002222571056178548832852731",
+		SybilID: expectedSybilID,
 	}
 
 	jsonTestData, err := json.Marshal(TestDataSig{

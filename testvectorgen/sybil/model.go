@@ -8,9 +8,6 @@ import (
 const (
 	mtpUserPK   = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
 	mtpIssuerPK = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
-
-	sigUserPK   = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
-	sigIssuerPK = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
 )
 
 type InputsMTP struct {
@@ -50,8 +47,9 @@ type InputsMTP struct {
 	CRS string `json:"crs"`
 
 	// user data
-	UserGenesisID string `json:"userGenesisID"`
-	ProfileNonce  string `json:"profileNonce"`
+	UserGenesisID            string `json:"userGenesisID"`
+	ProfileNonce             string `json:"profileNonce"`
+	ClaimSubjectProfileNonce string `json:"claimSubjectProfileNonce"`
 }
 
 type InputsSig struct {
@@ -100,8 +98,9 @@ type InputsSig struct {
 	CRS string `json:"crs"`
 
 	// user data
-	UserGenesisID string `json:"userGenesisID"`
-	ProfileNonce  string `json:"profileNonce"`
+	UserGenesisID            string `json:"userGenesisID"`
+	ProfileNonce             string `json:"profileNonce"`
+	ClaimSubjectProfileNonce string `json:"claimSubjectProfileNonce"`
 }
 
 type Outputs struct {

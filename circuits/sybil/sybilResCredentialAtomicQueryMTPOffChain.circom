@@ -46,6 +46,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
 
     signal input userGenesisID;
     signal input profileNonce;
+    signal input claimSubjectProfileNonce;
 
     signal output userID;
     signal output sybilID;
@@ -77,6 +78,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
 
     verifyUniClaim.userGenesisID  <== userGenesisID;
     verifyUniClaim.profileNonce <== profileNonce;
+    verifyUniClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
 
     verifyUniClaim.claimHash  ==> uniClaimHash;
 
@@ -134,6 +136,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
 
     signal input userGenesisID;
     signal input profileNonce;
+    signal input claimSubjectProfileNonce;
 
     signal output claimHash;
 
@@ -165,7 +168,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     component claimIdCheck = verifyCredentialSubjectProfile();
     for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== claim[i]; }
     claimIdCheck.id <== userGenesisID;
-    claimIdCheck.nonce <== profileNonce;
+    claimIdCheck.nonce <== claimSubjectProfileNonce;
 
     // (5) Get claim hash
     component hasher = getClaimHash();

@@ -54,12 +54,16 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
 
     signal input crs;
 
+    // identity
     signal input userGenesisID;
     signal input profileNonce;
+    signal input claimSubjectProfileNonce;
 
+    // inter signals
     signal uniClaimHash;
     signal secretClaimHash;
 
+    // outputs
     signal output sybilID;
     signal output userID;
 
@@ -94,7 +98,9 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     verifyUniClaim.issuerClaimSchema <== uniClaimSchemaHash.schemaHash;
     verifyUniClaim.profileNonce <== profileNonce;
     verifyUniClaim.userGenesisID <== userGenesisID;
-    
+    verifyUniClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
+
+  
     verifyUniClaim.claimHash ==> uniClaimHash;
 
     component verifyStateSecret = VerifyAndExtractValStateSecret(HolderLevel, GistLevels);
@@ -165,6 +171,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
 
     signal input userGenesisID;
     signal input profileNonce;
+    signal input claimSubjectProfileNonce;
 
     // inter-signal
     signal issuerAuthState;
@@ -238,7 +245,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     component claimIdCheck = verifyCredentialSubjectProfile();
     for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
     claimIdCheck.id <== userGenesisID;
-    claimIdCheck.nonce <== profileNonce;
+    claimIdCheck.nonce <== claimSubjectProfileNonce;
 
     //      D. Return hash of claim
     component hasher = getClaimHash();
