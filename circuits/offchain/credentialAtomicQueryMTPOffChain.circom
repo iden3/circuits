@@ -66,6 +66,7 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
     signal input issuerClaimIdenState;
 
     // issuerClaim non rev inputs
+    signal input isRevocationChecked;
     signal input issuerClaimNonRevMtp[IssuerLevels];
     signal input issuerClaimNonRevMtpNoAux;
     signal input issuerClaimNonRevMtpAuxHi;
@@ -109,6 +110,7 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
     vci.claimIssuanceIdenState <== issuerClaimIdenState;
 
     // non revocation status
+    vci.enabledNonRevCheck <== isRevocationChecked;
     for (var i=0; i<IssuerLevels; i++) { vci.claimNonRevMtp[i] <== issuerClaimNonRevMtp[i]; }
     vci.claimNonRevMtpNoAux <== issuerClaimNonRevMtpNoAux;
     vci.claimNonRevMtpAuxHi <== issuerClaimNonRevMtpAuxHi;

@@ -3,8 +3,7 @@ module test
 go 1.18
 
 require (
-	github.com/ethereum/go-ethereum v1.10.26
-	github.com/iden3/go-iden3-core v0.1.1-0.20221109163857-44d9c2816b2f
+	github.com/iden3/go-iden3-core v0.1.1-0.20221219072518-403916345ce1
 	github.com/iden3/go-iden3-crypto v0.0.13
 	github.com/iden3/go-merkletree-sql/v2 v2.0.0
 	github.com/iden3/go-schema-processor v0.2.1-0.20221108160946-1b71a2d1b644
