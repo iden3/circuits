@@ -12,6 +12,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     signal input issuerAuthClaimsRoot;
     signal input issuerAuthRevRoot;
     signal input issuerAuthRootsRoot;
+    signal output issuerAuthState;
 
     // issuer auth claim non rev proof
     signal input issuerAuthClaimNonRevMtp[IssuerLevels];
@@ -75,12 +76,14 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     for (var i=0; i<8; i++) { verifyUniClaim.issuerAuthClaim[i] <== issuerAuthClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerAuthClaimMtp[i] <== issuerAuthClaimMtp[i]; }
     verifyUniClaim.issuerAuthClaimsRoot <== issuerAuthClaimsRoot;
+    verifyUniClaim.issuerAuthRevRoot <== issuerAuthRevRoot;
+    verifyUniClaim.issuerAuthRootsRoot <== issuerAuthRootsRoot;
 
     for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerAuthClaimNonRevMtp[i] <== issuerAuthClaimNonRevMtp[i]; }
     verifyUniClaim.issuerAuthClaimNonRevMtpNoAux <== issuerAuthClaimNonRevMtpNoAux;
     verifyUniClaim.issuerAuthClaimNonRevMtpAuxHi <== issuerAuthClaimNonRevMtpAuxHi;
     verifyUniClaim.issuerAuthClaimNonRevMtpAuxHv <== issuerAuthClaimNonRevMtpAuxHv;
-
+    
     for (var i=0; i<8; i++) { verifyUniClaim.issuerClaim[i] <== issuerClaim[i]; }
 
     for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.issuerClaimNonRevMtp[i] <== issuerClaimNonRevMtp[i]; }
@@ -105,6 +108,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     verifyUniClaim.currentTimestamp  <== currentTimestamp;
   
     verifyUniClaim.claimHash ==> uniClaimHash;
+    verifyUniClaim.issuerAuthState ==> issuerAuthState;
 
     component verifyStateSecret = VerifyAndExtractValStateSecret(HolderLevel, GistLevels);
     for (var i=0; i<8; i++) { verifyStateSecret.claim[i] <== holderClaim[i]; }
@@ -143,6 +147,9 @@ template VerifyAndHashUniClaim(IssuerLevels){
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimMtp[IssuerLevels];
     signal input issuerAuthClaimsRoot;
+    signal input issuerAuthRevRoot;
+    signal input issuerAuthRootsRoot;
+
 
     // issuer auth claim non rev proof
     signal input issuerAuthClaimNonRevMtp[IssuerLevels];
@@ -177,6 +184,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     signal input claimSubjectProfileNonce;
 
     signal output claimHash;
+    signal output issuerAuthState;
 
     //  Verify issued and not revoked
     var AUTH_SCHEMA_HASH  = 80551937543569765027552589160822318028;
@@ -198,6 +206,15 @@ template VerifyAndHashUniClaim(IssuerLevels){
     verifyIssuerAuthClaimNotRevoked.auxHv <== issuerAuthClaimNonRevMtpAuxHv;
     verifyIssuerAuthClaimNotRevoked.treeRoot <== issuerClaimNonRevRevRoot;
     verifyIssuerAuthClaimNotRevoked.enabled <== 1;
+
+    // calculate issuerAuthState
+    component issuerAuthStateComponent = getIdenState();
+    issuerAuthStateComponent.claimsTreeRoot <== issuerAuthClaimsRoot;
+    issuerAuthStateComponent.revTreeRoot <== issuerAuthRevRoot;
+    issuerAuthStateComponent.rootsTreeRoot <== issuerAuthRootsRoot;
+
+    issuerAuthState <== issuerAuthStateComponent.idenState;
+
 
     component issuerAuthPubKey = getPubKeyFromClaim();
     for (var i=0; i<8; i++){ issuerAuthPubKey.claim[i] <== issuerAuthClaim[i]; }
