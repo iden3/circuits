@@ -55,15 +55,15 @@ type TestDataStateTransition struct {
 
 func Test_Issuer_From_Genesis(t *testing.T) {
 
-	desc := "Issuer from genesis state"
-	id, state := generateAuthTestData(t, false, IssuerPK, UserPK, desc, "issuer_genesis_state")
+	id, state := generateStateTransitionData(t, false, IssuerPK, UserPK,  "Issuer from genesis state", "issuer_genesis_state")
+	generateStateTransitionData(t, true, IssuerPK, UserPK,  "Issuer next transition state", "issuer_next_state_transition")
 	generateTestData(t, "MTP: Issuer genesis", id, state, false, "valid_mtp_user_genesis")
 
-	nextId, nextState := generateAuthTestData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition")
+	nextId, nextState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition")
 	generateTestData(t, "MTP: User genesis", nextId, nextState, true, "valid_mtp_user_non_genesis")
 }
 
-func generateAuthTestData(t *testing.T, nextState bool, primaryPK, secondaryPK, desc, fileName string) (*big.Int, *big.Int) {
+func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, secondaryPK, desc, fileName string) (*big.Int, *big.Int) {
 
 	primaryEntity := utils.NewIdentity(t, primaryPK)
 	secondaryEntity := utils.NewIdentity(t, secondaryPK)
