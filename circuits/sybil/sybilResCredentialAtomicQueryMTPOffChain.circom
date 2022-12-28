@@ -54,8 +54,8 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     signal input currentTimestamp;
 
     // inter-signal
-    signal uniClaimHash;
-    signal secretClaimHash;
+    signal issuerClaimHash;
+    signal holderClaimValueHash;
 
     // outputs
     signal output userID;
@@ -86,7 +86,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     verifyUniClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
     verifyUniClaim.currentTimestamp <== currentTimestamp;
 
-    verifyUniClaim.claimHash  ==> uniClaimHash;
+    verifyUniClaim.claimHash  ==> issuerClaimHash;
 
     component verifyStateSecret = VerifyAndExtractValStateSecret(HolderLevel, GistLevels);
     for (var i=0; i<8; i++) { verifyStateSecret.claim[i] <== holderClaim[i]; }
@@ -104,14 +104,14 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     verifyStateSecret.gistMtpAuxHv <== gistMtpAuxHv;
     verifyStateSecret.gistMtpNoAux <== gistMtpNoAux;
 
-    verifyStateSecret.secretClaimHash ==> secretClaimHash;
+    verifyStateSecret.claimValueHash ==> holderClaimValueHash;
     
     // Compute SybilId
-    component computeSybilID = ComputeSybilID();
-    computeSybilID.crs <== crs;
-    computeSybilID.stateSecret <== secretClaimHash;
-    computeSybilID.claimHash <== uniClaimHash;
-    sybilID <== computeSybilID.out;
+    component hash = Poseidon(3);
+    hash.inputs[0] <== holderClaimValueHash;
+    hash.inputs[1] <== issuerClaimHash;
+    hash.inputs[2] <== crs;
+    sybilID <== hash.out;
 
     // Compute UserId
     component selectProfile = SelectProfile();

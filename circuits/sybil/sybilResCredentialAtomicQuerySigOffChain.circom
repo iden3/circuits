@@ -65,8 +65,8 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     signal input currentTimestamp;
 
     // inter signals
-    signal uniClaimHash;
-    signal secretClaimHash;
+    signal issuerClaimHash;
+    signal holderClaimValueHash;
 
     // outputs
     signal output sybilID;
@@ -107,7 +107,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
 
     verifyUniClaim.currentTimestamp  <== currentTimestamp;
   
-    verifyUniClaim.claimHash ==> uniClaimHash;
+    verifyUniClaim.claimHash ==> issuerClaimHash;
     verifyUniClaim.issuerAuthState ==> issuerAuthState;
 
     component verifyStateSecret = VerifyAndExtractValStateSecret(HolderLevel, GistLevels);
@@ -126,20 +126,20 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     verifyStateSecret.gistMtpAuxHv <== gistMtpAuxHv;
     verifyStateSecret.gistMtpNoAux <== gistMtpNoAux;
 
-    verifyStateSecret.secretClaimHash ==> secretClaimHash;
+    verifyStateSecret.claimValueHash ==> holderClaimValueHash;
     
+    // Compute SybilId
+    component hash = Poseidon(3);
+    hash.inputs[0] <== holderClaimValueHash;
+    hash.inputs[1] <== issuerClaimHash;
+    hash.inputs[2] <== crs;
+    sybilID <== hash.out;
+
     // Compute profile.
     component selectProfile = SelectProfile();
     selectProfile.in <== userGenesisID;
     selectProfile.nonce <== profileNonce;
     userID <== selectProfile.out;
-
-    // Compute sybil
-    component computeSybilID = ComputeSybilID();
-    computeSybilID.crs <== crs;
-    computeSybilID.stateSecret <== secretClaimHash;
-    computeSybilID.claimHash <== uniClaimHash;
-    sybilID <== computeSybilID.out;
 }
 
 
