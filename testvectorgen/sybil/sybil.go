@@ -28,14 +28,14 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 		require.NoError(t, err)
 	}
 
-	expectedSybilID := "20862964869267347971331838950951441214503092363786002222571056178548832852731"
+	expectedSybilID := "21411712858152195557182873996645875700319223809429848212725198416822632213180"
 	subjectID := user.ID
 	nonceSubject := big.NewInt(0)
 	if isSubjectIDProfile {
 		nonceSubject = big.NewInt(999)
 		subjectID, err = core.ProfileID(user.ID, nonceSubject)
 		require.NoError(t, err)
-		expectedSybilID = "18782255017969163123601059576915295547702993380263687303967330844086007845814"
+		expectedSybilID = "1150468086655797487178838002550740766405123759104799896729630553107465758891"
 	}
 
 	// unique claim
@@ -147,14 +147,14 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 		require.NoError(t, err)
 	}
 
-	expectedSybilID := "20862964869267347971331838950951441214503092363786002222571056178548832852731"
+	expectedSybilID := "21411712858152195557182873996645875700319223809429848212725198416822632213180"
 	subjectID := user.ID
 	nonceSubject := big.NewInt(0)
 	if isSubjectIDProfile {
 		nonceSubject = big.NewInt(999)
 		subjectID, err = core.ProfileID(user.ID, nonceSubject)
 		require.NoError(t, err)
-		expectedSybilID = "18782255017969163123601059576915295547702993380263687303967330844086007845814"
+		expectedSybilID = "1150468086655797487178838002550740766405123759104799896729630553107465758891"
 	}
 
 	// Sig claim
