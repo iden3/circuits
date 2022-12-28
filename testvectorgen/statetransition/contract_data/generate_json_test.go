@@ -63,19 +63,6 @@ func Test_Issuer_From_Genesis(t *testing.T) {
 	generateTestData(t, "MTP: User genesis", nextId, nextState, true, "valid_mtp_user_non_genesis")
 }
 
-func Test_Issuer_Next_State(t *testing.T) {
-
-	desc := "Issuer: next state"
-	isUserStateGenesis := true
-	generateAuthTestData(t, isUserStateGenesis, IssuerPK, UserPK, desc, "issuer_next_state")
-}
-
-func Test_User_Next_State(t *testing.T) {
-	desc := "User: next state"
-	isUserStateGenesis := false
-	generateAuthTestData(t, isUserStateGenesis, UserPK, IssuerPK, desc, "user_genesis_state")
-}
-
 func generateAuthTestData(t *testing.T, nextState bool, primaryPK, secondaryPK, desc, fileName string) (*big.Int, *big.Int) {
 
 	primaryEntity := utils.NewIdentity(t, primaryPK)
@@ -268,7 +255,8 @@ func generateTestData(t *testing.T, desc string, id, newState *big.Int, nextStat
 	challenge := big.NewInt(12345)
 
 	if nextState {
-		user.AddClaim(t, claim)
+		claim1 := utils.DefaultUserClaim(t, issuer.ID)
+		user.AddClaim(t, claim1)
 	}
 
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
