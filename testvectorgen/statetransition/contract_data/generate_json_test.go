@@ -8,6 +8,7 @@ import (
 
 	"test/utils"
 
+	"github.com/ethereum/go-ethereum/common"
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql/v2"
@@ -53,14 +54,15 @@ type TestDataStateTransition struct {
 	Out  StateTransitionOutputs `json:"expOut"`
 }
 
-func Test_Issuer_From_Genesis(t *testing.T) {
+func Test_Generate_Test_Cases(t *testing.T) {
 
-	id, state := generateStateTransitionData(t, false, IssuerPK, UserPK,  "Issuer from genesis state", "issuer_genesis_state")
-	generateStateTransitionData(t, true, IssuerPK, UserPK,  "Issuer next transition state", "issuer_next_state_transition")
-	generateTestData(t, "MTP: Issuer genesis", id, state, false, "valid_mtp_user_genesis")
+	id, state := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis state", "issuer_genesis_state")
+	generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer next transition state", "issuer_next_state_transition")
+	generateMTPData(t, "MTP: Issuer genesis", id, state, false, "valid_mtp_user_genesis", false)
 
 	nextId, nextState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition")
-	generateTestData(t, "MTP: User genesis", nextId, nextState, true, "valid_mtp_user_non_genesis")
+	generateMTPData(t, "MTP: User genesis", nextId, nextState, true, "valid_mtp_user_non_genesis", false)
+	generateMTPData(t, "MTP: User sign with address challenge genesis", nextId, nextState, true, "valid_mtp_user_non_genesis_challenge_address", true)
 }
 
 func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, secondaryPK, desc, fileName string) (*big.Int, *big.Int) {
@@ -232,7 +234,7 @@ type TestDataMTPV2 struct {
 	Out  CredentialAtomicMTPOnChainV2Outputs `json:"expOut"`
 }
 
-func generateTestData(t *testing.T, desc string, id, newState *big.Int, nextState bool, fileName string) {
+func generateMTPData(t *testing.T, desc string, id, newState *big.Int, nextState bool, fileName string, isAddressChallenge bool) {
 	var err error
 
 	user := utils.NewIdentity(t, UserPK)
@@ -253,6 +255,10 @@ func generateTestData(t *testing.T, desc string, id, newState *big.Int, nextStat
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 	challenge := big.NewInt(12345)
+	if isAddressChallenge {
+		addr := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+		challenge = new(big.Int).SetBytes(merkletree.SwapEndianness(addr.Bytes()))
+	}
 
 	if nextState {
 		claim1 := utils.DefaultUserClaim(t, issuer.ID)
