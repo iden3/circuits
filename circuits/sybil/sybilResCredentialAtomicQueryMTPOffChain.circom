@@ -44,17 +44,22 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
 
     signal input crs;
 
+    // identity
     signal input userGenesisID;
     signal input profileNonce;
     signal input claimSubjectProfileNonce;
 
-    signal output userID;
-    signal output sybilID;
+    signal input requestID;
+    signal input issuerID;
+    signal input currentTimestamp;
 
     // inter-signal
     signal uniClaimHash;
     signal secretClaimHash;
 
+    // outputs
+    signal output userID;
+    signal output sybilID;
 
     component verifyUniClaim = VerifyAndHashUniClaim(IssuerLevels);
     for (var i=0; i<8; i++) { verifyUniClaim.claim[i] <== issuerClaim[i]; }
@@ -79,6 +84,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     verifyUniClaim.userGenesisID  <== userGenesisID;
     verifyUniClaim.profileNonce <== profileNonce;
     verifyUniClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
+    verifyUniClaim.currentTimestamp <== currentTimestamp;
 
     verifyUniClaim.claimHash  ==> uniClaimHash;
 
@@ -134,13 +140,15 @@ template VerifyAndHashUniClaim(IssuerLevels){
 
     signal input claimSchema;
 
+    signal input currentTimestamp;
+
     signal input userGenesisID;
     signal input profileNonce;
     signal input claimSubjectProfileNonce;
 
     signal output claimHash;
 
-    // (1) Verify claim issued
+    // Verify claim issued
     component vci = verifyClaimIssuanceNonRev(IssuerLevels);
     for (var i=0; i<8; i++) { vci.claim[i] <== claim[i]; }
     for (var i=0; i<IssuerLevels; i++) { vci.claimIssuanceMtp[i] <== claimMtp[i]; }
@@ -150,7 +158,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     vci.claimIssuanceIdenState <== claimIdenState;
     vci.enabledNonRevCheck <== 1;
 
-    // (2) And non revocation status
+    // And non revocation status
     for (var i=0; i<IssuerLevels; i++) { vci.claimNonRevMtp[i] <== claimNonRevMtp[i]; }
     vci.claimNonRevMtpNoAux <== claimNonRevMtpNoAux;
     vci.claimNonRevMtpAuxHi <== claimNonRevMtpAuxHi;
@@ -160,18 +168,23 @@ template VerifyAndHashUniClaim(IssuerLevels){
     vci.claimNonRevIssuerRootsTreeRoot <== claimNonRevRootsRoot;
     vci.claimNonRevIssuerState <== claimNonRevState;
 
-    // (3) Verify claim schema
+    // Verify issuerClaim expiration time
+    component claimExpirationCheck = verifyExpirationTime();
+    for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== claim[i]; }
+    claimExpirationCheck.timestamp <== currentTimestamp;
+
+    // Verify claim schema
     component claimSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== claim[i]; }
     claimSchemaCheck.schema <== claimSchema;
 
-    // (4) Check claim is issued to provided identity
+    // Check claim is issued to provided identity
     component claimIdCheck = verifyCredentialSubjectProfile();
     for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== claim[i]; }
     claimIdCheck.id <== userGenesisID;
     claimIdCheck.nonce <== claimSubjectProfileNonce;
 
-    // (5) Get claim hash
+    // Get claim hash
     component hasher = getClaimHash();
     for (var i=0; i<8; i++) { hasher.claim[i] <== claim[i]; }
     claimHash <== hasher.hash;

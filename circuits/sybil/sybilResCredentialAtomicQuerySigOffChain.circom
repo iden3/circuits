@@ -59,6 +59,10 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     signal input profileNonce;
     signal input claimSubjectProfileNonce;
 
+    signal input requestID;
+    signal input issuerID;
+    signal input currentTimestamp;
+
     // inter signals
     signal uniClaimHash;
     signal secretClaimHash;
@@ -98,6 +102,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     verifyUniClaim.userGenesisID <== userGenesisID;
     verifyUniClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
 
+    verifyUniClaim.currentTimestamp  <== currentTimestamp;
   
     verifyUniClaim.claimHash ==> uniClaimHash;
 
@@ -119,13 +124,13 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
 
     verifyStateSecret.secretClaimHash ==> secretClaimHash;
     
-    // 3. Compute profile.
+    // Compute profile.
     component selectProfile = SelectProfile();
     selectProfile.in <== userGenesisID;
     selectProfile.nonce <== profileNonce;
     userID <== selectProfile.out;
 
-    // 4. Compute sybil
+    // Compute sybil
     component computeSybilID = ComputeSybilID();
     computeSybilID.crs <== crs;
     computeSybilID.stateSecret <== secretClaimHash;
@@ -165,19 +170,21 @@ template VerifyAndHashUniClaim(IssuerLevels){
 
     signal input issuerClaimSchema;
 
+    signal input currentTimestamp;
+
     signal input userGenesisID;
     signal input profileNonce;
     signal input claimSubjectProfileNonce;
 
     signal output claimHash;
 
-    //  A. Verify issued and not revoked
+    //  Verify issued and not revoked
     var AUTH_SCHEMA_HASH  = 80551937543569765027552589160822318028;
     component issuerSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
     issuerSchemaCheck.schema <== AUTH_SCHEMA_HASH;
 
-    // issuerAuthClaim proof of existence (isProofExist)
+    // IssuerAuthClaim proof of existence (isProofExist)
     component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);
     for (var i=0; i<8; i++) { smtIssuerAuthClaimExists.claim[i] <== issuerAuthClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.claimMTP[i] <== issuerAuthClaimMtp[i]; }
@@ -195,7 +202,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     component issuerAuthPubKey = getPubKeyFromClaim();
     for (var i=0; i<8; i++){ issuerAuthPubKey.claim[i] <== issuerAuthClaim[i]; }
 
-    // issuerClaim  check signature
+    // IssuerClaim  check signature
     component verifyClaimSig = verifyClaimSignature();
     for (var i=0; i<8; i++) { verifyClaimSig.claim[i] <== issuerClaim[i]; }
     verifyClaimSig.sigR8x <== issuerClaimSignatureR8x;
@@ -204,7 +211,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     verifyClaimSig.pubKeyX <== issuerAuthPubKey.Ax;
     verifyClaimSig.pubKeyY <== issuerAuthPubKey.Ay;
 
-    // check issuer-claim is not revoked (uniqueness claim is not revoled)
+    // Check issuer-claim is not revoked (uniqueness claim is not revoled)
     component verifyClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
     for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== issuerClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) {verifyClaimNotRevoked.claimNonRevMTP[i] <== issuerClaimNonRevMtp[i];}
@@ -214,25 +221,30 @@ template VerifyAndHashUniClaim(IssuerLevels){
     verifyClaimNotRevoked.treeRoot <== issuerClaimNonRevRevRoot;
     verifyClaimNotRevoked.enabled <== 1;
 
-    // verify issuer state includes issuerClaim
+    // Verify issuer state includes issuerClaim
     component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();
     verifyClaimIssuanceIdenState.claimsTreeRoot <== issuerClaimNonRevClaimsRoot;
     verifyClaimIssuanceIdenState.revTreeRoot <== issuerClaimNonRevRevRoot;
     verifyClaimIssuanceIdenState.rootsTreeRoot <== issuerClaimNonRevRootsRoot;
     verifyClaimIssuanceIdenState.expectedState <== issuerClaimNonRevState;
 
-    //      B. Verify claim schema
+    // Verify claim schema
     component claimSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
     claimSchemaCheck.schema <== issuerClaimSchema;
 
-    //      C. Verify Issued to provided identity
+    // Verify issuerClaim expiration time
+    component claimExpirationCheck = verifyExpirationTime();
+    for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
+    claimExpirationCheck.timestamp <== currentTimestamp;
+
+    // Verify Issued to provided identity
     component claimIdCheck = verifyCredentialSubjectProfile();
     for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
     claimIdCheck.id <== userGenesisID;
     claimIdCheck.nonce <== claimSubjectProfileNonce;
 
-    //      D. Return hash of claim
+    // Return hash of claim
     component hasher = getClaimHash();
     for (var i=0; i<8; i++) { hasher.claim[i] <== issuerClaim[i]; }
     claimHash <== hasher.hash;

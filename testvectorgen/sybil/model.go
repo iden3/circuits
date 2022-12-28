@@ -8,6 +8,8 @@ import (
 const (
 	mtpUserPK   = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
 	mtpIssuerPK = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
+
+	timestamp = "1642074362"
 )
 
 type InputsMTP struct {
@@ -50,6 +52,10 @@ type InputsMTP struct {
 	UserGenesisID            string `json:"userGenesisID"`
 	ProfileNonce             string `json:"profileNonce"`
 	ClaimSubjectProfileNonce string `json:"claimSubjectProfileNonce"`
+
+	RequestID string `json:"requestID"`
+	IssuerID  string `json:"issuerID"`
+	Timestamp string `json:"currentTimestamp"`
 }
 
 type InputsSig struct {
@@ -101,6 +107,10 @@ type InputsSig struct {
 	UserGenesisID            string `json:"userGenesisID"`
 	ProfileNonce             string `json:"profileNonce"`
 	ClaimSubjectProfileNonce string `json:"claimSubjectProfileNonce"`
+
+	RequestID string `json:"requestID"`
+	IssuerID  string `json:"issuerID"`
+	Timestamp string `json:"currentTimestamp"`
 }
 
 type Outputs struct {
