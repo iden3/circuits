@@ -55,7 +55,7 @@ type InputsMTP struct {
 
 	RequestID string `json:"requestID"`
 	IssuerID  string `json:"issuerID"`
-	Timestamp string `json:"currentTimestamp"`
+	Timestamp string `json:"timestamp"`
 }
 
 type InputsSig struct {
@@ -110,7 +110,7 @@ type InputsSig struct {
 
 	RequestID string `json:"requestID"`
 	IssuerID  string `json:"issuerID"`
-	Timestamp string `json:"currentTimestamp"`
+	Timestamp string `json:"timestamp"`
 }
 
 type Outputs struct {

@@ -62,7 +62,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
 
     signal input requestID;
     signal input issuerID;
-    signal input currentTimestamp;
+    signal input timestamp;
 
     // inter signals
     signal issuerClaimHash;
@@ -105,7 +105,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     verifyUniClaim.userGenesisID <== userGenesisID;
     verifyUniClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
 
-    verifyUniClaim.currentTimestamp  <== currentTimestamp;
+    verifyUniClaim.timestamp  <== timestamp;
   
     verifyUniClaim.claimHash ==> issuerClaimHash;
     verifyUniClaim.issuerAuthState ==> issuerAuthState;
@@ -177,7 +177,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
 
     signal input issuerClaimSchema;
 
-    signal input currentTimestamp;
+    signal input timestamp;
 
     signal input userGenesisID;
     signal input profileNonce;
@@ -253,7 +253,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     // Verify issuerClaim expiration time
     component claimExpirationCheck = verifyExpirationTime();
     for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
-    claimExpirationCheck.timestamp <== currentTimestamp;
+    claimExpirationCheck.timestamp <== timestamp;
 
     // Verify Issued to provided identity
     component claimIdCheck = verifyCredentialSubjectProfile();

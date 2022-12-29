@@ -51,7 +51,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
 
     signal input requestID;
     signal input issuerID;
-    signal input currentTimestamp;
+    signal input timestamp;
 
     // inter-signal
     signal issuerClaimHash;
@@ -84,7 +84,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     verifyUniClaim.userGenesisID  <== userGenesisID;
     verifyUniClaim.profileNonce <== profileNonce;
     verifyUniClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
-    verifyUniClaim.currentTimestamp <== currentTimestamp;
+    verifyUniClaim.timestamp <== timestamp;
 
     verifyUniClaim.claimHash  ==> issuerClaimHash;
 
@@ -140,7 +140,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
 
     signal input claimSchema;
 
-    signal input currentTimestamp;
+    signal input timestamp;
 
     signal input userGenesisID;
     signal input profileNonce;
@@ -171,7 +171,7 @@ template VerifyAndHashUniClaim(IssuerLevels){
     // Verify issuerClaim expiration time
     component claimExpirationCheck = verifyExpirationTime();
     for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== claim[i]; }
-    claimExpirationCheck.timestamp <== currentTimestamp;
+    claimExpirationCheck.timestamp <== timestamp;
 
     // Verify claim schema
     component claimSchemaCheck = verifyCredentialSchema();
