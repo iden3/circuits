@@ -26,7 +26,7 @@ describe("Test On Chain credentialAtomicQueryOnchainMTPV2.circom", function () {
     after(async () => {
         circuit.release()
     })
-    const basePath = '../../../testvectorgen/onchain/mtpv2/testdata'
+    const basePath = '../../../testvectorgen/credentials/onchain/mtpv2/testdata'
     const tests = [
 
         require(`${basePath}/claimIssuedOnProfileID.json`),

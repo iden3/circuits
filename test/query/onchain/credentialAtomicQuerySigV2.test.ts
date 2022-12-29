@@ -24,7 +24,7 @@ describe("On Chain: Test credentialAtomicQuerySigV2.circom", function () {
         circuit.release()
     })
 
-    const basePath = '../../../testvectorgen/onchain/sigv2/testdata'
+    const basePath = '../../../testvectorgen/credentials/onchain/sigv2/testdata'
     const tests = [
 
         require(`${basePath}/jsonld_non_inclusion.json`),
