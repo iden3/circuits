@@ -5,18 +5,11 @@ template GetStateSecretPosition() {
     out <== 1974680877085411137074044236594333239180760340473446672920498187419060160560;
 }
 
-// A template to retrieve the hash of the uniqueness schema
-template GetUniquenessSchemaHash(){
-    signal output schemaHash;
-    schemaHash <== 180410020913331409885634153623124536270;
-}
-
 // A template to retrieve the hash of the state secret schema
 template GetStateSecretSchemaHash(){
     signal output schemaHash;
     schemaHash <== 262057681346829900854325169563380898778;
 }
-
 
 template VerifyAndExtractValStateSecret(HolderLevel, GistLevels){
     signal input claim[8];
@@ -36,7 +29,7 @@ template VerifyAndExtractValStateSecret(HolderLevel, GistLevels){
 
     signal output claimValueHash;
 
-    // (1) Verify claim is included in claims tree root
+    // Verify claim is included in claims tree root
     component claimIssuanceCheck = checkClaimExists(HolderLevel);
     for (var i=0; i<8; i++) { claimIssuanceCheck.claim[i] <== claim[i]; }
     for (var i=0; i<HolderLevel; i++) { claimIssuanceCheck.claimMTP[i] <== claimIssuanceMtp[i]; }

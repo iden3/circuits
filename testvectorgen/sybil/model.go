@@ -32,6 +32,8 @@ type InputsMTP struct {
 	IssuerClaimNonRevRootsRoot  *merkletree.Hash `json:"issuerClaimNonRevRootsRoot"`
 	IssuerClaimNonRevState      string           `json:"issuerClaimNonRevState"`
 
+	IssuerClaimSchema string `json:"issuerClaimSchema"`
+
 	// claim of state-secret (Holder's claim)
 	HolderClaim           *core.Claim      `json:"holderClaim"`
 	HolderClaimMtp        []string         `json:"holderClaimMtp"`
@@ -86,6 +88,8 @@ type InputsSig struct {
 	IssuerClaimSignatureR8X string `json:"issuerClaimSignatureR8x"`
 	IssuerClaimSignatureR8Y string `json:"issuerClaimSignatureR8y"`
 	IssuerClaimSignatureS   string `json:"issuerClaimSignatureS"`
+
+	IssuerClaimSchema string `json:"issuerClaimSchema"`
 
 	// claim of state-secret (Holder's claim)
 	HolderClaim           *core.Claim      `json:"holderClaim"`

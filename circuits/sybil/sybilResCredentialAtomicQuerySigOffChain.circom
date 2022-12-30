@@ -38,6 +38,8 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
 
+    signal input issuerClaimSchema;
+
   // claim of state secret stateSecret
     signal input holderClaim[8];
     signal input holderClaimMtp[HolderLevel];
@@ -99,8 +101,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     verifyUniClaim.issuerClaimSignatureR8y <== issuerClaimSignatureR8y;
     verifyUniClaim.issuerClaimSignatureS <== issuerClaimSignatureS;
 
-    component uniClaimSchemaHash = GetUniquenessSchemaHash();
-    verifyUniClaim.issuerClaimSchema <== uniClaimSchemaHash.schemaHash;
+    verifyUniClaim.issuerClaimSchema <== issuerClaimSchema;
     verifyUniClaim.profileNonce <== profileNonce;
     verifyUniClaim.userGenesisID <== userGenesisID;
     verifyUniClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;

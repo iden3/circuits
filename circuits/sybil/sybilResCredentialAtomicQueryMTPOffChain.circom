@@ -27,6 +27,8 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     signal input issuerClaimNonRevRootsRoot;
     signal input issuerClaimNonRevState;
 
+    signal input issuerClaimSchema;
+
     // claim of state secret stateSecret
     signal input holderClaim[8];
     signal input holderClaimMtp[HolderLevel];
@@ -78,8 +80,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     verifyUniClaim.claimNonRevRootsRoot  <== issuerClaimNonRevRootsRoot;
     verifyUniClaim.claimNonRevState  <== issuerClaimNonRevState;
 
-    component uniClaimSchemaHash = GetUniquenessSchemaHash();
-    verifyUniClaim.claimSchema  <== uniClaimSchemaHash.schemaHash;
+    verifyUniClaim.claimSchema  <== issuerClaimSchema;
 
     verifyUniClaim.userGenesisID  <== userGenesisID;
     verifyUniClaim.profileNonce <== profileNonce;

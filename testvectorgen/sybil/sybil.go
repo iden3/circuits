@@ -99,6 +99,8 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 		IssuerClaimNonRevRootsRoot:  issuer.Rot.Root(),
 		IssuerClaimNonRevState:      issuer.State(t).String(),
 
+		IssuerClaimSchema: "180410020913331409885634153623124536270",
+
 		HolderClaim:           ssClaim,
 		HolderClaimMtp:        userClaimMtp,
 		HolderClaimClaimsRoot: user.Clt.Root(),
@@ -228,6 +230,8 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 		IssuerAuthClaimsRoot:          issuer.Clt.Root().BigInt().String(),
 		IssuerAuthRevRoot:             issuer.Ret.Root().BigInt().String(),
 		IssuerAuthRootsRoot:           issuer.Rot.Root().BigInt().String(),
+
+		IssuerClaimSchema: "180410020913331409885634153623124536270",
 
 		HolderClaim:           ssClaim,
 		HolderClaimMtp:        userClaimMtp,
