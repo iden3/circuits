@@ -125,7 +125,7 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 		Timestamp: timestamp,
 	}
 
-	out := Outputs{
+	out := OutputsMTP{
 		UserID:  userProfileID.BigInt().String(),
 		SybilID: expectedSybilID,
 	}
@@ -154,6 +154,8 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 	}
 
 	expectedSybilID := "21411712858152195557182873996645875700319223809429848212725198416822632213180"
+	expectedIssuerAuthState := "2943483356559152311923412925436024635269538717812859789851139200242297094"
+
 	subjectID := user.ID
 	nonceSubject := big.NewInt(0)
 	if isSubjectIDProfile {
@@ -258,9 +260,11 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 		Timestamp: timestamp,
 	}
 
-	out := Outputs{
+
+	out := OutputsSig{
 		UserID:  userProfileID.BigInt().String(),
 		SybilID: expectedSybilID,
+		IssuerAuthState: expectedIssuerAuthState,
 	}
 
 	jsonTestData, err := json.Marshal(TestDataSig{

@@ -1,7 +1,7 @@
 package sybil
 
 import (
-	"github.com/iden3/go-iden3-core"
+	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-merkletree-sql/v2"
 )
 
@@ -117,19 +117,25 @@ type InputsSig struct {
 	Timestamp string `json:"timestamp"`
 }
 
-type Outputs struct {
+type OutputsMTP struct {
 	UserID  string `json:"userID"`
 	SybilID string `json:"sybilID"`
 }
 
+type OutputsSig struct {
+	UserID          string `json:"userID"`
+	SybilID         string `json:"sybilID"`
+	IssuerAuthState string `json:"issuerAuthState"`
+}
+
 type TestDataMTP struct {
-	Desc string    `json:"desc"`
-	In   InputsMTP `json:"inputs"`
-	Out  Outputs   `json:"expOut"`
+	Desc string     `json:"desc"`
+	In   InputsMTP  `json:"inputs"`
+	Out  OutputsMTP `json:"expOut"`
 }
 
 type TestDataSig struct {
-	Desc string    `json:"desc"`
-	In   InputsSig `json:"inputs"`
-	Out  Outputs   `json:"expOut"`
+	Desc string     `json:"desc"`
+	In   InputsSig  `json:"inputs"`
+	Out  OutputsSig `json:"expOut"`
 }
