@@ -247,6 +247,8 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 		UserGenesisID: user.ID.BigInt().String(),
 		ProfileNonce:  nonce.String(),
 
+		ClaimSubjectProfileNonce: nonceSubject.String(),
+
 		IssuerID:  "123",
 		RequestID: "321",
 		Timestamp: timestamp,
