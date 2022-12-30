@@ -24,12 +24,40 @@ const (
 func Test_Generate_Test_Cases(t *testing.T) {
 
 	id, state := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis state", "issuer_genesis_state")
-	generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer next transition state", "issuer_next_state_transition")
-	generateMTPData(t, "MTP: Issuer genesis", id, state, false, "valid_mtp_user_genesis", false)
-
 	nextId, nextState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition")
-	generateMTPData(t, "MTP: User genesis", nextId, nextState, true, "valid_mtp_user_non_genesis", false)
-	generateMTPData(t, "MTP: User sign with address challenge genesis", nextId, nextState, true, "valid_mtp_user_non_genesis_challenge_address", true)
+
+	generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer next transition state", "issuer_next_state_transition")
+
+	generateMTPData(t, "MTP: Issuer genesis", []*gistData{
+		{id, state},
+	}, false, "valid_mtp_user_genesis", false)
+	// snap, _ := mtpTree.()(context.Background(), mtpTree.Root())
+	generateMTPData(t, "MTP: User genesis", []*gistData{
+		{id, state},
+		{nextId, nextState},
+	}, true, "valid_mtp_user_non_genesis", false)
+	generateMTPData(t, "MTP: User sign with address challenge genesis", []*gistData{
+		{id, state},
+		{nextId, nextState},
+	}, true, "valid_mtp_user_non_genesis_challenge_address", true)
+
+	generateSigData(t, "Sig: Issuer genesis", []*gistData{
+		{id, state},
+	}, false, "valid_sig_user_genesis", false)
+	generateSigData(t, "Sig: User genesis", []*gistData{
+		{id, state},
+		{nextId, nextState},
+	}, true, "valid_sig_user_non_genesis", false)
+	generateSigData(t, "Sig: User sign with address challenge genesis", []*gistData{
+		{id, state},
+		{nextId, nextState},
+	}, true, "valid_sig_user_non_genesis_challenge_address", true)
+
+}
+
+type gistData struct {
+	id    *big.Int
+	state *big.Int
 }
 
 func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, secondaryPK, desc, fileName string) (*big.Int, *big.Int) {
@@ -103,9 +131,9 @@ func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, second
 	}
 
 	json, err := json2.Marshal(utils.TestDataStateTransition{
-		desc,
-		inputs,
-		out,
+		Desc: desc,
+		In:   inputs,
+		Out:  out,
 	})
 	require.NoError(t, err)
 
@@ -114,7 +142,7 @@ func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, second
 	return primaryEntity.ID.BigInt(), primaryEntity.State(t)
 }
 
-func generateMTPData(t *testing.T, desc string, id, newState *big.Int, nextState bool, fileName string, isAddressChallenge bool) {
+func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState bool, fileName string, isAddressChallenge bool) {
 	var err error
 
 	user := utils.NewIdentity(t, UserPK)
@@ -147,10 +175,13 @@ func generateMTPData(t *testing.T, desc string, id, newState *big.Int, nextState
 
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
 	require.Nil(t, err)
-	idPoseidonHash, _ := poseidon.Hash([]*big.Int{id})
 
-	err = gisTree.Add(context.Background(), idPoseidonHash, newState)
-	require.NoError(t, err)
+	for _, data := range gistData {
+		idPoseidonHash, _ := poseidon.Hash([]*big.Int{data.id})
+		err = gisTree.Add(context.Background(), idPoseidonHash, data.state)
+		require.Nil(t, err)
+	}
+
 	// user
 	authMTProof := user.AuthMTPStrign(t)
 
@@ -235,7 +266,160 @@ func generateMTPData(t *testing.T, desc string, id, newState *big.Int, nextState
 		GistRoot:               gistRoot.BigInt().String(), // 0 for inclusion, 1 for non-inclusion
 	}
 
-	json, err := json2.Marshal(utils.TestDataStateTransition{
+	json, err := json2.Marshal(utils.TestDataOnChainMTPV2{
+		Desc: desc,
+		In:   inputs,
+		Out:  out,
+	})
+	require.NoError(t, err)
+
+	utils.SaveTestVector(t, fileName, string(json))
+}
+
+func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState bool, fileName string, isAddressChallenge bool) {
+	var err error
+
+	user := utils.NewIdentity(t, UserPK)
+
+	issuer := utils.NewIdentity(t, IssuerPK)
+
+	userProfileID := user.ID
+	nonce := big.NewInt(0)
+
+	subjectID := user.ID
+	nonceSubject := big.NewInt(0)
+
+	claim := utils.DefaultUserClaim(t, subjectID)
+
+	// Sig claim
+	claimSig := issuer.SignClaim(t, claim)
+
+	issuerClaimNonRevState := issuer.State(t)
+
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
+
+	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
+
+	emptyPathMtp := utils.PrepareSiblingsStr([]*merkletree.Hash{&merkletree.HashZero}, 32)
+
+	challenge := big.NewInt(12345)
+	if isAddressChallenge {
+		addr := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+		challenge = new(big.Int).SetBytes(merkletree.SwapEndianness(addr.Bytes()))
+	}
+
+	if nextState {
+		claim1 := utils.DefaultUserClaim(t, issuer.ID)
+		user.AddClaim(t, claim1)
+	}
+
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	require.Nil(t, err)
+
+	for _, data := range gistData {
+		idPoseidonHash, _ := poseidon.Hash([]*big.Int{data.id})
+		err = gisTree.Add(context.Background(), idPoseidonHash, data.state)
+		require.Nil(t, err)
+	}
+	// user
+	authMTProof := user.AuthMTPStrign(t)
+
+	authNonRevMTProof, nodeAuxNonRev := user.ClaimRevMTP(t, user.AuthClaim)
+
+	sig := user.Sign(challenge)
+
+	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
+	require.NoError(t, err)
+
+	gistRoot := gisTree.Root()
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+
+	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+		UserGenesisID:                   user.ID.BigInt().String(),
+		ProfileNonce:                    nonce.String(),
+		UserAuthClaim:                   user.AuthClaim,
+		UserAuthClaimMtp:                authMTProof,
+		UserAuthClaimNonRevMtp:          authNonRevMTProof,
+		UserAuthClaimNonRevMtpAuxHi:     nodeAuxNonRev.Key,
+		UserAuthClaimNonRevMtpAuxHv:     nodeAuxNonRev.Value,
+		UserAuthClaimNonRevMtpNoAux:     nodeAuxNonRev.NoAux,
+		Challenge:                       challenge.String(),
+		ChallengeSignatureR8X:           sig.R8.X.String(),
+		ChallengeSignatureR8Y:           sig.R8.Y.String(),
+		ChallengeSignatureS:             sig.S.String(),
+		UserClaimsTreeRoot:              user.Clt.Root().BigInt().String(),
+		UserRevTreeRoot:                 user.Ret.Root().BigInt().String(),
+		UserRootsTreeRoot:               user.Rot.Root().BigInt().String(),
+		UserState:                       user.State(t).String(),
+		GistRoot:                        gistRoot.BigInt().String(),
+		GistMtp:                         gistProof,
+		GistMtpAuxHi:                    gistNodAux.Key,
+		GistMtpAuxHv:                    gistNodAux.Value,
+		GistMtpNoAux:                    gistNodAux.NoAux,
+		ClaimSubjectProfileNonce:        nonceSubject.String(),
+		IssuerID:                        issuer.ID.BigInt().String(),
+		IssuerClaim:                     claim,
+		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root().BigInt().String(),
+		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root().BigInt().String(),
+		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root().BigInt().String(),
+		IssuerClaimNonRevState:          issuerClaimNonRevState.String(),
+		IssuerClaimNonRevMtp:            issuerClaimNonRevMtp,
+		IssuerClaimNonRevMtpAuxHi:       issuerClaimNonRevAux.Key,
+		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
+		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
+		IssuerClaimSignatureR8X:         claimSig.R8.X.String(),
+		IssuerClaimSignatureR8Y:         claimSig.R8.Y.String(),
+		IssuerClaimSignatureS:           claimSig.S.String(),
+		IssuerAuthClaim:                 issuer.AuthClaim,
+		IssuerAuthClaimMtp:              issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtp:        issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtpAuxHi:   issuerAuthClaimNodeAux.Key,
+		IssuerAuthClaimNonRevMtpAuxHv:   issuerAuthClaimNodeAux.Value,
+		IssuerAuthClaimNonRevMtpNoAux:   issuerAuthClaimNodeAux.NoAux,
+		IssuerAuthClaimsTreeRoot:        issuer.Clt.Root().BigInt().String(),
+		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
+		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
+		ClaimSchema:                     "180410020913331409885634153623124536270",
+
+		ClaimPathNotExists: "0", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:       emptyPathMtp,
+		ClaimPathMtpNoAux:  "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi:  "0", // 0 for inclusion proof
+		ClaimPathMtpAuxHv:  "0", // 0 for inclusion proof
+		ClaimPathKey:       "0", // hash of path in merklized json-ld document
+		ClaimPathValue:     "0", // value in this path in merklized json-ld document
+		// value in this path in merklized json-ld document
+
+		Operator:            utils.EQ,
+		SlotIndex:           2,
+		Timestamp:           timestamp,
+		IsRevocationChecked: 1,
+		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
+			"0", "0",
+			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+	}
+
+	issuerAuthState := issuer.State(t)
+
+	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	require.NoError(t, err)
+	out := utils.CredentialAtomicSigOnChainV2Outputs{
+		UserID:                 userProfileID.BigInt().String(),
+		IssuerID:               issuer.ID.BigInt().String(),
+		IssuerAuthState:        issuerAuthState.String(),
+		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
+		ClaimSchema:            "180410020913331409885634153623124536270",
+		SlotIndex:              "2",
+		Operator:               utils.EQ,
+		Timestamp:              timestamp,
+		Merklized:              "0",
+		ClaimPathNotExists:     "0",
+		ValueHash:              valuesHash.String(),
+		Challenge:              challenge.String(),
+		GistRoot:               gistRoot.BigInt().String(),
+	}
+
+	json, err := json2.Marshal(utils.TestDataSigV2{
 		Desc: desc,
 		In:   inputs,
 		Out:  out,
