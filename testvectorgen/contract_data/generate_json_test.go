@@ -19,6 +19,7 @@ const (
 	UserPK    = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
 	IssuerPK  = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
 	timestamp = "1642074362"
+	requestID = "32"
 )
 
 func Test_Generate_Test_Cases(t *testing.T) {
@@ -196,6 +197,7 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
 	inputs := utils.CredentialAtomicMTPOnChainV2Inputs{
+		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,
@@ -335,6 +337,7 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
 	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,

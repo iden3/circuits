@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "credentialAtomicQuerySigOnChain.circom";
+include "./onchain/credentialAtomicQuerySigOnChain.circom";
 
 /*
  public signals:
@@ -8,7 +8,9 @@ include "credentialAtomicQuerySigOnChain.circom";
  merklized - `1` if claim is merklized
  issuerAuthState
 */
-component main{public [issuerID,
+component main{public [
+                       requestID,
+                       issuerID,
                        issuerClaimNonRevState,
                        claimSchema,
                        slotIndex,

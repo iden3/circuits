@@ -19,6 +19,7 @@ const (
 	userPK    = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
 	issuerPK  = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
 	timestamp = "1642074362"
+	requestID = "41"
 )
 
 func Test_UserID_Subject(t *testing.T) {
@@ -107,6 +108,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
 	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,
@@ -242,6 +244,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
 	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,
@@ -417,6 +420,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
 	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,
@@ -567,6 +571,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
 	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,
@@ -729,6 +734,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
 	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,

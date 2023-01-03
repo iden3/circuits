@@ -47,6 +47,10 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     // hash of the value array
     signal output valueHash;
 
+    // we have no constraints for "requestID" in this circuit, it is used as a unique identifier for the request
+    // and verifier can use it to identify the request, and verify the proof of specific request in case of multiple query requests
+    signal input requestID;
+
     /* userID ownership signals */
     signal input userGenesisID;
     signal input profileNonce; /* random number */

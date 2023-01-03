@@ -32,6 +32,8 @@ type StateTransitionOutputs struct {
 }
 
 type CredentialAtomicMTPOnChainV2Inputs struct {
+	RequestID string `json:"requestID"`
+
 	// begin  user data
 	UserGenesisID               string      `json:"userGenesisID"`            //
 	ProfileNonce                string      `json:"profileNonce"`             //
@@ -119,13 +121,14 @@ type TestDataStateTransition struct {
 }
 
 type TestDataOnChainMTPV2 struct {
-	Desc string                               `json:"desc"`
+	Desc string                              `json:"desc"`
 	In   CredentialAtomicMTPOnChainV2Inputs  `json:"inputs"`
 	Out  CredentialAtomicMTPOnChainV2Outputs `json:"expOut"`
 }
 
-
 type CredentialAtomicSigOnChainV2Inputs struct {
+	RequestID string `json:"requestID"`
+
 	// user data
 	UserGenesisID            string `json:"userGenesisID"`
 	ProfileNonce             string `json:"profileNonce"`

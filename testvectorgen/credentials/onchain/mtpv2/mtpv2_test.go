@@ -19,6 +19,7 @@ const (
 	userPK    = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
 	issuerPK  = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
 	timestamp = "1642074362"
+	requestID = "32"
 )
 
 func Test_ClaimIssuedOnUserID(t *testing.T) {
@@ -91,6 +92,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 	inputs := utils.CredentialAtomicMTPOnChainV2Inputs{
+		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,
@@ -165,8 +167,8 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 
 	json, err := json2.Marshal(utils.TestDataOnChainMTPV2{
 		Desc: desc,
-		In: inputs,
-		Out: out,
+		In:   inputs,
+		Out:  out,
 	})
 	require.NoError(t, err)
 
@@ -214,6 +216,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
 	inputs := utils.CredentialAtomicMTPOnChainV2Inputs{
+		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,
@@ -287,8 +290,8 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 
 	json, err := json2.Marshal(utils.TestDataOnChainMTPV2{
 		Desc: desc,
-		In: inputs,
-		Out: out,
+		In:   inputs,
+		Out:  out,
 	})
 	require.NoError(t, err)
 
@@ -359,6 +362,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
 	inputs := utils.CredentialAtomicMTPOnChainV2Inputs{
+		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,
@@ -432,8 +436,8 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 	json, err := json2.Marshal(utils.TestDataOnChainMTPV2{
 		Desc: desc,
-		In: inputs,
-		Out: out,
+		In:   inputs,
+		Out:  out,
 	})
 	require.NoError(t, err)
 
@@ -491,6 +495,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
 	inputs := utils.CredentialAtomicMTPOnChainV2Inputs{
+		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,
@@ -563,8 +568,8 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 
 	json, err := json2.Marshal(utils.TestDataOnChainMTPV2{
 		Desc: desc,
-		In: inputs,
-		Out: out,
+		In:   inputs,
+		Out:  out,
 	})
 	require.NoError(t, err)
 
