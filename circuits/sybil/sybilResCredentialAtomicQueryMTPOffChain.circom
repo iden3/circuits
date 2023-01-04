@@ -151,13 +151,13 @@ template VerifyAndHashUniClaim(IssuerLevels){
 
     // Verify claim issued
     component vci = verifyClaimIssuanceNonRev(IssuerLevels);
+    vci.enabledNonRevCheck <== 1;
     for (var i=0; i<8; i++) { vci.claim[i] <== claim[i]; }
     for (var i=0; i<IssuerLevels; i++) { vci.claimIssuanceMtp[i] <== claimMtp[i]; }
     vci.claimIssuanceClaimsTreeRoot <== claimClaimsRoot;
     vci.claimIssuanceRevTreeRoot <== claimRevRoot;
     vci.claimIssuanceRootsTreeRoot <== claimRootsRoot;
     vci.claimIssuanceIdenState <== claimIdenState;
-    vci.enabledNonRevCheck <== 1;
 
     // And non revocation status
     for (var i=0; i<IssuerLevels; i++) { vci.claimNonRevMtp[i] <== claimNonRevMtp[i]; }

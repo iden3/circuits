@@ -49,13 +49,23 @@ template VerifyAndExtractValStateSecret(HolderLevel, GistLevels){
     for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== claim[i]; }
     claimSchemaCheck.schema <== stateSecretSchemaHash.schemaHash;
 
+    component cutId = cutId();
+    cutId.in <== genesisID;
+
+    component cutState = cutState();
+    cutState.in <== claimIssuanceIdenState;
+
+    component isStateGenesis = IsEqual();
+    isStateGenesis.in[0] <== cutId.out;
+    isStateGenesis.in[1] <== cutState.out;
+
     // Verify issuer state is in GIST 
     component genesisIDhash = Poseidon(1);
     genesisIDhash.inputs[0] <== genesisID;
 
     component gistCheck = SMTVerifier(GistLevels);
     gistCheck.enabled <== 1;
-    gistCheck.fnc <== 0; // non-inclusion in case if genesis state, otherwise inclusion
+    gistCheck.fnc <== isStateGenesis.out; // non-inclusion in case if genesis state, otherwise inclusion
     gistCheck.root <== gistRoot;
     for (var i=0; i<GistLevels; i++) { gistCheck.siblings[i] <== gistMtp[i]; }
     gistCheck.oldKey <== gistMtpAuxHi;
