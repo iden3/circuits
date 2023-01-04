@@ -22,7 +22,7 @@ Examples:
 
 ```bash
 ./compile-circuit.sh circuits/auth.circom build/powersOfTau28_hez_final_16.ptau
-./compile-circuit.sh circuits/stateTransition.circom build/powersOfTau28_hez_final_15.ptau
+./compile-circuit.sh circuits/stateTransition.circom build/powersOfTau28_hez_final_16.ptau
 ```
 
 ## Work with `s3_util.js` script

@@ -5,10 +5,11 @@ import (
 	"math/big"
 	"testing"
 
+	"test/utils"
+
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/stretchr/testify/require"
-	"test/utils"
 )
 
 const (
@@ -34,6 +35,10 @@ type StateTransitionInputs struct {
 	SignatureR8Y            string      `json:"signatureR8y"`
 	SignatureS              string      `json:"signatureS"`
 	UserID                  string      `json:"userID"`
+	NewAuthClaimMtp         []string    `json:"newAuthClaimMtp"`
+	NewClaimsTreeRoot       string      `json:"newClaimsTreeRoot"`
+	NewRevTreeRoot          string      `json:"newRevTreeRoot"`
+	NewRootsTreeRoot        string      `json:"newRootsTreeRoot"`
 }
 
 type StateTransitionOutputs struct {
@@ -103,6 +108,11 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 		user.AddClaim(t, claim1)
 	}
 
+	newAuthMTProof := user.AuthMTPStrign(t)
+	newCltRoot := user.Clt.Root().BigInt().String()
+	newRevRoot := user.Ret.Root().BigInt().String()
+	newRotRoot := user.Rot.Root().BigInt().String()
+
 	hashOldAndNewStates, err := poseidon.Hash(
 		[]*big.Int{oldState, user.State(t)})
 	require.NoError(t, err)
@@ -127,6 +137,10 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 		SignatureR8Y:            sig.R8.Y.String(),
 		SignatureS:              sig.S.String(),
 		UserID:                  user.ID.BigInt().String(),
+		NewAuthClaimMtp:         newAuthMTProof,
+		NewClaimsTreeRoot:       newCltRoot,
+		NewRevTreeRoot:          newRevRoot,
+		NewRootsTreeRoot:        newRotRoot,
 	}
 
 	out := StateTransitionOutputs{
