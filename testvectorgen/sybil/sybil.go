@@ -28,14 +28,14 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 		require.NoError(t, err)
 	}
 
-	expectedSybilID := "21411712858152195557182873996645875700319223809429848212725198416822632213180"
+	expectedSybilID := "8903332384851738260747517773325377528299199208576629685986891704182978270332"
 	subjectID := user.ID
 	nonceSubject := big.NewInt(0)
 	if isSubjectIDProfile {
 		nonceSubject = big.NewInt(999)
 		subjectID, err = core.ProfileID(user.ID, nonceSubject)
 		require.NoError(t, err)
-		expectedSybilID = "1150468086655797487178838002550740766405123759104799896729630553107465758891"
+		expectedSybilID = "15928283987833756851644249157457264609084917385190027282640632960343512336427"
 	}
 
 	// unique claim
@@ -45,9 +45,9 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, uniClaim)
 
 	secret := big.NewInt(10)
-	ssClaim := utils.UserStateSecretClaim(t, secret)
-	user.AddClaim(t, ssClaim)
-	userClaimMtp, _ := user.ClaimMTP(t, ssClaim)
+	scClaim := utils.GenerateNewStateCommitmentClaim(t, secret)
+	user.AddClaim(t, scClaim)
+	userClaimMtp, _ := user.ClaimMTP(t, scClaim)
 
 	// gist
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
@@ -101,12 +101,12 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 
 		IssuerClaimSchema: "180410020913331409885634153623124536270",
 
-		HolderClaim:           ssClaim,
-		HolderClaimMtp:        userClaimMtp,
-		HolderClaimClaimsRoot: user.Clt.Root(),
-		HolderClaimRevRoot:    user.Ret.Root(),
-		HolderClaimRootsRoot:  user.Rot.Root(),
-		HolderClaimIdenState:  user.State(t).String(),
+		StateCommitmentClaim:           scClaim,
+		StateCommitmentClaimMtp:        userClaimMtp,
+		StateCommitmentClaimClaimsRoot: user.Clt.Root(),
+		StateCommitmentClaimRevRoot:    user.Ret.Root(),
+		StateCommitmentClaimRootsRoot:  user.Rot.Root(),
+		StateCommitmentClaimIdenState:  user.State(t).String(),
 
 		GistRoot:     gistRoot,
 		GistMtp:      gistProof,
@@ -153,7 +153,7 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 		require.NoError(t, err)
 	}
 
-	expectedSybilID := "21411712858152195557182873996645875700319223809429848212725198416822632213180"
+	expectedSybilID := "8903332384851738260747517773325377528299199208576629685986891704182978270332"
 	expectedIssuerAuthState := "2943483356559152311923412925436024635269538717812859789851139200242297094"
 
 	subjectID := user.ID
@@ -162,7 +162,7 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 		nonceSubject = big.NewInt(999)
 		subjectID, err = core.ProfileID(user.ID, nonceSubject)
 		require.NoError(t, err)
-		expectedSybilID = "1150468086655797487178838002550740766405123759104799896729630553107465758891"
+		expectedSybilID = "15928283987833756851644249157457264609084917385190027282640632960343512336427"
 	}
 
 	// Sig claim
@@ -174,9 +174,9 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
 	secret := big.NewInt(10)
-	ssClaim := utils.UserStateSecretClaim(t, secret)
-	user.AddClaim(t, ssClaim)
-	userClaimMtp, _ := user.ClaimMTP(t, ssClaim)
+	scClaim := utils.GenerateNewStateCommitmentClaim(t, secret)
+	user.AddClaim(t, scClaim)
+	userClaimMtp, _ := user.ClaimMTP(t, scClaim)
 
 	// gist
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
@@ -235,12 +235,12 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 
 		IssuerClaimSchema: "180410020913331409885634153623124536270",
 
-		HolderClaim:           ssClaim,
-		HolderClaimMtp:        userClaimMtp,
-		HolderClaimClaimsRoot: user.Clt.Root(),
-		HolderClaimRevRoot:    user.Ret.Root(),
-		HolderClaimRootsRoot:  user.Rot.Root(),
-		HolderClaimIdenState:  user.State(t).String(),
+		StateCommitmentClaim:           scClaim,
+		StateCommitmentClaimMtp:        userClaimMtp,
+		StateCommitmentClaimClaimsRoot: user.Clt.Root(),
+		StateCommitmentClaimRevRoot:    user.Ret.Root(),
+		StateCommitmentClaimRootsRoot:  user.Rot.Root(),
+		StateCommitmentClaimIdenState:  user.State(t).String(),
 
 		GistRoot:     gistRoot,
 		GistMtp:      gistProof,
@@ -260,10 +260,9 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 		Timestamp: timestamp,
 	}
 
-
 	out := OutputsSig{
-		UserID:  userProfileID.BigInt().String(),
-		SybilID: expectedSybilID,
+		UserID:          userProfileID.BigInt().String(),
+		SybilID:         expectedSybilID,
 		IssuerAuthState: expectedIssuerAuthState,
 	}
 
