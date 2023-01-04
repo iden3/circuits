@@ -89,23 +89,23 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
 
     verifyUniClaim.claimHash  ==> issuerClaimHash;
 
-    component verifyStateSecret = VerifyAndExtractValStateSecret(HolderLevel, GistLevels);
-    for (var i=0; i<8; i++) { verifyStateSecret.claim[i] <== holderClaim[i]; }
-    for (var i=0; i<HolderLevel; i++) { verifyStateSecret.claimIssuanceMtp[i] <== holderClaimMtp[i]; }
-    verifyStateSecret.claimIssuanceClaimsRoot <== holderClaimClaimsRoot;
-    verifyStateSecret.claimIssuanceRevRoot <== holderClaimRevRoot;
-    verifyStateSecret.claimIssuanceRootsRoot <== holderClaimRootsRoot;
-    verifyStateSecret.claimIssuanceIdenState <== holderClaimIdenState;
+    component verifyStateCommitment = VerifyAndExtractValStateCommitment(HolderLevel, GistLevels);
+    for (var i=0; i<8; i++) { verifyStateCommitment.claim[i] <== holderClaim[i]; }
+    for (var i=0; i<HolderLevel; i++) { verifyStateCommitment.claimMtp[i] <== holderClaimMtp[i]; }
+    verifyStateCommitment.claimClaimsRoot <== holderClaimClaimsRoot;
+    verifyStateCommitment.claimRevRoot <== holderClaimRevRoot;
+    verifyStateCommitment.claimRootsRoot <== holderClaimRootsRoot;
+    verifyStateCommitment.claimIdenState <== holderClaimIdenState;
 
-    verifyStateSecret.genesisID <== userGenesisID; 
+    verifyStateCommitment.genesisID <== userGenesisID; 
 
-    for (var i=0; i<GistLevels; i++) { verifyStateSecret.gistMtp[i] <== gistMtp[i]; }
-    verifyStateSecret.gistRoot <== gistRoot;
-    verifyStateSecret.gistMtpAuxHi <== gistMtpAuxHi;
-    verifyStateSecret.gistMtpAuxHv <== gistMtpAuxHv;
-    verifyStateSecret.gistMtpNoAux <== gistMtpNoAux;
+    for (var i=0; i<GistLevels; i++) { verifyStateCommitment.gistMtp[i] <== gistMtp[i]; }
+    verifyStateCommitment.gistRoot <== gistRoot;
+    verifyStateCommitment.gistMtpAuxHi <== gistMtpAuxHi;
+    verifyStateCommitment.gistMtpAuxHv <== gistMtpAuxHv;
+    verifyStateCommitment.gistMtpNoAux <== gistMtpNoAux;
 
-    verifyStateSecret.claimValueHash ==> holderClaimValueHash;
+    verifyStateCommitment.claimValueHash ==> holderClaimValueHash;
     
     // Compute SybilId
     component hash = Poseidon(3);
