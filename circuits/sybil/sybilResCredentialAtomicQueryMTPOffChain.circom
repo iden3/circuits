@@ -9,7 +9,7 @@ include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, GistLevels) {
 
-    // claim of uniqueness 
+    // uniqueness claim
     signal input issuerClaim[8];
     signal input issuerClaimMtp[IssuerLevels];
     signal input issuerClaimClaimsRoot;
@@ -29,7 +29,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
 
     signal input issuerClaimSchema;
 
-    // claim of state secret stateSecret
+    // state commitment claim
     signal input stateCommitmentClaim[8];
     signal input stateCommitmentClaimMtp[HolderLevel];
     signal input stateCommitmentClaimClaimsRoot;

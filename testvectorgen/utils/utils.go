@@ -74,7 +74,7 @@ func DefaultUserClaim(t testing.TB, subject core.ID) *core.Claim {
 
 }
 
-func UserStateSecretClaim(t testing.TB, secret *big.Int) *core.Claim {
+func GenerateNewStateCommitmentClaim(t testing.TB, secret *big.Int) *core.Claim {
 	dataSlotA, err := core.NewElemBytesFromInt(secret)
 	if err != nil {
 		t.Fatalf("failed get NewElemBytesFromInt %v", err)

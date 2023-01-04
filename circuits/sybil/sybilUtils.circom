@@ -76,7 +76,7 @@ template VerifyAndExtractValStateCommitment(HolderLevel, GistLevels){ // stateCo
     // Verify claim's index is the same as the hard-coded index
     component constClaimIdx = GetStateCommitmentPosition();
 
-    // Get the state-secret property value and return it
+    // Get the secret and return it
     component claimHash = getClaimHiHv();
     for (var i=0; i<8; i++) { claimHash.claim[i] <== claim[i]; }
     constClaimIdx.out === claimHash.hi;

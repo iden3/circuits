@@ -45,9 +45,9 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, uniClaim)
 
 	secret := big.NewInt(10)
-	ssClaim := utils.UserStateSecretClaim(t, secret)
-	user.AddClaim(t, ssClaim)
-	userClaimMtp, _ := user.ClaimMTP(t, ssClaim)
+	scClaim := utils.GenerateNewStateCommitmentClaim(t, secret)
+	user.AddClaim(t, scClaim)
+	userClaimMtp, _ := user.ClaimMTP(t, scClaim)
 
 	// gist
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
@@ -101,7 +101,7 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 
 		IssuerClaimSchema: "180410020913331409885634153623124536270",
 
-		StateCommitmentClaim:           ssClaim,
+		StateCommitmentClaim:           scClaim,
 		StateCommitmentClaimMtp:        userClaimMtp,
 		StateCommitmentClaimClaimsRoot: user.Clt.Root(),
 		StateCommitmentClaimRevRoot:    user.Ret.Root(),
@@ -174,9 +174,9 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
 	secret := big.NewInt(10)
-	ssClaim := utils.UserStateSecretClaim(t, secret)
-	user.AddClaim(t, ssClaim)
-	userClaimMtp, _ := user.ClaimMTP(t, ssClaim)
+	scClaim := utils.GenerateNewStateCommitmentClaim(t, secret)
+	user.AddClaim(t, scClaim)
+	userClaimMtp, _ := user.ClaimMTP(t, scClaim)
 
 	// gist
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
@@ -235,7 +235,7 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 
 		IssuerClaimSchema: "180410020913331409885634153623124536270",
 
-		StateCommitmentClaim:           ssClaim,
+		StateCommitmentClaim:           scClaim,
 		StateCommitmentClaimMtp:        userClaimMtp,
 		StateCommitmentClaimClaimsRoot: user.Clt.Root(),
 		StateCommitmentClaimRevRoot:    user.Ret.Root(),
