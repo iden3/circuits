@@ -80,18 +80,14 @@ func UserStateSecretClaim(t testing.TB, secret *big.Int) *core.Claim {
 		t.Fatalf("failed get NewElemBytesFromInt %v", err)
 	}
 
-	nonce := 145645
 	var schemaHash core.SchemaHash
-	schemaBytes, err := hex.DecodeString("da5b2efc8386250550e458a33b7926c5")
+	schemaBytes, err := hex.DecodeString("b55fa22ddacd3459bee10699dd025405")
 	if err != nil {
 		t.Fatalf("failed decode schema hash %v", err)
 	}
 	copy(schemaHash[:], schemaBytes)
 
-	claim, err := core.NewClaim(
-		schemaHash,
-		core.WithValueData(dataSlotA, core.ElemBytes{}),
-		core.WithRevocationNonce(uint64(nonce)))
+	claim, err := core.NewClaim(schemaHash, core.WithValueData(dataSlotA, core.ElemBytes{}))
 	if err != nil {
 		t.Fatalf("failed create new claim %v", err)
 	}

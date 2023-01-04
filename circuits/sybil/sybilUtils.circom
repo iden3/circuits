@@ -2,12 +2,12 @@ pragma circom 2.0.0;
 
 template GetStateCommitmentPosition() {
     signal output out;
-    out <== 1974680877085411137074044236594333239180760340473446672920498187419060160560;
+    out <== 11712158702391090353476752334536845532095615971587654091891297967623141028854;
 }
 
 template GetStateCommitmentSchemaHash(){
     signal output schemaHash;
-    schemaHash <== 262057681346829900854325169563380898778;
+    schemaHash <== 7082351036644153942426544930816155573;
 }
 
 template VerifyAndExtractValStateCommitment(HolderLevel, GistLevels){ // stateCommitmentClaim
