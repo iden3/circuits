@@ -55,10 +55,6 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     signal input issuerID;
     signal input timestamp;
 
-    // inter-signal
-    signal issuerClaimHash;
-    signal stateCommitmentClaimValueHash;
-
     // outputs
     signal output userID;
     signal output sybilID;
@@ -87,8 +83,6 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     verifyIssuerClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
     verifyIssuerClaim.timestamp <== timestamp;
 
-    verifyIssuerClaim.claimHash  ==> issuerClaimHash;
-
     component verifyStateCommitment = VerifyAndExtractValStateCommitment(HolderLevel, GistLevels);
     for (var i=0; i<8; i++) { verifyStateCommitment.claim[i] <== stateCommitmentClaim[i]; }
     for (var i=0; i<HolderLevel; i++) { verifyStateCommitment.claimMtp[i] <== stateCommitmentClaimMtp[i]; }
@@ -104,13 +98,11 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     verifyStateCommitment.gistMtpAuxHi <== gistMtpAuxHi;
     verifyStateCommitment.gistMtpAuxHv <== gistMtpAuxHv;
     verifyStateCommitment.gistMtpNoAux <== gistMtpNoAux;
-
-    verifyStateCommitment.claimValueHash ==> stateCommitmentClaimValueHash;
     
     // Compute SybilId
     component hash = Poseidon(3);
-    hash.inputs[0] <== stateCommitmentClaimValueHash;
-    hash.inputs[1] <== issuerClaimHash;
+    hash.inputs[0] <== verifyStateCommitment.claimValueHash;
+    hash.inputs[1] <== verifyIssuerClaim.claimHash;
     hash.inputs[2] <== crs;
     sybilID <== hash.out;
 

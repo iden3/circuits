@@ -66,10 +66,6 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     signal input issuerID;
     signal input timestamp;
 
-    // inter signals
-    signal issuerClaimHash;
-    signal stateCommitmentClaimValueHash;
-
     // outputs
     signal output sybilID;
     signal output userID;
@@ -108,7 +104,6 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
 
     verifyIssuerClaim.timestamp  <== timestamp;
   
-    verifyIssuerClaim.claimHash ==> issuerClaimHash;
     verifyIssuerClaim.issuerAuthState ==> issuerAuthState;
 
     component verifyStateCommitment = VerifyAndExtractValStateCommitment(HolderLevel, GistLevels);
@@ -126,13 +121,11 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     verifyStateCommitment.gistMtpAuxHi <== gistMtpAuxHi;
     verifyStateCommitment.gistMtpAuxHv <== gistMtpAuxHv;
     verifyStateCommitment.gistMtpNoAux <== gistMtpNoAux;
-
-    verifyStateCommitment.claimValueHash ==> stateCommitmentClaimValueHash;
     
     // Compute SybilId
     component hash = Poseidon(3);
-    hash.inputs[0] <== stateCommitmentClaimValueHash;
-    hash.inputs[1] <== issuerClaimHash;
+    hash.inputs[0] <== verifyStateCommitment.claimValueHash;
+    hash.inputs[1] <== verifyIssuerClaim.claimHash;
     hash.inputs[2] <== crs;
     sybilID <== hash.out;
 
