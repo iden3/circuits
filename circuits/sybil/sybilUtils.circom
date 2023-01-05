@@ -10,7 +10,7 @@ template GetStateCommitmentSchemaHash(){
     schemaHash <== 7082351036644153942426544930816155573;
 }
 
-template VerifyAndExtractValStateCommitment(HolderLevel, GistLevels){ // stateCommitmentClaim
+template VerifyStateCommitment(HolderLevel, GistLevels){ // stateCommitmentClaim
     signal input claim[8];
     signal input claimMtp[HolderLevel];
     signal input claimClaimsRoot;
@@ -25,8 +25,6 @@ template VerifyAndExtractValStateCommitment(HolderLevel, GistLevels){ // stateCo
     signal input gistMtpNoAux;
 
     signal input genesisID;
-
-    signal output claimValueHash;
 
     // Verify claim is included in claims tree root
     component claimIssuanceCheck = checkClaimExists(HolderLevel);
@@ -80,6 +78,4 @@ template VerifyAndExtractValStateCommitment(HolderLevel, GistLevels){ // stateCo
     component claimHash = getClaimHiHv();
     for (var i=0; i<8; i++) { claimHash.claim[i] <== claim[i]; }
     constClaimIdx.out === claimHash.hi;
-
-    claimValueHash <== claimHash.hv;
 }
