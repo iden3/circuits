@@ -5,7 +5,7 @@ include "../lib/utils/claimUtils.circom";
 include "../lib/utils/treeUtils.circom";
 
 
-template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, GistLevels) {
+template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, UserLevels, GistLevels) {
     // issuer auth proof of existence
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimMtp[IssuerLevels];
@@ -42,7 +42,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
 
   // claim of state secret stateSecret
     signal input stateCommitmentClaim[8];
-    signal input stateCommitmentClaimMtp[HolderLevel];
+    signal input stateCommitmentClaimMtp[UserLevels];
     signal input stateCommitmentClaimClaimsRoot;
     signal input stateCommitmentClaimRevRoot;
     signal input stateCommitmentClaimRootsRoot;
@@ -109,9 +109,9 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     component issuerClaimHasher = getClaimHash();
     for (var i=0; i<8; i++) { issuerClaimHasher.claim[i] <== issuerClaim[i]; }
 
-    component verifyStateCommitment = VerifyStateCommitment(HolderLevel, GistLevels);
+    component verifyStateCommitment = VerifyStateCommitment(UserLevels, GistLevels);
     for (var i=0; i<8; i++) { verifyStateCommitment.claim[i] <== stateCommitmentClaim[i]; }
-    for (var i=0; i<HolderLevel; i++) { verifyStateCommitment.claimMtp[i] <== stateCommitmentClaimMtp[i]; }
+    for (var i=0; i<UserLevels; i++) { verifyStateCommitment.claimMtp[i] <== stateCommitmentClaimMtp[i]; }
     verifyStateCommitment.claimClaimsRoot <== stateCommitmentClaimClaimsRoot;
     verifyStateCommitment.claimRevRoot <== stateCommitmentClaimRevRoot;
     verifyStateCommitment.claimRootsRoot <== stateCommitmentClaimRootsRoot;

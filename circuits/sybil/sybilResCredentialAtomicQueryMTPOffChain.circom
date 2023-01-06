@@ -7,7 +7,7 @@ include "../lib/utils/claimUtils.circom";
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 
-template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, GistLevels) {
+template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, UserLevels, GistLevels) {
 
     // uniqueness claim
     signal input issuerClaim[8];
@@ -31,7 +31,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
 
     // state commitment claim
     signal input stateCommitmentClaim[8];
-    signal input stateCommitmentClaimMtp[HolderLevel];
+    signal input stateCommitmentClaimMtp[UserLevels];
     signal input stateCommitmentClaimClaimsRoot;
     signal input stateCommitmentClaimRevRoot;
     signal input stateCommitmentClaimRootsRoot;
@@ -86,9 +86,9 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     component issuerClaimHasher = getClaimHash();
     for (var i=0; i<8; i++) { issuerClaimHasher.claim[i] <== issuerClaim[i]; }
 
-    component verifyStateCommitment = VerifyStateCommitment(HolderLevel, GistLevels);
+    component verifyStateCommitment = VerifyStateCommitment(UserLevels, GistLevels);
     for (var i=0; i<8; i++) { verifyStateCommitment.claim[i] <== stateCommitmentClaim[i]; }
-    for (var i=0; i<HolderLevel; i++) { verifyStateCommitment.claimMtp[i] <== stateCommitmentClaimMtp[i]; }
+    for (var i=0; i<UserLevels; i++) { verifyStateCommitment.claimMtp[i] <== stateCommitmentClaimMtp[i]; }
     verifyStateCommitment.claimClaimsRoot <== stateCommitmentClaimClaimsRoot;
     verifyStateCommitment.claimRevRoot <== stateCommitmentClaimRevRoot;
     verifyStateCommitment.claimRootsRoot <== stateCommitmentClaimRootsRoot;

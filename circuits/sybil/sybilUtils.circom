@@ -10,9 +10,9 @@ template GetStateCommitmentSchemaHash(){
     schemaHash <== 7082351036644153942426544930816155573;
 }
 
-template VerifyStateCommitment(HolderLevel, GistLevels){ // stateCommitmentClaim
+template VerifyStateCommitment(UserLevels, GistLevels){ // stateCommitmentClaim
     signal input claim[8];
-    signal input claimMtp[HolderLevel];
+    signal input claimMtp[UserLevels];
     signal input claimClaimsRoot;
     signal input claimRevRoot;
     signal input claimRootsRoot;
@@ -27,9 +27,9 @@ template VerifyStateCommitment(HolderLevel, GistLevels){ // stateCommitmentClaim
     signal input genesisID;
 
     // Verify claim is included in claims tree root
-    component claimIssuanceCheck = checkClaimExists(HolderLevel);
+    component claimIssuanceCheck = checkClaimExists(UserLevels);
     for (var i=0; i<8; i++) { claimIssuanceCheck.claim[i] <== claim[i]; }
-    for (var i=0; i<HolderLevel; i++) { claimIssuanceCheck.claimMTP[i] <== claimMtp[i]; }
+    for (var i=0; i<UserLevels; i++) { claimIssuanceCheck.claimMTP[i] <== claimMtp[i]; }
     claimIssuanceCheck.treeRoot <== claimClaimsRoot;
 
     // Verify state includes claims tree
