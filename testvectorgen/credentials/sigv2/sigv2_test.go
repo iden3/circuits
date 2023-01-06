@@ -93,7 +93,7 @@ type TestDataSigV2 struct {
 func Test_UserID_Subject(t *testing.T) {
 
 	desc := "UserID = Subject. UserID out. User nonce = 0, Subject nonce = 0 claim issued on userID (Merklized claim)"
-	isUserIDProfile := true
+	isUserIDProfile := false
 	isSubjectIDProfile := false
 
 	generateJSONLDTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "userID_subject")
