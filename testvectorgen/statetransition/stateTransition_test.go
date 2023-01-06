@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"testing"
 
+	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/stretchr/testify/require"
 	"test/utils"
@@ -15,6 +16,38 @@ const (
 	userPK2   = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
 	timestamp = "1642074362"
 )
+
+type StateTransitionInputs struct {
+	AuthClaim               *core.Claim `json:"authClaim"`
+	AuthClaimMtp            []string    `json:"authClaimMtp"`
+	AuthClaimNonRevMtp      []string    `json:"authClaimNonRevMtp"`
+	AuthClaimNonRevMtpAuxHi string      `json:"authClaimNonRevMtpAuxHi"`
+	AuthClaimNonRevMtpAuxHv string      `json:"authClaimNonRevMtpAuxHv"`
+	AuthClaimNonRevMtpNoAux string      `json:"authClaimNonRevMtpNoAux"`
+	ClaimsTreeRoot          string      `json:"claimsTreeRoot"`
+	IsOldStateGenesis       string      `json:"isOldStateGenesis"`
+	NewUserState            string      `json:"newUserState"`
+	OldUserState            string      `json:"oldUserState"`
+	RevTreeRoot             string      `json:"revTreeRoot"`
+	RootsTreeRoot           string      `json:"rootsTreeRoot"`
+	SignatureR8X            string      `json:"signatureR8x"`
+	SignatureR8Y            string      `json:"signatureR8y"`
+	SignatureS              string      `json:"signatureS"`
+	UserID                  string      `json:"userID"`
+}
+
+type StateTransitionOutputs struct {
+	ID                string `json:"userID"`
+	NewUserState      string `json:"newUserState"`
+	OldUserState      string `json:"oldUserState"`
+	IsOldStateGenesis string `json:"isOldStateGenesis"`
+}
+
+type TestDataStateTransition struct {
+	Desc string                 `json:"desc"`
+	In   StateTransitionInputs  `json:"inputs"`
+	Out  StateTransitionOutputs `json:"expOut"`
+}
 
 func Test_GenesisState(t *testing.T) {
 
@@ -77,7 +110,7 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 	sig := user.Sign(hashOldAndNewStates)
 	require.NoError(t, err)
 
-	inputs := utils.StateTransitionInputs{
+	inputs := StateTransitionInputs{
 		AuthClaim:               user.AuthClaim,
 		AuthClaimMtp:            authMTProof,
 		AuthClaimNonRevMtp:      authNonRevMTProof,
@@ -96,14 +129,14 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 		UserID:                  user.ID.BigInt().String(),
 	}
 
-	out := utils.StateTransitionOutputs{
+	out := StateTransitionOutputs{
 		ID:                user.ID.BigInt().String(),
 		NewUserState:      user.State(t).String(),
 		OldUserState:      oldState.String(),
 		IsOldStateGenesis: isGenesis,
 	}
 
-	json, err := json2.Marshal(utils.TestDataStateTransition{
+	json, err := json2.Marshal(TestDataStateTransition{
 		desc,
 		inputs,
 		out,

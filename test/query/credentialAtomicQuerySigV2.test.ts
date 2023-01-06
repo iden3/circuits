@@ -5,7 +5,7 @@ const wasmTester = require("circom_tester").wasm;
 const chai = require("chai");
 const expect = chai.expect;
 
-describe("Test credentialAtomicQuerySigV2OnChain.circom", function () {
+describe("Test credentialAtomicQuerySigV2.circom", function () {
 
     this.timeout(600000);
 
