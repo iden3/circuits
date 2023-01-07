@@ -5,7 +5,7 @@ include "../lib/utils/claimUtils.circom";
 include "../lib/utils/treeUtils.circom";
 
 
-template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, GistLevels) {
+template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, UserLevels, GistLevels) {
     // issuer auth proof of existence
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimMtp[IssuerLevels];
@@ -42,7 +42,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
 
   // claim of state secret stateSecret
     signal input stateCommitmentClaim[8];
-    signal input stateCommitmentClaimMtp[HolderLevel];
+    signal input stateCommitmentClaimMtp[UserLevels];
     signal input stateCommitmentClaimClaimsRoot;
     signal input stateCommitmentClaimRevRoot;
     signal input stateCommitmentClaimRootsRoot;
@@ -66,15 +66,11 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     signal input issuerID;
     signal input timestamp;
 
-    // inter signals
-    signal issuerClaimHash;
-    signal stateCommitmentClaimValueHash;
-
     // outputs
     signal output sybilID;
     signal output userID;
 
-    component verifyIssuerClaim = VerifyAndHashIssuerClaim(IssuerLevels);
+    component verifyIssuerClaim = VerifyIssuerClaim(IssuerLevels);
     for (var i=0; i<8; i++) { verifyIssuerClaim.issuerAuthClaim[i] <== issuerAuthClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) { verifyIssuerClaim.issuerAuthClaimMtp[i] <== issuerAuthClaimMtp[i]; }
     verifyIssuerClaim.issuerAuthClaimsRoot <== issuerAuthClaimsRoot;
@@ -108,12 +104,14 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
 
     verifyIssuerClaim.timestamp  <== timestamp;
   
-    verifyIssuerClaim.claimHash ==> issuerClaimHash;
     verifyIssuerClaim.issuerAuthState ==> issuerAuthState;
 
-    component verifyStateCommitment = VerifyAndExtractValStateCommitment(HolderLevel, GistLevels);
+    component issuerClaimHasher = getClaimHash();
+    for (var i=0; i<8; i++) { issuerClaimHasher.claim[i] <== issuerClaim[i]; }
+
+    component verifyStateCommitment = VerifyStateCommitment(UserLevels, GistLevels);
     for (var i=0; i<8; i++) { verifyStateCommitment.claim[i] <== stateCommitmentClaim[i]; }
-    for (var i=0; i<HolderLevel; i++) { verifyStateCommitment.claimMtp[i] <== stateCommitmentClaimMtp[i]; }
+    for (var i=0; i<UserLevels; i++) { verifyStateCommitment.claimMtp[i] <== stateCommitmentClaimMtp[i]; }
     verifyStateCommitment.claimClaimsRoot <== stateCommitmentClaimClaimsRoot;
     verifyStateCommitment.claimRevRoot <== stateCommitmentClaimRevRoot;
     verifyStateCommitment.claimRootsRoot <== stateCommitmentClaimRootsRoot;
@@ -126,15 +124,16 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     verifyStateCommitment.gistMtpAuxHi <== gistMtpAuxHi;
     verifyStateCommitment.gistMtpAuxHv <== gistMtpAuxHv;
     verifyStateCommitment.gistMtpNoAux <== gistMtpNoAux;
-
-    verifyStateCommitment.claimValueHash ==> stateCommitmentClaimValueHash;
     
+    component stateCommitmentClaimValHasher = getClaimHiHv();
+    for (var i=0; i<8; i++) { stateCommitmentClaimValHasher.claim[i] <== stateCommitmentClaim[i]; }
+
     // Compute SybilId
-    component hash = Poseidon(3);
-    hash.inputs[0] <== stateCommitmentClaimValueHash;
-    hash.inputs[1] <== issuerClaimHash;
-    hash.inputs[2] <== crs;
-    sybilID <== hash.out;
+    component sybilIDHasher = Poseidon(3);
+    sybilIDHasher.inputs[0] <== stateCommitmentClaimValHasher.hv;
+    sybilIDHasher.inputs[1] <== issuerClaimHasher.hash;
+    sybilIDHasher.inputs[2] <== crs;
+    sybilID <== sybilIDHasher.out;
 
     // Compute profile.
     component selectProfile = SelectProfile();
@@ -143,8 +142,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, HolderLevel, Gis
     userID <== selectProfile.out;
 }
 
-
-template VerifyAndHashIssuerClaim(IssuerLevels){
+template VerifyIssuerClaim(IssuerLevels){
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimMtp[IssuerLevels];
     signal input issuerAuthClaimsRoot;
@@ -184,7 +182,6 @@ template VerifyAndHashIssuerClaim(IssuerLevels){
     signal input profileNonce;
     signal input claimSubjectProfileNonce;
 
-    signal output claimHash;
     signal output issuerAuthState;
 
     //  Verify issued and not revoked
@@ -215,7 +212,6 @@ template VerifyAndHashIssuerClaim(IssuerLevels){
     issuerAuthStateComponent.rootsTreeRoot <== issuerAuthRootsRoot;
 
     issuerAuthState <== issuerAuthStateComponent.idenState;
-
 
     component issuerAuthPubKey = getPubKeyFromClaim();
     for (var i=0; i<8; i++){ issuerAuthPubKey.claim[i] <== issuerAuthClaim[i]; }
@@ -261,9 +257,4 @@ template VerifyAndHashIssuerClaim(IssuerLevels){
     for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
     claimIdCheck.id <== userGenesisID;
     claimIdCheck.nonce <== claimSubjectProfileNonce;
-
-    // Return hash of claim
-    component hasher = getClaimHash();
-    for (var i=0; i<8; i++) { hasher.claim[i] <== issuerClaim[i]; }
-    claimHash <== hasher.hash;
 }
