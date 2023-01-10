@@ -38,7 +38,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, UserLevels, Gist
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
 
-    signal input issuerClaimSchema;
+    signal input claimSchema;
 
   // claim of state secret stateSecret
     signal input stateCommitmentClaim[8];
@@ -97,7 +97,7 @@ template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, UserLevels, Gist
     verifyIssuerClaim.issuerClaimSignatureR8y <== issuerClaimSignatureR8y;
     verifyIssuerClaim.issuerClaimSignatureS <== issuerClaimSignatureS;
 
-    verifyIssuerClaim.issuerClaimSchema <== issuerClaimSchema;
+    verifyIssuerClaim.claimSchema <== claimSchema;
     verifyIssuerClaim.profileNonce <== profileNonce;
     verifyIssuerClaim.userGenesisID <== userGenesisID;
     verifyIssuerClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
@@ -174,7 +174,7 @@ template VerifyIssuerClaim(IssuerLevels){
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
 
-    signal input issuerClaimSchema;
+    signal input claimSchema;
 
     signal input timestamp;
 
@@ -245,7 +245,7 @@ template VerifyIssuerClaim(IssuerLevels){
     // Verify claim schema
     component claimSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
-    claimSchemaCheck.schema <== issuerClaimSchema;
+    claimSchemaCheck.schema <== claimSchema;
 
     // Verify issuerClaim expiration time
     component claimExpirationCheck = verifyExpirationTime();
