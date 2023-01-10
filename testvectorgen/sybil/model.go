@@ -32,7 +32,7 @@ type InputsMTP struct {
 	IssuerClaimNonRevRootsRoot  *merkletree.Hash `json:"issuerClaimNonRevRootsRoot"`
 	IssuerClaimNonRevState      string           `json:"issuerClaimNonRevState"`
 
-	IssuerClaimSchema string `json:"issuerClaimSchema"`
+	ClaimSchema string `json:"claimSchema"`
 
 	StateCommitmentClaim           *core.Claim      `json:"stateCommitmentClaim"`
 	StateCommitmentClaimMtp        []string         `json:"stateCommitmentClaimMtp"`
@@ -88,7 +88,7 @@ type InputsSig struct {
 	IssuerClaimSignatureR8Y string `json:"issuerClaimSignatureR8y"`
 	IssuerClaimSignatureS   string `json:"issuerClaimSignatureS"`
 
-	IssuerClaimSchema string `json:"issuerClaimSchema"`
+	ClaimSchema string `json:"claimSchema"`
 
 	StateCommitmentClaim           *core.Claim      `json:"stateCommitmentClaim"`
 	StateCommitmentClaimMtp        []string         `json:"stateCommitmentClaimMtp"`

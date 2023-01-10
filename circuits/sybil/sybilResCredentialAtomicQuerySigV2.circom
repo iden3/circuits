@@ -6,7 +6,7 @@ component main{public [
                         requestID,
                         issuerID,
                         timestamp,
-                        issuerClaimSchema,
+                        claimSchema,
                         issuerClaimNonRevState,
                         crs,
                         gistRoot]} = SybilResCredentialAtomicQuerySigOffChain(32, 32, 32);

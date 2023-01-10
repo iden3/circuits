@@ -27,7 +27,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, UserLevels, Gist
     signal input issuerClaimNonRevRootsRoot;
     signal input issuerClaimNonRevState;
 
-    signal input issuerClaimSchema;
+    signal input claimSchema;
 
     // state commitment claim
     signal input stateCommitmentClaim[8];
@@ -76,7 +76,7 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, UserLevels, Gist
     verifyIssuerClaim.claimNonRevRootsRoot  <== issuerClaimNonRevRootsRoot;
     verifyIssuerClaim.claimNonRevState  <== issuerClaimNonRevState;
 
-    verifyIssuerClaim.claimSchema  <== issuerClaimSchema;
+    verifyIssuerClaim.claimSchema  <== claimSchema;
 
     verifyIssuerClaim.userGenesisID  <== userGenesisID;
     verifyIssuerClaim.profileNonce <== profileNonce;

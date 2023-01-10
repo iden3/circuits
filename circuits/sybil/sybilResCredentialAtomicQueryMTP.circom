@@ -6,7 +6,7 @@ component main{public [
                         requestID,
                         issuerID,
                         timestamp,
-                        issuerClaimSchema,
+                        claimSchema,
                         issuerClaimIdenState,
                         issuerClaimNonRevState,
                         crs,

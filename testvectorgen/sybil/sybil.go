@@ -99,7 +99,7 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 		IssuerClaimNonRevRootsRoot:  issuer.Rot.Root(),
 		IssuerClaimNonRevState:      issuer.State(t).String(),
 
-		IssuerClaimSchema: "180410020913331409885634153623124536270",
+		ClaimSchema: "180410020913331409885634153623124536270",
 
 		StateCommitmentClaim:           scClaim,
 		StateCommitmentClaimMtp:        userClaimMtp,
@@ -120,7 +120,7 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 		ProfileNonce:             nonce.String(),
 		ClaimSubjectProfileNonce: nonceSubject.String(),
 
-		IssuerID:  "123",
+		IssuerID:  issuer.ID.BigInt().String(),
 		RequestID: "321",
 		Timestamp: timestamp,
 	}
@@ -233,7 +233,7 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 		IssuerAuthRevRoot:             issuer.Ret.Root().BigInt().String(),
 		IssuerAuthRootsRoot:           issuer.Rot.Root().BigInt().String(),
 
-		IssuerClaimSchema: "180410020913331409885634153623124536270",
+		ClaimSchema: "180410020913331409885634153623124536270",
 
 		StateCommitmentClaim:           scClaim,
 		StateCommitmentClaimMtp:        userClaimMtp,
@@ -255,7 +255,7 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 
 		ClaimSubjectProfileNonce: nonceSubject.String(),
 
-		IssuerID:  "123",
+		IssuerID:  issuer.ID.BigInt().String(),
 		RequestID: "321",
 		Timestamp: timestamp,
 	}
