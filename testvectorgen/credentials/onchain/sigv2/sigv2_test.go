@@ -92,19 +92,22 @@ type CredentialAtomicSigOnChainV2Inputs struct {
 }
 
 type CredentialAtomicSigOnChainV2Outputs struct {
+	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
-	IssuerID               string `json:"issuerID"`
+	ValueHash              string `json:"valueHash"`
 	IssuerAuthState        string `json:"issuerAuthState"`
+	RequestID              string `json:"requestID"`
+	IssuerID               string `json:"issuerID"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
 	ClaimSchema            string `json:"claimSchema"`
 	SlotIndex              string `json:"slotIndex"`
-	Operator               int    `json:"operator"`
-	ValueHash              string `json:"valueHash"`
-	Timestamp              string `json:"timestamp"`
-	Merklized              string `json:"merklized"`
+	ClaimPathKey           string `json:"claimPathKey"`
 	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
-	GistRoot               string `json:"gistRoot"`
+	Operator               int    `json:"operator"`
+	Timestamp              string `json:"timestamp"`
+	IsRevocationChecked    string `json:"isRevocationChecked"`
 	Challenge              string `json:"challenge"`
+	GistRoot               string `json:"gistRoot"`
 }
 
 type TestDataSigV2 struct {
@@ -269,6 +272,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	out := CredentialAtomicSigOnChainV2Outputs{
+		RequestID:              requestID,
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -282,6 +286,8 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		ValueHash:              valuesHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
+		ClaimPathKey:           "0",
+		IsRevocationChecked:    "0",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
@@ -406,6 +412,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	out := CredentialAtomicSigOnChainV2Outputs{
+		RequestID:              requestID,
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -419,6 +426,8 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		ValueHash:              valuesHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
+		ClaimPathKey:           "0",
+		IsRevocationChecked:    "1",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
@@ -581,6 +590,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	out := CredentialAtomicSigOnChainV2Outputs{
+		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -594,6 +604,8 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		ValueHash:              valuesHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
+		ClaimPathKey:           pathKey.String(),
+		IsRevocationChecked:    "1",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
@@ -732,6 +744,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	out := CredentialAtomicSigOnChainV2Outputs{
+		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -745,6 +758,9 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		ValueHash:              valuesHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
+
+		ClaimPathKey:        "0",
+		IsRevocationChecked: "1",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
@@ -896,6 +912,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	require.NoError(t, err)
 
 	out := CredentialAtomicSigOnChainV2Outputs{
+		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -909,6 +926,8 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		ValueHash:              valuesHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
+		ClaimPathKey:           pathKey.String(),
+		IsRevocationChecked:    "1",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{

@@ -116,22 +116,23 @@ type CredentialAtomicMTPOnChainV2Inputs struct {
 }
 
 type CredentialAtomicMTPOnChainV2Outputs struct {
+	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
+	ValueHash              string `json:"valueHash"`
+	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
 	ClaimSchema            string `json:"claimSchema"`
 	SlotIndex              string `json:"slotIndex"`
 	Operator               int    `json:"operator"`
-	ValueHash              string `json:"valueHash"`
 	Timestamp              string `json:"timestamp"`
-	Merklized              string `json:"merklized"`
 	ClaimPathKey           string `json:"claimPathKey"`
 	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
+	IsRevocationChecked    string `json:"isRevocationChecked"`
 	GistRoot               string `json:"gistRoot"`
 	Challenge              string `json:"challenge"`
 }
-
 type TestDataStateTransition struct {
 	Desc string                 `json:"desc"`
 	In   StateTransitionInputs  `json:"inputs"`
@@ -214,21 +215,23 @@ type CredentialAtomicSigOnChainV2Inputs struct {
 }
 
 type CredentialAtomicSigOnChainV2Outputs struct {
+	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
-	IssuerID               string `json:"issuerID"`
+	ValueHash              string `json:"valueHash"`
 	IssuerAuthState        string `json:"issuerAuthState"`
+	RequestID              string `json:"requestID"`
+	IssuerID               string `json:"issuerID"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
 	ClaimSchema            string `json:"claimSchema"`
 	SlotIndex              string `json:"slotIndex"`
-	Operator               int    `json:"operator"`
-	ValueHash              string `json:"valueHash"`
-	Timestamp              string `json:"timestamp"`
-	Merklized              string `json:"merklized"`
+	ClaimPathKey           string `json:"claimPathKey"`
 	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
-	GistRoot               string `json:"gistRoot"`
+	Operator               int    `json:"operator"`
+	Timestamp              string `json:"timestamp"`
+	IsRevocationChecked    string `json:"isRevocationChecked"`
 	Challenge              string `json:"challenge"`
+	GistRoot               string `json:"gistRoot"`
 }
-
 type TestDataSigV2 struct {
 	Desc string                              `json:"desc"`
 	In   CredentialAtomicSigOnChainV2Inputs  `json:"inputs"`
@@ -465,6 +468,7 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	out := CredentialAtomicMTPOnChainV2Outputs{
+		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -479,6 +483,7 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 		ClaimPathNotExists:     "0",
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(), // 0 for inclusion, 1 for non-inclusion
+		IsRevocationChecked:    "1",
 	}
 
 	json, err := json2.Marshal(TestDataOnChainMTPV2{
@@ -620,6 +625,7 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	out := CredentialAtomicSigOnChainV2Outputs{
+		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -633,6 +639,8 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 		ValueHash:              valuesHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "1",
+		ClaimPathKey:           "0",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{

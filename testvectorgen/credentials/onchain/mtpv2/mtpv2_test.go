@@ -89,18 +89,20 @@ type CredentialAtomicMTPOnChainV2Inputs struct {
 }
 
 type CredentialAtomicMTPOnChainV2Outputs struct {
+	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
+	ValueHash              string `json:"valueHash"`
+	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
 	ClaimSchema            string `json:"claimSchema"`
 	SlotIndex              string `json:"slotIndex"`
 	Operator               int    `json:"operator"`
-	ValueHash              string `json:"valueHash"`
 	Timestamp              string `json:"timestamp"`
-	Merklized              string `json:"merklized"`
 	ClaimPathKey           string `json:"claimPathKey"`
 	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
+	IsRevocationChecked    string `json:"isRevocationChecked"`
 	GistRoot               string `json:"gistRoot"`
 	Challenge              string `json:"challenge"`
 }
@@ -238,6 +240,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
+		RequestID:              requestID,
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -252,6 +255,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "1",
 	}
 
 	json, err := json2.Marshal(TestDataOnChainMTPV2{
@@ -361,6 +365,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
+		RequestID:              requestID,
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -375,6 +380,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "0",
 	}
 
 	json, err := json2.Marshal(TestDataOnChainMTPV2{
@@ -507,6 +513,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	require.NoError(t, err)
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
+		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -521,6 +528,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "1",
 	}
 
 	json, err := json2.Marshal(TestDataOnChainMTPV2{
@@ -639,6 +647,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	out := CredentialAtomicMTPOnChainV2Outputs{
+		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -653,6 +662,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		ClaimPathNotExists:     "0",
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(), // 0 for inclusion, 1 for non-inclusion
+		IsRevocationChecked:    "1",
 	}
 
 	json, err := json2.Marshal(TestDataOnChainMTPV2{
