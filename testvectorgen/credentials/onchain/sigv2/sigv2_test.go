@@ -22,6 +22,97 @@ const (
 	requestID = "41"
 )
 
+type CredentialAtomicSigOnChainV2Inputs struct {
+	RequestID string `json:"requestID"`
+
+	// user data
+	UserGenesisID            string `json:"userGenesisID"`
+	ProfileNonce             string `json:"profileNonce"`
+	ClaimSubjectProfileNonce string `json:"claimSubjectProfileNonce"`
+
+	UserAuthClaim               *core.Claim `json:"authClaim"`
+	UserAuthClaimMtp            []string    `json:"authClaimIncMtp"`
+	UserAuthClaimNonRevMtp      []string    `json:"authClaimNonRevMtp"`
+	UserAuthClaimNonRevMtpAuxHi string      `json:"authClaimNonRevMtpAuxHi"`
+	UserAuthClaimNonRevMtpAuxHv string      `json:"authClaimNonRevMtpAuxHv"`
+	UserAuthClaimNonRevMtpNoAux string      `json:"authClaimNonRevMtpNoAux"`
+	Challenge                   string      `json:"challenge"`
+	ChallengeSignatureR8X       string      `json:"challengeSignatureR8x"`
+	ChallengeSignatureR8Y       string      `json:"challengeSignatureR8y"`
+	ChallengeSignatureS         string      `json:"challengeSignatureS"`
+	UserClaimsTreeRoot          string      `json:"userClaimsTreeRoot"`
+	UserRevTreeRoot             string      `json:"userRevTreeRoot"`
+	UserRootsTreeRoot           string      `json:"userRootsTreeRoot"`
+	UserState                   string      `json:"userState"`
+	GistRoot                    string      `json:"gistRoot"`
+	GistMtp                     []string    `json:"gistMtp"`
+	GistMtpAuxHi                string      `json:"gistMtpAuxHi"`
+	GistMtpAuxHv                string      `json:"gistMtpAuxHv"`
+	GistMtpNoAux                string      `json:"gistMtpNoAux"`
+
+	IssuerID string `json:"issuerID"`
+	// Claim
+	IssuerClaim                     *core.Claim `json:"issuerClaim"`
+	IssuerClaimNonRevClaimsTreeRoot string      `json:"issuerClaimNonRevClaimsTreeRoot"`
+	IssuerClaimNonRevRevTreeRoot    string      `json:"issuerClaimNonRevRevTreeRoot"`
+	IssuerClaimNonRevRootsTreeRoot  string      `json:"issuerClaimNonRevRootsTreeRoot"`
+	IssuerClaimNonRevState          string      `json:"issuerClaimNonRevState"`
+	IssuerClaimNonRevMtp            []string    `json:"issuerClaimNonRevMtp"`
+	IssuerClaimNonRevMtpAuxHi       string      `json:"issuerClaimNonRevMtpAuxHi"`
+	IssuerClaimNonRevMtpAuxHv       string      `json:"issuerClaimNonRevMtpAuxHv"`
+	IssuerClaimNonRevMtpNoAux       string      `json:"issuerClaimNonRevMtpNoAux"`
+	ClaimSchema                     string      `json:"claimSchema"`
+	IssuerClaimSignatureR8X         string      `json:"issuerClaimSignatureR8x"`
+	IssuerClaimSignatureR8Y         string      `json:"issuerClaimSignatureR8y"`
+	IssuerClaimSignatureS           string      `json:"issuerClaimSignatureS"`
+	IssuerAuthClaim                 *core.Claim `json:"issuerAuthClaim"`
+	IssuerAuthClaimMtp              []string    `json:"issuerAuthClaimMtp"`
+	IssuerAuthClaimNonRevMtp        []string    `json:"issuerAuthClaimNonRevMtp"`
+	IssuerAuthClaimNonRevMtpAuxHi   string      `json:"issuerAuthClaimNonRevMtpAuxHi"`
+	IssuerAuthClaimNonRevMtpAuxHv   string      `json:"issuerAuthClaimNonRevMtpAuxHv"`
+	IssuerAuthClaimNonRevMtpNoAux   string      `json:"issuerAuthClaimNonRevMtpNoAux"`
+	IssuerAuthClaimsTreeRoot        string      `json:"issuerAuthClaimsTreeRoot"`
+	IssuerAuthRevTreeRoot           string      `json:"issuerAuthRevTreeRoot"`
+	IssuerAuthRootsTreeRoot         string      `json:"issuerAuthRootsTreeRoot"`
+	// Query
+	// JSON path
+	ClaimPathNotExists string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
+	ClaimPathMtp       []string `json:"claimPathMtp"`
+	ClaimPathMtpNoAux  string   `json:"claimPathMtpNoAux"` // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+	ClaimPathMtpAuxHi  string   `json:"claimPathMtpAuxHi"` // 0 for inclusion proof
+	ClaimPathMtpAuxHv  string   `json:"claimPathMtpAuxHv"` // 0 for inclusion proof
+	ClaimPathKey       string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
+	ClaimPathValue     string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
+
+	Operator            int      `json:"operator"`
+	SlotIndex           int      `json:"slotIndex"`
+	Timestamp           string   `json:"timestamp"`
+	IsRevocationChecked int      `json:"isRevocationChecked"`
+	Value               []string `json:"value"`
+}
+
+type CredentialAtomicSigOnChainV2Outputs struct {
+	UserID                 string `json:"userID"`
+	IssuerID               string `json:"issuerID"`
+	IssuerAuthState        string `json:"issuerAuthState"`
+	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
+	ClaimSchema            string `json:"claimSchema"`
+	SlotIndex              string `json:"slotIndex"`
+	Operator               int    `json:"operator"`
+	ValueHash              string `json:"valueHash"`
+	Timestamp              string `json:"timestamp"`
+	Merklized              string `json:"merklized"`
+	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
+	GistRoot               string `json:"gistRoot"`
+	Challenge              string `json:"challenge"`
+}
+
+type TestDataSigV2 struct {
+	Desc string                              `json:"desc"`
+	In   CredentialAtomicSigOnChainV2Inputs  `json:"inputs"`
+	Out  CredentialAtomicSigOnChainV2Outputs `json:"expOut"`
+}
+
 func Test_UserID_Subject(t *testing.T) {
 
 	desc := "ON Chain: UserID = Subject. UserID out. User nonce = 0, Subject nonce = 0 claim issued on userID (Merklized claim)"
@@ -107,7 +198,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
-	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+	inputs := CredentialAtomicSigOnChainV2Inputs{
 		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
@@ -177,7 +268,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
-	out := utils.CredentialAtomicSigOnChainV2Outputs{
+	out := CredentialAtomicSigOnChainV2Outputs{
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -193,10 +284,10 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		GistRoot:               gistRoot.BigInt().String(),
 	}
 
-	json, err := json2.Marshal(utils.TestDataSigV2{
+	json, err := json2.Marshal(TestDataSigV2{
 		Desc: desc,
-		In: inputs,
-		Out: out,
+		In:   inputs,
+		Out:  out,
 	})
 	require.NoError(t, err)
 
@@ -243,7 +334,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
-	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+	inputs := CredentialAtomicSigOnChainV2Inputs{
 		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
@@ -314,7 +405,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
-	out := utils.CredentialAtomicSigOnChainV2Outputs{
+	out := CredentialAtomicSigOnChainV2Outputs{
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -330,10 +421,10 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		GistRoot:               gistRoot.BigInt().String(),
 	}
 
-	json, err := json2.Marshal(utils.TestDataSigV2{
+	json, err := json2.Marshal(TestDataSigV2{
 		Desc: desc,
-		In: inputs,
-		Out: out,
+		In:   inputs,
+		Out:  out,
 	})
 	require.NoError(t, err)
 
@@ -419,7 +510,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
-	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+	inputs := CredentialAtomicSigOnChainV2Inputs{
 		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
@@ -489,7 +580,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
-	out := utils.CredentialAtomicSigOnChainV2Outputs{
+	out := CredentialAtomicSigOnChainV2Outputs{
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -505,10 +596,10 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		GistRoot:               gistRoot.BigInt().String(),
 	}
 
-	json, err := json2.Marshal(utils.TestDataSigV2{
+	json, err := json2.Marshal(TestDataSigV2{
 		Desc: desc,
-		In: inputs,
-		Out: out,
+		In:   inputs,
+		Out:  out,
 	})
 	require.NoError(t, err)
 
@@ -570,7 +661,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
-	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+	inputs := CredentialAtomicSigOnChainV2Inputs{
 		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
@@ -640,7 +731,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
-	out := utils.CredentialAtomicSigOnChainV2Outputs{
+	out := CredentialAtomicSigOnChainV2Outputs{
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -656,10 +747,10 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		GistRoot:               gistRoot.BigInt().String(),
 	}
 
-	json, err := json2.Marshal(utils.TestDataSigV2{
+	json, err := json2.Marshal(TestDataSigV2{
 		Desc: desc,
-		In: inputs,
-		Out: out,
+		In:   inputs,
+		Out:  out,
 	})
 	require.NoError(t, err)
 
@@ -733,7 +824,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
-	inputs := utils.CredentialAtomicSigOnChainV2Inputs{
+	inputs := CredentialAtomicSigOnChainV2Inputs{
 		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
@@ -804,7 +895,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
-	out := utils.CredentialAtomicSigOnChainV2Outputs{
+	out := CredentialAtomicSigOnChainV2Outputs{
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
@@ -820,10 +911,10 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		GistRoot:               gistRoot.BigInt().String(),
 	}
 
-	json, err := json2.Marshal(utils.TestDataSigV2{
+	json, err := json2.Marshal(TestDataSigV2{
 		Desc: desc,
-		In: inputs,
-		Out: out,
+		In:   inputs,
+		Out:  out,
 	})
 	require.NoError(t, err)
 

@@ -22,6 +22,95 @@ const (
 	requestID = "32"
 )
 
+type CredentialAtomicMTPOnChainV2Inputs struct {
+	RequestID string `json:"requestID"`
+
+	// begin  user data
+	UserGenesisID               string      `json:"userGenesisID"`            //
+	ProfileNonce                string      `json:"profileNonce"`             //
+	ClaimSubjectProfileNonce    string      `json:"claimSubjectProfileNonce"` //
+	UserAuthClaim               *core.Claim `json:"authClaim"`
+	UserAuthClaimMtp            []string    `json:"authClaimIncMtp"`
+	UserAuthClaimNonRevMtp      []string    `json:"authClaimNonRevMtp"`
+	UserAuthClaimNonRevMtpAuxHi string      `json:"authClaimNonRevMtpAuxHi"`
+	UserAuthClaimNonRevMtpAuxHv string      `json:"authClaimNonRevMtpAuxHv"`
+	UserAuthClaimNonRevMtpNoAux string      `json:"authClaimNonRevMtpNoAux"`
+	Challenge                   string      `json:"challenge"`
+	ChallengeSignatureR8X       string      `json:"challengeSignatureR8x"`
+	ChallengeSignatureR8Y       string      `json:"challengeSignatureR8y"`
+	ChallengeSignatureS         string      `json:"challengeSignatureS"`
+	UserClaimsTreeRoot          string      `json:"userClaimsTreeRoot"`
+	UserRevTreeRoot             string      `json:"userRevTreeRoot"`
+	UserRootsTreeRoot           string      `json:"userRootsTreeRoot"`
+	UserState                   string      `json:"userState"`
+	GistRoot                    string      `json:"gistRoot"`
+	GistMtp                     []string    `json:"gistMtp"`
+	GistMtpAuxHi                string      `json:"gistMtpAuxHi"`
+	GistMtpAuxHv                string      `json:"gistMtpAuxHv"`
+	GistMtpNoAux                string      `json:"gistMtpNoAux"`
+	// end user data
+
+	IssuerID string `json:"issuerID"`
+	// Claim
+	IssuerClaim *core.Claim `json:"issuerClaim"`
+	// Inclusion
+	IssuerClaimMtp            []string         `json:"issuerClaimMtp"`
+	IssuerClaimClaimsTreeRoot *merkletree.Hash `json:"issuerClaimClaimsTreeRoot"`
+	IssuerClaimRevTreeRoot    *merkletree.Hash `json:"issuerClaimRevTreeRoot"`
+	IssuerClaimRootsTreeRoot  *merkletree.Hash `json:"issuerClaimRootsTreeRoot"`
+	IssuerClaimIdenState      string           `json:"issuerClaimIdenState"`
+
+	IsRevocationChecked             int              `json:"isRevocationChecked"`
+	IssuerClaimNonRevClaimsTreeRoot *merkletree.Hash `json:"issuerClaimNonRevClaimsTreeRoot"`
+	IssuerClaimNonRevRevTreeRoot    *merkletree.Hash `json:"issuerClaimNonRevRevTreeRoot"`
+	IssuerClaimNonRevRootsTreeRoot  *merkletree.Hash `json:"issuerClaimNonRevRootsTreeRoot"`
+	IssuerClaimNonRevState          string           `json:"issuerClaimNonRevState"`
+	IssuerClaimNonRevMtp            []string         `json:"issuerClaimNonRevMtp"`
+	IssuerClaimNonRevMtpAuxHi       string           `json:"issuerClaimNonRevMtpAuxHi"`
+	IssuerClaimNonRevMtpAuxHv       string           `json:"issuerClaimNonRevMtpAuxHv"`
+	IssuerClaimNonRevMtpNoAux       string           `json:"issuerClaimNonRevMtpNoAux"`
+
+	ClaimSchema string `json:"claimSchema"`
+
+	// Query
+	// JSON path
+	ClaimPathNotExists string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
+	ClaimPathMtp       []string `json:"claimPathMtp"`
+	ClaimPathMtpNoAux  string   `json:"claimPathMtpNoAux"` // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+	ClaimPathMtpAuxHi  string   `json:"claimPathMtpAuxHi"` // 0 for inclusion proof
+	ClaimPathMtpAuxHv  string   `json:"claimPathMtpAuxHv"` // 0 for inclusion proof
+	ClaimPathKey       string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
+	ClaimPathValue     string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
+
+	Operator  int      `json:"operator"`
+	SlotIndex int      `json:"slotIndex"`
+	Timestamp string   `json:"timestamp"`
+	Value     []string `json:"value"`
+}
+
+type CredentialAtomicMTPOnChainV2Outputs struct {
+	UserID                 string `json:"userID"`
+	IssuerID               string `json:"issuerID"`
+	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
+	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
+	ClaimSchema            string `json:"claimSchema"`
+	SlotIndex              string `json:"slotIndex"`
+	Operator               int    `json:"operator"`
+	ValueHash              string `json:"valueHash"`
+	Timestamp              string `json:"timestamp"`
+	Merklized              string `json:"merklized"`
+	ClaimPathKey           string `json:"claimPathKey"`
+	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
+	GistRoot               string `json:"gistRoot"`
+	Challenge              string `json:"challenge"`
+}
+
+type TestDataOnChainMTPV2 struct {
+	Desc string                              `json:"desc"`
+	In   CredentialAtomicMTPOnChainV2Inputs  `json:"inputs"`
+	Out  CredentialAtomicMTPOnChainV2Outputs `json:"expOut"`
+}
+
 func Test_ClaimIssuedOnUserID(t *testing.T) {
 	desc := "OnChain: User == Subject. Claim issued on UserID"
 	isUserIDProfile := false
@@ -91,7 +180,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
-	inputs := utils.CredentialAtomicMTPOnChainV2Inputs{
+	inputs := CredentialAtomicMTPOnChainV2Inputs{
 		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
@@ -148,7 +237,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
-	out := utils.CredentialAtomicMTPOnChainV2Outputs{
+	out := CredentialAtomicMTPOnChainV2Outputs{
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -165,7 +254,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		GistRoot:               gistRoot.BigInt().String(),
 	}
 
-	json, err := json2.Marshal(utils.TestDataOnChainMTPV2{
+	json, err := json2.Marshal(TestDataOnChainMTPV2{
 		Desc: desc,
 		In:   inputs,
 		Out:  out,
@@ -215,7 +304,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
-	inputs := utils.CredentialAtomicMTPOnChainV2Inputs{
+	inputs := CredentialAtomicMTPOnChainV2Inputs{
 		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
@@ -271,7 +360,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	valueHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
-	out := utils.CredentialAtomicMTPOnChainV2Outputs{
+	out := CredentialAtomicMTPOnChainV2Outputs{
 		UserID:                 user.ID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -288,7 +377,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		GistRoot:               gistRoot.BigInt().String(),
 	}
 
-	json, err := json2.Marshal(utils.TestDataOnChainMTPV2{
+	json, err := json2.Marshal(TestDataOnChainMTPV2{
 		Desc: desc,
 		In:   inputs,
 		Out:  out,
@@ -361,7 +450,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
-	inputs := utils.CredentialAtomicMTPOnChainV2Inputs{
+	inputs := CredentialAtomicMTPOnChainV2Inputs{
 		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
@@ -417,7 +506,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	valueHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
-	out := utils.CredentialAtomicMTPOnChainV2Outputs{
+	out := CredentialAtomicMTPOnChainV2Outputs{
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -434,7 +523,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		GistRoot:               gistRoot.BigInt().String(),
 	}
 
-	json, err := json2.Marshal(utils.TestDataOnChainMTPV2{
+	json, err := json2.Marshal(TestDataOnChainMTPV2{
 		Desc: desc,
 		In:   inputs,
 		Out:  out,
@@ -494,7 +583,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
-	inputs := utils.CredentialAtomicMTPOnChainV2Inputs{
+	inputs := CredentialAtomicMTPOnChainV2Inputs{
 		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
 		ProfileNonce:                    nonce.String(),
@@ -549,7 +638,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	}
 	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
-	out := utils.CredentialAtomicMTPOnChainV2Outputs{
+	out := CredentialAtomicMTPOnChainV2Outputs{
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
@@ -566,7 +655,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		GistRoot:               gistRoot.BigInt().String(), // 0 for inclusion, 1 for non-inclusion
 	}
 
-	json, err := json2.Marshal(utils.TestDataOnChainMTPV2{
+	json, err := json2.Marshal(TestDataOnChainMTPV2{
 		Desc: desc,
 		In:   inputs,
 		Out:  out,
