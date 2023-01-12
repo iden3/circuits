@@ -32,15 +32,14 @@ type InputsMTP struct {
 	IssuerClaimNonRevRootsRoot  *merkletree.Hash `json:"issuerClaimNonRevRootsRoot"`
 	IssuerClaimNonRevState      string           `json:"issuerClaimNonRevState"`
 
-	IssuerClaimSchema string `json:"issuerClaimSchema"`
+	ClaimSchema string `json:"claimSchema"`
 
-	// claim of state-secret (Holder's claim)
-	HolderClaim           *core.Claim      `json:"holderClaim"`
-	HolderClaimMtp        []string         `json:"holderClaimMtp"`
-	HolderClaimClaimsRoot *merkletree.Hash `json:"holderClaimClaimsRoot"`
-	HolderClaimRevRoot    *merkletree.Hash `json:"holderClaimRevRoot"`
-	HolderClaimRootsRoot  *merkletree.Hash `json:"holderClaimRootsRoot"`
-	HolderClaimIdenState  string           `json:"holderClaimIdenState"`
+	StateCommitmentClaim           *core.Claim      `json:"stateCommitmentClaim"`
+	StateCommitmentClaimMtp        []string         `json:"stateCommitmentClaimMtp"`
+	StateCommitmentClaimClaimsRoot *merkletree.Hash `json:"stateCommitmentClaimClaimsRoot"`
+	StateCommitmentClaimRevRoot    *merkletree.Hash `json:"stateCommitmentClaimRevRoot"`
+	StateCommitmentClaimRootsRoot  *merkletree.Hash `json:"stateCommitmentClaimRootsRoot"`
+	StateCommitmentClaimIdenState  string           `json:"stateCommitmentClaimIdenState"`
 
 	GistRoot     *merkletree.Hash `json:"gistRoot"`
 	GistMtp      []string         `json:"gistMtp"`
@@ -89,15 +88,14 @@ type InputsSig struct {
 	IssuerClaimSignatureR8Y string `json:"issuerClaimSignatureR8y"`
 	IssuerClaimSignatureS   string `json:"issuerClaimSignatureS"`
 
-	IssuerClaimSchema string `json:"issuerClaimSchema"`
+	ClaimSchema string `json:"claimSchema"`
 
-	// claim of state-secret (Holder's claim)
-	HolderClaim           *core.Claim      `json:"holderClaim"`
-	HolderClaimMtp        []string         `json:"holderClaimMtp"`
-	HolderClaimClaimsRoot *merkletree.Hash `json:"holderClaimClaimsRoot"`
-	HolderClaimRevRoot    *merkletree.Hash `json:"holderClaimRevRoot"`
-	HolderClaimRootsRoot  *merkletree.Hash `json:"holderClaimRootsRoot"`
-	HolderClaimIdenState  string           `json:"holderClaimIdenState"`
+	StateCommitmentClaim           *core.Claim      `json:"stateCommitmentClaim"`
+	StateCommitmentClaimMtp        []string         `json:"stateCommitmentClaimMtp"`
+	StateCommitmentClaimClaimsRoot *merkletree.Hash `json:"stateCommitmentClaimClaimsRoot"`
+	StateCommitmentClaimRevRoot    *merkletree.Hash `json:"stateCommitmentClaimRevRoot"`
+	StateCommitmentClaimRootsRoot  *merkletree.Hash `json:"stateCommitmentClaimRootsRoot"`
+	StateCommitmentClaimIdenState  string           `json:"stateCommitmentClaimIdenState"`
 
 	GistRoot     *merkletree.Hash `json:"gistRoot"`
 	GistMtp      []string         `json:"gistMtp"`

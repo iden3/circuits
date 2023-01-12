@@ -1,23 +1,22 @@
 pragma circom 2.0.0;
 
-template GetStateSecretPosition() {
+template GetStateCommitmentPosition() {
     signal output out;
-    out <== 1974680877085411137074044236594333239180760340473446672920498187419060160560;
+    out <== 11712158702391090353476752334536845532095615971587654091891297967623141028854;
 }
 
-// A template to retrieve the hash of the state secret schema
-template GetStateSecretSchemaHash(){
+template GetStateCommitmentSchemaHash(){
     signal output schemaHash;
-    schemaHash <== 262057681346829900854325169563380898778;
+    schemaHash <== 7082351036644153942426544930816155573;
 }
 
-template VerifyAndExtractValStateSecret(HolderLevel, GistLevels){
+template VerifyStateCommitment(UserLevels, GistLevels){ // stateCommitmentClaim
     signal input claim[8];
-    signal input claimIssuanceMtp[HolderLevel];
-    signal input claimIssuanceClaimsRoot;
-    signal input claimIssuanceRevRoot;
-    signal input claimIssuanceRootsRoot;
-    signal input claimIssuanceIdenState;
+    signal input claimMtp[UserLevels];
+    signal input claimClaimsRoot;
+    signal input claimRevRoot;
+    signal input claimRootsRoot;
+    signal input claimIdenState;
 
     signal input gistMtp[GistLevels];
     signal input gistRoot;
@@ -27,27 +26,35 @@ template VerifyAndExtractValStateSecret(HolderLevel, GistLevels){
 
     signal input genesisID;
 
-    signal output claimValueHash;
-
     // Verify claim is included in claims tree root
-    component claimIssuanceCheck = checkClaimExists(HolderLevel);
+    component claimIssuanceCheck = checkClaimExists(UserLevels);
     for (var i=0; i<8; i++) { claimIssuanceCheck.claim[i] <== claim[i]; }
-    for (var i=0; i<HolderLevel; i++) { claimIssuanceCheck.claimMTP[i] <== claimIssuanceMtp[i]; }
-    claimIssuanceCheck.treeRoot <== claimIssuanceClaimsRoot;
+    for (var i=0; i<UserLevels; i++) { claimIssuanceCheck.claimMTP[i] <== claimMtp[i]; }
+    claimIssuanceCheck.treeRoot <== claimClaimsRoot;
 
     // Verify state includes claims tree
     component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();
-    verifyClaimIssuanceIdenState.claimsTreeRoot <== claimIssuanceClaimsRoot;
-    verifyClaimIssuanceIdenState.revTreeRoot <== claimIssuanceRevRoot;
-    verifyClaimIssuanceIdenState.rootsTreeRoot <== claimIssuanceRootsRoot;
-    verifyClaimIssuanceIdenState.expectedState <== claimIssuanceIdenState;
+    verifyClaimIssuanceIdenState.claimsTreeRoot <== claimClaimsRoot;
+    verifyClaimIssuanceIdenState.revTreeRoot <== claimRevRoot;
+    verifyClaimIssuanceIdenState.rootsTreeRoot <== claimRootsRoot;
+    verifyClaimIssuanceIdenState.expectedState <== claimIdenState;
 
-    component stateSecretSchemaHash = GetStateSecretSchemaHash();
+    component stateCommitmentSchemaHash = GetStateCommitmentSchemaHash();
 
     // Verify claim schema
     component claimSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== claim[i]; }
-    claimSchemaCheck.schema <== stateSecretSchemaHash.schemaHash;
+    claimSchemaCheck.schema <== stateCommitmentSchemaHash.schemaHash;
+
+    component cutId = cutId();
+    cutId.in <== genesisID;
+
+    component cutState = cutState();
+    cutState.in <== claimIdenState;
+
+    component isStateGenesis = IsEqual();
+    isStateGenesis.in[0] <== cutId.out;
+    isStateGenesis.in[1] <== cutState.out;
 
     // Verify issuer state is in GIST 
     component genesisIDhash = Poseidon(1);
@@ -55,22 +62,20 @@ template VerifyAndExtractValStateSecret(HolderLevel, GistLevels){
 
     component gistCheck = SMTVerifier(GistLevels);
     gistCheck.enabled <== 1;
-    gistCheck.fnc <== 0; // non-inclusion in case if genesis state, otherwise inclusion
+    gistCheck.fnc <== isStateGenesis.out; // non-inclusion in case if genesis state, otherwise inclusion
     gistCheck.root <== gistRoot;
     for (var i=0; i<GistLevels; i++) { gistCheck.siblings[i] <== gistMtp[i]; }
     gistCheck.oldKey <== gistMtpAuxHi;
     gistCheck.oldValue <== gistMtpAuxHv;
     gistCheck.isOld0 <== gistMtpNoAux;
     gistCheck.key <== genesisIDhash.out;
-    gistCheck.value <== claimIssuanceIdenState;
+    gistCheck.value <== claimIdenState;
 
     // Verify claim's index is the same as the hard-coded index
-    component constClaimIdx = GetStateSecretPosition();
+    component constClaimIdx = GetStateCommitmentPosition();
 
-    // Get the state-secret property value and return it
+    // Get the secret and return it
     component claimHash = getClaimHiHv();
     for (var i=0; i<8; i++) { claimHash.claim[i] <== claim[i]; }
     constClaimIdx.out === claimHash.hi;
-
-    claimValueHash <== claimHash.hv;
 }

@@ -7,9 +7,9 @@ include "../lib/utils/claimUtils.circom";
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 
-template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, GistLevels) {
+template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, UserLevels, GistLevels) {
 
-    // claim of uniqueness 
+    // uniqueness claim
     signal input issuerClaim[8];
     signal input issuerClaimMtp[IssuerLevels];
     signal input issuerClaimClaimsRoot;
@@ -27,15 +27,15 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     signal input issuerClaimNonRevRootsRoot;
     signal input issuerClaimNonRevState;
 
-    signal input issuerClaimSchema;
+    signal input claimSchema;
 
-    // claim of state secret stateSecret
-    signal input holderClaim[8];
-    signal input holderClaimMtp[HolderLevel];
-    signal input holderClaimClaimsRoot;
-    signal input holderClaimRevRoot;
-    signal input holderClaimRootsRoot;
-    signal input holderClaimIdenState;
+    // state commitment claim
+    signal input stateCommitmentClaim[8];
+    signal input stateCommitmentClaimMtp[UserLevels];
+    signal input stateCommitmentClaimClaimsRoot;
+    signal input stateCommitmentClaimRevRoot;
+    signal input stateCommitmentClaimRootsRoot;
+    signal input stateCommitmentClaimIdenState;
     
     // GIST and path to holderState
     signal input gistRoot;
@@ -55,64 +55,62 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
     signal input issuerID;
     signal input timestamp;
 
-    // inter-signal
-    signal issuerClaimHash;
-    signal holderClaimValueHash;
-
     // outputs
     signal output userID;
     signal output sybilID;
 
-    component verifyUniClaim = VerifyAndHashUniClaim(IssuerLevels);
-    for (var i=0; i<8; i++) { verifyUniClaim.claim[i] <== issuerClaim[i]; }
-    for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.claimMtp[i] <== issuerClaimMtp[i]; }
-    verifyUniClaim.claimClaimsRoot  <== issuerClaimClaimsRoot;
-    verifyUniClaim.claimRevRoot  <== issuerClaimRevRoot;
-    verifyUniClaim.claimRootsRoot  <== issuerClaimRootsRoot;
-    verifyUniClaim.claimIdenState  <== issuerClaimIdenState;
+    component verifyIssuerClaim = VerifyIssuerClaim(IssuerLevels);
+    for (var i=0; i<8; i++) { verifyIssuerClaim.claim[i] <== issuerClaim[i]; }
+    for (var i=0; i<IssuerLevels; i++) { verifyIssuerClaim.claimMtp[i] <== issuerClaimMtp[i]; }
+    verifyIssuerClaim.claimClaimsRoot  <== issuerClaimClaimsRoot;
+    verifyIssuerClaim.claimRevRoot  <== issuerClaimRevRoot;
+    verifyIssuerClaim.claimRootsRoot  <== issuerClaimRootsRoot;
+    verifyIssuerClaim.claimIdenState  <== issuerClaimIdenState;
 
-    for (var i=0; i<IssuerLevels; i++) { verifyUniClaim.claimNonRevMtp[i] <== issuerClaimNonRevMtp[i]; }
-    verifyUniClaim.claimNonRevMtpNoAux  <== issuerClaimNonRevMtpNoAux;
-    verifyUniClaim.claimNonRevMtpAuxHi  <== issuerClaimNonRevMtpAuxHi;
-    verifyUniClaim.claimNonRevMtpAuxHv  <== issuerClaimNonRevMtpAuxHv;
-    verifyUniClaim.claimNonRevClaimsRoot  <== issuerClaimNonRevClaimsRoot;
-    verifyUniClaim.claimNonRevRevRoot  <== issuerClaimNonRevRevRoot;
-    verifyUniClaim.claimNonRevRootsRoot  <== issuerClaimNonRevRootsRoot;
-    verifyUniClaim.claimNonRevState  <== issuerClaimNonRevState;
+    for (var i=0; i<IssuerLevels; i++) { verifyIssuerClaim.claimNonRevMtp[i] <== issuerClaimNonRevMtp[i]; }
+    verifyIssuerClaim.claimNonRevMtpNoAux  <== issuerClaimNonRevMtpNoAux;
+    verifyIssuerClaim.claimNonRevMtpAuxHi  <== issuerClaimNonRevMtpAuxHi;
+    verifyIssuerClaim.claimNonRevMtpAuxHv  <== issuerClaimNonRevMtpAuxHv;
+    verifyIssuerClaim.claimNonRevClaimsRoot  <== issuerClaimNonRevClaimsRoot;
+    verifyIssuerClaim.claimNonRevRevRoot  <== issuerClaimNonRevRevRoot;
+    verifyIssuerClaim.claimNonRevRootsRoot  <== issuerClaimNonRevRootsRoot;
+    verifyIssuerClaim.claimNonRevState  <== issuerClaimNonRevState;
 
-    verifyUniClaim.claimSchema  <== issuerClaimSchema;
+    verifyIssuerClaim.claimSchema  <== claimSchema;
 
-    verifyUniClaim.userGenesisID  <== userGenesisID;
-    verifyUniClaim.profileNonce <== profileNonce;
-    verifyUniClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
-    verifyUniClaim.timestamp <== timestamp;
+    verifyIssuerClaim.userGenesisID  <== userGenesisID;
+    verifyIssuerClaim.profileNonce <== profileNonce;
+    verifyIssuerClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
+    verifyIssuerClaim.timestamp <== timestamp;
 
-    verifyUniClaim.claimHash  ==> issuerClaimHash;
+    component issuerClaimHasher = getClaimHash();
+    for (var i=0; i<8; i++) { issuerClaimHasher.claim[i] <== issuerClaim[i]; }
 
-    component verifyStateSecret = VerifyAndExtractValStateSecret(HolderLevel, GistLevels);
-    for (var i=0; i<8; i++) { verifyStateSecret.claim[i] <== holderClaim[i]; }
-    for (var i=0; i<HolderLevel; i++) { verifyStateSecret.claimIssuanceMtp[i] <== holderClaimMtp[i]; }
-    verifyStateSecret.claimIssuanceClaimsRoot <== holderClaimClaimsRoot;
-    verifyStateSecret.claimIssuanceRevRoot <== holderClaimRevRoot;
-    verifyStateSecret.claimIssuanceRootsRoot <== holderClaimRootsRoot;
-    verifyStateSecret.claimIssuanceIdenState <== holderClaimIdenState;
+    component verifyStateCommitment = VerifyStateCommitment(UserLevels, GistLevels);
+    for (var i=0; i<8; i++) { verifyStateCommitment.claim[i] <== stateCommitmentClaim[i]; }
+    for (var i=0; i<UserLevels; i++) { verifyStateCommitment.claimMtp[i] <== stateCommitmentClaimMtp[i]; }
+    verifyStateCommitment.claimClaimsRoot <== stateCommitmentClaimClaimsRoot;
+    verifyStateCommitment.claimRevRoot <== stateCommitmentClaimRevRoot;
+    verifyStateCommitment.claimRootsRoot <== stateCommitmentClaimRootsRoot;
+    verifyStateCommitment.claimIdenState <== stateCommitmentClaimIdenState;
 
-    verifyStateSecret.genesisID <== userGenesisID; 
+    verifyStateCommitment.genesisID <== userGenesisID; 
 
-    for (var i=0; i<GistLevels; i++) { verifyStateSecret.gistMtp[i] <== gistMtp[i]; }
-    verifyStateSecret.gistRoot <== gistRoot;
-    verifyStateSecret.gistMtpAuxHi <== gistMtpAuxHi;
-    verifyStateSecret.gistMtpAuxHv <== gistMtpAuxHv;
-    verifyStateSecret.gistMtpNoAux <== gistMtpNoAux;
-
-    verifyStateSecret.claimValueHash ==> holderClaimValueHash;
+    for (var i=0; i<GistLevels; i++) { verifyStateCommitment.gistMtp[i] <== gistMtp[i]; }
+    verifyStateCommitment.gistRoot <== gistRoot;
+    verifyStateCommitment.gistMtpAuxHi <== gistMtpAuxHi;
+    verifyStateCommitment.gistMtpAuxHv <== gistMtpAuxHv;
+    verifyStateCommitment.gistMtpNoAux <== gistMtpNoAux;
+    
+    component stateCommitmentClaimValHasher = getClaimHiHv();
+    for (var i=0; i<8; i++) { stateCommitmentClaimValHasher.claim[i] <== stateCommitmentClaim[i]; }
     
     // Compute SybilId
-    component hash = Poseidon(3);
-    hash.inputs[0] <== holderClaimValueHash;
-    hash.inputs[1] <== issuerClaimHash;
-    hash.inputs[2] <== crs;
-    sybilID <== hash.out;
+    component sybilIDHasher = Poseidon(3);
+    sybilIDHasher.inputs[0] <== stateCommitmentClaimValHasher.hv;
+    sybilIDHasher.inputs[1] <== issuerClaimHasher.hash;
+    sybilIDHasher.inputs[2] <== crs;
+    sybilID <== sybilIDHasher.out;
 
     // Compute UserId
     component selectProfile = SelectProfile();
@@ -122,13 +120,15 @@ template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, HolderLevel, Gis
 }
 
 
-template VerifyAndHashUniClaim(IssuerLevels){
+template VerifyIssuerClaim(IssuerLevels){
     signal input claim[8];
     signal input claimMtp[IssuerLevels];
     signal input claimClaimsRoot;
     signal input claimRevRoot;
     signal input claimRootsRoot;
     signal input claimIdenState;
+
+    signal input claimSchema;
 
     signal input claimNonRevMtp[IssuerLevels];
     signal input claimNonRevMtpNoAux;
@@ -139,25 +139,21 @@ template VerifyAndHashUniClaim(IssuerLevels){
     signal input claimNonRevRootsRoot;
     signal input claimNonRevState;
 
-    signal input claimSchema;
-
     signal input timestamp;
 
     signal input userGenesisID;
     signal input profileNonce;
     signal input claimSubjectProfileNonce;
 
-    signal output claimHash;
-
     // Verify claim issued
     component vci = verifyClaimIssuanceNonRev(IssuerLevels);
+    vci.enabledNonRevCheck <== 1;
     for (var i=0; i<8; i++) { vci.claim[i] <== claim[i]; }
     for (var i=0; i<IssuerLevels; i++) { vci.claimIssuanceMtp[i] <== claimMtp[i]; }
     vci.claimIssuanceClaimsTreeRoot <== claimClaimsRoot;
     vci.claimIssuanceRevTreeRoot <== claimRevRoot;
     vci.claimIssuanceRootsTreeRoot <== claimRootsRoot;
     vci.claimIssuanceIdenState <== claimIdenState;
-    vci.enabledNonRevCheck <== 1;
 
     // And non revocation status
     for (var i=0; i<IssuerLevels; i++) { vci.claimNonRevMtp[i] <== claimNonRevMtp[i]; }
@@ -185,10 +181,6 @@ template VerifyAndHashUniClaim(IssuerLevels){
     claimIdCheck.id <== userGenesisID;
     claimIdCheck.nonce <== claimSubjectProfileNonce;
 
-    // Get claim hash
-    component hasher = getClaimHash();
-    for (var i=0; i<8; i++) { hasher.claim[i] <== claim[i]; }
-    claimHash <== hasher.hash;
 }
 
 
