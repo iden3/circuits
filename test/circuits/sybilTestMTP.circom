@@ -1,9 +1,13 @@
 pragma circom 2.0.0;
 
-include "../../circuits/sybil/sybilResCredentialAtomicQueryMTPOffChain.circom";
+include "../../circuits/sybil/sybilCredentialAtomicMTPOffChain.circom";
 
 component main{public [
+                        requestID,
+                        issuerID,
+                        timestamp,
+                        claimSchema,
                         issuerClaimIdenState,
                         issuerClaimNonRevState,
                         crs,
-                        gistRoot]} = SybilResCredentialAtomicQueryMTPOffChain(32, 32, 32);
+                        gistRoot]} = SybilCredentialAtomicMTP(32, 32, 32);

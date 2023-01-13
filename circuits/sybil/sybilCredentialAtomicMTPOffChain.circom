@@ -7,7 +7,7 @@ include "../lib/utils/claimUtils.circom";
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 
-template SybilResCredentialAtomicQueryMTPOffChain(IssuerLevels, UserLevels, GistLevels) {
+template SybilCredentialAtomicMTP(IssuerLevels, UserLevels, GistLevels) {
 
     // uniqueness claim
     signal input issuerClaim[8];
