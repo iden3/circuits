@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "sybilResCredentialAtomicQuerySigOffChain.circom";
+include "sybilCredentialAtomicSigOffChain.circom";
 
 component main{public [
                         requestID,
@@ -9,4 +9,4 @@ component main{public [
                         claimSchema,
                         issuerClaimNonRevState,
                         crs,
-                        gistRoot]} = SybilResCredentialAtomicQuerySigOffChain(32, 32, 32);
+                        gistRoot]} = SybilCredentialAtomicSig(32, 32, 32);
