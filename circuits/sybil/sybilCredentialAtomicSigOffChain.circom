@@ -5,7 +5,7 @@ include "../lib/utils/claimUtils.circom";
 include "../lib/utils/treeUtils.circom";
 
 
-template SybilResCredentialAtomicQuerySigOffChain(IssuerLevels, UserLevels, GistLevels) {
+template SybilCredentialAtomicSig(IssuerLevels, UserLevels, GistLevels) {
     // issuer auth proof of existence
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimMtp[IssuerLevels];
