@@ -3,9 +3,10 @@ package mtpv2onchain
 import (
 	"context"
 	json2 "encoding/json"
-	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 	"math/big"
 	"testing"
+
+	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 
 	"test/utils"
 
@@ -236,7 +237,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
 	}
 
-	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
@@ -361,7 +362,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		Timestamp:                       timestamp,
 		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
 	}
-	valueHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valueHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
@@ -509,7 +510,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		Timestamp:                       timestamp,
 		Value:                           utils.PrepareStrArray([]string{valueKey.String()}, 64),
 	}
-	valueHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valueHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
@@ -644,7 +645,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		Timestamp:                       timestamp,
 		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
 	}
-	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,

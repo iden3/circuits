@@ -465,7 +465,7 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 		Timestamp:                       timestamp,
 		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
 	}
-	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,
@@ -622,7 +622,7 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 
 	issuerAuthState := issuer.State(t)
 
-	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	out := CredentialAtomicSigOnChainV2Outputs{
 		RequestID:              requestID,

@@ -3,9 +3,10 @@ package sigv2onchain
 import (
 	"context"
 	json2 "encoding/json"
-	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 	"math/big"
 	"testing"
+
+	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 
 	"test/utils"
 
@@ -268,7 +269,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 
 	issuerAuthState := issuer.State(t)
 
-	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
 	out := CredentialAtomicSigOnChainV2Outputs{
@@ -408,7 +409,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 
 	issuerAuthState := issuer.State(t)
 
-	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
 	out := CredentialAtomicSigOnChainV2Outputs{
@@ -587,7 +588,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 
 	issuerAuthState := issuer.State(t)
 
-	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	out := CredentialAtomicSigOnChainV2Outputs{
 		RequestID:              requestID,
@@ -741,7 +742,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 
 	issuerAuthState := issuer.State(t)
 
-	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	out := CredentialAtomicSigOnChainV2Outputs{
 		RequestID:              requestID,
@@ -908,7 +909,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 
 	issuerAuthState := issuer.State(t)
 
-	valuesHash, err := utils.PoseidonHash(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 
 	out := CredentialAtomicSigOnChainV2Outputs{
