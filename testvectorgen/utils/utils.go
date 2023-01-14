@@ -198,6 +198,51 @@ func FromStringArrayToBigIntArray(values []string) []*big.Int {
 	return bigInts
 }
 
+// // PoseidonHash returns the solidity and circom implementation of poseidon hash
+// func PoseidonHash(values []*big.Int) (*big.Int, error) {
+
+// 	if values == nil {
+// 		return nil, fmt.Errorf("values not provided")
+// 	}
+
+// 	if len(values) == 0 {
+// 		return nil, fmt.Errorf("empty values")
+// 	}
+// 	var iterationCount int
+// 	l := len(values)
+// 	if l > BatchSize {
+// 		r := l % BatchSize
+// 		diff := BatchSize - r
+// 		iterationCount = (l + diff) / BatchSize
+// 	} else {
+// 		iterationCount = 1
+// 	}
+// 	fullHash := big.NewInt(0)
+// 	var err error
+// 	getIndex := func(idx, length int) int {
+// 		if idx < length {
+// 			return idx
+// 		}
+// 		return 0
+// 	}
+// 	for i := 0; i < iterationCount; i++ {
+// 		elemIdx := i * BatchSize
+// 		fullHash, err = poseidon.Hash([]*big.Int{
+// 			fullHash,
+// 			values[getIndex(elemIdx, l)],
+// 			values[getIndex(elemIdx+1, l)],
+// 			values[getIndex(elemIdx+2, l)],
+// 			values[getIndex(elemIdx+3, l)],
+// 			values[getIndex(elemIdx+4, l)],
+// 		})
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 	}
+
+// 	return fullHash, nil
+// }
+
 // PoseidonHash returns the solidity and circom implementation of poseidon hash
 func PoseidonHash(values []*big.Int) (*big.Int, error) {
 
@@ -208,32 +253,47 @@ func PoseidonHash(values []*big.Int) (*big.Int, error) {
 	if len(values) == 0 {
 		return nil, fmt.Errorf("empty values")
 	}
-	var iterationCount int
-	l := len(values)
-	if l > BatchSize {
-		r := l % BatchSize
-		diff := BatchSize - r
-		iterationCount = (l + diff) / BatchSize
-	} else {
-		iterationCount = 1
-	}
-	fullHash := big.NewInt(0)
+
+	iterationCount := 0
 	var err error
-	getIndex := func(idx, length int) int {
+	getValueByIndex := func(arr []*big.Int, idx, length int) *big.Int {
 		if idx < length {
-			return idx
+			return arr[idx]
 		}
-		return 0
+		return big.NewInt(0)
 	}
+	l := len(values)
+	hashFnBatchSize := 6
+	// first iteration to get the first hash  (6 elements)
+	fullHash, err := poseidon.Hash([]*big.Int{
+		getValueByIndex(values, 0, l),
+		getValueByIndex(values, 1, l),
+		getValueByIndex(values, 2, l),
+		getValueByIndex(values, 3, l),
+		getValueByIndex(values, 4, l),
+		getValueByIndex(values, 5, l),
+	})
+
+	restLength := l - hashFnBatchSize
+	if restLength > BatchSize {
+		r := restLength % BatchSize
+		diff := BatchSize - r
+		iterationCount = (restLength + diff) / BatchSize
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
 	for i := 0; i < iterationCount; i++ {
-		elemIdx := i * BatchSize
+		elemIdx := i*BatchSize + hashFnBatchSize
 		fullHash, err = poseidon.Hash([]*big.Int{
 			fullHash,
-			values[getIndex(elemIdx, l)],
-			values[getIndex(elemIdx+1, l)],
-			values[getIndex(elemIdx+2, l)],
-			values[getIndex(elemIdx+3, l)],
-			values[getIndex(elemIdx+4, l)],
+			getValueByIndex(values, elemIdx, l),
+			getValueByIndex(values, elemIdx+1, l),
+			getValueByIndex(values, elemIdx+2, l),
+			getValueByIndex(values, elemIdx+3, l),
+			getValueByIndex(values, elemIdx+4, l),
 		})
 		if err != nil {
 			return nil, err

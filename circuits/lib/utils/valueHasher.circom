@@ -8,40 +8,52 @@ template ValueHasher(valueArraySize) {
 	signal output out;
     // batch size is 5 because 1 input is reserved for the hash of the previous iteration
     var batchSize = 5;
-    var totalIterations = 1;
-    if (valueArraySize >  batchSize) {
-        var moduloRest = valueArraySize % batchSize;
-        var difftoRound = batchSize - moduloRest;
-        var fullLength = valueArraySize + difftoRound;
-        totalIterations = fullLength / batchSize;
+    var iterationCount = 0;
+	var hashFnBatchSize = 6;
+    component firstPoseidon = Poseidon(hashFnBatchSize);
+    for(var i = 0; i < hashFnBatchSize; i++) {
+        firstPoseidon.inputs[i] <== getArrayValueByIndex(in, valueArraySize, i);
     }
-    var fullHash = 0;
 
-    component poseidon[totalIterations];
-    for(var i = 0; i < totalIterations; i++) {
-        var iterationIndex = i * batchSize;
-        poseidon[i] = Poseidon(6);
+    var restLength = valueArraySize - hashFnBatchSize;
+	if (restLength > batchSize) {
+		var r = restLength % batchSize;
+		var diff = batchSize - r;
+		iterationCount = (restLength + diff) / batchSize;
+	}
+
+    var fullHash = firstPoseidon.out;
+
+    component poseidon[iterationCount];
+    for(var i = 0; i < iterationCount; i++) {
+        var elemIdx = i * batchSize + hashFnBatchSize ;
+        poseidon[i] = Poseidon(hashFnBatchSize);
         
         poseidon[i].inputs[0] <== fullHash;
-        poseidon[i].inputs[1] <== in[
-            iterationIndex >= valueArraySize ? 0 : iterationIndex
-        ];
-        poseidon[i].inputs[2] <== in[
-            iterationIndex + 1 >= valueArraySize ? 0 : iterationIndex + 1
-        ];
-        poseidon[i].inputs[3] <== in[
-            iterationIndex + 2 >= valueArraySize ? 0 : iterationIndex + 2
-        ];
-        poseidon[i].inputs[4] <== in[
-            iterationIndex + 3 >= valueArraySize ? 0 : iterationIndex + 3
-        ];
-        poseidon[i].inputs[5] <== in[
-            iterationIndex + 4 >= valueArraySize ? 0 : iterationIndex + 4
-        ];
+
+        poseidon[i].inputs[1] <== getArrayValueByIndex(in, valueArraySize, elemIdx);
+
+        poseidon[i].inputs[2] <== getArrayValueByIndex(in, valueArraySize, elemIdx + 1);
+
+        poseidon[i].inputs[3] <== getArrayValueByIndex(in, valueArraySize, elemIdx + 2);
+
+        poseidon[i].inputs[4] <== getArrayValueByIndex(in, valueArraySize, elemIdx + 3);
+
+        poseidon[i].inputs[5] <== getArrayValueByIndex(in, valueArraySize, elemIdx + 4);
 
         fullHash = poseidon[i].out;
         
     }
     
     out <== fullHash;
+}
+
+
+function getArrayValueByIndex(valueArray, valueArraySize, idx) {
+
+   if(idx < valueArraySize) {
+        return valueArray[idx];
+    } else{
+        return 0;
+    }
 }
