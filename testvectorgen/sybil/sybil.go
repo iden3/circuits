@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"test/utils"
+	"testing"
+
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 	"github.com/stretchr/testify/require"
-	"math/big"
-	"test/utils"
-	"testing"
 )
 
 func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, invalidIdentity, isUserIDProfile, isSubjectIDProfile bool) {
@@ -28,14 +29,13 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 		require.NoError(t, err)
 	}
 
-	expectedSybilID := "8903332384851738260747517773325377528299199208576629685986891704182978270332"
+	expectedSybilID := "10471698337950695878316330095385673516661727327544830961388283775499658220263"
 	subjectID := user.ID
 	nonceSubject := big.NewInt(0)
 	if isSubjectIDProfile {
 		nonceSubject = big.NewInt(999)
 		subjectID, err = core.ProfileID(user.ID, nonceSubject)
 		require.NoError(t, err)
-		expectedSybilID = "15928283987833756851644249157457264609084917385190027282640632960343512336427"
 	}
 
 	// unique claim
@@ -153,7 +153,7 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 		require.NoError(t, err)
 	}
 
-	expectedSybilID := "8903332384851738260747517773325377528299199208576629685986891704182978270332"
+	expectedSybilID := "10471698337950695878316330095385673516661727327544830961388283775499658220263"
 	expectedIssuerAuthState := "2943483356559152311923412925436024635269538717812859789851139200242297094"
 
 	subjectID := user.ID
@@ -162,7 +162,6 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 		nonceSubject = big.NewInt(999)
 		subjectID, err = core.ProfileID(user.ID, nonceSubject)
 		require.NoError(t, err)
-		expectedSybilID = "15928283987833756851644249157457264609084917385190027282640632960343512336427"
 	}
 
 	// Sig claim

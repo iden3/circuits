@@ -106,9 +106,6 @@ template SybilCredentialAtomicSig(IssuerLevels, UserLevels, GistLevels) {
   
     verifyIssuerClaim.issuerAuthState ==> issuerAuthState;
 
-    component issuerClaimHasher = getClaimHash();
-    for (var i=0; i<8; i++) { issuerClaimHasher.claim[i] <== issuerClaim[i]; }
-
     component verifyStateCommitment = VerifyStateCommitment(UserLevels, GistLevels);
     for (var i=0; i<8; i++) { verifyStateCommitment.claim[i] <== stateCommitmentClaim[i]; }
     for (var i=0; i<UserLevels; i++) { verifyStateCommitment.claimMtp[i] <== stateCommitmentClaimMtp[i]; }
@@ -125,14 +122,14 @@ template SybilCredentialAtomicSig(IssuerLevels, UserLevels, GistLevels) {
     verifyStateCommitment.gistMtpAuxHv <== gistMtpAuxHv;
     verifyStateCommitment.gistMtpNoAux <== gistMtpNoAux;
     
-    component stateCommitmentClaimValHasher = getClaimHiHv();
-    for (var i=0; i<8; i++) { stateCommitmentClaimValHasher.claim[i] <== stateCommitmentClaim[i]; }
+    component commClaimValueExtactor = getValueByIndex();
+    for (var i=0; i<8; i++) { commClaimValueExtactor.claim[i] <== stateCommitmentClaim[i]; }
+    commClaimValueExtactor.index <== 6; // secret value position stored in value slot 3 (which is index 7 our of 8)
 
     // Compute SybilId
-    component sybilIDHasher = Poseidon(3);
-    sybilIDHasher.inputs[0] <== stateCommitmentClaimValHasher.hv;
-    sybilIDHasher.inputs[1] <== issuerClaimHasher.hash;
-    sybilIDHasher.inputs[2] <== crs;
+    component sybilIDHasher = Poseidon(2);
+    sybilIDHasher.inputs[0] <== commClaimValueExtactor.value;
+    sybilIDHasher.inputs[1] <== crs;
     sybilID <== sybilIDHasher.out;
 
     // Compute profile.

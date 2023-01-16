@@ -83,9 +83,6 @@ template SybilCredentialAtomicMTP(IssuerLevels, UserLevels, GistLevels) {
     verifyIssuerClaim.claimSubjectProfileNonce <== claimSubjectProfileNonce;
     verifyIssuerClaim.timestamp <== timestamp;
 
-    component issuerClaimHasher = getClaimHash();
-    for (var i=0; i<8; i++) { issuerClaimHasher.claim[i] <== issuerClaim[i]; }
-
     component verifyStateCommitment = VerifyStateCommitment(UserLevels, GistLevels);
     for (var i=0; i<8; i++) { verifyStateCommitment.claim[i] <== stateCommitmentClaim[i]; }
     for (var i=0; i<UserLevels; i++) { verifyStateCommitment.claimMtp[i] <== stateCommitmentClaimMtp[i]; }
@@ -102,23 +99,20 @@ template SybilCredentialAtomicMTP(IssuerLevels, UserLevels, GistLevels) {
     verifyStateCommitment.gistMtpAuxHv <== gistMtpAuxHv;
     verifyStateCommitment.gistMtpNoAux <== gistMtpNoAux;
     
-    component stateCommitmentClaimValHasher = getClaimHiHv();
-    for (var i=0; i<8; i++) { stateCommitmentClaimValHasher.claim[i] <== stateCommitmentClaim[i]; }
-    
-    // Compute SybilId
-    component sybilIDHasher = Poseidon(3);
-    sybilIDHasher.inputs[0] <== stateCommitmentClaimValHasher.hv;
-    sybilIDHasher.inputs[1] <== issuerClaimHasher.hash;
-    sybilIDHasher.inputs[2] <== crs;
+    component commClaimValueExtactor = getValueByIndex();
+    for (var i=0; i<8; i++) { commClaimValueExtactor.claim[i] <== stateCommitmentClaim[i]; }
+    commClaimValueExtactor.index <== 6; // secret value position stored in value slot 3 (which is index 7 out of 8)
+
+    component sybilIDHasher = Poseidon(2);
+    sybilIDHasher.inputs[0] <== commClaimValueExtactor.value;
+    sybilIDHasher.inputs[1] <== crs;
     sybilID <== sybilIDHasher.out;
 
-    // Compute UserId
     component selectProfile = SelectProfile();
     selectProfile.in <== userGenesisID;
     selectProfile.nonce <== profileNonce;
     userID <== selectProfile.out;
 }
-
 
 template VerifyIssuerClaim(IssuerLevels){
     signal input claim[8];
