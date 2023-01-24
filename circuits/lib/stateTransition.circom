@@ -31,6 +31,11 @@ template StateTransition(IdOwnershipLevels) {
     signal input signatureR8y;
     signal input signatureS;
 
+    signal input newClaimsTreeRoot;
+    signal input newAuthClaimMtp[IdOwnershipLevels];
+    signal input newRevTreeRoot;
+    signal input newRootsTreeRoot;
+
     component cutId = cutId();
     cutId.in <== userID;
 
@@ -81,4 +86,16 @@ template StateTransition(IdOwnershipLevels) {
     checkIdOwnership.challengeSignatureS <== signatureS;
 
     checkIdOwnership.userState <== oldUserState;
+
+    // check auth claim exists in newClaimsTreeRoot and newUserState
+    component claimExistsInNewState = checkClaimExists(IdOwnershipLevels);
+    for (var i=0; i<8; i++) { claimExistsInNewState.claim[i] <== authClaim[i]; }
+    for (var i=0; i<IdOwnershipLevels; i++) { claimExistsInNewState.claimMTP[i] <== newAuthClaimMtp[i]; }
+    claimExistsInNewState.treeRoot <== newClaimsTreeRoot;
+
+    component checkNewUserState = checkIdenStateMatchesRoots();
+    checkNewUserState.claimsTreeRoot <== newClaimsTreeRoot;
+    checkNewUserState.revTreeRoot <== newRevTreeRoot;
+    checkNewUserState.rootsTreeRoot <== newRootsTreeRoot;
+    checkNewUserState.expectedState <== newUserState;
 }
