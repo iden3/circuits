@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 
 	"test/utils"
@@ -92,14 +93,11 @@ type CredentialAtomicMTPOnChainV2Inputs struct {
 type CredentialAtomicMTPOnChainV2Outputs struct {
 	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
-	ValueHash              string `json:"valueHash"`
+	СircuitQueryHash       string `json:"circuitQueryHash"`
 	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
-	ClaimSchema            string `json:"claimSchema"`
-	SlotIndex              string `json:"slotIndex"`
-	Operator               int    `json:"operator"`
 	Timestamp              string `json:"timestamp"`
 	ClaimPathKey           string `json:"claimPathKey"`
 	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
@@ -239,6 +237,16 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
+	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		valuesHash,
+		big.NewInt(0),
+		big.NewInt(0),
+	})
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,
@@ -246,10 +254,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
 		IssuerClaimNonRevState: issuer.State(t).String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               utils.EQ,
-		ValueHash:              valuesHash.String(),
+		СircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		ClaimPathKey:           "0",
@@ -362,8 +367,18 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		Timestamp:                       timestamp,
 		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
 	}
-	valueHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
+	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		valuesHash,
+		big.NewInt(0),
+		big.NewInt(0),
+	})
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,
@@ -371,10 +386,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
 		IssuerClaimNonRevState: issuer.State(t).String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               utils.EQ,
-		ValueHash:              valueHash.String(),
+		СircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		ClaimPathKey:           "0",
@@ -510,8 +522,18 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		Timestamp:                       timestamp,
 		Value:                           utils.PrepareStrArray([]string{valueKey.String()}, 64),
 	}
-	valueHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
+	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
+	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		valuesHash,
+		big.NewInt(0),
+		big.NewInt(0),
+	})
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,
@@ -519,10 +541,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
 		IssuerClaimNonRevState: issuer.State(t).String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "0",
-		Operator:               utils.EQ,
-		ValueHash:              valueHash.String(),
+		СircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
 		ClaimPathKey:           pathKey.String(),
@@ -647,16 +666,23 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	}
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
+	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		valuesHash,
+		big.NewInt(0),
+		big.NewInt(0),
+	})
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
 		IssuerClaimNonRevState: issuer.State(t).String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               utils.EQ,
-		ValueHash:              valuesHash.String(),
+		СircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		ClaimPathKey:           "0",

@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 
 	"test/utils"
@@ -95,16 +96,13 @@ type CredentialAtomicSigOnChainV2Inputs struct {
 type CredentialAtomicSigOnChainV2Outputs struct {
 	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
-	ValueHash              string `json:"valueHash"`
+	СircuitQueryHash       string `json:"circuitQueryHash"`
 	IssuerAuthState        string `json:"issuerAuthState"`
 	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
-	ClaimSchema            string `json:"claimSchema"`
-	SlotIndex              string `json:"slotIndex"`
 	ClaimPathKey           string `json:"claimPathKey"`
 	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
-	Operator               int    `json:"operator"`
 	Timestamp              string `json:"timestamp"`
 	IsRevocationChecked    string `json:"isRevocationChecked"`
 	Challenge              string `json:"challenge"`
@@ -271,6 +269,17 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
+	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		valuesHash,
+		big.NewInt(0),
+		big.NewInt(0),
+	})
+	require.NoError(t, err)
 
 	out := CredentialAtomicSigOnChainV2Outputs{
 		RequestID:              requestID,
@@ -278,17 +287,15 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               utils.EQ,
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		ClaimPathNotExists:     "0",
-		ValueHash:              valuesHash.String(),
-		Challenge:              challenge.String(),
-		GistRoot:               gistRoot.BigInt().String(),
-		ClaimPathKey:           "0",
-		IsRevocationChecked:    "0",
+		СircuitQueryHash:       circuitQueryHash.String(),
+
+		Challenge:           challenge.String(),
+		GistRoot:            gistRoot.BigInt().String(),
+		ClaimPathKey:        "0",
+		IsRevocationChecked: "0",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
@@ -411,6 +418,17 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
+	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		valuesHash,
+		big.NewInt(0),
+		big.NewInt(0),
+	})
+	require.NoError(t, err)
 
 	out := CredentialAtomicSigOnChainV2Outputs{
 		RequestID:              requestID,
@@ -418,17 +436,15 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               utils.EQ,
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		ClaimPathNotExists:     "0",
-		ValueHash:              valuesHash.String(),
-		Challenge:              challenge.String(),
-		GistRoot:               gistRoot.BigInt().String(),
-		ClaimPathKey:           "0",
-		IsRevocationChecked:    "1",
+		СircuitQueryHash:       circuitQueryHash.String(),
+
+		Challenge:           challenge.String(),
+		GistRoot:            gistRoot.BigInt().String(),
+		ClaimPathKey:        "0",
+		IsRevocationChecked: "1",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
@@ -590,23 +606,33 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
+	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		valuesHash,
+		big.NewInt(0),
+		big.NewInt(0),
+	})
+	require.NoError(t, err)
+
 	out := CredentialAtomicSigOnChainV2Outputs{
 		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               utils.EQ,
 		Timestamp:              timestamp,
 		Merklized:              "1",
 		ClaimPathNotExists:     "0",
-		ValueHash:              valuesHash.String(),
-		Challenge:              challenge.String(),
-		GistRoot:               gistRoot.BigInt().String(),
-		ClaimPathKey:           pathKey.String(),
-		IsRevocationChecked:    "1",
+		СircuitQueryHash:       circuitQueryHash.String(),
+
+		Challenge:           challenge.String(),
+		GistRoot:            gistRoot.BigInt().String(),
+		ClaimPathKey:        pathKey.String(),
+		IsRevocationChecked: "1",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
@@ -744,21 +770,31 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
+	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		valuesHash,
+		big.NewInt(0),
+		big.NewInt(0),
+	})
+	require.NoError(t, err)
+
 	out := CredentialAtomicSigOnChainV2Outputs{
 		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               utils.EQ,
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		ClaimPathNotExists:     "0",
-		ValueHash:              valuesHash.String(),
-		Challenge:              challenge.String(),
-		GistRoot:               gistRoot.BigInt().String(),
+		СircuitQueryHash:       circuitQueryHash.String(),
+
+		Challenge: challenge.String(),
+		GistRoot:  gistRoot.BigInt().String(),
 
 		ClaimPathKey:        "0",
 		IsRevocationChecked: "1",
@@ -911,6 +947,17 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
+	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		valuesHash,
+		big.NewInt(0),
+		big.NewInt(0),
+	})
+	require.NoError(t, err)
 
 	out := CredentialAtomicSigOnChainV2Outputs{
 		RequestID:              requestID,
@@ -918,17 +965,15 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "0",
-		Operator:               utils.NOOP,
 		Timestamp:              timestamp,
 		Merklized:              "1",
 		ClaimPathNotExists:     "1",
-		ValueHash:              valuesHash.String(),
-		Challenge:              challenge.String(),
-		GistRoot:               gistRoot.BigInt().String(),
-		ClaimPathKey:           pathKey.String(),
-		IsRevocationChecked:    "1",
+		СircuitQueryHash:       circuitQueryHash.String(),
+
+		Challenge:           challenge.String(),
+		GistRoot:            gistRoot.BigInt().String(),
+		ClaimPathKey:        pathKey.String(),
+		IsRevocationChecked: "1",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
