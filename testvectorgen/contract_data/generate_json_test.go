@@ -40,6 +40,10 @@ type StateTransitionInputs struct {
 	SignatureR8Y            string      `json:"signatureR8y"`
 	SignatureS              string      `json:"signatureS"`
 	UserID                  string      `json:"userID"`
+	NewAuthClaimMtp         []string    `json:"newAuthClaimMtp"`
+	NewClaimsTreeRoot       string      `json:"newClaimsTreeRoot"`
+	NewRevTreeRoot          string      `json:"newRevTreeRoot"`
+	NewRootsTreeRoot        string      `json:"newRootsTreeRoot"`
 }
 
 type StateTransitionOutputs struct {
@@ -321,6 +325,11 @@ func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, second
 	sig := primaryEntity.Sign(hashOldAndNewStates)
 	require.NoError(t, err)
 
+	newAuthMTProof := primaryEntity.AuthMTPStrign(t)
+	newCltRoot := primaryEntity.Clt.Root().BigInt().String()
+	newRevRoot := primaryEntity.Ret.Root().BigInt().String()
+	newRotRoot := primaryEntity.Rot.Root().BigInt().String()
+
 	inputs := StateTransitionInputs{
 		AuthClaim:               primaryEntity.AuthClaim,
 		AuthClaimMtp:            authMTProof,
@@ -338,6 +347,10 @@ func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, second
 		SignatureR8Y:            sig.R8.Y.String(),
 		SignatureS:              sig.S.String(),
 		UserID:                  primaryEntity.ID.BigInt().String(),
+		NewAuthClaimMtp:         newAuthMTProof,
+		NewClaimsTreeRoot:       newCltRoot,
+		NewRevTreeRoot:          newRevRoot,
+		NewRootsTreeRoot:        newRotRoot,
 	}
 
 	out := StateTransitionOutputs{
