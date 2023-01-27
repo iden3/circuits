@@ -244,8 +244,6 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		valuesHash,
-		big.NewInt(0),
-		big.NewInt(0),
 	})
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
@@ -376,8 +374,6 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		valuesHash,
-		big.NewInt(0),
-		big.NewInt(0),
 	})
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
@@ -531,8 +527,6 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		valuesHash,
-		big.NewInt(0),
-		big.NewInt(0),
 	})
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
@@ -673,8 +667,6 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		valuesHash,
-		big.NewInt(0),
-		big.NewInt(0),
 	})
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,

@@ -252,13 +252,11 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
         valueHasher.in[i] <== value[i];
     }
 
-    component queryHasher = Poseidon(6);
+    component queryHasher = Poseidon(4);
     queryHasher.inputs[0] <== claimSchema;
     queryHasher.inputs[1] <== slotIndex;
     queryHasher.inputs[2] <== operator;
     queryHasher.inputs[3] <== valueHasher.out;
-    queryHasher.inputs[4] <== 0;
-    queryHasher.inputs[5] <== 0;
 
     circuitQueryHash <== queryHasher.out;
 

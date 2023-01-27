@@ -276,8 +276,6 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		valuesHash,
-		big.NewInt(0),
-		big.NewInt(0),
 	})
 	require.NoError(t, err)
 
@@ -425,8 +423,6 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		valuesHash,
-		big.NewInt(0),
-		big.NewInt(0),
 	})
 	require.NoError(t, err)
 
@@ -613,8 +609,6 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		valuesHash,
-		big.NewInt(0),
-		big.NewInt(0),
 	})
 	require.NoError(t, err)
 
@@ -777,8 +771,6 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		valuesHash,
-		big.NewInt(0),
-		big.NewInt(0),
 	})
 	require.NoError(t, err)
 
@@ -954,8 +946,6 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		valuesHash,
-		big.NewInt(0),
-		big.NewInt(0),
 	})
 	require.NoError(t, err)
 

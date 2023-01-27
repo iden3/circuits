@@ -481,8 +481,6 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		valuesHash,
-		big.NewInt(0),
-		big.NewInt(0),
 	})
 	require.NoError(t, err)
 	out := CredentialAtomicMTPOnChainV2Outputs{
@@ -645,8 +643,6 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		valuesHash,
-		big.NewInt(0),
-		big.NewInt(0),
 	})
 	require.NoError(t, err)
 	out := CredentialAtomicSigOnChainV2Outputs{
