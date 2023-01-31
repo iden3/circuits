@@ -122,14 +122,11 @@ type CredentialAtomicMTPOnChainV2Inputs struct {
 type CredentialAtomicMTPOnChainV2Outputs struct {
 	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
-	ValueHash              string `json:"valueHash"`
+	СircuitQueryHash       string `json:"circuitQueryHash"`
 	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
-	ClaimSchema            string `json:"claimSchema"`
-	SlotIndex              string `json:"slotIndex"`
-	Operator               int    `json:"operator"`
 	Timestamp              string `json:"timestamp"`
 	ClaimPathKey           string `json:"claimPathKey"`
 	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
@@ -221,16 +218,13 @@ type CredentialAtomicSigOnChainV2Inputs struct {
 type CredentialAtomicSigOnChainV2Outputs struct {
 	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
-	ValueHash              string `json:"valueHash"`
+	СircuitQueryHash       string `json:"circuitQueryHash"`
 	IssuerAuthState        string `json:"issuerAuthState"`
 	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
-	ClaimSchema            string `json:"claimSchema"`
-	SlotIndex              string `json:"slotIndex"`
 	ClaimPathKey           string `json:"claimPathKey"`
 	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
-	Operator               int    `json:"operator"`
 	Timestamp              string `json:"timestamp"`
 	IsRevocationChecked    string `json:"isRevocationChecked"`
 	Challenge              string `json:"challenge"`
@@ -480,16 +474,22 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 	}
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
+	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		valuesHash,
+	})
+	require.NoError(t, err)
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
 		IssuerClaimNonRevState: issuer.State(t).String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               utils.EQ,
-		ValueHash:              valuesHash.String(),
+		СircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		ClaimPathKey:           "0",
@@ -634,8 +634,16 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 	}
 
 	issuerAuthState := issuer.State(t)
-
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
+	require.NoError(t, err)
+	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		valuesHash,
+	})
 	require.NoError(t, err)
 	out := CredentialAtomicSigOnChainV2Outputs{
 		RequestID:              requestID,
@@ -643,13 +651,10 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               utils.EQ,
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		ClaimPathNotExists:     "0",
-		ValueHash:              valuesHash.String(),
+		СircuitQueryHash:       circuitQueryHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
 		IsRevocationChecked:    "1",

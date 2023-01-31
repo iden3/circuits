@@ -2,6 +2,7 @@ pragma circom 2.0.0;
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../../node_modules/circomlib/circuits/poseidon.circom";
 include "../lib/query/comparators.circom";
 include "../lib/authV2.circom";
 include "../lib/query/query.circom";
@@ -44,8 +45,8 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     // userID output signal will be assigned with ProfileID SelectProfile(UserGenesisID, nonce)
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
-    // hash of the value array
-    signal output valueHash;
+    // circuits query Hash
+    signal output circuitQueryHash;
 
     // we have no constraints for "requestID" in this circuit, it is used as a unique identifier for the request
     // and verifier can use it to identify the request, and verify the proof of specific request in case of multiple query requests
@@ -308,9 +309,14 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     query.operator <== operator;
 
     query.out === 1;
-    valueHash <== valueHasher.out;
 
+    component queryHasher = Poseidon(4);
+    queryHasher.inputs[0] <== claimSchema;
+    queryHasher.inputs[1] <== slotIndex;
+    queryHasher.inputs[2] <== operator;
+    queryHasher.inputs[3] <== valueHasher.out;
 
+    circuitQueryHash <== queryHasher.out;
 
     /* ProfileID calculation */
     component selectProfile = SelectProfile();
