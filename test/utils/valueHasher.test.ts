@@ -29,7 +29,7 @@ component main = ${templateName}Test();
 };
 
 
-describe("Value Hasher tests", function () {
+describe.only("Value Hasher tests", function () {
     this.timeout(200000);
     it("Test ValueHasher util using hash for different size inputs", async () => {
         const templateName = "ValueHasher";
@@ -40,6 +40,7 @@ describe("Value Hasher tests", function () {
             new Array(5).fill(0).map((_, i) => i + 1),
             [0],
             new Array(6).fill(0).map((_, i) => i + 1),
+            new Array(16).fill(0).map((_, i) => i + 1),
 
         ];
 
@@ -49,7 +50,8 @@ describe("Value Hasher tests", function () {
             "13254546416358473313457812414193018870743005197521155619424967381510427667259",
             "6186895146109816025093019628248576250523388957868658785525378722128520330607",
             "14408838593220040598588012778523101864903887657864399481915450526643617223637",
-            "20400040500897583745843009878988256314335038853985262692600694741116813247201"
+            "20400040500897583745843009878988256314335038853985262692600694741116813247201",
+            "5605330091169856132381694679994923791994681609858984566508182442210285386845",
         ];
 
         for (let index = 0; index < testCases.length; index++) {

@@ -18,7 +18,7 @@ template ValueHasher(valueArraySize) {
     var restLength = valueArraySize - hashFnBatchSize;
 	if (restLength > batchSize) {
 		var r = restLength % batchSize;
-		var diff = batchSize - r;
+		var diff = r == 0 ? 0 : batchSize - r;
 		iterationCount = (restLength + diff) / batchSize;
 	}
 
