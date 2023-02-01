@@ -12,6 +12,7 @@ include "comparators.circom";
  "3" - greater-than
  "4" - in
  "5" - notin
+ "6" - not equals
 */
 template Query (valueArraySize) {
     // signals
