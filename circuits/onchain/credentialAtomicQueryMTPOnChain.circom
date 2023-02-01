@@ -8,7 +8,7 @@ include "../lib/authV2.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/query/jsonldQuery.circom";
-include "../lib/utils/valueHasher.circom";
+include "../lib/utils/spongeHash.circom";
 
 /**
 credentialJsonLDAtomicQueryMTP.circom - query issuerClaim value and verify issuerClaim MTP
@@ -246,17 +246,17 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     component query = Query(valueArraySize);
     query.in <== queryValue.out;
     query.operator <== operator;
-    component valueHasher = ValueHasher(valueArraySize);
+    component spongeHash = SpongeHash(valueArraySize);
     for (var i = 0; i < valueArraySize; i++) { 
         query.value[i] <== value[i];
-        valueHasher.in[i] <== value[i];
+        spongeHash.in[i] <== value[i];
     }
 
     component queryHasher = Poseidon(4);
     queryHasher.inputs[0] <== claimSchema;
     queryHasher.inputs[1] <== slotIndex;
     queryHasher.inputs[2] <== operator;
-    queryHasher.inputs[3] <== valueHasher.out;
+    queryHasher.inputs[3] <== spongeHash.out;
 
     circuitQueryHash <== queryHasher.out;
 

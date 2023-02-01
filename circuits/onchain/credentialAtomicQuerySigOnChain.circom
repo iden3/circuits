@@ -8,7 +8,7 @@ include "../lib/authV2.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/query/jsonldQuery.circom";
-include "../lib/utils/valueHasher.circom";
+include "../lib/utils/spongeHash.circom";
 
 
 /**
@@ -299,12 +299,12 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     queryValue.c[1] <== claimPathValue;
 
     // verify query
-    component valueHasher = ValueHasher(valueArraySize);
+    component spongeHash = SpongeHash(valueArraySize);
     component query = Query(valueArraySize);
     query.in <== queryValue.out;
     for (var i=0; i<valueArraySize; i++) { 
         query.value[i] <== value[i];
-        valueHasher.in[i] <== value[i];
+        spongeHash.in[i] <== value[i];
     }
     query.operator <== operator;
 
@@ -314,7 +314,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     queryHasher.inputs[0] <== claimSchema;
     queryHasher.inputs[1] <== slotIndex;
     queryHasher.inputs[2] <== operator;
-    queryHasher.inputs[3] <== valueHasher.out;
+    queryHasher.inputs[3] <== spongeHash.out;
 
     circuitQueryHash <== queryHasher.out;
 
