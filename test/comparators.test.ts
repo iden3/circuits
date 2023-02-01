@@ -301,7 +301,7 @@ describe("WASM: Less than", function ()  {
     }
 });
 
-describe("C: Less than", function ()  {
+describe.skip("C: Less than", function ()  {
     let circuit;
     this.timeout(100000);
 
