@@ -7,7 +7,6 @@ include "../lib/query/comparators.circom";
 include "../lib/authV2.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
-include "../lib/query/jsonldQuery.circom";
 include "../lib/utils/spongeHash.circom";
 
 
