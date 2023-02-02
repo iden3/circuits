@@ -12,6 +12,7 @@ include "comparators.circom";
  "3" - greater-than
  "4" - in
  "5" - notin
+ "6" - not equals
 */
 template Query (valueArraySize) {
     // signals
@@ -52,11 +53,11 @@ template Query (valueArraySize) {
     mux.c[1] <== eq.out;
     mux.c[2] <== lt.out;
     mux.c[3] <== gt.out;
-    mux.c[4] <== inComp.out;
+    mux.c[4] <== inComp.out; // in
 
-    mux.c[5] <== 1-inComp.out;
+    mux.c[5] <== 1-inComp.out; // nin
 
-    mux.c[6] <== 0; // not in use
+    mux.c[6] <== 1-eq.out; // neq
     mux.c[7] <== 0; // not in use
 
     // output
