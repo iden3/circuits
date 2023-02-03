@@ -17,4 +17,4 @@ component main{public [requestID,
                        claimPathNotExists,
                        operator,
                        value,
-                       timestamp, isRevocationChecked]} = credentialAtomicQuerySigOffChain(32, 32, 64);
+                       timestamp, isRevocationChecked]} = credentialAtomicQuerySigOffChain(40, 32, 64);
