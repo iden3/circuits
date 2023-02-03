@@ -313,7 +313,9 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     queryHasher.inputs[0] <== claimSchema;
     queryHasher.inputs[1] <== slotIndex;
     queryHasher.inputs[2] <== operator;
-    queryHasher.inputs[3] <== spongeHash.out;
+    queryHasher.inputs[3] <== claimPathKey;
+    queryHasher.inputs[4] <== claimPathNotExists;
+    queryHasher.inputs[5] <== spongeHash.out;
 
     circuitQueryHash <== queryHasher.out;
 
