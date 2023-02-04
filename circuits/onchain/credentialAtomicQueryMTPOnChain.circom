@@ -245,7 +245,7 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     component query = Query(valueArraySize);
     query.in <== queryValue.out;
     query.operator <== operator;
-    component spongeHash = SpongeHash(valueArraySize);
+    component spongeHash = SpongeHash(valueArraySize, 6); // 6 - max size of poseidon hash available on-chain
     for (var i = 0; i < valueArraySize; i++) { 
         query.value[i] <== value[i];
         spongeHash.in[i] <== value[i];

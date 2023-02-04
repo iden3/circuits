@@ -298,7 +298,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     queryValue.c[1] <== claimPathValue;
 
     // verify query
-    component spongeHash = SpongeHash(valueArraySize);
+    component spongeHash = SpongeHash(valueArraySize, 6); // 6 - max size of poseidon hash available on-chain
     component query = Query(valueArraySize);
     query.in <== queryValue.out;
     for (var i=0; i<valueArraySize; i++) { 
