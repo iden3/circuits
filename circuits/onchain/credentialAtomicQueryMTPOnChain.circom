@@ -19,7 +19,7 @@ checks:
 - claim ownership and issuance state
 - claim non revocation state
 - claim expiration ?
-- query JSON-LD claaim's field
+- query JSON-LD claim's field
 
 issuerLevels - Merkle tree depth level for claims issued by the issuer
 claimLevels - Merkle tree depth level for claim JSON-LD document
@@ -35,7 +35,7 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
-    // flag indicates if merkleized flag set in issuer claim (if set MTP is used to verify that
+    // flag indicates if merklized flag set in issuer claim (if set MTP is used to verify that
     // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed
     // on root stored in the index or value slot
     // if it is not set verification is performed on according to the slotIndex. Value selected from the
@@ -251,11 +251,13 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
         spongeHash.in[i] <== value[i];
     }
 
-    component queryHasher = Poseidon(4);
+    component queryHasher = Poseidon(6);
     queryHasher.inputs[0] <== claimSchema;
     queryHasher.inputs[1] <== slotIndex;
     queryHasher.inputs[2] <== operator;
-    queryHasher.inputs[3] <== spongeHash.out;
+    queryHasher.inputs[3] <== claimPathKey;
+    queryHasher.inputs[4] <== claimPathNotExists;
+    queryHasher.inputs[5] <== spongeHash.out;
 
     circuitQueryHash <== queryHasher.out;
 

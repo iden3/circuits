@@ -13,6 +13,7 @@ import (
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
+	"github.com/iden3/go-schema-processor/merklize"
 	"github.com/stretchr/testify/require"
 )
 
@@ -128,8 +129,6 @@ type CredentialAtomicMTPOnChainV2Outputs struct {
 	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
 	Timestamp              string `json:"timestamp"`
-	ClaimPathKey           string `json:"claimPathKey"`
-	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
 	IsRevocationChecked    string `json:"isRevocationChecked"`
 	GistRoot               string `json:"gistRoot"`
 	Challenge              string `json:"challenge"`
@@ -223,8 +222,6 @@ type CredentialAtomicSigOnChainV2Outputs struct {
 	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
-	ClaimPathKey           string `json:"claimPathKey"`
-	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
 	Timestamp              string `json:"timestamp"`
 	IsRevocationChecked    string `json:"isRevocationChecked"`
 	Challenge              string `json:"challenge"`
@@ -238,34 +235,33 @@ type TestDataSigV2 struct {
 
 func Test_Generate_Test_Cases(t *testing.T) {
 
-	id, state := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis state", "issuer_genesis_state")
-	nextId, nextState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition")
+	id, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis state", "issuer_genesis_state")
+	nextId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition")
 
 	generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer next transition state", "issuer_next_state_transition")
 
-	generateMTPData(t, "MTP: Issuer genesis", []*gistData{
-		{id, state},
+	generateMTPData(t, "MTP: Issuer first state", []*gistData{
+		{id, issuerFirstState},
 	}, false, "valid_mtp_user_genesis", false)
-	// snap, _ := mtpTree.()(context.Background(), mtpTree.Root())
-	generateMTPData(t, "MTP: User genesis", []*gistData{
-		{id, state},
-		{nextId, nextState},
+	generateMTPData(t, "MTP: User non genesis but latest", []*gistData{
+		{id, issuerFirstState},
+		{nextId, userFirstState},
 	}, true, "valid_mtp_user_non_genesis", false)
 	generateMTPData(t, "MTP: User sign with address challenge genesis", []*gistData{
-		{id, state},
-		{nextId, nextState},
+		{id, issuerFirstState},
+		{nextId, userFirstState},
 	}, true, "valid_mtp_user_non_genesis_challenge_address", true)
 
-	generateSigData(t, "Sig: Issuer genesis", []*gistData{
-		{id, state},
+	generateSigData(t, "Sig: Issuer first state", []*gistData{
+		{id, issuerFirstState},
 	}, false, "valid_sig_user_genesis", false)
-	generateSigData(t, "Sig: User genesis", []*gistData{
-		{id, state},
-		{nextId, nextState},
+	generateSigData(t, "Sig: User non genesis latest", []*gistData{
+		{id, issuerFirstState},
+		{nextId, userFirstState},
 	}, true, "valid_sig_user_non_genesis", false)
 	generateSigData(t, "Sig: User sign with address challenge genesis", []*gistData{
-		{id, state},
-		{nextId, nextState},
+		{id, issuerFirstState},
+		{nextId, userFirstState},
 	}, true, "valid_sig_user_non_genesis_challenge_address", true)
 
 }
@@ -294,7 +290,7 @@ func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, second
 	//if genesis == false {
 	// extract pubKey
 
-	secondaryEntityClaim := utils.DefaultUserClaim(t, secondaryEntity.ID)
+	_, secondaryEntityClaim := utils.DefaultJSONUserClaim(t, secondaryEntity.ID)
 	primaryEntity.AddClaim(t, secondaryEntityClaim)
 
 	if nextState {
@@ -367,6 +363,7 @@ func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, second
 }
 
 func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState bool, fileName string, isAddressChallenge bool) {
+
 	var err error
 
 	user := utils.NewIdentity(t, UserPK)
@@ -378,12 +375,27 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 	subjectID := user.ID
 	nonceSubject := big.NewInt(0)
 
-	claim := utils.DefaultUserClaim(t, subjectID)
+	mz, claim := utils.DefaultJSONUserClaim(t, subjectID)
+
+	path, err := merklize.NewPath(
+		"https://www.w3.org/2018/credentials#credentialSubject",
+		"https://w3id.org/citizenship#residentSince")
+	require.NoError(t, err)
+
+	jsonP, value, err := mz.Proof(context.Background(), path)
+	require.NoError(t, err)
+
+	valueKey, err := value.MtEntry()
+	require.NoError(t, err)
+
+	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
+
+	pathKey, err := path.MtEntry()
+	require.NoError(t, err)
 
 	issuer.AddClaim(t, claim)
 
 	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
-	require.NoError(t, err)
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 	challenge := big.NewInt(12345)
@@ -393,7 +405,7 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 	}
 
 	if nextState {
-		claim1 := utils.DefaultUserClaim(t, issuer.ID)
+		_, claim1 := utils.DefaultJSONUserClaim(t, issuer.ID)
 		user.AddClaim(t, claim1)
 	}
 
@@ -460,17 +472,16 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
 		ClaimSchema:                     "180410020913331409885634153623124536270",
 		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:                    utils.PrepareStrArray([]string{}, 32),
-		ClaimPathMtpNoAux:               "0",
-		ClaimPathMtpAuxHi:               "0",
-		ClaimPathMtpAuxHv:               "0",
-		ClaimPathKey:                    "0",
-		ClaimPathValue:                  "0",
-		IsRevocationChecked:             1,
+		ClaimPathMtp:                    claimJSONLDProof,
+		ClaimPathMtpNoAux:               claimJSONLDProofAux.NoAux,
+		ClaimPathMtpAuxHi:               claimJSONLDProofAux.Key,
+		ClaimPathMtpAuxHv:               claimJSONLDProofAux.Value,
+		ClaimPathKey:                    pathKey.String(),
+		ClaimPathValue:                  valueKey.String(),
 		Operator:                        utils.EQ,
-		SlotIndex:                       2,
+		SlotIndex:                       0,
 		Timestamp:                       timestamp,
-		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
+		Value:                           utils.PrepareStrArray([]string{valueKey.String()}, 64),
 	}
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
@@ -480,9 +491,12 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
+		pathKey,
+		big.NewInt(0),
 		valuesHash,
 	})
 	require.NoError(t, err)
+
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
@@ -491,11 +505,9 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 		IssuerClaimNonRevState: issuer.State(t).String(),
 		СircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
-		Merklized:              "0",
-		ClaimPathKey:           "0",
-		ClaimPathNotExists:     "0",
+		Merklized:              "1",
 		Challenge:              challenge.String(),
-		GistRoot:               gistRoot.BigInt().String(), // 0 for inclusion, 1 for non-inclusion
+		GistRoot:               gistRoot.BigInt().String(),
 		IsRevocationChecked:    "1",
 	}
 
@@ -510,10 +522,10 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 }
 
 func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState bool, fileName string, isAddressChallenge bool) {
+
 	var err error
 
 	user := utils.NewIdentity(t, UserPK)
-
 	issuer := utils.NewIdentity(t, IssuerPK)
 
 	userProfileID := user.ID
@@ -522,7 +534,23 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 	subjectID := user.ID
 	nonceSubject := big.NewInt(0)
 
-	claim := utils.DefaultUserClaim(t, subjectID)
+	mz, claim := utils.DefaultJSONUserClaim(t, subjectID)
+
+	path, err := merklize.NewPath(
+		"https://www.w3.org/2018/credentials#credentialSubject",
+		"https://w3id.org/citizenship#residentSince")
+	require.NoError(t, err)
+
+	jsonP, value, err := mz.Proof(context.Background(), path)
+	require.NoError(t, err)
+
+	valueKey, err := value.MtEntry()
+	require.NoError(t, err)
+
+	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
+
+	pathKey, err := path.MtEntry()
+	require.NoError(t, err)
 
 	// Sig claim
 	claimSig := issuer.SignClaim(t, claim)
@@ -533,8 +561,6 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 
 	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
-	emptyPathMtp := utils.PrepareSiblingsStr([]*merkletree.Hash{&merkletree.HashZero}, 32)
-
 	challenge := big.NewInt(12345)
 	if isAddressChallenge {
 		addr := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
@@ -542,7 +568,7 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 	}
 
 	if nextState {
-		claim1 := utils.DefaultUserClaim(t, issuer.ID)
+		_, claim1 := utils.DefaultJSONUserClaim(t, issuer.ID)
 		user.AddClaim(t, claim1)
 	}
 
@@ -616,24 +642,25 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 		ClaimSchema:                     "180410020913331409885634153623124536270",
 
 		ClaimPathNotExists: "0", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:       emptyPathMtp,
-		ClaimPathMtpNoAux:  "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-		ClaimPathMtpAuxHi:  "0", // 0 for inclusion proof
-		ClaimPathMtpAuxHv:  "0", // 0 for inclusion proof
-		ClaimPathKey:       "0", // hash of path in merklized json-ld document
-		ClaimPathValue:     "0", // value in this path in merklized json-ld document
+		ClaimPathMtp:       claimJSONLDProof,
+		ClaimPathMtpNoAux:  claimJSONLDProofAux.NoAux, // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi:  claimJSONLDProofAux.Key,   // 0 for inclusion proof
+		ClaimPathMtpAuxHv:  claimJSONLDProofAux.Value, // 0 for inclusion proof
+		ClaimPathKey:       pathKey.String(),          // hash of path in merklized json-ld document
+		ClaimPathValue:     valueKey.String(),         // value in this path in merklized json-ld document
 		// value in this path in merklized json-ld document
 
 		Operator:            utils.EQ,
-		SlotIndex:           2,
+		SlotIndex:           0,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
-		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
+		Value: []string{valueKey.String(), "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
 			"0", "0",
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
 	}
 
 	issuerAuthState := issuer.State(t)
+
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
@@ -642,9 +669,12 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
+		pathKey,
+		big.NewInt(0),
 		valuesHash,
 	})
 	require.NoError(t, err)
+
 	out := CredentialAtomicSigOnChainV2Outputs{
 		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
@@ -652,13 +682,11 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 		IssuerAuthState:        issuerAuthState.String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
-		Merklized:              "0",
-		ClaimPathNotExists:     "0",
+		Merklized:              "1",
 		СircuitQueryHash:       circuitQueryHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
 		IsRevocationChecked:    "1",
-		ClaimPathKey:           "0",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{

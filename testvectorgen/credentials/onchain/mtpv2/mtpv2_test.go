@@ -99,8 +99,6 @@ type CredentialAtomicMTPOnChainV2Outputs struct {
 	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
 	Timestamp              string `json:"timestamp"`
-	ClaimPathKey           string `json:"claimPathKey"`
-	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
 	IsRevocationChecked    string `json:"isRevocationChecked"`
 	GistRoot               string `json:"gistRoot"`
 	Challenge              string `json:"challenge"`
@@ -243,9 +241,11 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
+		big.NewInt(0),
+		big.NewInt(0),
 		valuesHash,
 	})
-
+	require.NoError(t, err)
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,
 		UserID:                 user.ID.BigInt().String(),
@@ -255,8 +255,6 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		СircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		ClaimPathKey:           "0",
-		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
 		IsRevocationChecked:    "1",
@@ -373,6 +371,8 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
+		big.NewInt(0),
+		big.NewInt(0),
 		valuesHash,
 	})
 
@@ -385,8 +385,6 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		СircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		ClaimPathKey:           "0",
-		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
 		IsRevocationChecked:    "0",
@@ -401,6 +399,8 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 
 	utils.SaveTestVector(t, fileName, string(json))
 }
+
+//merklized
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
 	var err error
 
@@ -526,8 +526,11 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
+		pathKey,
+		big.NewInt(0),
 		valuesHash,
 	})
+	require.NoError(t, err)
 
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,
@@ -538,8 +541,6 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		СircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
-		ClaimPathKey:           pathKey.String(),
-		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
 		IsRevocationChecked:    "1",
@@ -666,8 +667,11 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
+		big.NewInt(0),
+		big.NewInt(0),
 		valuesHash,
 	})
+	require.NoError(t, err)
 	out := CredentialAtomicMTPOnChainV2Outputs{
 		RequestID:              requestID,
 		UserID:                 userProfileID.BigInt().String(),
@@ -677,8 +681,6 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		СircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		ClaimPathKey:           "0",
-		ClaimPathNotExists:     "0",
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(), // 0 for inclusion, 1 for non-inclusion
 		IsRevocationChecked:    "1",

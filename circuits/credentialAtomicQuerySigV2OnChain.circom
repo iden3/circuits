@@ -5,8 +5,6 @@ include "./onchain/credentialAtomicQuerySigOnChain.circom";
 component main{public [requestID,
                        issuerID,
                        issuerClaimNonRevState,
-                       claimPathKey,
-                       claimPathNotExists,
                        timestamp,
                        isRevocationChecked,
                        challenge,
