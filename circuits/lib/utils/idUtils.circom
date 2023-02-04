@@ -104,7 +104,7 @@ template GatherID() {
     out <== idBits.out;
 }
 
-// Take least significan n bits
+// Take least significant n bits
 template TakeNBits(n) {
     signal input in;
     signal output out;
