@@ -156,12 +156,11 @@ template VerifyAuthClaimAndSignature(nLevels) {
     // AuthHash cca3371a6cb1b715004407e325bd993c
     // BigInt: 80551937543569765027552589160822318028
     // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
-    var AUTH_SCHEMA_HASH  = 80551937543569765027552589160822318028;
     component verifyAuthSchema  = verifyCredentialSchema();
     for (var i=0; i<8; i++) {
             verifyAuthSchema.claim[i] <== authClaim[i];
     }
-    verifyAuthSchema.schema <== AUTH_SCHEMA_HASH;
+    verifyAuthSchema.schema <== 80551937543569765027552589160822318028;
 
     component claimExists = checkClaimExists(nLevels);
     for (var i=0; i<8; i++) { claimExists.claim[i] <== authClaim[i]; }

@@ -123,7 +123,9 @@ template CalculateIdChecksum() {
     signal input genesis; // 27 bytes
     signal output out;
 
-    var sum = 0;
+    signal sum[30];
+    var k = 0;
+    sum[0] <== 0;
 
     component typBits = Num2Bits(16);
     typBits.in <== typ;
@@ -134,7 +136,8 @@ template CalculateIdChecksum() {
             lc1 += typBits.out[i + j] * e2;
             e2 = e2 + e2;
         }
-        sum += lc1;
+        sum[k+1] <== sum[k] + lc1;
+        k++;
     }
 
     component genesisBits = Num2Bits(27*8);
@@ -146,11 +149,12 @@ template CalculateIdChecksum() {
             lc1 += genesisBits.out[i + j] * e2;
             e2 = e2 + e2;
         }
-        sum += lc1;
+        sum[k+1] <== sum[k] + lc1;
+        k++;
     }
 
     component sumBits = LastNBits(16);
-    sumBits.in <== sum;
+    sumBits.in <== sum[k];
     out <== sumBits.out;
 }
 
