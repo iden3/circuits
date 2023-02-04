@@ -429,8 +429,6 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	t.Log("gistRoot", gistRoot.BigInt().String())
-	t.Log("issuer.State().BigInt().String()", issuer.State(t).String())
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
 
 	inputs := CredentialAtomicMTPOnChainV2Inputs{
