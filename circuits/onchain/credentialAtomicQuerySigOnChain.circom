@@ -309,7 +309,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
 
     query.out === 1;
 
-    component queryHasher = Poseidon(4);
+    component queryHasher = Poseidon(6);
     queryHasher.inputs[0] <== claimSchema;
     queryHasher.inputs[1] <== slotIndex;
     queryHasher.inputs[2] <== operator;
