@@ -35,7 +35,7 @@ func (it *IdentityTest) State(t testing.TB) *big.Int {
 
 func (it *IdentityTest) AuthMTPStrign(t testing.TB) []string {
 	p, _ := it.ClaimMTPRaw(t, it.AuthClaim)
-	return PrepareSiblingsStr(p.AllSiblings(), 32)
+	return PrepareSiblingsStr(p.AllSiblings(), IdentityTreeLevels)
 }
 
 func (it *IdentityTest) SignClaim(t testing.TB, claim *core.Claim) *babyjub.Signature {
@@ -78,7 +78,7 @@ func (it *IdentityTest) ClaimMTP(t testing.TB, claim *core.Claim) (sibling []str
 		t.Fatalf("can't generate proof %v", err)
 	}
 
-	return PrepareProof(proof)
+	return PrepareProof(proof, IdentityTreeLevels)
 }
 
 func (it *IdentityTest) ClaimRevMTPRaw(t testing.TB, claim *core.Claim) (*merkletree.Proof, *big.Int) {
@@ -101,7 +101,7 @@ func (it *IdentityTest) ClaimRevMTP(t testing.TB, claim *core.Claim) (sibling []
 		t.Fatalf("can't generate proof %v", err)
 	}
 
-	return PrepareProof(proof)
+	return PrepareProof(proof, IdentityTreeLevels)
 
 }
 
@@ -133,15 +133,15 @@ func NewIdentity(t testing.TB, privKHex string) *IdentityTest {
 
 	// init claims tree
 
-	it.Clt, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	it.Clt, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 40)
 	if err != nil {
 		t.Fatalf("Error creating Claims merkle tree: %v", err)
 	}
-	it.Ret, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	it.Ret, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 40)
 	if err != nil {
 		t.Fatalf("Error creating Revocation merkle tree: %v", err)
 	}
-	it.Rot, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	it.Rot, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 40)
 	if err != nil {
 		t.Fatalf("Error creating Roots merkle tree: %v", err)
 	}

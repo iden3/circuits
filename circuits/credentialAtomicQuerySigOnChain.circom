@@ -8,4 +8,4 @@ component main{public [requestID,
                        timestamp,
                        isRevocationChecked,
                        challenge,
-                       gistRoot]} = credentialAtomicQuerySigOnChain(32, 32, 64, 32, 32);
+                       gistRoot]} = credentialAtomicQuerySigOnChain(40, 32, 64, 40, 64);
