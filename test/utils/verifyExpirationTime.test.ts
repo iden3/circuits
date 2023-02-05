@@ -8,6 +8,7 @@ describe("Test verifyExpirationTime",  function() {
     let testData = {in:{},expOut:{}};
 
     before(async function() {
+        this.timeout(5000);
         circuit = await wasm_tester(path.join(__dirname, "../circuits/utils", "utils_verifyExpirationTime.circom"));
     });
 
