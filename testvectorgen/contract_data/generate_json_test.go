@@ -388,7 +388,7 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 	valueKey, err := value.MtEntry()
 	require.NoError(t, err)
 
-	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
+	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP, utils.ClaimLevels)
 
 	pathKey, err := path.MtEntry()
 	require.NoError(t, err)
@@ -409,7 +409,7 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 		user.AddClaim(t, claim1)
 	}
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 
 	for _, data := range gistData {
@@ -429,7 +429,7 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := CredentialAtomicMTPOnChainV2Inputs{
 		RequestID:                       requestID,
@@ -547,7 +547,7 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 	valueKey, err := value.MtEntry()
 	require.NoError(t, err)
 
-	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
+	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP, utils.ClaimLevels)
 
 	pathKey, err := path.MtEntry()
 	require.NoError(t, err)
@@ -572,7 +572,7 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 		user.AddClaim(t, claim1)
 	}
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 
 	for _, data := range gistData {
@@ -591,7 +591,7 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := CredentialAtomicSigOnChainV2Inputs{
 		RequestID:                       requestID,

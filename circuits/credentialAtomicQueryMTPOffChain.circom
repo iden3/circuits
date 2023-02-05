@@ -17,4 +17,4 @@ component main{public [requestID,
                        claimPathNotExists,
                        operator,
                        value,
-                       timestamp, isRevocationChecked]} = CredentialAtomicQueryMTPOffChain(32, 32, 64);
+                       timestamp, isRevocationChecked]} = CredentialAtomicQueryMTPOffChain(40, 32, 64);

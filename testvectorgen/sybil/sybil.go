@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"test/utils"
 	"testing"
+
+	"test/utils"
 
 	core "github.com/iden3/go-iden3-core"
 	"github.com/iden3/go-iden3-crypto/babyjub"
@@ -50,7 +51,7 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 	userClaimMtp, _ := user.ClaimMTP(t, scClaim)
 
 	// gist
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.Nil(t, err)
@@ -59,7 +60,7 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 	require.Nil(t, err)
 
 	if invalidGist {
-		gisTree, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+		gisTree, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 		require.Nil(t, err)
 		err = gisTree.Add(context.Background(), big.NewInt(3), big.NewInt(3))
 		require.Nil(t, err)
@@ -73,7 +74,7 @@ func generateTestDataMTP(t *testing.T, desc, fileName string, invalidGist, inval
 
 	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	if invalidIdentity {
 		sk := babyjub.NewRandPrivKey()
@@ -178,7 +179,7 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 	userClaimMtp, _ := user.ClaimMTP(t, scClaim)
 
 	// gist
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.Nil(t, err)
@@ -187,7 +188,7 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 	require.Nil(t, err)
 
 	if invalidGist {
-		gisTree, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+		gisTree, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 		require.Nil(t, err)
 		err = gisTree.Add(context.Background(), big.NewInt(3), big.NewInt(3))
 		require.Nil(t, err)
@@ -201,7 +202,7 @@ func generateTestDataSig(t *testing.T, desc, fileName string, invalidGist, inval
 
 	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	if invalidIdentity {
 		sk := babyjub.NewRandPrivKey()

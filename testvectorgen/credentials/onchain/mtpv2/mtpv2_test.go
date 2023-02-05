@@ -163,7 +163,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 	challenge := big.NewInt(12345)
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), utils.GistLevels)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.NoError(t, err)
@@ -178,7 +178,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 	inputs := CredentialAtomicMTPOnChainV2Inputs{
 		RequestID:                       requestID,
 		UserGenesisID:                   user.ID.BigInt().String(),
@@ -230,7 +230,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		Operator:                        utils.EQ,
 		SlotIndex:                       2,
 		Timestamp:                       timestamp,
-		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
+		Value:                           utils.PrepareStrArray([]string{"10"}, utils.GistLevels),
 	}
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
@@ -293,7 +293,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 
 	challenge := big.NewInt(12345)
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.NoError(t, err)
@@ -308,7 +308,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := CredentialAtomicMTPOnChainV2Inputs{
 		RequestID:                       requestID,
@@ -436,7 +436,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	valueKey, err := value.MtEntry()
 	require.NoError(t, err)
 
-	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
+	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP, 32)
 
 	pathKey, err := path.MtEntry()
 	require.NoError(t, err)
@@ -448,7 +448,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 	challenge := big.NewInt(12345)
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.NoError(t, err)
@@ -463,7 +463,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := CredentialAtomicMTPOnChainV2Inputs{
 		RequestID:                       requestID,
@@ -589,7 +589,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 	challenge := big.NewInt(12345)
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.NoError(t, err)
@@ -604,7 +604,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := CredentialAtomicMTPOnChainV2Inputs{
 		RequestID:                       requestID,

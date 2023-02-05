@@ -13,4 +13,4 @@ include "auth/authV2.circom";
     - challenge
     - gistRoot
 */
-component main {public [challenge, gistRoot]} = AuthV2(32,32);
+component main {public [challenge, gistRoot]} = AuthV2(40, 64);
