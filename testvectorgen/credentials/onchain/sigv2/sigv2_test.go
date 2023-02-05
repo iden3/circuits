@@ -183,7 +183,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 
 	challenge := big.NewInt(12345)
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.NoError(t, err)
@@ -198,7 +198,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := CredentialAtomicSigOnChainV2Inputs{
 		RequestID:                       requestID,
@@ -329,7 +329,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 
 	challenge := big.NewInt(12345)
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.NoError(t, err)
@@ -344,7 +344,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := CredentialAtomicSigOnChainV2Inputs{
 		RequestID:                       requestID,
@@ -499,7 +499,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	valueKey, err := value.MtEntry()
 	require.NoError(t, err)
 
-	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
+	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP, utils.ClaimLevels)
 
 	pathKey, err := path.MtEntry()
 	require.NoError(t, err)
@@ -515,7 +515,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 
 	challenge := big.NewInt(12345)
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.NoError(t, err)
@@ -530,7 +530,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := CredentialAtomicSigOnChainV2Inputs{
 		RequestID:                       requestID,
@@ -677,7 +677,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 
 	challenge := big.NewInt(12345)
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.NoError(t, err)
@@ -692,7 +692,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := CredentialAtomicSigOnChainV2Inputs{
 		RequestID:                       requestID,
@@ -836,7 +836,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	jsonP, _, err := mz.Proof(context.Background(), path)
 	require.NoError(t, err)
 
-	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
+	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP, utils.ClaimLevels)
 
 	pathKey, err := path.MtEntry()
 	require.NoError(t, err)
@@ -852,7 +852,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 
 	challenge := big.NewInt(12345)
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 32)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.NoError(t, err)
@@ -867,7 +867,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := CredentialAtomicSigOnChainV2Inputs{
 		RequestID:                       requestID,

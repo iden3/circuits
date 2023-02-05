@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-
 	"math/big"
 	"os"
 	"strings"
@@ -96,8 +95,8 @@ func GenerateNewStateCommitmentClaim(t testing.TB, secret *big.Int) *core.Claim 
 	return claim
 }
 
-func PrepareProof(proof *merkletree.Proof) ([]string, NodeAuxValue) {
-	return PrepareSiblingsStr(proof.AllSiblings(), 32), getNodeAuxValue(proof)
+func PrepareProof(proof *merkletree.Proof, levels int) ([]string, NodeAuxValue) {
+	return PrepareSiblingsStr(proof.AllSiblings(), levels), getNodeAuxValue(proof)
 }
 
 func ExtractPubXY(privKHex string) (key *babyjub.PrivateKey, x, y *big.Int) {

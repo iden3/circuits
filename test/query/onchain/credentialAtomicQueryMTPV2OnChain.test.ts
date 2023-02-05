@@ -28,7 +28,6 @@ describe("Test On Chain credentialAtomicQueryMTPV2OnChain.circom", function () {
     })
     const basePath = '../../../testvectorgen/credentials/onchain/mtpv2/testdata'
     const tests = [
-
         require(`${basePath}/claimIssuedOnProfileID.json`),
         require(`${basePath}/claimIssuedOnProfileID2.json`),
         require(`${basePath}/claimIssuedOnUserID.json`),

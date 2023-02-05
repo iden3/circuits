@@ -39,3 +39,9 @@ const TestClaimDocument = `{
      "birthDate": "1958-07-17"
    }
  }`
+
+const (
+	IdentityTreeLevels = 40
+	GistLevels         = 64
+	ClaimLevels        = 32
+)

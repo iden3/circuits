@@ -376,7 +376,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	valueKey, err := value.MtEntry()
 	require.NoError(t, err)
 
-	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
+	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP, utils.ClaimLevels)
 
 	pathKey, err := path.MtEntry()
 	require.NoError(t, err)
@@ -612,7 +612,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 
 	jsonP, _, err := mz.Proof(context.Background(), path)
 
-	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP)
+	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP, utils.ClaimLevels)
 
 	pathKey, err := path.MtEntry()
 	require.NoError(t, err)
