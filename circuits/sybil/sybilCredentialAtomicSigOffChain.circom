@@ -182,10 +182,12 @@ template VerifyIssuerClaim(IssuerLevels){
     signal output issuerAuthState;
 
     //  Verify issued and not revoked
-    var AUTH_SCHEMA_HASH  = 80551937543569765027552589160822318028;
+    // AuthHash cca3371a6cb1b715004407e325bd993c
+    // BigInt: 80551937543569765027552589160822318028
+    // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
     component issuerSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
-    issuerSchemaCheck.schema <== AUTH_SCHEMA_HASH;
+    issuerSchemaCheck.schema <== 80551937543569765027552589160822318028;
 
     // IssuerAuthClaim proof of existence (isProofExist)
     component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);
