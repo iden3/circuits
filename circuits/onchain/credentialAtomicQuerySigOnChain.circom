@@ -4,7 +4,7 @@ include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 include "../lib/query/comparators.circom";
-include "../lib/authV2.circom";
+include "../auth/authV2.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/utils/spongeHash.circom";
