@@ -141,10 +141,9 @@ template CredentialAtomicQuerySig(IdOwnershipLevels, IssuerLevels, valueArraySiz
     claimExpirationCheck.timestamp <== timestamp;
 
 
-    var AUTH_SCHEMA_HASH  = 304427537360709784173770334266246861770;
     component issuerSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
-    issuerSchemaCheck.schema <== AUTH_SCHEMA_HASH;
+    issuerSchemaCheck.schema <== 304427537360709784173770334266246861770; // AUTH_SCHEMA_HASH
     // verify authClaim issued and not revoked
     // calculate issuerAuthState
     component issuerAuthStateComponent = getIdenState();
