@@ -1,7 +1,7 @@
 pragma circom 2.0.0;
 
-include "idOwnership.circom";
-include "./utils/idUtils.circom";
+include "../lib/idOwnership.circom";
+include "../lib/utils/idUtils.circom";
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../../node_modules/circomlib/circuits/eddsaposeidon.circom";

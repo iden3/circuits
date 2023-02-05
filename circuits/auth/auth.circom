@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "idOwnership.circom";
+include "../lib/idOwnership.circom";
 
 template Auth(IdOwnershipLevels) {
 

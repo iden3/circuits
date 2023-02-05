@@ -5,7 +5,7 @@ const wasmTester = require("circom_tester").wasm;
 const chai = require("chai");
 const expect = chai.expect;
 
-describe("Test credentialAtomicQueryMTPV2.circom", function() {
+describe("Test credentialAtomicQueryMTPOffChain.circom", function() {
 
     this.timeout(600000);
 
@@ -13,7 +13,7 @@ describe("Test credentialAtomicQueryMTPV2.circom", function() {
 
     before(async () => {
         circuit = await wasmTester(
-            path.join(__dirname, "../../circuits/offchain", "credentialAtomicQueryMTPV2.circom"),
+            path.join(__dirname, "../../circuits", "credentialAtomicQueryMTPOffChain.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,

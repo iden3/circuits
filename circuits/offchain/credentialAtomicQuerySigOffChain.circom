@@ -3,7 +3,7 @@ include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../lib/query/comparators.circom";
-include "../lib/authV2.circom";
+include "../auth/authV2.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
 

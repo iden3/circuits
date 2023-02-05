@@ -1,19 +1,16 @@
-
-
 import { expect } from "chai"
 import path from "path";
 import { wasm } from "circom_tester";
 
-describe("Test On Chain credentialAtomicQueryMTPV2OnChain.circom", function () {
+describe("On Chain: Test credentialAtomicQuerySigOnChain.circom", function () {
 
     this.timeout(600000);
 
     let circuit;
 
     before(async () => {
-
         circuit = await wasm(
-            path.join(__dirname, "../../../circuits/", "credentialAtomicQueryMTPV2OnChain.circom"),
+            path.join(__dirname, "../../circuits", "credentialAtomicQuerySigOnChain.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,
@@ -26,14 +23,17 @@ describe("Test On Chain credentialAtomicQueryMTPV2OnChain.circom", function () {
     after(async () => {
         circuit.release()
     })
-    const basePath = '../../../testvectorgen/credentials/onchain/mtpv2/testdata'
+
+    const basePath = '../../testvectorgen/credentials/onchain/sigv2/testdata'
     const tests = [
 
-        require(`${basePath}/claimIssuedOnProfileID.json`),
-        require(`${basePath}/claimIssuedOnProfileID2.json`),
-        require(`${basePath}/claimIssuedOnUserID.json`),
-        require(`${basePath}/claimNonMerklized.json`),
-        require(`${basePath}/revoked_claim_without_revocation_check.json`)
+        require(`${basePath}/jsonld_non_inclusion.json`),
+        require(`${basePath}/profileID_subject_profileID2.json`),
+        require(`${basePath}/profileID_subject_userid.json`),
+        require(`${basePath}/profileID_subject.json`),
+        require(`${basePath}/regular_claim.json`),
+        require(`${basePath}/revoked_claim_without_revocation_check.json`),
+        require(`${basePath}/userID_subject.json`)
     ];
 
     tests.forEach(({ desc, inputs, expOut }) => {
@@ -44,7 +44,7 @@ describe("Test On Chain credentialAtomicQueryMTPV2OnChain.circom", function () {
         });
     });
 
-    const failTestCase = require(`${basePath}/revoked_claim_with_revocation_check.json`)
+    const failTestCase = require(`${basePath}/revoked_claim_with_revocation_check.json`);
     it(failTestCase.desc, async () => {
         const { inputs } = failTestCase
 
@@ -54,5 +54,4 @@ describe("Test On Chain credentialAtomicQueryMTPV2OnChain.circom", function () {
         });
         expect(error.message).to.include("Error in template checkClaimNotRevoked");
     });
-
 });
