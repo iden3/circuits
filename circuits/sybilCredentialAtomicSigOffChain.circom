@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "sybilCredentialAtomicSigOffChain.circom";
+include "sybil/sybilCredentialAtomicSigOffChain.circom";
 
 component main{public [
                         requestID,
