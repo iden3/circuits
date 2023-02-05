@@ -18,11 +18,12 @@ checks:
 - claim ownership and issuance state
 - claim non revocation state
 - claim expiration
-- query data slots
+- query JSON-LD claim's field
 
 IdOwnershipLevels - Merkle tree depth level for personal claims
 IssuerLevels - Merkle tree depth level for claims issued by the issuer
-valueArraySize - Number of elements in comparison array for in/notin operation if level = 3 number of values for
+ClaimLevels - Merkle tree depth level for claim JSON-LD document
+valueLevels - Number of elements in comparison array for in/notin operation if level = 3 number of values for
 comparison ["1", "2", "3"]
 
 */
@@ -53,7 +54,7 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
     /* issuerClaim signals */
     signal input claimSubjectProfileNonce; // nonce of the profile that claim is issued to, 0 if claim is issued to genesisID
 
-    // issuer state
+    // issuer ID
     signal input issuerID;
 
     // issuer auth proof of existence
@@ -105,7 +106,6 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
     signal input slotIndex;
     signal input operator;
     signal input value[valueArraySize];
-
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -196,6 +196,7 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
 
     component merklize = getClaimMerklizeRoot();
     for (var i=0; i<8; i++) { merklize.claim[i] <== issuerClaim[i]; }
+    merklized <== merklize.flag;
 
     // check path/in node exists in merkletree specified by jsonldRoot
     component valueInMT = SMTVerifier(ClaimLevels);
@@ -230,12 +231,10 @@ template credentialAtomicQuerySigOffChain(IssuerLevels, ClaimLevels, valueArrayS
 
     query.out === 1;
 
-
     /* ProfileID calculation */
     component selectProfile = SelectProfile();
     selectProfile.in <== userGenesisID;
     selectProfile.nonce <== profileNonce;
 
     userID <== selectProfile.out;
-    merklized <== merklize.flag;
 }

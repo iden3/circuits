@@ -10,7 +10,7 @@ include "../lib/utils/idUtils.circom";
 include "../lib/utils/spongeHash.circom";
 
 /**
-credentialJsonLDAtomicQueryMTP.circom - query issuerClaim value and verify issuerClaim MTP
+credentialJsonLDAtomicQueryMTP.circom - query claim value and verify claim MTP
 
 checks:
 - identity ownership
@@ -18,23 +18,22 @@ checks:
 - claim schema
 - claim ownership and issuance state
 - claim non revocation state
-- claim expiration ?
+- claim expiration
 - query JSON-LD claim's field
 
+idOwnershipLevels - Merkle tree depth level for personal claims
 issuerLevels - Merkle tree depth level for claims issued by the issuer
 claimLevels - Merkle tree depth level for claim JSON-LD document
-valueLevels - Number of elements in comparison array for in/notin operation if level =3 number of values for
-idOwnershipLevels - Merkle tree depth level for personal claims
-onChainLevels - Merkle tree depth level for Auth claimon chain
+valueArraySize - Number of elements in comparison array for in/notin operation if level = 3 number of values for
 comparison ["1", "2", "3"]
-
+idOwnershipLevels - Merkle tree depth level for personal claims
+onChainLevels - Merkle tree depth level for Auth claim on-chain
 */
 template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySize, idOwnershipLevels, onChainLevels) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
-
     // flag indicates if merklized flag set in issuer claim (if set MTP is used to verify that
     // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed
     // on root stored in the index or value slot
@@ -42,7 +41,7 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     // provided slot. For example if slotIndex is `1` value gets from `i_1` slot. If `4` from `v_1`.
     signal output merklized;
 
-    // userID output signal will be assigned with ProfileID ProfileID(UserID, nonce),
+    // userID output signal will be assigned with ProfileID SelectProfile(UserGenesisID, nonce)
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
@@ -92,12 +91,12 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     /* issuerClaim signals */
     signal input claimSubjectProfileNonce; // nonce of the profile that claim is issued to, 0 if claim is issued to genesisID
 
-
+    // issuer ID
     signal input issuerID;
 
     /* issuerClaim signals */
     signal input issuerClaim[8];
-    signal input issuerClaimMtp[ issuerLevels];
+    signal input issuerClaimMtp[issuerLevels];
     signal input issuerClaimClaimsTreeRoot;
     signal input issuerClaimRevTreeRoot;
     signal input issuerClaimRootsTreeRoot;
@@ -105,7 +104,7 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
 
     // issuerClaim non rev inputs
     signal input isRevocationChecked;
-    signal input issuerClaimNonRevMtp[ issuerLevels];
+    signal input issuerClaimNonRevMtp[issuerLevels];
     signal input issuerClaimNonRevMtpNoAux;
     signal input issuerClaimNonRevMtpAuxHi;
     signal input issuerClaimNonRevMtpAuxHv;
@@ -174,8 +173,6 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     auth.gistMtpAuxHv <== gistMtpAuxHv;
     auth.gistMtpNoAux <== gistMtpNoAux;
 
-    // check user ownership
-
     // verify issuerClaim issued and not revoked
     component vci = verifyClaimIssuanceNonRev(issuerLevels);
     for (var i = 0; i < 8; i++) { vci.claim[i] <== issuerClaim[i]; }
@@ -242,14 +239,16 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     queryValue.c[1] <== claimPathValue;
 
     // verify query
+    component spongeHash = SpongeHash(valueArraySize, 6); // 6 - max size of poseidon hash available on-chain
     component query = Query(valueArraySize);
     query.in <== queryValue.out;
-    query.operator <== operator;
-    component spongeHash = SpongeHash(valueArraySize, 6); // 6 - max size of poseidon hash available on-chain
-    for (var i = 0; i < valueArraySize; i++) { 
+    for (var i = 0; i < valueArraySize; i++) {
         query.value[i] <== value[i];
         spongeHash.in[i] <== value[i];
     }
+    query.operator <== operator;
+
+    query.out === 1;
 
     component queryHasher = Poseidon(6);
     queryHasher.inputs[0] <== claimSchema;
@@ -260,8 +259,6 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     queryHasher.inputs[5] <== spongeHash.out;
 
     circuitQueryHash <== queryHasher.out;
-
-    query.out === 1;
 
     userID <== auth.userID;
 }
