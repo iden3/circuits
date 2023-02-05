@@ -1,8 +1,7 @@
 pragma circom 2.0.0;
 
 include "../../../node_modules/circomlib/circuits/bitify.circom";
-include "../../../node_modules/circomlib/circuits/binsum.circom";
-include "../../../node_modules/circomlib/circuits/eddsaposeidon.circom";
+include "../../../node_modules/circomlib/circuits/poseidon.circom";
 include "../../../node_modules/circomlib/circuits/mux1.circom";
 
 template ProfileID(){
@@ -104,7 +103,7 @@ template GatherID() {
     out <== idBits.out;
 }
 
-// Take least significan n bits
+// Take least significant n bits
 template TakeNBits(n) {
     signal input in;
     signal output out;
@@ -120,38 +119,42 @@ template TakeNBits(n) {
 }
 
 template CalculateIdChecksum() {
-    signal input typ;
-    signal input genesis;
+    signal input typ; // 2 bytes
+    signal input genesis; // 27 bytes
     signal output out;
 
-    var sum = 0;
+    signal sum[30];
+    var k = 0;
+    sum[0] <== 0;
 
-    component typBits = Num2Bits(256);
+    component typBits = Num2Bits(16);
     typBits.in <== typ;
-    for (var i = 0; i < 256; i = i + 8) {
+    for (var i = 0; i < 16; i = i + 8) {
         var lc1 = 0;
         var e2 = 1;
         for (var j = 0; j < 8; j++) {
             lc1 += typBits.out[i + j] * e2;
             e2 = e2 + e2;
         }
-        sum += lc1;
+        sum[k+1] <== sum[k] + lc1;
+        k++;
     }
 
-    component genesisBits = Num2Bits(256);
+    component genesisBits = Num2Bits(27*8);
     genesisBits.in <== genesis;
-    for (var i = 0; i < 256; i = i + 8) {
+    for (var i = 0; i < 27*8; i = i + 8) {
         var lc1 = 0;
         var e2 = 1;
         for (var j = 0; j < 8; j++) {
             lc1 += genesisBits.out[i + j] * e2;
             e2 = e2 + e2;
         }
-        sum += lc1;
+        sum[k+1] <== sum[k] + lc1;
+        k++;
     }
 
     component sumBits = LastNBits(16);
-    sumBits.in <== sum;
+    sumBits.in <== sum[k];
     out <== sumBits.out;
 }
 

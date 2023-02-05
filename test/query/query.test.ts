@@ -275,8 +275,8 @@ describe("Test query",  function() {
         });
     });
 
-    describe("#GreterThan", function() {
-        it("#GreterThan - 11 > 10 (true)", async () => {
+    describe("#GreaterThan", function() {
+        it("#GreaterThan - 11 > 10 (true)", async () => {
             const w = await circuit.calculateWitness({
                 in: "11",
                 operator: GREATER,
@@ -289,7 +289,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w);
         });
 
-        it("#GreterThan - 11 > 11 (false)", async () => {
+        it("#GreaterThan - 11 > 11 (false)", async () => {
 
             const w1 = await circuit.calculateWitness({
                 in: "11",
@@ -303,7 +303,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w1);
         });
 
-        it("#GreterThan - 11 > 12 (false) ", async () => {
+        it("#GreaterThan - 11 > 12 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "11",
                 operator:  GREATER,
@@ -316,7 +316,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w2);
         });
 
-        it("#GreterThan - 0 > 12 (false) ", async () => {
+        it("#GreaterThan - 0 > 12 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "0",
                 operator:  GREATER,
@@ -329,7 +329,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w2);
         });
 
-        it("#GreterThan - 12 > 0 (true) ", async () => {
+        it("#GreaterThan - 12 > 0 (true) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "12",
                 operator:  GREATER,
@@ -342,7 +342,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w2);
         });
 
-        it("#GreterThan - 0 > 0 (false) ", async () => {
+        it("#GreaterThan - 0 > 0 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "0",
                 operator:  GREATER,
@@ -355,7 +355,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w2);
         });
 
-        it("#GreterThan - p-1 > p-2 (true) ", async () => {
+        it("#GreaterThan - p-1 > p-2 (true) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "-1",
                 operator:  GREATER,
@@ -368,7 +368,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w2);
         });
 
-        it("#GreterThan - p-2 > p-1 (false) ", async () => {
+        it("#GreaterThan - p-2 > p-1 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "-2",
                 operator:  GREATER,
@@ -381,7 +381,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w2);
         });
 
-        it("#GreterThan - p-1 > 0 (true) ", async () => {
+        it("#GreaterThan - p-1 > 0 (true) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "-1",
                 operator:  GREATER,

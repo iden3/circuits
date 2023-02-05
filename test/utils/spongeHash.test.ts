@@ -10,7 +10,7 @@ include "../../circuits/lib/utils/spongeHash.circom";
 template ${templateName}Test() {
 signal input in[{{n}}];
 signal output out;
-component h = ${templateName}({{n}});
+component h = ${templateName}({{n}},6);
 for(var i = 0; i < {{n}}; i++) {
 h.in[i] <== in[i];
 }
