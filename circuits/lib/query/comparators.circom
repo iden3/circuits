@@ -11,17 +11,18 @@ template IN (valueArraySize){
         signal output out;
 
         component eq[valueArraySize];
-        var count = 0;
+        signal count[valueArraySize+1];
+        count[0] <== 0;
         for (var i=0; i<valueArraySize; i++) {
             eq[i] = IsEqual();
             eq[i].in[0] <== in;
             eq[i].in[1] <== value[i];
-            count += eq[i].out;
+            count[i+1] <== count[i] + eq[i].out;
         }
 
-        // Greater then
+        // Greater than
         component gt = GreaterThan(252);
-        gt.in[0] <== count;
+        gt.in[0] <== count[valueArraySize];
         gt.in[1] <== 0;
 
         out <== gt.out; // 1 - if in signal in the list, 0 - if it is not

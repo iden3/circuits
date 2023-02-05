@@ -11,9 +11,10 @@ export {};
 const NOOP = "0"; // = - no operation, skip query verification if set
 const EQUALS  = "1"; // = - equals sign
 const LESS    = "2"; // = - less-than sign
-const GREATER    = "3"; // = - greter-than sign
+const GREATER    = "3"; // = - greater-than sign
 const IN = "4"; // = - in
 const NOTIN = "5"; // = - notin
+const NOTEQUALS = "6"; // = - not equals
 
 describe("Test query",  function() {
     let circuit;
@@ -205,36 +206,47 @@ describe("Test query",  function() {
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
-    });
 
-    describe.skip("#LessThan bug.", function() {
-        it("#LessThan: -1 < 10 should be true but false", async () => {
+        it("#LessThan: p-1 < 10 should be false", async () => {
             const w = await circuit.calculateWitness({
                 in: "-1",
                 operator: LESS,
                 value: ["10", "0", "0"],
             }, false);
 
-            const expOut = {out: 1, value: ["10", "0", "0"]}
+            const expOut = {out: 0, value: ["10", "0", "0"]}
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
-        it("#LessThan: -4294967290 < 10 should be true and it is", async () => {
+        it("#LessThan: 10 < p-1 should be true", async () => {
+            const w = await circuit.calculateWitness({
+                in: "10",
+                operator: LESS,
+                value: ["-1", "0", "0"],
+            }, false);
+
+            const expOut = {out: 1, value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]}
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("#LessThan: p-4294967290 < 10 should be false", async () => {
             const w = await circuit.calculateWitness({
                 in: "-4294967290",
                 operator: LESS,
                 value: ["10", "0", "0"],
             }, false);
 
-            const expOut = {out: 1, value: ["10", "0", "0"]}
+            const expOut = {out: 0, value: ["10", "0", "0"]}
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
-        it("#LessThan: -345345345345345114294967290 < 10 should be true and it is", async () => {
+        it("#LessThan: p-345345345345345114294967290 < 10 should false", async () => {
             const w = await circuit.calculateWitness({
                 in: "-345345345345345114294967290",
                 // 1111111111111111111111111110011001100011011111010011010000000110
@@ -243,13 +255,13 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, false);
 
-            const expOut = {out: 1, value: ["10", "0", "0"]}
+            const expOut = {out: 0, value: ["10", "0", "0"]}
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
-        it("#LessThan: 1465...3131 < 10 should be false but fails in Num2Bits_2 line: 38", async () => {
+        it("#LessThan: 1465...3131 < 10 should be false", async () => {
             const w = await circuit.calculateWitness({
                 in: "14651237294507013008273219182214280847718990358813499091232105186081237893131",
                 operator: LESS,
@@ -263,8 +275,8 @@ describe("Test query",  function() {
         });
     });
 
-    describe("#GreterThan", function() {
-        it("#GreterThan - 11 > 10 (true)", async () => {
+    describe("#GreaterThan", function() {
+        it("#GreaterThan - 11 > 10 (true)", async () => {
             const w = await circuit.calculateWitness({
                 in: "11",
                 operator: GREATER,
@@ -277,7 +289,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w);
         });
 
-        it("#GreterThan - 11 > 11 (false)", async () => {
+        it("#GreaterThan - 11 > 11 (false)", async () => {
 
             const w1 = await circuit.calculateWitness({
                 in: "11",
@@ -291,7 +303,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w1);
         });
 
-        it("#GreterThan - 11 > 12 (false) ", async () => {
+        it("#GreaterThan - 11 > 12 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "11",
                 operator:  GREATER,
@@ -304,7 +316,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w2);
         });
 
-        it("#GreterThan - 0 > 12 (false) ", async () => {
+        it("#GreaterThan - 0 > 12 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "0",
                 operator:  GREATER,
@@ -317,7 +329,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w2);
         });
 
-        it("#GreterThan - 12 > 0 (true) ", async () => {
+        it("#GreaterThan - 12 > 0 (true) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "12",
                 operator:  GREATER,
@@ -330,7 +342,7 @@ describe("Test query",  function() {
             await circuit.checkConstraints(w2);
         });
 
-        it("#GreterThan - 0 > 0 (false) ", async () => {
+        it("#GreaterThan - 0 > 0 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "0",
                 operator:  GREATER,
@@ -338,6 +350,45 @@ describe("Test query",  function() {
             }, true);
 
             const expOut = {out: 0, value: ["0", "0", "0"]}
+
+            await circuit.assertOut(w2, expOut);
+            await circuit.checkConstraints(w2);
+        });
+
+        it("#GreaterThan - p-1 > p-2 (true) ", async () => {
+            const w2 = await circuit.calculateWitness({
+                in: "-1",
+                operator:  GREATER,
+                value: ["-2", "0", "0"],
+            }, true);
+
+            const expOut = {out: 1, value: ["21888242871839275222246405745257275088548364400416034343698204186575808495615", "0", "0"]}
+
+            await circuit.assertOut(w2, expOut);
+            await circuit.checkConstraints(w2);
+        });
+
+        it("#GreaterThan - p-2 > p-1 (false) ", async () => {
+            const w2 = await circuit.calculateWitness({
+                in: "-2",
+                operator:  GREATER,
+                value: ["-1", "0", "0"],
+            }, true);
+
+            const expOut = {out: 0, value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]}
+
+            await circuit.assertOut(w2, expOut);
+            await circuit.checkConstraints(w2);
+        });
+
+        it("#GreaterThan - p-1 > 0 (true) ", async () => {
+            const w2 = await circuit.calculateWitness({
+                in: "-1",
+                operator:  GREATER,
+                value: ["0", "0", "0"],
+            }, true);
+
+            const expOut = {out: 1, value: ["0", "0", "0"]}
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -504,4 +555,78 @@ describe("Test query",  function() {
         });
 
     });
+
+    describe("#NotEqual", function() {
+        it("10 != 11 (true)", async () => {
+            const inputs = {
+                in: "10",
+                operator: NOTEQUALS,
+                value: ["11", "0", "0"],
+            }
+
+            const expOut = {out: 1, value: ["11", "0", "0"]}
+
+            const w = await circuit.calculateWitness(inputs, true);
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("10 != 10 (false)", async () => {
+            const inputs = {
+                in: "10",
+                operator: NOTEQUALS,
+                value: ["10", "0", "0"],
+            }
+
+            const expOut = {out: 0, value: ["10", "0", "0"]}
+
+            const w = await circuit.calculateWitness(inputs, true);
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("0 != 11 (true)", async () => {
+            const inputs = {
+                in: "0",
+                operator: NOTEQUALS,
+                value: ["11", "0", "0"],
+            }
+
+            const expOut = {out: 1, value: ["11", "0", "0"]}
+
+            const w = await circuit.calculateWitness(inputs, true);
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("10 != 0 (true)", async () => {
+            const inputs = {
+                in: "10",
+                operator: NOTEQUALS,
+                value: ["0", "0", "0"],
+            }
+
+            const expOut = {out: 1, value: ["0", "0", "0"]}
+
+            const w = await circuit.calculateWitness(inputs, true);
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("0 != 0 (false)", async () => {
+            const inputs = {
+                in: "0",
+                operator: NOTEQUALS,
+                value: ["0", "0", "0"],
+            }
+
+            const expOut = {out: 0, value: ["0", "0", "0"]}
+
+            const w = await circuit.calculateWitness(inputs, true);
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+    });
+
 });

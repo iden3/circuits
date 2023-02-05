@@ -101,8 +101,6 @@ type CredentialAtomicSigOnChainV2Outputs struct {
 	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
-	ClaimPathKey           string `json:"claimPathKey"`
-	ClaimPathNotExists     string `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
 	Timestamp              string `json:"timestamp"`
 	IsRevocationChecked    string `json:"isRevocationChecked"`
 	Challenge              string `json:"challenge"`
@@ -275,6 +273,8 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
+		big.NewInt(0),
+		big.NewInt(0),
 		valuesHash,
 	})
 	require.NoError(t, err)
@@ -287,12 +287,10 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		ClaimPathNotExists:     "0",
 		СircuitQueryHash:       circuitQueryHash.String(),
 
 		Challenge:           challenge.String(),
 		GistRoot:            gistRoot.BigInt().String(),
-		ClaimPathKey:        "0",
 		IsRevocationChecked: "0",
 	}
 
@@ -422,6 +420,8 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
+		big.NewInt(0),
+		big.NewInt(0),
 		valuesHash,
 	})
 	require.NoError(t, err)
@@ -434,12 +434,10 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		ClaimPathNotExists:     "0",
 		СircuitQueryHash:       circuitQueryHash.String(),
 
 		Challenge:           challenge.String(),
 		GistRoot:            gistRoot.BigInt().String(),
-		ClaimPathKey:        "0",
 		IsRevocationChecked: "1",
 	}
 
@@ -464,6 +462,7 @@ func Test_JSON_LD_Proof_non_inclusion(t *testing.T) {
 	generateJSONLD_NON_INCLUSIO_TestData(t, isUserIDProfile, isSubjectIDProfile, desc, "jsonld_non_inclusion")
 }
 
+//merklized
 func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
 	var err error
 
@@ -608,6 +607,8 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
+		pathKey,
+		big.NewInt(0),
 		valuesHash,
 	})
 	require.NoError(t, err)
@@ -620,13 +621,10 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
-		ClaimPathNotExists:     "0",
 		СircuitQueryHash:       circuitQueryHash.String(),
-
-		Challenge:           challenge.String(),
-		GistRoot:            gistRoot.BigInt().String(),
-		ClaimPathKey:        pathKey.String(),
-		IsRevocationChecked: "1",
+		Challenge:              challenge.String(),
+		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "1",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
@@ -770,6 +768,8 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
+		big.NewInt(0),
+		big.NewInt(0),
 		valuesHash,
 	})
 	require.NoError(t, err)
@@ -782,13 +782,11 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		ClaimPathNotExists:     "0",
 		СircuitQueryHash:       circuitQueryHash.String(),
 
 		Challenge: challenge.String(),
 		GistRoot:  gistRoot.BigInt().String(),
 
-		ClaimPathKey:        "0",
 		IsRevocationChecked: "1",
 	}
 
@@ -945,6 +943,8 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
+		pathKey,
+		big.NewInt(1),
 		valuesHash,
 	})
 	require.NoError(t, err)
@@ -957,12 +957,10 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
-		ClaimPathNotExists:     "1",
 		СircuitQueryHash:       circuitQueryHash.String(),
 
 		Challenge:           challenge.String(),
 		GistRoot:            gistRoot.BigInt().String(),
-		ClaimPathKey:        pathKey.String(),
 		IsRevocationChecked: "1",
 	}
 

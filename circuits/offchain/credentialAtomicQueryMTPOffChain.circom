@@ -3,13 +3,13 @@ include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../lib/query/comparators.circom";
-include "../lib/authV2.circom";
+include "../auth/authV2.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
-include "../lib/query/jsonldQuery.circom";
+
 
 /**
-credentialJsonLDAtomicQueryMTP.circom - query issuerClaim value and verify issuerClaim MTP
+credentialJsonLDAtomicQueryMTP.circom - query claim value and verify claim MTP
 
 checks:
 - identity ownership
@@ -17,13 +17,13 @@ checks:
 - claim schema
 - claim ownership and issuance state
 - claim non revocation state
-- claim expiration ?
-- query JSON-LD claaim's field
+- claim expiration
+- query JSON-LD claim's field
 
 IdOwnershipLevels - Merkle tree depth level for personal claims
 IssuerLevels - Merkle tree depth level for claims issued by the issuer
 ClaimLevels - Merkle tree depth level for claim JSON-LD document
-valueLevels - Number of elements in comparison array for in/notin operation if level =3 number of values for
+valueLevels - Number of elements in comparison array for in/notin operation if level = 3 number of values for
 comparison ["1", "2", "3"]
 
 */
@@ -43,7 +43,7 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
     // provided slot. For example if slotIndex is `1` value gets from `i_1` slot. If `4` from `v_1`.
     signal output merklized;
 
-    // userID output signal will be assigned with ProfileID ProfileID(UserID, nonce),
+    // userID output signal will be assigned with ProfileID SelectProfile(UserGenesisID, nonce)
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
@@ -54,7 +54,7 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
     /* issuerClaim signals */
     signal input claimSubjectProfileNonce; // nonce of the profile that claim is issued to, 0 if claim is issued to genesisID
 
-
+    // issuer ID
     signal input issuerID;
 
     /* issuerClaim signals */
@@ -97,8 +97,6 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
-
-    // check user ownership
 
     // verify issuerClaim issued and not revoked
     component vci = verifyClaimIssuanceNonRev(IssuerLevels);

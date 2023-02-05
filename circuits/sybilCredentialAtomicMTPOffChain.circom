@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "sybilCredentialAtomicMTPOffChain.circom";
+include "sybil/sybilCredentialAtomicMTPOffChain.circom";
 
 component main{public [
                         requestID,

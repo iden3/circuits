@@ -4,12 +4,10 @@ include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 include "../lib/query/comparators.circom";
-include "../lib/authV2.circom";
+include "../auth/authV2.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
-include "../lib/query/jsonldQuery.circom";
 include "../lib/utils/spongeHash.circom";
-
 
 /**
 credentialAtomicQuerySigOnChain.circom - query claim value and verify claim issuer signature:
@@ -21,21 +19,22 @@ checks:
 - claim ownership and issuance state
 - claim non revocation state
 - claim expiration
-- query data slots
+- query JSON-LD claim's field
 
 idOwnershipLevels - Merkle tree depth level for personal claims
 issuerLevels - Merkle tree depth level for claims issued by the issuer
+claimLevels - Merkle tree depth level for claim JSON-LD document
 valueArraySize - Number of elements in comparison array for in/notin operation if level = 3 number of values for
 comparison ["1", "2", "3"]
 idOwnershipLevels - Merkle tree depth level for personal claims
-onChainLevels - Merkle tree depth level for Auth claimon chain
+onChainLevels - Merkle tree depth level for Auth claim on-chain
 */
 template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySize, idOwnershipLevels, onChainLevels) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
-    // flag indicates if merkleized flag set in issuer claim (if set MTP is used to verify that
+    // flag indicates if merklized flag set in issuer claim (if set MTP is used to verify that
     // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed
     // on root stored in the index or value slot
     // if it is not set verification is performed on according to the slotIndex. Value selected from the
@@ -45,6 +44,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     // userID output signal will be assigned with ProfileID SelectProfile(UserGenesisID, nonce)
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
+
     // circuits query Hash
     signal output circuitQueryHash;
 
@@ -91,7 +91,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     /* issuerClaim signals */
     signal input claimSubjectProfileNonce; // nonce of the profile that claim is issued to, 0 if claim is issued to genesisID
 
-    // issuer state
+    // issuer ID
     signal input issuerID;
 
     // issuer auth proof of existence
@@ -144,10 +144,10 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     signal input operator;
     signal input value[valueArraySize];
 
-
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
+
      component auth = AuthV2(idOwnershipLevels, onChainLevels);
 
     auth.genesisID <== userGenesisID;
@@ -188,28 +188,27 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
 
     // Check issuerClaim is issued to provided identity
     component claimIdCheck = verifyCredentialSubjectProfile();
-    for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
+    for (var i = 0; i < 8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
     claimIdCheck.id <== userGenesisID;
     claimIdCheck.nonce <== claimSubjectProfileNonce;
 
     // Verify issuerClaim schema
     component claimSchemaCheck = verifyCredentialSchema();
-    for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
+    for (var i = 0; i < 8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
     claimSchemaCheck.schema <== claimSchema;
 
     // verify issuerClaim expiration time
     component claimExpirationCheck = verifyExpirationTime();
-    for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
+    for (var i = 0; i < 8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
     claimExpirationCheck.timestamp <== timestamp;
 
 
     // AuthHash cca3371a6cb1b715004407e325bd993c
     // BigInt: 80551937543569765027552589160822318028
     // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
-    var AUTH_SCHEMA_HASH  = 80551937543569765027552589160822318028;
     component issuerSchemaCheck = verifyCredentialSchema();
     for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
-    issuerSchemaCheck.schema <== AUTH_SCHEMA_HASH;
+    issuerSchemaCheck.schema <== 80551937543569765027552589160822318028;
     // verify authClaim issued and not revoked
     // calculate issuerAuthState
     component issuerAuthStateComponent = getIdenState();
@@ -271,14 +270,15 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     verifyClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
 
     component merklize = getClaimMerklizeRoot();
-    for (var i=0; i<8; i++) { merklize.claim[i] <== issuerClaim[i]; }
+    for (var i = 0; i < 8; i++) { merklize.claim[i] <== issuerClaim[i]; }
+    merklized <== merklize.flag;
 
     // check path/in node exists in merkletree specified by jsonldRoot
     component valueInMT = SMTVerifier(claimLevels);
     valueInMT.enabled <== merklize.flag;  // if merklize flag 0 skip MTP verification
     valueInMT.fnc <== claimPathNotExists; // inclusion
     valueInMT.root <== merklize.out;
-    for (var i=0; i<claimLevels; i++) { valueInMT.siblings[i] <== claimPathMtp[i]; }
+    for (var i = 0; i < claimLevels; i++) { valueInMT.siblings[i] <== claimPathMtp[i]; }
     valueInMT.oldKey <== claimPathMtpAuxHi;
     valueInMT.oldValue <== claimPathMtpAuxHv;
     valueInMT.isOld0 <== claimPathMtpNoAux;
@@ -287,7 +287,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
 
     // select value from claim by slot index (0-7)
     component getClaimValue = getValueByIndex();
-    for (var i=0; i<8; i++) { getClaimValue.claim[i] <== issuerClaim[i]; }
+    for (var i = 0; i < 8; i++) { getClaimValue.claim[i] <== issuerClaim[i]; }
     getClaimValue.index <== slotIndex;
 
     // select value for query verification,
@@ -299,10 +299,10 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     queryValue.c[1] <== claimPathValue;
 
     // verify query
-    component spongeHash = SpongeHash(valueArraySize);
+    component spongeHash = SpongeHash(valueArraySize, 6); // 6 - max size of poseidon hash available on-chain
     component query = Query(valueArraySize);
     query.in <== queryValue.out;
-    for (var i=0; i<valueArraySize; i++) { 
+    for (var i = 0; i < valueArraySize; i++) {
         query.value[i] <== value[i];
         spongeHash.in[i] <== value[i];
     }
@@ -310,19 +310,15 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
 
     query.out === 1;
 
-    component queryHasher = Poseidon(4);
+    component queryHasher = Poseidon(6);
     queryHasher.inputs[0] <== claimSchema;
     queryHasher.inputs[1] <== slotIndex;
     queryHasher.inputs[2] <== operator;
-    queryHasher.inputs[3] <== spongeHash.out;
+    queryHasher.inputs[3] <== claimPathKey;
+    queryHasher.inputs[4] <== claimPathNotExists;
+    queryHasher.inputs[5] <== spongeHash.out;
 
     circuitQueryHash <== queryHasher.out;
 
-    /* ProfileID calculation */
-    component selectProfile = SelectProfile();
-    selectProfile.in <== userGenesisID;
-    selectProfile.nonce <== profileNonce;
-
-    userID <== selectProfile.out;
-    merklized <== merklize.flag;
+    userID <== auth.userID;
 }

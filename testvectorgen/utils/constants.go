@@ -8,6 +8,7 @@ const (
 	GT
 	IN
 	NIN
+	NE
 )
 
 const TestClaimDocument = `{
