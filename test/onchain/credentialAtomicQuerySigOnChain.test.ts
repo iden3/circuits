@@ -10,7 +10,7 @@ describe("On Chain: Test credentialAtomicQuerySigOnChain.circom", function () {
 
     before(async () => {
         circuit = await wasm(
-            path.join(__dirname, "../../circuits", "credentialAtomicQuerySigOnChain.circom"),
+            path.join(__dirname, "../../circuits", "credentialAtomicQuerySigV2OnChain.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,
