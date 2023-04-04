@@ -13,8 +13,8 @@ template SpongeHash(arraySize, hashFnBatchSize) {
         firstPoseidon.inputs[i] <== getArrayValueByIndex(in, arraySize, i);
     }
 
-    var restLength = arraySize - hashFnBatchSize;
-	if (restLength > batchSize) {
+    var restLength = arraySize - hashFnBatchSize > 0 ? arraySize - hashFnBatchSize : 0;
+	if (restLength > 0) {
 		var r = restLength % batchSize;
 		var diff = r == 0 ? 0 : batchSize - r;
 		iterationCount = (restLength + diff) / batchSize;
