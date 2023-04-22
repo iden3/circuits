@@ -150,43 +150,29 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
 
     /////////////////////////////////////////////////////////////////
 
-     component auth = AuthV2(idOwnershipLevels, onChainLevels);
-
-    auth.genesisID <== userGenesisID;
-    // random number, which should be stored by user
-    // if there is a need to generate the same userID (ProfileID) output for different proofs
-    auth.profileNonce <== profileNonce;
-    // user state
-    auth.state <== userState;
-    auth.claimsTreeRoot <== userClaimsTreeRoot;
-    auth.revTreeRoot <== userRevTreeRoot;
-    auth.rootsTreeRoot <== userRootsTreeRoot;
-
-    for (var i= 0; i < 8; i++) { auth.authClaim[i] <== authClaim[i]; }
-    for (var i= 0; i < idOwnershipLevels; i++) {
-        auth.authClaimIncMtp[i] <== authClaimIncMtp[i]; 
-        auth.authClaimNonRevMtp[i] <== authClaimNonRevMtp[i];
-    }
-
-    auth.authClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
-    auth.authClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
-    auth.authClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
-
-    // challenge signature
-    auth.challenge <== challenge;
-    auth.challengeSignatureR8x <== challengeSignatureR8x;
-    auth.challengeSignatureR8y <== challengeSignatureR8y;
-    auth.challengeSignatureS <== challengeSignatureS;
-
-    // global identity state tree on chain
-    auth.gistRoot <== gistRoot;
-
-    // proof of inclusion or exclusion of the user in the global state
-    for (var i = 0; i < onChainLevels; i++) { auth.gistMtp[i] <== gistMtp[i]; }
-    
-    auth.gistMtpAuxHi <== gistMtpAuxHi;
-    auth.gistMtpAuxHv <== gistMtpAuxHv;
-    auth.gistMtpNoAux <== gistMtpNoAux;
+    userID <== AuthV2(idOwnershipLevels, onChainLevels)(
+        userGenesisID,
+        profileNonce,
+        userState, // user state
+        userClaimsTreeRoot,
+        userRevTreeRoot,
+        userRootsTreeRoot,
+        authClaim,
+        authClaimIncMtp,
+        authClaimNonRevMtp,
+        authClaimNonRevMtpNoAux,
+        authClaimNonRevMtpAuxHi,
+        authClaimNonRevMtpAuxHv,
+        challenge, // challenge & signature
+        challengeSignatureR8x,
+        challengeSignatureR8y,
+        challengeSignatureS,
+        gistRoot, // global identity state tree on chain
+        gistMtp, // proof of inclusion or exclusion of the user in the global state
+        gistMtpAuxHi,
+        gistMtpAuxHv,
+        gistMtpNoAux
+    );
 
     /////////////////////////////////////////////////////////////////
 
@@ -328,6 +314,4 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     queryHasher.inputs[5] <== spongeHash.out;
 
     circuitQueryHash <== queryHasher.out;
-
-    userID <== auth.userID;
 }

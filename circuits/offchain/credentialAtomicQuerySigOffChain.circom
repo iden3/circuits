@@ -1,4 +1,4 @@
-pragma circom 2.0.0;
+pragma circom 2.1.1;
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
@@ -239,9 +239,5 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
     query.out === 1;
 
     /* ProfileID calculation */
-    component selectProfile = SelectProfile();
-    selectProfile.in <== userGenesisID;
-    selectProfile.nonce <== profileNonce;
-
-    userID <== selectProfile.out;
+    userID <== SelectProfile()(userGenesisID, profileNonce);
 }

@@ -1,4 +1,4 @@
-pragma circom 2.0.0;
+pragma circom 2.1.1;
 
 include "../lib/idOwnership.circom";
 include "../lib/utils/idUtils.circom";
@@ -50,58 +50,44 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     signal output userID;
 
 
-
     /* id ownership check */
-    component checkIdOwnership = IdOwnership(IdOwnershipLevels);
-
-    checkIdOwnership.userClaimsTreeRoot <== claimsTreeRoot;
-    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimMtp[i] <== authClaimIncMtp[i]; }
-    for (var i=0; i<8; i++) { checkIdOwnership.userAuthClaim[i] <== authClaim[i]; }
-
-    checkIdOwnership.userRevTreeRoot <== revTreeRoot;
-    for (var i=0; i<IdOwnershipLevels; i++) { checkIdOwnership.userAuthClaimNonRevMtp[i] <== authClaimNonRevMtp[i]; }
-    checkIdOwnership.userAuthClaimNonRevMtpNoAux <== authClaimNonRevMtpNoAux;
-    checkIdOwnership.userAuthClaimNonRevMtpAuxHv <== authClaimNonRevMtpAuxHv;
-    checkIdOwnership.userAuthClaimNonRevMtpAuxHi <== authClaimNonRevMtpAuxHi;
-
-    checkIdOwnership.userRootsTreeRoot <== rootsTreeRoot;
-
-    checkIdOwnership.challenge <== challenge;
-    checkIdOwnership.challengeSignatureR8x <== challengeSignatureR8x;
-    checkIdOwnership.challengeSignatureR8y <== challengeSignatureR8y;
-    checkIdOwnership.challengeSignatureS <== challengeSignatureS;
-
-    checkIdOwnership.userState <== state;
+    IdOwnership(IdOwnershipLevels)(
+        state,
+        claimsTreeRoot,
+        authClaimIncMtp,
+        authClaim,
+        revTreeRoot,
+        authClaimNonRevMtp,
+        authClaimNonRevMtpNoAux,
+        authClaimNonRevMtpAuxHi,
+        authClaimNonRevMtpAuxHv,
+        rootsTreeRoot,
+        challenge,
+        challengeSignatureR8x,
+        challengeSignatureR8y,
+        challengeSignatureS
+    );
 
     /* Check on-chain SMT inclusion existence */
-    component cutId = cutId();
-    cutId.in <== genesisID;
+    signal cutId <== cutId()(genesisID);
 
-    component cutState = cutState();
-    cutState.in <== state;
+    signal cutState <== cutState()(state);
 
-    component isStateGenesis = IsEqual();
-    isStateGenesis.in[0] <== cutId.out;
-    isStateGenesis.in[1] <== cutState.out;
+    signal isStateGenesis <== IsEqual()([cutId, cutState]);
 
-    component genesisIDhash = Poseidon(1);
-    genesisIDhash.inputs[0] <== genesisID;
+    signal genesisIDhash <== Poseidon(1)([genesisID]);
 
     component gistCheck = SMTVerifier(onChainLevels);
     gistCheck.enabled <== 1;
-    gistCheck.fnc <== isStateGenesis.out; // non-inclusion in case if genesis state, otherwise inclusion
+    gistCheck.fnc <== isStateGenesis; // non-inclusion in case if genesis state, otherwise inclusion
     gistCheck.root <== gistRoot;
     for (var i=0; i<onChainLevels; i++) { gistCheck.siblings[i] <== gistMtp[i]; }
     gistCheck.oldKey <== gistMtpAuxHi;
     gistCheck.oldValue <== gistMtpAuxHv;
     gistCheck.isOld0 <== gistMtpNoAux;
-    gistCheck.key <== genesisIDhash.out;
+    gistCheck.key <== genesisIDhash;
     gistCheck.value <== state;
 
     /* ProfileID calculation */
-    component calcProfile = SelectProfile();
-    calcProfile.in <== genesisID;
-    calcProfile.nonce <== profileNonce;
-
-    userID <== calcProfile.out;
+    userID <== SelectProfile()(genesisID, profileNonce);
 }
