@@ -111,6 +111,8 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
+    /////////////////////////////////////////////////////////////////
+
     // Check issuerClaim is issued to provided identity
     component claimIdCheck = verifyCredentialSubjectProfile();
     for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
@@ -126,6 +128,8 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
     component claimExpirationCheck = verifyExpirationTime();
     for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
     claimExpirationCheck.timestamp <== timestamp;
+
+    /////////////////////////////////////////////////////////////////
 
     // AuthHash cca3371a6cb1b715004407e325bd993c
     // BigInt: 80551937543569765027552589160822318028
@@ -193,6 +197,8 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
     verifyClaimNotRevoked.auxHv <== issuerClaimNonRevMtpAuxHv;
     verifyClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
 
+    /////////////////////////////////////////////////////////////////
+
     component merklize = getClaimMerklizeRoot();
     for (var i=0; i<8; i++) { merklize.claim[i] <== issuerClaim[i]; }
     merklized <== merklize.flag;
@@ -221,6 +227,8 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
     queryValue.s <== merklize.flag;
     queryValue.c[0] <== getClaimValue.value;
     queryValue.c[1] <== claimPathValue;
+
+    /////////////////////////////////////////////////////////////////
 
     // verify query
     component query = Query(valueArraySize);

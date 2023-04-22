@@ -148,6 +148,8 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
+    /////////////////////////////////////////////////////////////////
+
      component auth = AuthV2(idOwnershipLevels, onChainLevels);
 
     auth.genesisID <== userGenesisID;
@@ -186,6 +188,8 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     auth.gistMtpAuxHv <== gistMtpAuxHv;
     auth.gistMtpNoAux <== gistMtpNoAux;
 
+    /////////////////////////////////////////////////////////////////
+
     // Check issuerClaim is issued to provided identity
     component claimIdCheck = verifyCredentialSubjectProfile();
     for (var i = 0; i < 8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
@@ -202,6 +206,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     for (var i = 0; i < 8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
     claimExpirationCheck.timestamp <== timestamp;
 
+    /////////////////////////////////////////////////////////////////
 
     // AuthHash cca3371a6cb1b715004407e325bd993c
     // BigInt: 80551937543569765027552589160822318028
@@ -269,6 +274,8 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     verifyClaimNotRevoked.auxHv <== issuerClaimNonRevMtpAuxHv;
     verifyClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
 
+    /////////////////////////////////////////////////////////////////
+
     component merklize = getClaimMerklizeRoot();
     for (var i = 0; i < 8; i++) { merklize.claim[i] <== issuerClaim[i]; }
     merklized <== merklize.flag;
@@ -297,6 +304,8 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     queryValue.s <== merklize.flag;
     queryValue.c[0] <== getClaimValue.value;
     queryValue.c[1] <== claimPathValue;
+
+    /////////////////////////////////////////////////////////////////
 
     // verify query
     component spongeHash = SpongeHash(valueArraySize, 6); // 6 - max size of poseidon hash available on-chain

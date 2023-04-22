@@ -98,6 +98,8 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
+    /////////////////////////////////////////////////////////////////
+
     // Check issuerClaim is issued to provided identity
     component claimIdCheck = verifyCredentialSubjectProfile();
     for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
@@ -113,6 +115,8 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
     component claimExpirationCheck = verifyExpirationTime();
     for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
     claimExpirationCheck.timestamp <== timestamp;
+
+    /////////////////////////////////////////////////////////////////
 
     // verify issuerClaim issued and not revoked
     component vci = verifyClaimIssuanceNonRev(issuerLevels);
@@ -133,6 +137,8 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
     vci.claimNonRevIssuerRevTreeRoot <== issuerClaimNonRevRevTreeRoot;
     vci.claimNonRevIssuerRootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
     vci.claimNonRevIssuerState <== issuerClaimNonRevState;
+
+    /////////////////////////////////////////////////////////////////
 
     component merklize = getClaimMerklizeRoot();
     for (var i=0; i<8; i++) { merklize.claim[i] <== issuerClaim[i]; }
@@ -162,6 +168,8 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
     queryValue.s <== merklize.flag;
     queryValue.c[0] <== getClaimValue.value;
     queryValue.c[1] <== claimPathValue;
+
+    /////////////////////////////////////////////////////////////////
 
     // verify query
     component query = Query(valueArraySize);

@@ -135,6 +135,8 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
 
+    /////////////////////////////////////////////////////////////////
+
     component auth = AuthV2(idOwnershipLevels, onChainLevels);
 
     auth.genesisID <== userGenesisID;
@@ -173,6 +175,8 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     auth.gistMtpAuxHv <== gistMtpAuxHv;
     auth.gistMtpNoAux <== gistMtpNoAux;
 
+    /////////////////////////////////////////////////////////////////
+
     // Check issuerClaim is issued to provided identity
     component claimIdCheck = verifyCredentialSubjectProfile();
     for (var i = 0; i < 8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
@@ -188,6 +192,8 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     component claimExpirationCheck = verifyExpirationTime();
     for (var i = 0; i < 8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
     claimExpirationCheck.timestamp <== timestamp;
+
+    /////////////////////////////////////////////////////////////////
 
     // verify issuerClaim issued and not revoked
     component vci = verifyClaimIssuanceNonRev(issuerLevels);
@@ -208,6 +214,8 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     vci.claimNonRevIssuerRevTreeRoot <== issuerClaimNonRevRevTreeRoot;
     vci.claimNonRevIssuerRootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
     vci.claimNonRevIssuerState <== issuerClaimNonRevState;
+
+    /////////////////////////////////////////////////////////////////
 
     component merklize = getClaimMerklizeRoot();
     for (var i = 0; i < 8; i++) { merklize.claim[i] <== issuerClaim[i]; }
@@ -237,6 +245,8 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     queryValue.s <== merklize.flag;
     queryValue.c[0] <== getClaimValue.value;
     queryValue.c[1] <== claimPathValue;
+
+    /////////////////////////////////////////////////////////////////
 
     // verify query
     component spongeHash = SpongeHash(valueArraySize, 6); // 6 - max size of poseidon hash available on-chain
