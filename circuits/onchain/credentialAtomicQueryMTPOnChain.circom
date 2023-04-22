@@ -173,6 +173,22 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     auth.gistMtpAuxHv <== gistMtpAuxHv;
     auth.gistMtpNoAux <== gistMtpNoAux;
 
+    // Check issuerClaim is issued to provided identity
+    component claimIdCheck = verifyCredentialSubjectProfile();
+    for (var i = 0; i < 8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
+    claimIdCheck.id <== userGenesisID;
+    claimIdCheck.nonce <== claimSubjectProfileNonce;
+
+    // Verify issuerClaim schema
+    component claimSchemaCheck = verifyCredentialSchema();
+    for (var i = 0; i < 8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
+    claimSchemaCheck.schema <== claimSchema;
+
+    // verify issuerClaim expiration time
+    component claimExpirationCheck = verifyExpirationTime();
+    for (var i = 0; i < 8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
+    claimExpirationCheck.timestamp <== timestamp;
+
     // verify issuerClaim issued and not revoked
     component vci = verifyClaimIssuanceNonRev(issuerLevels);
     for (var i = 0; i < 8; i++) { vci.claim[i] <== issuerClaim[i]; }
@@ -192,22 +208,6 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     vci.claimNonRevIssuerRevTreeRoot <== issuerClaimNonRevRevTreeRoot;
     vci.claimNonRevIssuerRootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
     vci.claimNonRevIssuerState <== issuerClaimNonRevState;
-
-    // Check issuerClaim is issued to provided identity
-    component claimIdCheck = verifyCredentialSubjectProfile();
-    for (var i = 0; i < 8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
-    claimIdCheck.id <== userGenesisID;
-    claimIdCheck.nonce <== claimSubjectProfileNonce;
-
-    // Verify issuerClaim schema
-    component claimSchemaCheck = verifyCredentialSchema();
-    for (var i = 0; i < 8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
-    claimSchemaCheck.schema <== claimSchema;
-
-    // verify issuerClaim expiration time
-    component claimExpirationCheck = verifyExpirationTime();
-    for (var i = 0; i < 8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
-    claimExpirationCheck.timestamp <== timestamp;
 
     component merklize = getClaimMerklizeRoot();
     for (var i = 0; i < 8; i++) { merklize.claim[i] <== issuerClaim[i]; }

@@ -20,14 +20,14 @@ checks:
 - claim expiration
 - query JSON-LD claim's field
 
-IdOwnershipLevels - Merkle tree depth level for personal claims
-IssuerLevels - Merkle tree depth level for claims issued by the issuer
-ClaimLevels - Merkle tree depth level for claim JSON-LD document
-valueLevels - Number of elements in comparison array for in/notin operation if level = 3 number of values for
+idOwnershipLevels - Merkle tree depth level for personal claims
+issuerLevels - Merkle tree depth level for claims issued by the issuer
+claimLevels - Merkle tree depth level for claim JSON-LD document
+valueArraySize - Number of elements in comparison array for in/notin operation if level = 3 number of values for
 comparison ["1", "2", "3"]
 
 */
-template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArraySize) {
+template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -36,7 +36,7 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
     // and verifier can use it to identify the request, and verify the proof of specific request in case of multiple query requests
     signal input requestID;
 
-    // flag indicates if merkleized flag set in issuer claim (if set MTP is used to verify that
+    // flag indicates if merklized flag set in issuer claim (if set MTP is used to verify that
     // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed
     // on root stored in the index or value slot
     // if it is not set verification is performed on according to the slotIndex. Value selected from the
@@ -59,7 +59,7 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
 
     /* issuerClaim signals */
     signal input issuerClaim[8];
-    signal input issuerClaimMtp[IssuerLevels];
+    signal input issuerClaimMtp[issuerLevels];
     signal input issuerClaimClaimsTreeRoot;
     signal input issuerClaimRevTreeRoot;
     signal input issuerClaimRootsTreeRoot;
@@ -67,7 +67,7 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
 
     // issuerClaim non rev inputs
     signal input isRevocationChecked;
-    signal input issuerClaimNonRevMtp[IssuerLevels];
+    signal input issuerClaimNonRevMtp[issuerLevels];
     signal input issuerClaimNonRevMtpNoAux;
     signal input issuerClaimNonRevMtpAuxHi;
     signal input issuerClaimNonRevMtpAuxHv;
@@ -83,7 +83,7 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
     signal input claimSchema;
 
     signal input claimPathNotExists; // 0 for inclusion, 1 for non-inclusion
-    signal input claimPathMtp[ClaimLevels];
+    signal input claimPathMtp[claimLevels];
     signal input claimPathMtpNoAux; // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
     signal input claimPathMtpAuxHi; // 0 for inclusion proof
     signal input claimPathMtpAuxHv; // 0 for inclusion proof
@@ -97,26 +97,6 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
-
-    // verify issuerClaim issued and not revoked
-    component vci = verifyClaimIssuanceNonRev(IssuerLevels);
-    for (var i=0; i<8; i++) { vci.claim[i] <== issuerClaim[i]; }
-    for (var i=0; i<IssuerLevels; i++) { vci.claimIssuanceMtp[i] <== issuerClaimMtp[i]; }
-    vci.claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot;
-    vci.claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot;
-    vci.claimIssuanceRootsTreeRoot <== issuerClaimRootsTreeRoot;
-    vci.claimIssuanceIdenState <== issuerClaimIdenState;
-
-    // non revocation status
-    vci.enabledNonRevCheck <== isRevocationChecked;
-    for (var i=0; i<IssuerLevels; i++) { vci.claimNonRevMtp[i] <== issuerClaimNonRevMtp[i]; }
-    vci.claimNonRevMtpNoAux <== issuerClaimNonRevMtpNoAux;
-    vci.claimNonRevMtpAuxHi <== issuerClaimNonRevMtpAuxHi;
-    vci.claimNonRevMtpAuxHv <== issuerClaimNonRevMtpAuxHv;
-    vci.claimNonRevIssuerClaimsTreeRoot <== issuerClaimNonRevClaimsTreeRoot;
-    vci.claimNonRevIssuerRevTreeRoot <== issuerClaimNonRevRevTreeRoot;
-    vci.claimNonRevIssuerRootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
-    vci.claimNonRevIssuerState <== issuerClaimNonRevState;
 
     // Check issuerClaim is issued to provided identity
     component claimIdCheck = verifyCredentialSubjectProfile();
@@ -134,16 +114,36 @@ template CredentialAtomicQueryMTPOffChain(IssuerLevels, ClaimLevels, valueArrayS
     for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
     claimExpirationCheck.timestamp <== timestamp;
 
+    // verify issuerClaim issued and not revoked
+    component vci = verifyClaimIssuanceNonRev(issuerLevels);
+    for (var i=0; i<8; i++) { vci.claim[i] <== issuerClaim[i]; }
+    for (var i = 0; i < issuerLevels; i++) { vci.claimIssuanceMtp[i] <== issuerClaimMtp[i]; }
+    vci.claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot;
+    vci.claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot;
+    vci.claimIssuanceRootsTreeRoot <== issuerClaimRootsTreeRoot;
+    vci.claimIssuanceIdenState <== issuerClaimIdenState;
+
+    // non revocation status
+    vci.enabledNonRevCheck <== isRevocationChecked;
+    for (var i = 0; i < issuerLevels; i++) { vci.claimNonRevMtp[i] <== issuerClaimNonRevMtp[i]; }
+    vci.claimNonRevMtpNoAux <== issuerClaimNonRevMtpNoAux;
+    vci.claimNonRevMtpAuxHi <== issuerClaimNonRevMtpAuxHi;
+    vci.claimNonRevMtpAuxHv <== issuerClaimNonRevMtpAuxHv;
+    vci.claimNonRevIssuerClaimsTreeRoot <== issuerClaimNonRevClaimsTreeRoot;
+    vci.claimNonRevIssuerRevTreeRoot <== issuerClaimNonRevRevTreeRoot;
+    vci.claimNonRevIssuerRootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
+    vci.claimNonRevIssuerState <== issuerClaimNonRevState;
+
     component merklize = getClaimMerklizeRoot();
     for (var i=0; i<8; i++) { merklize.claim[i] <== issuerClaim[i]; }
     merklized <== merklize.flag;
 
     // check path/in node exists in merkletree specified by jsonldRoot
-    component valueInMT = SMTVerifier(ClaimLevels);
+    component valueInMT = SMTVerifier(claimLevels);
     valueInMT.enabled <== merklize.flag;  // if merklize flag 0 skip MTP verification
     valueInMT.fnc <== claimPathNotExists; // inclusion
     valueInMT.root <== merklize.out;
-    for (var i=0; i<ClaimLevels; i++) { valueInMT.siblings[i] <== claimPathMtp[i]; }
+    for (var i = 0; i < claimLevels; i++) { valueInMT.siblings[i] <== claimPathMtp[i]; }
     valueInMT.oldKey <== claimPathMtpAuxHi;
     valueInMT.oldValue <== claimPathMtpAuxHv;
     valueInMT.isOld0 <== claimPathMtpNoAux;
