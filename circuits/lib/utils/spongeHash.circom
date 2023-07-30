@@ -44,8 +44,7 @@ template SpongeHash(arraySize, hashFnBatchSize) {
 
 
 function getArrayValueByIndex(valueArray, arraySize, idx) {
-
-   if(idx < arraySize) {
+    if(idx < arraySize) {
         return valueArray[idx];
     } else{
         return 0;

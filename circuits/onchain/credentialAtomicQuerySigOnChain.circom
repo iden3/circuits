@@ -1,4 +1,4 @@
-pragma circom 2.0.0;
+pragma circom 2.1.1;
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
@@ -177,141 +177,137 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     /////////////////////////////////////////////////////////////////
 
     // Check issuerClaim is issued to provided identity
-    component claimIdCheck = verifyCredentialSubjectProfile();
-    for (var i = 0; i < 8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
-    claimIdCheck.id <== userGenesisID;
-    claimIdCheck.nonce <== claimSubjectProfileNonce;
+    verifyCredentialSubjectProfile()(
+        issuerClaim,
+        userGenesisID,
+        claimSubjectProfileNonce
+    );
 
     // Verify issuerClaim schema
-    component claimSchemaCheck = verifyCredentialSchema();
-    for (var i = 0; i < 8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
-    claimSchemaCheck.schema <== claimSchema;
+    verifyCredentialSchema()(issuerClaim, claimSchema);
 
     // verify issuerClaim expiration time
-    component claimExpirationCheck = verifyExpirationTime();
-    for (var i = 0; i < 8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
-    claimExpirationCheck.timestamp <== timestamp;
+    verifyExpirationTime()(issuerClaim, timestamp);
 
     /////////////////////////////////////////////////////////////////
 
+    // verify issuerAuthClaim Schema
     // AuthHash cca3371a6cb1b715004407e325bd993c
     // BigInt: 80551937543569765027552589160822318028
     // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
-    component issuerSchemaCheck = verifyCredentialSchema();
-    for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
-    issuerSchemaCheck.schema <== 80551937543569765027552589160822318028;
+    verifyCredentialSchema()(
+        issuerAuthClaim,
+        80551937543569765027552589160822318028
+    );
+
     // verify authClaim issued and not revoked
     // calculate issuerAuthState
-    component issuerAuthStateComponent = getIdenState();
-    issuerAuthStateComponent.claimsTreeRoot <== issuerAuthClaimsTreeRoot;
-    issuerAuthStateComponent.revTreeRoot <== issuerAuthRevTreeRoot;
-    issuerAuthStateComponent.rootsTreeRoot <== issuerAuthRootsTreeRoot;
-
-    issuerAuthState <== issuerAuthStateComponent.idenState;
+    issuerAuthState <== getIdenState()(
+        issuerAuthClaimsTreeRoot,
+        issuerAuthRevTreeRoot,
+        issuerAuthRootsTreeRoot
+    );
 
     // issuerAuthClaim proof of existence (isProofExist)
-    //
-    component smtIssuerAuthClaimExists = checkClaimExists(issuerLevels);
-    for (var i=0; i<8; i++) { smtIssuerAuthClaimExists.claim[i] <== issuerAuthClaim[i]; }
-    for (var i=0; i<issuerLevels; i++) { smtIssuerAuthClaimExists.claimMTP[i] <== issuerAuthClaimMtp[i]; }
-    smtIssuerAuthClaimExists.treeRoot <== issuerAuthClaimsTreeRoot;
+    checkClaimExists(issuerLevels)(
+        issuerAuthClaim,
+        issuerAuthClaimMtp,
+        issuerAuthClaimsTreeRoot
+    );
 
     // issuerAuthClaim proof of non-revocation
-    //
-    component verifyIssuerAuthClaimNotRevoked = checkClaimNotRevoked(issuerLevels);
-    verifyIssuerAuthClaimNotRevoked.enabled <== 1;
-    for (var i=0; i<8; i++) { verifyIssuerAuthClaimNotRevoked.claim[i] <== issuerAuthClaim[i]; }
-    for (var i=0; i<issuerLevels; i++) {
-        verifyIssuerAuthClaimNotRevoked.claimNonRevMTP[i] <== issuerAuthClaimNonRevMtp[i];
-    }
-    verifyIssuerAuthClaimNotRevoked.noAux <== issuerAuthClaimNonRevMtpNoAux;
-    verifyIssuerAuthClaimNotRevoked.auxHi <== issuerAuthClaimNonRevMtpAuxHi;
-    verifyIssuerAuthClaimNotRevoked.auxHv <== issuerAuthClaimNonRevMtpAuxHv;
-    verifyIssuerAuthClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
+    checkClaimNotRevoked(issuerLevels)(
+        enabled <== 1,
+        claim <== issuerAuthClaim,
+        claimNonRevMTP <== issuerAuthClaimNonRevMtp,
+        noAux <== issuerAuthClaimNonRevMtpNoAux,
+        auxHi <== issuerAuthClaimNonRevMtpAuxHi,
+        auxHv <== issuerAuthClaimNonRevMtpAuxHv,
+        treeRoot <== issuerClaimNonRevRevTreeRoot
+    );
 
     component issuerAuthPubKey = getPubKeyFromClaim();
-    for (var i=0; i<8; i++){ issuerAuthPubKey.claim[i] <== issuerAuthClaim[i]; }
+    issuerAuthPubKey.claim <== issuerAuthClaim;
 
-    // issuerClaim  check signature
-    component verifyClaimSig = verifyClaimSignature();
-    for (var i=0; i<8; i++) { verifyClaimSig.claim[i] <== issuerClaim[i]; }
-    verifyClaimSig.sigR8x <== issuerClaimSignatureR8x;
-    verifyClaimSig.sigR8y <== issuerClaimSignatureR8y;
-    verifyClaimSig.sigS <== issuerClaimSignatureS;
-    verifyClaimSig.pubKeyX <== issuerAuthPubKey.Ax;
-    verifyClaimSig.pubKeyY <== issuerAuthPubKey.Ay;
+    // issuerClaim check signature
+    verifyClaimSignature()(
+        issuerClaim,
+        issuerClaimSignatureR8x,
+        issuerClaimSignatureR8y,
+        issuerClaimSignatureS,
+        issuerAuthPubKey.Ax,
+        issuerAuthPubKey.Ay
+    );
 
     // verify issuer state includes issuerClaim
-    component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();
-    verifyClaimIssuanceIdenState.claimsTreeRoot <== issuerClaimNonRevClaimsTreeRoot;
-    verifyClaimIssuanceIdenState.revTreeRoot <== issuerClaimNonRevRevTreeRoot;
-    verifyClaimIssuanceIdenState.rootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
-    verifyClaimIssuanceIdenState.expectedState <== issuerClaimNonRevState;
+    checkIdenStateMatchesRoots()(
+        issuerClaimNonRevClaimsTreeRoot,
+        issuerClaimNonRevRevTreeRoot,
+        issuerClaimNonRevRootsTreeRoot,
+        issuerClaimNonRevState
+    );
 
     // non revocation status
-    component verifyClaimNotRevoked = checkClaimNotRevoked(issuerLevels);
-    verifyClaimNotRevoked.enabled <== isRevocationChecked;
-    for (var i=0; i<8; i++) { verifyClaimNotRevoked.claim[i] <== issuerClaim[i]; }
-    for (var i=0; i<issuerLevels; i++) {
-        verifyClaimNotRevoked.claimNonRevMTP[i] <== issuerClaimNonRevMtp[i];
-    }
-    verifyClaimNotRevoked.noAux <== issuerClaimNonRevMtpNoAux;
-    verifyClaimNotRevoked.auxHi <== issuerClaimNonRevMtpAuxHi;
-    verifyClaimNotRevoked.auxHv <== issuerClaimNonRevMtpAuxHv;
-    verifyClaimNotRevoked.treeRoot <== issuerClaimNonRevRevTreeRoot;
+    checkClaimNotRevoked(issuerLevels)(
+        enabled <== isRevocationChecked,
+        claim <== issuerClaim,
+        claimNonRevMTP <== issuerClaimNonRevMtp,
+        noAux <== issuerClaimNonRevMtpNoAux,
+        auxHi <== issuerClaimNonRevMtpAuxHi,
+        auxHv <== issuerClaimNonRevMtpAuxHv,
+        treeRoot <== issuerClaimNonRevRevTreeRoot
+    );
 
     /////////////////////////////////////////////////////////////////
 
     component merklize = getClaimMerklizeRoot();
-    for (var i = 0; i < 8; i++) { merklize.claim[i] <== issuerClaim[i]; }
+    merklize.claim <== issuerClaim;
+
     merklized <== merklize.flag;
 
     // check path/in node exists in merkletree specified by jsonldRoot
-    component valueInMT = SMTVerifier(claimLevels);
-    valueInMT.enabled <== merklize.flag;  // if merklize flag 0 skip MTP verification
-    valueInMT.fnc <== claimPathNotExists; // inclusion
-    valueInMT.root <== merklize.out;
-    for (var i = 0; i < claimLevels; i++) { valueInMT.siblings[i] <== claimPathMtp[i]; }
-    valueInMT.oldKey <== claimPathMtpAuxHi;
-    valueInMT.oldValue <== claimPathMtpAuxHv;
-    valueInMT.isOld0 <== claimPathMtpNoAux;
-    valueInMT.key <== claimPathKey;
-    valueInMT.value <== claimPathValue;
+    SMTVerifier(claimLevels)(
+        enabled <== merklize.flag,  // if merklize flag 0 skip MTP verification
+        fnc <== claimPathNotExists, // inclusion
+        root <== merklize.out,
+        siblings <== claimPathMtp,
+        oldKey <== claimPathMtpAuxHi,
+        oldValue <== claimPathMtpAuxHv,
+        isOld0 <== claimPathMtpNoAux,
+        key <== claimPathKey,
+        value <== claimPathValue
+    );
 
     // select value from claim by slot index (0-7)
-    component getClaimValue = getValueByIndex();
-    for (var i = 0; i < 8; i++) { getClaimValue.claim[i] <== issuerClaim[i]; }
-    getClaimValue.index <== slotIndex;
+    signal slotValue <== getValueByIndex()(issuerClaim, slotIndex);
 
     // select value for query verification,
     // if claim is merklized merklizeFlag = `1|2`, take claimPathValue
     // if not merklized merklizeFlag = `0`, take value from selected slot
-    component queryValue = Mux1();
-    queryValue.s <== merklize.flag;
-    queryValue.c[0] <== getClaimValue.value;
-    queryValue.c[1] <== claimPathValue;
+    signal fieldValue <== Mux1()(
+        [slotValue, claimPathValue],
+        merklize.flag
+    );
 
     /////////////////////////////////////////////////////////////////
 
     // verify query
-    component spongeHash = SpongeHash(valueArraySize, 6); // 6 - max size of poseidon hash available on-chain
-    component query = Query(valueArraySize);
-    query.in <== queryValue.out;
-    for (var i = 0; i < valueArraySize; i++) {
-        query.value[i] <== value[i];
-        spongeHash.in[i] <== value[i];
-    }
-    query.operator <== operator;
+    signal valueHash <== SpongeHash(valueArraySize, 6)(value); // 6 - max size of poseidon hash available on-chain
 
-    query.out === 1;
+    signal querySatisfied <== Query(valueArraySize)(
+        in <== fieldValue,
+        value <== value,
+        operator <== operator
+    );
 
-    component queryHasher = Poseidon(6);
-    queryHasher.inputs[0] <== claimSchema;
-    queryHasher.inputs[1] <== slotIndex;
-    queryHasher.inputs[2] <== operator;
-    queryHasher.inputs[3] <== claimPathKey;
-    queryHasher.inputs[4] <== claimPathNotExists;
-    queryHasher.inputs[5] <== spongeHash.out;
+    querySatisfied === 1;
 
-    circuitQueryHash <== queryHasher.out;
+    circuitQueryHash <== Poseidon(6)([
+        claimSchema,
+        slotIndex,
+        operator,
+        claimPathKey,
+        claimPathNotExists, // TODO: check if this value should be here
+        valueHash
+    ]);
 }

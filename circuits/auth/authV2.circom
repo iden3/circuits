@@ -77,16 +77,17 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
 
     signal genesisIDhash <== Poseidon(1)([genesisID]);
 
-    component gistCheck = SMTVerifier(onChainLevels);
-    gistCheck.enabled <== 1;
-    gistCheck.fnc <== isStateGenesis; // non-inclusion in case if genesis state, otherwise inclusion
-    gistCheck.root <== gistRoot;
-    for (var i=0; i<onChainLevels; i++) { gistCheck.siblings[i] <== gistMtp[i]; }
-    gistCheck.oldKey <== gistMtpAuxHi;
-    gistCheck.oldValue <== gistMtpAuxHv;
-    gistCheck.isOld0 <== gistMtpNoAux;
-    gistCheck.key <== genesisIDhash;
-    gistCheck.value <== state;
+    SMTVerifier(onChainLevels)(
+        enabled <== 1,
+        fnc <== isStateGenesis, // non-inclusion in case if genesis state, otherwise inclusion
+        root <== gistRoot,
+        siblings <== gistMtp,
+        oldKey <== gistMtpAuxHi,
+        oldValue <== gistMtpAuxHv,
+        isOld0 <== gistMtpNoAux,
+        key <== genesisIDhash,
+        value <== state
+    );
 
     /* ProfileID calculation */
     userID <== SelectProfile()(genesisID, profileNonce);
