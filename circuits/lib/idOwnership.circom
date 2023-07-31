@@ -12,6 +12,8 @@ include "utils/claimUtils.circom";
 include "utils/treeUtils.circom";
 
 template IdOwnership(nLevels) {
+    signal input enabled;
+
     signal input userState;
 
 	signal input userClaimsTreeRoot;
@@ -32,6 +34,7 @@ template IdOwnership(nLevels) {
 	signal input challengeSignatureS;
 
     VerifyAuthClaimAndSignature(nLevels)(
+        enabled,
         userClaimsTreeRoot,
         userAuthClaimMtp,
         userAuthClaim,

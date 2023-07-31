@@ -58,6 +58,7 @@ template StateTransition(IdOwnershipLevels) {
     signal challenge <== Poseidon(2)([oldUserState, newUserState]);
 
     IdOwnership(IdOwnershipLevels)(
+        1,
         oldUserState,
         claimsTreeRoot,
         authClaimMtp,

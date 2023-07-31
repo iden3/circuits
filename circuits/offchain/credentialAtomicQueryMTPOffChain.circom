@@ -101,83 +101,93 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
     /////////////////////////////////////////////////////////////////
 
     // Check issuerClaim is issued to provided identity
-    component claimIdCheck = verifyCredentialSubjectProfile();
-    for (var i=0; i<8; i++) { claimIdCheck.claim[i] <== issuerClaim[i]; }
-    claimIdCheck.id <== userGenesisID;
-    claimIdCheck.nonce <== claimSubjectProfileNonce;
+    verifyCredentialSubjectProfile()(
+        issuerClaim,
+        userGenesisID,
+        claimSubjectProfileNonce
+    );
 
     // Verify issuerClaim schema
-    component claimSchemaCheck = verifyCredentialSchema();
-    for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
-    claimSchemaCheck.schema <== claimSchema;
+    verifyCredentialSchema()(1, issuerClaim, claimSchema);
 
     // verify issuerClaim expiration time
-    component claimExpirationCheck = verifyExpirationTime();
-    for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
-    claimExpirationCheck.timestamp <== timestamp;
+    verifyExpirationTime()(issuerClaim, timestamp);
 
     /////////////////////////////////////////////////////////////////
 
-    // verify issuerClaim issued and not revoked
-    component vci = verifyClaimIssuanceNonRev(issuerLevels);
-    for (var i=0; i<8; i++) { vci.claim[i] <== issuerClaim[i]; }
-    for (var i = 0; i < issuerLevels; i++) { vci.claimIssuanceMtp[i] <== issuerClaimMtp[i]; }
-    vci.claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot;
-    vci.claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot;
-    vci.claimIssuanceRootsTreeRoot <== issuerClaimRootsTreeRoot;
-    vci.claimIssuanceIdenState <== issuerClaimIdenState;
+    // verify issuerClaim issued
+    verifyClaimIssuance(issuerLevels)(
+        enabled <== 1,
+        claim <== issuerClaim,
+        claimIssuanceMtp <== issuerClaimMtp,
+        claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
+        claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot,
+        claimIssuanceRootsTreeRoot <== issuerClaimRootsTreeRoot,
+        claimIssuanceIdenState <== issuerClaimIdenState
+    );
+
+    /////////////////////////////////////////////////////////////////
 
     // non revocation status
-    vci.enabledNonRevCheck <== isRevocationChecked;
-    for (var i = 0; i < issuerLevels; i++) { vci.claimNonRevMtp[i] <== issuerClaimNonRevMtp[i]; }
-    vci.claimNonRevMtpNoAux <== issuerClaimNonRevMtpNoAux;
-    vci.claimNonRevMtpAuxHi <== issuerClaimNonRevMtpAuxHi;
-    vci.claimNonRevMtpAuxHv <== issuerClaimNonRevMtpAuxHv;
-    vci.claimNonRevIssuerClaimsTreeRoot <== issuerClaimNonRevClaimsTreeRoot;
-    vci.claimNonRevIssuerRevTreeRoot <== issuerClaimNonRevRevTreeRoot;
-    vci.claimNonRevIssuerRootsTreeRoot <== issuerClaimNonRevRootsTreeRoot;
-    vci.claimNonRevIssuerState <== issuerClaimNonRevState;
+    checkClaimNotRevoked(issuerLevels)(
+        enabled <== isRevocationChecked,
+        claim <== issuerClaim,
+        claimNonRevMTP <== issuerClaimNonRevMtp,
+        noAux <== issuerClaimNonRevMtpNoAux,
+        auxHi <== issuerClaimNonRevMtpAuxHi,
+        auxHv <== issuerClaimNonRevMtpAuxHv,
+        treeRoot <== issuerClaimNonRevRevTreeRoot
+    );
+
+    // verify issuer state for claim non-revocation proof
+    checkIdenStateMatchesRoots()(
+        issuerClaimNonRevClaimsTreeRoot,
+        issuerClaimNonRevRevTreeRoot,
+        issuerClaimNonRevRootsTreeRoot,
+        issuerClaimNonRevState
+    );
 
     /////////////////////////////////////////////////////////////////
 
     component merklize = getClaimMerklizeRoot();
-    for (var i=0; i<8; i++) { merklize.claim[i] <== issuerClaim[i]; }
+    merklize.claim <== issuerClaim;
+
     merklized <== merklize.flag;
 
     // check path/in node exists in merkletree specified by jsonldRoot
-    component valueInMT = SMTVerifier(claimLevels);
-    valueInMT.enabled <== merklize.flag;  // if merklize flag 0 skip MTP verification
-    valueInMT.fnc <== claimPathNotExists; // inclusion
-    valueInMT.root <== merklize.out;
-    for (var i = 0; i < claimLevels; i++) { valueInMT.siblings[i] <== claimPathMtp[i]; }
-    valueInMT.oldKey <== claimPathMtpAuxHi;
-    valueInMT.oldValue <== claimPathMtpAuxHv;
-    valueInMT.isOld0 <== claimPathMtpNoAux;
-    valueInMT.key <== claimPathKey;
-    valueInMT.value <== claimPathValue;
+    SMTVerifier(claimLevels)(
+        enabled <== merklize.flag,  // if merklize flag 0 skip MTP verification
+        fnc <== claimPathNotExists, // inclusion
+        root <== merklize.out,
+        siblings <== claimPathMtp,
+        oldKey <== claimPathMtpAuxHi,
+        oldValue <== claimPathMtpAuxHv,
+        isOld0 <== claimPathMtpNoAux,
+        key <== claimPathKey,
+        value <== claimPathValue
+    );
 
     // select value from claim by slot index (0-7)
-    component getClaimValue = getValueByIndex();
-    for (var i=0; i<8; i++) { getClaimValue.claim[i] <== issuerClaim[i]; }
-    getClaimValue.index <== slotIndex;
+    signal slotValue <== getValueByIndex()(issuerClaim, slotIndex);
 
     // select value for query verification,
     // if claim is merklized merklizeFlag = `1|2`, take claimPathValue
     // if not merklized merklizeFlag = `0`, take value from selected slot
-    component queryValue = Mux1();
-    queryValue.s <== merklize.flag;
-    queryValue.c[0] <== getClaimValue.value;
-    queryValue.c[1] <== claimPathValue;
+    signal fieldValue <== Mux1()(
+        [slotValue, claimPathValue],
+        merklize.flag
+    );
 
     /////////////////////////////////////////////////////////////////
 
     // verify query
-    component query = Query(valueArraySize);
-    query.in <== queryValue.out;
-    for (var i=0; i<valueArraySize; i++) { query.value[i] <== value[i]; }
-    query.operator <== operator;
+    signal querySatisfied <== Query(valueArraySize)(
+        in <== fieldValue,
+        value <== value,
+        operator <== operator
+    );
 
-    query.out === 1;
+    querySatisfied === 1;
 
     /* ProfileID calculation */
     userID <== SelectProfile()(userGenesisID, profileNonce);

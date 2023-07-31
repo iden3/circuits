@@ -30,7 +30,6 @@ idOwnershipLevels - Merkle tree depth level for personal claims
 onChainLevels - Merkle tree depth level for Auth claim on-chain
 */
 template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySize, idOwnershipLevels, onChainLevels) {
-
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
@@ -110,6 +109,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
 
     // claim issued by issuer to the user
     signal input issuerClaim[8];
+
     // issuerClaim non rev inputs
     signal input isRevocationChecked;
     signal input issuerClaimNonRevMtp[issuerLevels];
@@ -150,7 +150,8 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
 
     /////////////////////////////////////////////////////////////////
 
-    userID <== AuthV2(idOwnershipLevels, onChainLevels)(
+    checkAuthV2(idOwnershipLevels, onChainLevels)(
+        1, // enabled
         userGenesisID,
         profileNonce,
         userState, // user state
@@ -184,7 +185,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     );
 
     // Verify issuerClaim schema
-    verifyCredentialSchema()(issuerClaim, claimSchema);
+    verifyCredentialSchema()(1, issuerClaim, claimSchema);
 
     // verify issuerClaim expiration time
     verifyExpirationTime()(issuerClaim, timestamp);
@@ -196,6 +197,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     // BigInt: 80551937543569765027552589160822318028
     // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
     verifyCredentialSchema()(
+        1,
         issuerAuthClaim,
         80551937543569765027552589160822318028
     );
@@ -239,13 +241,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
         issuerAuthPubKey.Ay
     );
 
-    // verify issuer state includes issuerClaim
-    checkIdenStateMatchesRoots()(
-        issuerClaimNonRevClaimsTreeRoot,
-        issuerClaimNonRevRevTreeRoot,
-        issuerClaimNonRevRootsTreeRoot,
-        issuerClaimNonRevState
-    );
+    /////////////////////////////////////////////////////////////////
 
     // non revocation status
     checkClaimNotRevoked(issuerLevels)(
@@ -256,6 +252,14 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
         auxHi <== issuerClaimNonRevMtpAuxHi,
         auxHv <== issuerClaimNonRevMtpAuxHv,
         treeRoot <== issuerClaimNonRevRevTreeRoot
+    );
+
+    // verify issuer state for claim non-revocation proof
+    checkIdenStateMatchesRoots()(
+        issuerClaimNonRevClaimsTreeRoot,
+        issuerClaimNonRevRevTreeRoot,
+        issuerClaimNonRevRootsTreeRoot,
+        issuerClaimNonRevState
     );
 
     /////////////////////////////////////////////////////////////////
@@ -292,8 +296,6 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     /////////////////////////////////////////////////////////////////
 
     // verify query
-    signal valueHash <== SpongeHash(valueArraySize, 6)(value); // 6 - max size of poseidon hash available on-chain
-
     signal querySatisfied <== Query(valueArraySize)(
         in <== fieldValue,
         value <== value,
@@ -301,6 +303,9 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     );
 
     querySatisfied === 1;
+
+    // verify query hash matches
+    signal valueHash <== SpongeHash(valueArraySize, 6)(value); // 6 - max size of poseidon hash available on-chain
 
     circuitQueryHash <== Poseidon(6)([
         claimSchema,
@@ -310,4 +315,7 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
         claimPathNotExists, // TODO: check if this value should be here
         valueHash
     ]);
+
+    /* ProfileID calculation */
+    userID <== SelectProfile()(userGenesisID, profileNonce);
 }

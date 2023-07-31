@@ -171,3 +171,43 @@ template SelectProfile() {
         isSaltZero
     );
 }
+
+template cutId() {
+	signal input in;
+	signal output out;
+
+	signal idBits[256] <== Num2Bits(256)(in);
+
+	component cutted = Bits2Num(256-16-16-8);
+	for (var i=16; i<256-16-8; i++) {
+		cutted.in[i-16] <== idBits[i];
+	}
+	out <== cutted.out;
+}
+
+template cutState() {
+	signal input in;
+	signal output out;
+
+	signal stateBits[256] <== Num2Bits(256)(in);
+
+	component cutted = Bits2Num(256-16-16-8);
+	for (var i=0; i<256-16-16-8; i++) {
+		cutted.in[i] <== stateBits[i+16+16+8];
+	}
+	out <== cutted.out;
+}
+
+// getIdenState caclulates the Identity state out of the claims tree root,
+// revocations tree root and roots tree root.
+template getIdenState() {
+	signal input claimsTreeRoot;
+	signal input revTreeRoot;
+	signal input rootsTreeRoot;
+
+	signal output idenState <== Poseidon(3)([
+	    claimsTreeRoot,
+	    revTreeRoot,
+	    rootsTreeRoot
+	]);
+}

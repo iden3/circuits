@@ -8,20 +8,6 @@ include "../../../node_modules/circomlib/circuits/mux3.circom";
 include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "claimUtils.circom";
 
-// getIdenState caclulates the Identity state out of the claims tree root,
-// revocations tree root and roots tree root.
-template getIdenState() {
-	signal input claimsTreeRoot;
-	signal input revTreeRoot;
-	signal input rootsTreeRoot;
-
-	signal output idenState <== Poseidon(3)([
-	    claimsTreeRoot,
-	    revTreeRoot,
-	    rootsTreeRoot
-	]);
-}
-
 // checkClaimExists verifies that claim is included into the claim tree root
 template checkClaimExists(IssuerLevels) {
 	signal input claim[8];
@@ -86,7 +72,8 @@ template checkIdenStateMatchesRoots() {
 	idenState === expectedState;
 }
 
-// verifyClaimIssuance verifies that claim is issued by the issuer and not revoked
+// verifyClaimIssuanceNonRev verifies that claim is issued by the issuer and not revoked
+// TODO: review if we need both verifyClaimIssuanceNonRev and verifyClaimIssuance
 template verifyClaimIssuanceNonRev(IssuerLevels) {
 	signal input claim[8];
 	signal input claimIssuanceMtp[IssuerLevels];
@@ -105,15 +92,10 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 	signal input claimNonRevIssuerRootsTreeRoot;
 	signal input claimNonRevIssuerState;
 
-    // verify country claim is included in claims tree root
-    checkClaimExists(IssuerLevels)(
+    verifyClaimIssuance(IssuerLevels)(
+        1,
         claim,
         claimIssuanceMtp,
-        claimIssuanceClaimsTreeRoot
-    );
-
-    // verify issuer state includes country claim
-    checkIdenStateMatchesRoots()(
         claimIssuanceClaimsTreeRoot,
         claimIssuanceRevTreeRoot,
         claimIssuanceRootsTreeRoot,
@@ -140,7 +122,37 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
     );
 }
 
+// verifyClaimIssuance verifies that claim is issued by the issuer
+template verifyClaimIssuance(IssuerLevels) {
+    signal input enabled;
+	signal input claim[8];
+	signal input claimIssuanceMtp[IssuerLevels];
+	signal input claimIssuanceClaimsTreeRoot;
+	signal input claimIssuanceRevTreeRoot;
+	signal input claimIssuanceRootsTreeRoot;
+	signal input claimIssuanceIdenState;
+
+    // TODO: implement enabled
+    // verify country claim is included in claims tree root
+    checkClaimExists(IssuerLevels)(
+        claim,
+        claimIssuanceMtp,
+        claimIssuanceClaimsTreeRoot
+    );
+
+    // TODO: implement enabled
+    // verify issuer state includes country claim
+    checkIdenStateMatchesRoots()(
+        claimIssuanceClaimsTreeRoot,
+        claimIssuanceRevTreeRoot,
+        claimIssuanceRootsTreeRoot,
+        claimIssuanceIdenState
+    );
+}
+
 template VerifyAuthClaimAndSignature(nLevels) {
+    signal input enabled;
+
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[nLevels];
 	signal input authClaim[8];
@@ -160,6 +172,7 @@ template VerifyAuthClaimAndSignature(nLevels) {
     // BigInt: 80551937543569765027552589160822318028
     // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
     verifyCredentialSchema()(
+        enabled,
         authClaim,
         80551937543569765027552589160822318028
     );
@@ -171,7 +184,7 @@ template VerifyAuthClaimAndSignature(nLevels) {
     );
 
     checkClaimNotRevoked(nLevels)(
-        1,
+        enabled,
         authClaim,
         authClaimNonRevMtp,
         revTreeRoot,
@@ -187,30 +200,4 @@ template VerifyAuthClaimAndSignature(nLevels) {
         challengeSignatureR8y,
         challenge
     );
-}
-
-template cutId() {
-	signal input in;
-	signal output out;
-
-	signal idBits[256] <== Num2Bits(256)(in);
-
-	component cutted = Bits2Num(256-16-16-8);
-	for (var i=16; i<256-16-8; i++) {
-		cutted.in[i-16] <== idBits[i];
-	}
-	out <== cutted.out;
-}
-
-template cutState() {
-	signal input in;
-	signal output out;
-
-	signal stateBits[256] <== Num2Bits(256)(in);
-
-	component cutted = Bits2Num(256-16-16-8);
-	for (var i=0; i<256-16-16-8; i++) {
-		cutted.in[i] <== stateBits[i+16+16+8];
-	}
-	out <== cutted.out;
 }

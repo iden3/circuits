@@ -1,4 +1,4 @@
-pragma circom 2.0.0;
+pragma circom 2.1.1;
 
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/eddsaposeidon.circom";
@@ -15,11 +15,11 @@ template getClaimSubjectOtherIden() {
 
     // get header flags from claim.
     component header = getClaimHeader();
-    for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
+    header.claim <== claim;
 
     // get subject location from header flags.
     component subjectLocation = getSubjectLocation();
-    for (var i = 0; i < 32; i++) { subjectLocation.claimFlags[i] <== header.claimFlags[i]; }
+    subjectLocation.claimFlags <== header.claimFlags;
 
     component mux = Mux2();
     component n2b = Num2Bits(2);
@@ -48,11 +48,11 @@ template getClaimMerklizeRoot() {
 
     // get header flags from claim.
     component header = getClaimHeader();
-    for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
+    header.claim <== claim;
 
     // get subject location from header flags.
     component merklizeLocation = getMerklizeLocation();
-    for (var i = 0; i < 32; i++) { merklizeLocation.claimFlags[i] <== header.claimFlags[i]; }
+    merklizeLocation.claimFlags <== header.claimFlags;
 
     component mux = Mux2();
     component n2b = Num2Bits(2);
@@ -160,14 +160,9 @@ template getClaimHash() {
     signal output hv;
 
     component hihv = getClaimHiHv();
-    for (var i=0; i<8; i++) {
-        hihv.claim[i] <== claim[i];
-    }
+    hihv.claim <== claim;
 
-    component hashAll = Poseidon(2);
-    hashAll.inputs[0] <== hihv.hi;
-    hashAll.inputs[1] <== hihv.hv;
-    hash <== hashAll.out;
+    hash <== Poseidon(2)([hihv.hi, hihv.hv]);
     hi <== hihv.hi;
     hv <== hihv.hv;
 }
@@ -178,10 +173,10 @@ template verifyCredentialSubject() {
     signal input id;
 
     component header = getClaimHeader();
-    for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
+    header.claim <== claim;
 
     component subjectOtherIden = getClaimSubjectOtherIden();
-    for (var i=0; i<8; i++) { subjectOtherIden.claim[i] <== claim[i]; }
+    subjectOtherIden.claim <== claim;
 
     subjectOtherIden.id === id;
 }
@@ -194,10 +189,10 @@ template verifyCredentialSubjectProfile() {
     signal input nonce;
 
     component header = getClaimHeader();
-    for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
+    header.claim <== claim;
 
     component subjectOtherIden = getClaimSubjectOtherIden();
-    for (var i=0; i<8; i++) { subjectOtherIden.claim[i] <== claim[i]; }
+    subjectOtherIden.claim <== claim;
 
 
     /* ProfileID calculation */
@@ -210,13 +205,17 @@ template verifyCredentialSubjectProfile() {
 
 // verifyCredentialSchema verifies that claim matches provided schema
 template verifyCredentialSchema() {
+    signal input enabled;
     signal input claim[8];
     signal input schema;
 
     component claimSchema = getClaimSchema();
-    for (var i=0; i<8; i++) { claimSchema.claim[i] <== claim[i]; }
+    claimSchema.claim <== claim;
 
-    claimSchema.schema === schema;
+    ForceEqualIfEnabled()(
+        enabled,
+        [claimSchema.schema, schema]
+    );
 }
 
 // verifyClaimSignature verifies that claim is signed with the provided public key
@@ -229,20 +228,18 @@ template verifyClaimSignature() {
     signal input pubKeyY;
 
     component hash = getClaimHash();
-    for (var i=0; i<8; i++) { hash.claim[i] <== claim[i]; }
+    hash.claim <== claim;
 
     // signature verification
-    component sigVerifier = EdDSAPoseidonVerifier();
-    sigVerifier.enabled <== 1;
-
-    sigVerifier.Ax <== pubKeyX;
-    sigVerifier.Ay <== pubKeyY;
-
-    sigVerifier.S <== sigS;
-    sigVerifier.R8x <== sigR8x;
-    sigVerifier.R8y <== sigR8y;
-
-    sigVerifier.M <== hash.hash;
+    EdDSAPoseidonVerifier()(
+        enabled <== 1,
+        Ax <== pubKeyX,
+        Ay <== pubKeyY,
+        S <== sigS,
+        R8x <== sigR8x,
+        R8y <== sigR8y,
+        M <== hash.hash
+    );
 }
 
 template checkDataSignatureWithPubKeyInClaim() {
@@ -253,16 +250,17 @@ template checkDataSignatureWithPubKeyInClaim() {
     signal input data;
 
     component getPubKey = getPubKeyFromClaim();
-    for (var i=0; i<8; i++){ getPubKey.claim[i] <== claim[i]; }
+    getPubKey.claim <== claim;
 
-    component sigVerifier = EdDSAPoseidonVerifier();
-    sigVerifier.enabled <== 1;
-    sigVerifier.Ax <== getPubKey.Ax;
-    sigVerifier.Ay <== getPubKey.Ay;
-    sigVerifier.S <== signatureS;
-    sigVerifier.R8x <== signatureR8X;
-    sigVerifier.R8y <== signatureR8Y;
-    sigVerifier.M <== data;
+    EdDSAPoseidonVerifier()(
+        enabled <== 1,
+        Ax <== getPubKey.Ax,
+        Ay <== getPubKey.Ay,
+        S <== signatureS,
+        R8x <== signatureR8X,
+        R8y <== signatureR8Y,
+        M <== data
+    );
 }
 
 template getPubKeyFromClaim() {
@@ -300,18 +298,19 @@ template verifyExpirationTime() {
     signal input timestamp;
 
     component header = getClaimHeader();
-    for (var i=0; i<8; i++) { header.claim[i] <== claim[i]; }
+    header.claim <== claim;
 
-    component expirationComp =  getClaimExpiration();
-    for (var i=0; i<8; i++) { expirationComp.claim[i] <== claim[i]; }
+    signal claimExpiration <==  getClaimExpiration()(claim);
 
-    component lt = LessEqThan(252); // timestamp < expirationComp.expiration
-    lt.in[0] <== timestamp;
-    lt.in[1] <== expirationComp.expiration;
+    // timestamp < claimExpiration
+    signal lt <== LessEqThan(252)([
+        timestamp,
+        claimExpiration]
+    );
 
     component res = Mux1();
     res.c[0] <== 1;
-    res.c[1] <== lt.out;
+    res.c[1] <== lt;
     res.s <== header.claimFlags[3];
 
     res.out === 1;
