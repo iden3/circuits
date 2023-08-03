@@ -1,4 +1,4 @@
-pragma circom 2.0.0;
+pragma circom 2.1.1;
 
 include "sybilUtils.circom";
 include "../lib/utils/claimUtils.circom";
@@ -185,9 +185,7 @@ template VerifyIssuerClaim(IssuerLevels){
     // AuthHash cca3371a6cb1b715004407e325bd993c
     // BigInt: 80551937543569765027552589160822318028
     // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
-    component issuerSchemaCheck = verifyCredentialSchema();
-    for (var i=0; i<8; i++) { issuerSchemaCheck.claim[i] <== issuerAuthClaim[i]; }
-    issuerSchemaCheck.schema <== 80551937543569765027552589160822318028;
+    verifyCredentialSchema()(1, issuerAuthClaim, 80551937543569765027552589160822318028);
 
     // IssuerAuthClaim proof of existence (isProofExist)
     component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);
@@ -242,9 +240,7 @@ template VerifyIssuerClaim(IssuerLevels){
     verifyClaimIdenState.expectedState <== issuerClaimNonRevState;
 
     // Verify claim schema
-    component claimSchemaCheck = verifyCredentialSchema();
-    for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== issuerClaim[i]; }
-    claimSchemaCheck.schema <== claimSchema;
+    verifyCredentialSchema()(1, issuerClaim, claimSchema);
 
     // Verify issuerClaim expiration time
     component claimExpirationCheck = verifyExpirationTime();

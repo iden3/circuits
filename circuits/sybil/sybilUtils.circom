@@ -1,4 +1,4 @@
-pragma circom 2.0.0;
+pragma circom 2.1.1;
 
 template GetStateCommitmentPosition() {
     signal output out;
@@ -42,9 +42,7 @@ template VerifyStateCommitment(UserLevels, GistLevels){ // stateCommitmentClaim
     component stateCommitmentSchemaHash = GetStateCommitmentSchemaHash();
 
     // Verify claim schema
-    component claimSchemaCheck = verifyCredentialSchema();
-    for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== claim[i]; }
-    claimSchemaCheck.schema <== stateCommitmentSchemaHash.schemaHash;
+    verifyCredentialSchema()(1, claim, stateCommitmentSchemaHash.schemaHash);
 
     component cutId = cutId();
     cutId.in <== genesisID;

@@ -18,11 +18,8 @@ describe("EdDSA Poseidon test", function () {
         eddsa = await buildEddsa();
         babyJub = await buildBabyjub();
         F = babyJub.F;
-        circuit = await tester(path.join(__dirname, "circuits", "eddsaposeidon.circom"),
-          {
-              output: path.join(__dirname, "circuits", "build/eddsaposeidon"),
-              recompile: false,
-          });
+
+        circuit = await tester(path.join(__dirname, "circuits", "eddsaposeidon.circom"));
     });
 
     it("Sign a single number", async () => {

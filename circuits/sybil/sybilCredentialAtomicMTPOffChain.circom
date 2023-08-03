@@ -165,9 +165,7 @@ template VerifyIssuerClaim(IssuerLevels){
     claimExpirationCheck.timestamp <== timestamp;
 
     // Verify claim schema
-    component claimSchemaCheck = verifyCredentialSchema();
-    for (var i=0; i<8; i++) { claimSchemaCheck.claim[i] <== claim[i]; }
-    claimSchemaCheck.schema <== claimSchema;
+    verifyCredentialSchema()(1, claim, claimSchema);
 
     // Check claim is issued to provided identity
     component claimIdCheck = verifyCredentialSubjectProfile();
