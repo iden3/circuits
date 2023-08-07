@@ -192,6 +192,7 @@ template VerifyIssuerClaim(IssuerLevels){
     for (var i=0; i<8; i++) { smtIssuerAuthClaimExists.claim[i] <== issuerAuthClaim[i]; }
     for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.claimMTP[i] <== issuerAuthClaimMtp[i]; }
     smtIssuerAuthClaimExists.treeRoot <== issuerAuthClaimsRoot;
+    smtIssuerAuthClaimExists.enabled <== 1;
 
     component verifyIssuerAuthClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
     for (var i=0; i<8; i++) { verifyIssuerAuthClaimNotRevoked.claim[i] <== issuerAuthClaim[i]; }
@@ -221,6 +222,7 @@ template VerifyIssuerClaim(IssuerLevels){
     verifyClaimSig.sigS <== issuerClaimSignatureS;
     verifyClaimSig.pubKeyX <== issuerAuthPubKey.Ax;
     verifyClaimSig.pubKeyY <== issuerAuthPubKey.Ay;
+    verifyClaimSig.enabled <== 1;
 
     // Check issuer-claim is not revoked (uniqueness claim is not revoled)
     component verifyClaimNotRevoked = checkClaimNotRevoked(IssuerLevels);
@@ -238,6 +240,7 @@ template VerifyIssuerClaim(IssuerLevels){
     verifyClaimIdenState.revTreeRoot <== issuerClaimNonRevRevRoot;
     verifyClaimIdenState.rootsTreeRoot <== issuerClaimNonRevRootsRoot;
     verifyClaimIdenState.expectedState <== issuerClaimNonRevState;
+    verifyClaimIdenState.enabled <== 1;
 
     // Verify claim schema
     verifyCredentialSchema()(1, issuerClaim, claimSchema);

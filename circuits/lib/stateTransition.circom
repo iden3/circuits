@@ -76,7 +76,7 @@ template StateTransition(IdOwnershipLevels) {
     );
 
     // check auth claim exists in newClaimsTreeRoot and newUserState
-    checkClaimExists(IdOwnershipLevels)(authClaim, newAuthClaimMtp, newClaimsTreeRoot);
+    checkClaimExists(IdOwnershipLevels)(1, authClaim, newAuthClaimMtp, newClaimsTreeRoot);
 
-    checkIdenStateMatchesRoots()(newClaimsTreeRoot, newRevTreeRoot, newRootsTreeRoot, newUserState);
+    checkIdenStateMatchesRoots()(1, newClaimsTreeRoot, newRevTreeRoot, newRootsTreeRoot, newUserState);
 }

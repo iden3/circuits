@@ -10,6 +10,7 @@ include "claimUtils.circom";
 
 // checkClaimExists verifies that claim is included into the claim tree root
 template checkClaimExists(IssuerLevels) {
+    signal input enabled;
 	signal input claim[8];
 	signal input claimMTP[IssuerLevels];
 	signal input treeRoot;
@@ -18,7 +19,7 @@ template checkClaimExists(IssuerLevels) {
 	claimHiHv.claim <== claim;
 
 	SMTVerifier(IssuerLevels)(
-	    enabled <== 1,  // enabled
+	    enabled <== enabled,  // enabled
         root <== treeRoot, // root
         siblings <== claimMTP, // siblings
         oldKey <== 0, // oldKey
@@ -57,6 +58,7 @@ template checkClaimNotRevoked(treeLevels) {
 // checkIdenStateMatchesRoots checks that a hash of 3 tree
 // roots is equal to expected identity state
 template checkIdenStateMatchesRoots() {
+    signal input enabled;
 	signal input claimsTreeRoot;
 	signal input revTreeRoot;
 	signal input rootsTreeRoot;
@@ -68,8 +70,10 @@ template checkIdenStateMatchesRoots() {
         rootsTreeRoot
     );
 
-    // TODO: use IsEqual component
-	idenState === expectedState;
+    ForceEqualIfEnabled()(
+        enabled,
+        [idenState, expectedState]
+    );
 }
 
 // verifyClaimIssuanceNonRev verifies that claim is issued by the issuer and not revoked
@@ -115,6 +119,7 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 
     // check issuer state matches for non-revocation proof
     checkIdenStateMatchesRoots()(
+        1,
         claimNonRevIssuerClaimsTreeRoot,
         claimNonRevIssuerRevTreeRoot,
         claimNonRevIssuerRootsTreeRoot,
@@ -132,17 +137,17 @@ template verifyClaimIssuance(IssuerLevels) {
 	signal input claimIssuanceRootsTreeRoot;
 	signal input claimIssuanceIdenState;
 
-    // TODO: implement enabled
     // verify country claim is included in claims tree root
     checkClaimExists(IssuerLevels)(
+        enabled,
         claim,
         claimIssuanceMtp,
         claimIssuanceClaimsTreeRoot
     );
 
-    // TODO: implement enabled
     // verify issuer state includes country claim
     checkIdenStateMatchesRoots()(
+        enabled,
         claimIssuanceClaimsTreeRoot,
         claimIssuanceRevTreeRoot,
         claimIssuanceRootsTreeRoot,
@@ -178,6 +183,7 @@ template VerifyAuthClaimAndSignature(nLevels) {
     );
 
     checkClaimExists(nLevels)(
+        1,
         authClaim,
         authClaimMtp,
         claimsTreeRoot

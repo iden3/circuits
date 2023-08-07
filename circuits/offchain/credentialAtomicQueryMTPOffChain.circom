@@ -141,6 +141,7 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
 
     // verify issuer state for claim non-revocation proof
     checkIdenStateMatchesRoots()(
+        1,
         issuerClaimNonRevClaimsTreeRoot,
         issuerClaimNonRevRevTreeRoot,
         issuerClaimNonRevRootsTreeRoot,

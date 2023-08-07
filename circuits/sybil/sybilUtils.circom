@@ -31,6 +31,7 @@ template VerifyStateCommitment(UserLevels, GistLevels){ // stateCommitmentClaim
     for (var i=0; i<8; i++) { claimIssuanceCheck.claim[i] <== claim[i]; }
     for (var i=0; i<UserLevels; i++) { claimIssuanceCheck.claimMTP[i] <== claimMtp[i]; }
     claimIssuanceCheck.treeRoot <== claimClaimsRoot;
+    claimIssuanceCheck.enabled <== 1;
 
     // Verify state includes claims tree
     component verifyClaimIssuanceIdenState = checkIdenStateMatchesRoots();
@@ -38,6 +39,7 @@ template VerifyStateCommitment(UserLevels, GistLevels){ // stateCommitmentClaim
     verifyClaimIssuanceIdenState.revTreeRoot <== claimRevRoot;
     verifyClaimIssuanceIdenState.rootsTreeRoot <== claimRootsRoot;
     verifyClaimIssuanceIdenState.expectedState <== claimIdenState;
+    verifyClaimIssuanceIdenState.enabled <== 1;
 
     component stateCommitmentSchemaHash = GetStateCommitmentSchemaHash();
 

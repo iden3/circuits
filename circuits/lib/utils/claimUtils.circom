@@ -220,6 +220,7 @@ template verifyCredentialSchema() {
 
 // verifyClaimSignature verifies that claim is signed with the provided public key
 template verifyClaimSignature() {
+    signal input enabled;
     signal input claim[8];
     signal input sigR8x;
     signal input sigR8y;
@@ -232,7 +233,7 @@ template verifyClaimSignature() {
 
     // signature verification
     EdDSAPoseidonVerifier()(
-        enabled <== 1,
+        enabled <== enabled,
         Ax <== pubKeyX,
         Ay <== pubKeyY,
         S <== sigS,

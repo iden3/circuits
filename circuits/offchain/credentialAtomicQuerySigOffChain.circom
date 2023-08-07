@@ -148,6 +148,7 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
 
     // issuerAuthClaim proof of existence (isProofExist)
     checkClaimExists(issuerLevels)(
+        1,
         issuerAuthClaim,
         issuerAuthClaimMtp,
         issuerAuthClaimsTreeRoot
@@ -169,6 +170,7 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
 
     // issuerClaim  check signature
     verifyClaimSignature()(
+        1,
         issuerClaim,
         issuerClaimSignatureR8x,
         issuerClaimSignatureR8y,
@@ -192,6 +194,7 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
 
     // verify issuer state for claim non-revocation proof
     checkIdenStateMatchesRoots()(
+        1,
         issuerClaimNonRevClaimsTreeRoot,
         issuerClaimNonRevRevTreeRoot,
         issuerClaimNonRevRootsTreeRoot,
