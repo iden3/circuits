@@ -43,8 +43,9 @@ template credentialAtomicQuerySigMTPOffChain(issuerLevels, claimLevels, valueArr
     signal input operator;
     signal input value[valueArraySize];
 
-    // Diff for MTP proof
     signal input issuerClaim[8];
+
+    // Diff for MTP proof
     signal input issuerClaimMtp[issuerLevels];
     signal input issuerClaimClaimsTreeRoot;
     signal input issuerClaimRevTreeRoot;
