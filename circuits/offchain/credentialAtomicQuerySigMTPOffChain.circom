@@ -58,7 +58,6 @@ template credentialAtomicQuerySigMTPOffChain(issuerLevels, claimLevels, valueArr
     signal input issuerAuthClaimsTreeRoot;
     signal input issuerAuthRevTreeRoot;
     signal input issuerAuthRootsTreeRoot;
-    signal output issuerAuthState;
     signal input issuerAuthClaimNonRevMtp[issuerLevels];
     signal input issuerAuthClaimNonRevMtpNoAux;
     signal input issuerAuthClaimNonRevMtpAuxHi;
@@ -66,6 +65,8 @@ template credentialAtomicQuerySigMTPOffChain(issuerLevels, claimLevels, valueArr
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
+
+    signal output issuerAuthState;
     
      /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
