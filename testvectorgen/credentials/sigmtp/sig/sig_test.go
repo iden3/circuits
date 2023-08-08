@@ -92,10 +92,12 @@ type Outputs struct {
 	Merklized              string   `json:"merklized"`
 	ClaimPathNotExists     string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
 	ProofType              string   `json:"proofType"`
+	ClaimPathKey           string   `json:"claimPathKey"`
+	IssuerClaimIdenState   string   `json:"issuerClaimIdenState"`
 }
 
 type TestData struct {
-	Desc string                               `json:"desc"`
+	Desc string  `json:"desc"`
 	In   Inputs  `json:"inputs"`
 	Out  Outputs `json:"expOut"`
 }
@@ -236,10 +238,12 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		Operator:               utils.EQ,
 		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
-		Timestamp:          timestamp,
-		Merklized:          "0",
-		ClaimPathNotExists: "0",
-		ProofType:          "0",
+		Timestamp:            timestamp,
+		Merklized:            "0",
+		ClaimPathNotExists:   "0",
+		ProofType:            "0",
+		ClaimPathKey:         "0",
+		IssuerClaimIdenState: "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -344,10 +348,12 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		Operator:               utils.EQ,
 		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
-		Timestamp:          timestamp,
-		Merklized:          "0",
-		ClaimPathNotExists: "0",
-		ProofType:          "0",
+		Timestamp:            timestamp,
+		Merklized:            "0",
+		ClaimPathNotExists:   "0",
+		ProofType:            "0",
+		ClaimPathKey:         "0",
+		IssuerClaimIdenState: "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -494,6 +500,8 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		Merklized:              "1",
 		ClaimPathNotExists:     "0",
 		ProofType:              "0",
+		ClaimPathKey:           pathKey.String(),
+		IssuerClaimIdenState:   "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -613,10 +621,12 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		Operator:               utils.EQ,
 		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
-		Timestamp:          timestamp,
-		Merklized:          "0",
-		ClaimPathNotExists: "0",
-		ProofType:          "0",
+		Timestamp:            timestamp,
+		Merklized:            "0",
+		ClaimPathNotExists:   "0",
+		ProofType:            "0",
+		ClaimPathKey:         "0",
+		IssuerClaimIdenState: "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -747,10 +757,12 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		Operator:               utils.NOOP,
 		Value: []string{"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
 			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
-		Timestamp:          timestamp,
-		Merklized:          "1",
-		ClaimPathNotExists: "1",
-		ProofType:          "0",
+		Timestamp:            timestamp,
+		Merklized:            "1",
+		ClaimPathNotExists:   "1",
+		ProofType:            "0",
+		ClaimPathKey:         pathKey.String(),
+		IssuerClaimIdenState: "0",
 	}
 
 	json, err := json.Marshal(TestData{

@@ -97,6 +97,7 @@ type Outputs struct {
 	ClaimPathKey           string   `json:"claimPathKey"`
 	ClaimPathNotExists     string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
 	ProofType              string   `json:"proofType"`          // 0 for sig, 1 for mtp
+	IssuerAuthState        string   `json:"issuerAuthState"`
 }
 
 type TestData struct {
@@ -197,7 +198,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IssuerClaimSignatureR8X:       "0",
 		IssuerClaimSignatureR8Y:       "0",
 		IssuerClaimSignatureS:         "0",
-		IssuerAuthClaim:               claim,
+		IssuerAuthClaim:               &core.Claim{},
 		IssuerAuthClaimMtp:            utils.PrepareStrArray([]string{}, 40),
 		IssuerAuthClaimNonRevMtp:      utils.PrepareStrArray([]string{}, 40),
 		IssuerAuthClaimNonRevMtpAuxHi: "0",
@@ -224,6 +225,8 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		Merklized:              "0",
 		ClaimPathKey:           "0",
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
+		ProofType:              "1",
+		IssuerAuthState:        "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -296,7 +299,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IssuerClaimSignatureR8X:       "0",
 		IssuerClaimSignatureR8Y:       "0",
 		IssuerClaimSignatureS:         "0",
-		IssuerAuthClaim:               claim,
+		IssuerAuthClaim:               &core.Claim{},
 		IssuerAuthClaimMtp:            utils.PrepareStrArray([]string{}, 40),
 		IssuerAuthClaimNonRevMtp:      utils.PrepareStrArray([]string{}, 40),
 		IssuerAuthClaimNonRevMtpAuxHi: "0",
@@ -324,6 +327,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		ClaimPathKey:           "0",
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		ProofType:              "1",
+		IssuerAuthState:        "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -421,7 +425,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		IssuerClaimSignatureR8X:       "0",
 		IssuerClaimSignatureR8Y:       "0",
 		IssuerClaimSignatureS:         "0",
-		IssuerAuthClaim:               claim,
+		IssuerAuthClaim:               &core.Claim{},
 		IssuerAuthClaimMtp:            utils.PrepareStrArray([]string{}, 40),
 		IssuerAuthClaimNonRevMtp:      utils.PrepareStrArray([]string{}, 40),
 		IssuerAuthClaimNonRevMtpAuxHi: "0",
@@ -449,6 +453,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		ClaimPathKey:           pathKey.String(),
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		ProofType:              "1",
+		IssuerAuthState:        "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -560,6 +565,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		ClaimPathKey:           "0",
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		ProofType:              "1",
+		IssuerAuthState:        "0",
 	}
 
 	json, err := json2.Marshal(TestData{

@@ -208,11 +208,13 @@ template sigFlow(issuerLevels) {
         80551937543569765027552589160822318028
     );
 
-    issuerAuthState <== getIdenState()(
+    signal tmpAuthState;
+    tmpAuthState <== getIdenState()(
         issuerAuthClaimsTreeRoot,
         issuerAuthRevTreeRoot,
         issuerAuthRootsTreeRoot
     );
+    issuerAuthState <-- enabled ==1 ? tmpAuthState : 0;
 
     checkClaimExists(issuerLevels)(
         enabled,
