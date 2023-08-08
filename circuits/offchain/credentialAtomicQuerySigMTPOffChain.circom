@@ -4,13 +4,13 @@ include "./credentialAtomicQueryMTPOffChain.circom";
 include "./credentialAtomicQuerySigOffChain.circom";
 
 template credentialAtomicQuerySigMTPOffChain(issuerLevels, claimLevels, valueArraySize) {
-    // sig 0, mtp 1
-    signal input proofType;
-
-    // common inputs between Sig and MTP circuits
-    signal input requestID;
+    // common outputs between Sig and MTP circuits
     signal output merklized;
     signal output userID;
+
+    // common inputs between Sig and MTP circuits
+    signal input proofType;  // sig 0, mtp 1
+    signal input requestID;
     signal input userGenesisID;
     signal input profileNonce;
     signal input claimSubjectProfileNonce; // nonce of the profile that claim is issued to, 0 if claim is issued to genesisID
@@ -66,6 +66,7 @@ template credentialAtomicQuerySigMTPOffChain(issuerLevels, claimLevels, valueArr
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
 
+    // Diif for Sig proof output
     signal output issuerAuthState;
     
      /*
