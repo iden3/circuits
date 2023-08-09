@@ -1,8 +1,8 @@
+import { expect } from "chai";
 import {describe} from "mocha";
 
 const path = require("path");
 const wasmTester = require("circom_tester").wasm;
-const chai = require("chai");
 
 describe("Test credentialAtomicQuerySigMTPOffChain.circom", function () {
 
@@ -35,7 +35,6 @@ describe("Test credentialAtomicQuerySigMTPOffChain.circom", function () {
         require(`${sigBasePath}/profileID_subject_profileID2.json`),
         require(`${sigBasePath}/profileID_subject_userid.json`),
         require(`${sigBasePath}/regular_claim.json`),
-        // require(`${sigBasePath}/revoked_claim_with_revocation_check.json`),
         require(`${sigBasePath}/revoked_claim_without_revocation_check.json`),
         require(`${sigBasePath}/userID_subject.json`),
 
@@ -44,7 +43,6 @@ describe("Test credentialAtomicQuerySigMTPOffChain.circom", function () {
         require(`${mtpBasePath}/claimIssuedOnProfileID2.json`),
         require(`${mtpBasePath}/claimIssuedOnUserID.json`),
         require(`${mtpBasePath}/claimNonMerklized.json`),
-        // require(`${basePath}/revoked_claim_with_revocation_check.json`),
         require(`${mtpBasePath}/revoked_claim_without_revocation_check.json`)
     ];
 
@@ -54,5 +52,20 @@ describe("Test credentialAtomicQuerySigMTPOffChain.circom", function () {
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
+    });
+
+    const failTestCase = [
+        require(`${sigBasePath}/revoked_claim_with_revocation_check.json`),
+        require(`${mtpBasePath}/revoked_claim_with_revocation_check.json`),
+    ]
+
+    failTestCase.forEach(({ desc, inputs, expOut }) => {
+    it(`${desc}`, async function () {
+        let error;
+        await circuit.calculateWitness(inputs, true).catch((err) => {
+        error = err;
+        });
+        expect(error.message).to.include("Error in template checkClaimNotRevoked");
+    })
     });
 });
