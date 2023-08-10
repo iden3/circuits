@@ -4,7 +4,7 @@ import {describe} from "mocha";
 const path = require("path");
 const wasmTester = require("circom_tester").wasm;
 
-describe("Test credentialAtomicQuerySigMTPOffChain.circom", function () {
+describe("Test credentialAtomicQueryV3OffChain.circom", function () {
 
     this.timeout(600000);
 
@@ -12,7 +12,7 @@ describe("Test credentialAtomicQuerySigMTPOffChain.circom", function () {
 
     before(async () => {
         circuit = await wasmTester(
-            path.join(__dirname, "../../circuits", "credentialAtomicQuerySigMTP.circom"),
+            path.join(__dirname, "../../circuits", "credentialAtomicQueryV3.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,
@@ -26,8 +26,8 @@ describe("Test credentialAtomicQuerySigMTPOffChain.circom", function () {
         circuit.release()
     })
 
-    const sigBasePath = '../../testvectorgen/credentials/sigmtp/sig/testdata'
-    const mtpBasePath = '../../testvectorgen/credentials/sigmtp/mtp/testdata'
+    const sigBasePath = '../../testvectorgen/credentials/v3/sig/testdata'
+    const mtpBasePath = '../../testvectorgen/credentials/v3/mtp/testdata'
     const tests = [
         // sig
         require(`${sigBasePath}/jsonld_non_inclusion.json`),

@@ -1,6 +1,6 @@
 pragma circom 2.1.1;
 
-include "offchain/credentialAtomicQuerySigMTPOffChain.circom";
+include "offchain/credentialAtomicQueryV3OffChain.circom";
 
 /*
  public signals:
@@ -21,4 +21,4 @@ component main{public [requestID,
                        timestamp, 
                        isRevocationChecked,
                        issuerClaimIdenState, // is used for MTP
-                       proofType]} = credentialAtomicQuerySigMTPOffChain(40, 32, 64);
+                       proofType]} = credentialAtomicQueryV3OffChain(40, 32, 64);

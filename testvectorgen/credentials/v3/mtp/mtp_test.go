@@ -1,4 +1,4 @@
-package sigmtp
+package v3
 
 import (
 	"context"

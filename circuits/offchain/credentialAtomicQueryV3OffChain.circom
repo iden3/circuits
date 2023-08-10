@@ -3,7 +3,7 @@ pragma circom 2.1.5; /* chage to 2.1.6 */
 include "./credentialAtomicQueryMTPOffChain.circom";
 include "./credentialAtomicQuerySigOffChain.circom";
 
-template credentialAtomicQuerySigMTPOffChain(issuerLevels, claimLevels, valueArraySize) {
+template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize) {
     // common outputs between Sig and MTP circuits
     signal output merklized;
     signal output userID;
