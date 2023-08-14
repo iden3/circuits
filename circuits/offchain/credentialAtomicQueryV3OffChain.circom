@@ -4,11 +4,11 @@ include "./credentialAtomicQueryMTPOffChain.circom";
 include "./credentialAtomicQuerySigOffChain.circom";
 
 template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize) {
-    // common outputs between Sig and MTP circuits
+    // common outputs for Sig and MTP
     signal output merklized;
     signal output userID;
 
-    // common inputs between Sig and MTP circuits
+    // common inputs for Sig and MTP
     signal input proofType;  // sig 0, mtp 1
     signal input requestID;
     signal input userGenesisID;
@@ -45,14 +45,14 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     signal input issuerClaim[8];
 
-    // Diff for MTP proof
+    // MTP specific
     signal input issuerClaimMtp[issuerLevels];
     signal input issuerClaimClaimsTreeRoot;
     signal input issuerClaimRevTreeRoot;
     signal input issuerClaimRootsTreeRoot;
     signal input issuerClaimIdenState;
 
-    // Diff for Sig proof
+    // Sig specific
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimMtp[issuerLevels];
     signal input issuerAuthClaimsTreeRoot;
@@ -66,7 +66,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
 
-    // Diif for Sig proof output
+    // Sig specific outputs
     signal output issuerAuthState;
     
      /*
@@ -90,8 +90,9 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     
     signal isSig;
     signal isMTP;
-    isSig <-- proofType==0 ? 1 : 0;
-    isMTP <-- proofType==1 ? 1 : 0;
+    isSig  <== 1 - proofType;
+    isMTP <== proofType;
+    isSig * isMTP === 0;
 
     issuerAuthState <== sigFlow(issuerLevels)(
         enabled <== isSig,
@@ -215,7 +216,7 @@ template sigFlow(issuerLevels) {
         issuerAuthRevTreeRoot,
         issuerAuthRootsTreeRoot
     );
-    issuerAuthState <-- enabled ==1 ? tmpAuthState : 0;
+    issuerAuthState <== tmpAuthState * enabled;
 
     checkClaimExists(issuerLevels)(
         enabled,
