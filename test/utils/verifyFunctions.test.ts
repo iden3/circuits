@@ -43,6 +43,7 @@ describe("utils checkIdenStateMatchesRoots test", function () {
         );
 
         const witness = await circuit.calculateWitness({
+            "enabled": "1",
             "claimsTreeRoot": "5390978791160263927985161830452830346003784422812143177724675599288112176057",
             "revTreeRoot": "0",
             "rootsTreeRoot": "0",
@@ -61,6 +62,7 @@ describe("utils verifyClaimSignature test", function () {
         );
 
         const witness = await circuit.calculateWitness({
+            "enabled": "1",
             "claim": ["0","0","0","0","0","0","0","0"],
             "sigR8x": "9813265844413837380082826071463892301278045128546516139211810884421030840917",
             "sigR8y": "7110066446166689493462986682910785889642607369745074815971396692733663407188",

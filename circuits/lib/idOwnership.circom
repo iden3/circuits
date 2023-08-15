@@ -49,5 +49,5 @@ template IdOwnership(nLevels) {
         challengeSignatureS
     );
 
-    checkIdenStateMatchesRoots()(userClaimsTreeRoot, userRevTreeRoot, userRootsTreeRoot, userState);
+    checkIdenStateMatchesRoots()(1, userClaimsTreeRoot, userRevTreeRoot, userRootsTreeRoot, userState);
 }
