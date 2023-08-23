@@ -57,7 +57,6 @@ set -u
 
 CIRCUIT="$(pwd)/$1"
 PTAU="$(pwd)/$2"
-PATH="$(pwd)/node_modules/.bin:$PATH"
 
 # npm ci
 mkdir -p build
