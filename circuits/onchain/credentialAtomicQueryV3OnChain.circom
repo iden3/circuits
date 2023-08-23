@@ -10,7 +10,7 @@ include "../lib/utils/idUtils.circom";
 include "../lib/utils/spongeHash.circom";
 
 /**
-credentialAtomicQuerySigOnChain.circom - query claim value and verify claim issuer signature:
+credentialAtomicQueryV3OnChain.circom - query claim value and verify claim issuer signature or mtp:
 
 checks:
 - identity ownership
