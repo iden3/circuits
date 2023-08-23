@@ -9,7 +9,7 @@ const generateTemplate = (
   circuitTemplateName = "SpongeHash"
 ): void => {
   const template = `
-pragma circom 2.0.0;
+pragma circom 2.1.1;
 include "../../circuits/lib/utils/spongeHash.circom";
 template ${circuitTemplateName}Test() {
 signal input in[{{n}}];
