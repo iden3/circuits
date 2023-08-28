@@ -27,11 +27,10 @@ const (
 type CredentialAtomicSigOnChainV2Inputs struct {
 	RequestID string `json:"requestID"`
 
-	// user data
-	UserGenesisID            string `json:"userGenesisID"`
-	ProfileNonce             string `json:"profileNonce"`
-	ClaimSubjectProfileNonce string `json:"claimSubjectProfileNonce"`
-
+	// begin user data
+	UserGenesisID               string      `json:"userGenesisID"`
+	ProfileNonce                string      `json:"profileNonce"`
+	ClaimSubjectProfileNonce    string      `json:"claimSubjectProfileNonce"`
 	UserAuthClaim               *core.Claim `json:"authClaim"`
 	UserAuthClaimMtp            []string    `json:"authClaimIncMtp"`
 	UserAuthClaimNonRevMtp      []string    `json:"authClaimNonRevMtp"`
@@ -51,6 +50,7 @@ type CredentialAtomicSigOnChainV2Inputs struct {
 	GistMtpAuxHi                string      `json:"gistMtpAuxHi"`
 	GistMtpAuxHv                string      `json:"gistMtpAuxHv"`
 	GistMtpNoAux                string      `json:"gistMtpNoAux"`
+	// end user data
 
 	IssuerID string `json:"issuerID"`
 	// Claim
@@ -89,22 +89,22 @@ type CredentialAtomicSigOnChainV2Inputs struct {
 	Operator            int      `json:"operator"`
 	SlotIndex           int      `json:"slotIndex"`
 	Timestamp           string   `json:"timestamp"`
-	IsRevocationChecked int      `json:"isRevocationChecked"`
 	Value               []string `json:"value"`
+	IsRevocationChecked int      `json:"isRevocationChecked"`
 }
 
 type CredentialAtomicSigOnChainV2Outputs struct {
 	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
-	СircuitQueryHash       string `json:"circuitQueryHash"`
+	CircuitQueryHash       string `json:"circuitQueryHash"`
 	IssuerAuthState        string `json:"issuerAuthState"`
 	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
 	Timestamp              string `json:"timestamp"`
-	IsRevocationChecked    string `json:"isRevocationChecked"`
-	Challenge              string `json:"challenge"`
 	GistRoot               string `json:"gistRoot"`
+	Challenge              string `json:"challenge"`
+	IsRevocationChecked    string `json:"isRevocationChecked"`
 }
 
 type TestDataSigV2 struct {
@@ -114,7 +114,6 @@ type TestDataSigV2 struct {
 }
 
 func Test_UserID_Subject(t *testing.T) {
-
 	desc := "ON Chain: UserID = Subject. UserID out. User nonce = 0, Subject nonce = 0 claim issued on userID (Merklized claim)"
 	isUserIDProfile := true
 	isSubjectIDProfile := false
@@ -123,7 +122,6 @@ func Test_UserID_Subject(t *testing.T) {
 }
 
 func Test_IssueClaimToProfile(t *testing.T) {
-
 	desc := "ON Chain: UserID != Subject. UserID out. User nonce = 0. Claim issued on Profile (subject nonce = 999) (Merklized claim)"
 	isUserIDProfile := false
 	isSubjectIDProfile := true
@@ -161,6 +159,7 @@ func Test_RegularClaim(t *testing.T) {
 func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	desc := "ON Chain: User's claim revoked and the circuit not checking for revocation status"
 	fileName := "revoked_claim_without_revocation_check"
+
 	user := utils.NewIdentity(t, userPK)
 	issuer := utils.NewIdentity(t, issuerPK)
 
@@ -252,15 +251,11 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		ClaimPathMtpAuxHv:               "0", // 0 for inclusion proof
 		ClaimPathKey:                    "0", // hash of path in merklized json-ld document
 		ClaimPathValue:                  "0", // value in this path in merklized json-ld document
-		// value in this path in merklized json-ld document
-
-		Operator:            utils.EQ,
-		SlotIndex:           2,
-		Timestamp:           timestamp,
-		IsRevocationChecked: 0,
-		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Operator:                        utils.EQ,
+		SlotIndex:                       2,
+		Timestamp:                       timestamp,
+		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
+		IsRevocationChecked:             0,
 	}
 
 	issuerAuthState := issuer.State(t)
@@ -287,11 +282,10 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		СircuitQueryHash:       circuitQueryHash.String(),
-
-		Challenge:           challenge.String(),
-		GistRoot:            gistRoot.BigInt().String(),
-		IsRevocationChecked: "0",
+		CircuitQueryHash:       circuitQueryHash.String(),
+		Challenge:              challenge.String(),
+		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "0",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
@@ -307,6 +301,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 	desc := "ON Chain: User's claim revoked and the circuit checking for revocation status (expected to fail)"
 	fileName := "revoked_claim_with_revocation_check"
+
 	user := utils.NewIdentity(t, userPK)
 	issuer := utils.NewIdentity(t, issuerPK)
 
@@ -391,23 +386,18 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
 		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
 		ClaimSchema:                     "180410020913331409885634153623124536270",
-
-		ClaimPathNotExists: "0", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:       emptyPathMtp,
-		ClaimPathMtpNoAux:  "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-		ClaimPathMtpAuxHi:  "0", // 0 for inclusion proof
-		ClaimPathMtpAuxHv:  "0", // 0 for inclusion proof
-		ClaimPathKey:       "0", // hash of path in merklized json-ld document
-		ClaimPathValue:     "0", // value in this path in merklized json-ld document
-		// value in this path in merklized json-ld document
-
-		Operator:            utils.EQ,
-		SlotIndex:           2,
-		Timestamp:           timestamp,
-		IsRevocationChecked: 1,
-		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:                    emptyPathMtp,
+		ClaimPathMtpNoAux:               "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi:               "0", // 0 for inclusion proof
+		ClaimPathMtpAuxHv:               "0", // 0 for inclusion proof
+		ClaimPathKey:                    "0", // hash of path in merklized json-ld document
+		ClaimPathValue:                  "0", // value in this path in merklized json-ld document
+		Operator:                        utils.EQ,
+		SlotIndex:                       2,
+		Timestamp:                       timestamp,
+		Value:                           utils.PrepareStrArray([]string{"10"}, utils.GistLevels),
+		IsRevocationChecked:             1,
 	}
 
 	issuerAuthState := issuer.State(t)
@@ -434,11 +424,10 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		СircuitQueryHash:       circuitQueryHash.String(),
-
-		Challenge:           challenge.String(),
-		GistRoot:            gistRoot.BigInt().String(),
-		IsRevocationChecked: "1",
+		CircuitQueryHash:       circuitQueryHash.String(),
+		Challenge:              challenge.String(),
+		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "1",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
@@ -459,10 +448,10 @@ func Test_JSON_LD_Proof_non_inclusion(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
-	generateJSONLD_NON_INCLUSIO_TestData(t, isUserIDProfile, isSubjectIDProfile, desc, "jsonld_non_inclusion")
+	generateJSONLD_NON_INCLUSION_TestData(t, isUserIDProfile, isSubjectIDProfile, desc, "jsonld_non_inclusion")
 }
 
-//merklized
+// merklized
 func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
 	var err error
 
@@ -578,23 +567,18 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
 		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
 		ClaimSchema:                     "180410020913331409885634153623124536270",
-
-		ClaimPathNotExists: "0", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:       claimJSONLDProof,
-		ClaimPathMtpNoAux:  claimJSONLDProofAux.NoAux, // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-		ClaimPathMtpAuxHi:  claimJSONLDProofAux.Key,   // 0 for inclusion proof
-		ClaimPathMtpAuxHv:  claimJSONLDProofAux.Value, // 0 for inclusion proof
-		ClaimPathKey:       pathKey.String(),          // hash of path in merklized json-ld document
-		ClaimPathValue:     valueKey.String(),         // value in this path in merklized json-ld document
-		// value in this path in merklized json-ld document
-
-		Operator:            utils.EQ,
-		SlotIndex:           2,
-		Timestamp:           timestamp,
-		IsRevocationChecked: 1,
-		Value: []string{valueKey.String(), "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:                    claimJSONLDProof,
+		ClaimPathMtpNoAux:               claimJSONLDProofAux.NoAux, // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi:               claimJSONLDProofAux.Key,   // 0 for inclusion proof
+		ClaimPathMtpAuxHv:               claimJSONLDProofAux.Value, // 0 for inclusion proof
+		ClaimPathKey:                    pathKey.String(),          // hash of path in merklized json-ld document
+		ClaimPathValue:                  valueKey.String(),         // value in this path in merklized json-ld document
+		Operator:                        utils.EQ,
+		SlotIndex:                       2,
+		Timestamp:                       timestamp,
+		Value:                           utils.PrepareStrArray([]string{valueKey.String()}, 64),
+		IsRevocationChecked:             1,
 	}
 
 	issuerAuthState := issuer.State(t)
@@ -621,7 +605,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
-		СircuitQueryHash:       circuitQueryHash.String(),
+		CircuitQueryHash:       circuitQueryHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
 		IsRevocationChecked:    "1",
@@ -641,7 +625,6 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
-
 	issuer := utils.NewIdentity(t, issuerPK)
 
 	userProfileID := user.ID
@@ -739,23 +722,18 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
 		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
 		ClaimSchema:                     "180410020913331409885634153623124536270",
-
-		ClaimPathNotExists: "0", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:       emptyPathMtp,
-		ClaimPathMtpNoAux:  "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-		ClaimPathMtpAuxHi:  "0", // 0 for inclusion proof
-		ClaimPathMtpAuxHv:  "0", // 0 for inclusion proof
-		ClaimPathKey:       "0", // hash of path in merklized json-ld document
-		ClaimPathValue:     "0", // value in this path in merklized json-ld document
-		// value in this path in merklized json-ld document
-
-		Operator:            utils.EQ,
-		SlotIndex:           2,
-		Timestamp:           timestamp,
-		IsRevocationChecked: 1,
-		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:                    emptyPathMtp,
+		ClaimPathMtpNoAux:               "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi:               "0", // 0 for inclusion proof
+		ClaimPathMtpAuxHv:               "0", // 0 for inclusion proof
+		ClaimPathKey:                    "0", // hash of path in merklized json-ld document
+		ClaimPathValue:                  "0", // value in this path in merklized json-ld document
+		Operator:                        utils.EQ,
+		SlotIndex:                       2,
+		Timestamp:                       timestamp,
+		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
+		IsRevocationChecked:             1,
 	}
 
 	issuerAuthState := issuer.State(t)
@@ -780,14 +758,12 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
+		CircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		СircuitQueryHash:       circuitQueryHash.String(),
-
-		Challenge: challenge.String(),
-		GistRoot:  gistRoot.BigInt().String(),
-
-		IsRevocationChecked: "1",
+		Challenge:              challenge.String(),
+		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "1",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
@@ -800,7 +776,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	utils.SaveTestVector(t, fileName, string(json))
 }
 
-func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
+func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
 	fileName string) {
 
 	var err error
@@ -914,23 +890,18 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
 		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
 		ClaimSchema:                     "180410020913331409885634153623124536270",
-
-		ClaimPathNotExists: "1", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:       claimJSONLDProof,
-		ClaimPathMtpNoAux:  claimJSONLDProofAux.NoAux, // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-		ClaimPathMtpAuxHi:  claimJSONLDProofAux.Key,   // 0 for inclusion proof
-		ClaimPathMtpAuxHv:  claimJSONLDProofAux.Value, // 0 for inclusion proof
-		ClaimPathKey:       pathKey.String(),          // hash of path in merklized json-ld document
-		ClaimPathValue:     "0",                       // value in this path in merklized json-ld document
-		// value in this path in merklized json-ld document
-
-		Operator:            utils.NOOP,
-		SlotIndex:           0,
-		Timestamp:           timestamp,
-		IsRevocationChecked: 1,
-		Value: []string{"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		ClaimPathNotExists:              "1", // 0 for inclusion, 1 for non-inclusion
+		ClaimPathMtp:                    claimJSONLDProof,
+		ClaimPathMtpNoAux:               claimJSONLDProofAux.NoAux, // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi:               claimJSONLDProofAux.Key,   // 0 for inclusion proof
+		ClaimPathMtpAuxHv:               claimJSONLDProofAux.Value, // 0 for inclusion proof
+		ClaimPathKey:                    pathKey.String(),          // hash of path in merklized json-ld document
+		ClaimPathValue:                  "0",                       // value in this path in merklized json-ld document
+		Operator:                        utils.NOOP,
+		SlotIndex:                       0,
+		Timestamp:                       timestamp,
+		Value:                           utils.PrepareStrArray([]string{"0"}, 64),
+		IsRevocationChecked:             1,
 	}
 
 	issuerAuthState := issuer.State(t)
@@ -955,13 +926,12 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerAuthState:        issuerAuthState.String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
+		CircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
-		СircuitQueryHash:       circuitQueryHash.String(),
-
-		Challenge:           challenge.String(),
-		GistRoot:            gistRoot.BigInt().String(),
-		IsRevocationChecked: "1",
+		Challenge:              challenge.String(),
+		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "1",
 	}
 
 	json, err := json2.Marshal(TestDataSigV2{
