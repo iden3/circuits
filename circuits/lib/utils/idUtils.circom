@@ -1,4 +1,4 @@
-pragma circom 2.0.0;
+pragma circom 2.1.1;
 
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/poseidon.circom";
@@ -9,21 +9,13 @@ template ProfileID(){
     signal input nonce;
     signal output out;
 
-    component hash = Poseidon(2);
-    hash.inputs[0] <== in;
-    hash.inputs[1] <== nonce;
-
-    component genesis = TakeNBits(27*8);
-    genesis.in <== hash.out;
+    signal hash <== Poseidon(2)([in, nonce]);
+    signal genesis <== TakeNBits(27*8)(hash);
 
     component genesisIdParts = SplitID();
     genesisIdParts.id <== in;
 
-    component newId = NewID();
-    newId.typ <== genesisIdParts.typ;
-    newId.genesis <== genesis.out;
-
-    out <== newId.out;
+    out <== NewID()(genesisIdParts.typ, genesis);
 }
 
 // Split ID into type, genesys and checksum
@@ -61,16 +53,9 @@ template NewID() {
     signal input genesis;
     signal output out;
 
-    component s = CalculateIdChecksum();
-    s.typ <== typ;
-    s.genesis <== genesis;
+    signal checksum <== CalculateIdChecksum()(typ, genesis);
 
-    component id = GatherID();
-    id.typ <== typ;
-    id.genesis <== genesis;
-    id.checksum <== s.out;
-
-    out <== id.out;
+    out <== GatherID()(typ, genesis, checksum);
 }
 
 // return 31-byte ID made up from type, genesis and checksum
@@ -153,9 +138,7 @@ template CalculateIdChecksum() {
         k++;
     }
 
-    component sumBits = LastNBits(16);
-    sumBits.in <== sum[k];
-    out <== sumBits.out;
+    out <== LastNBits(16)(sum[k]);
 }
 
 template LastNBits(n) {
@@ -180,17 +163,51 @@ template SelectProfile() {
 
     signal output out;
 
-    component calcProfile = ProfileID();
-    calcProfile.in <== in;
-    calcProfile.nonce <== nonce;
+    signal isSaltZero <== IsZero()(nonce);
+    signal calcProfile <== ProfileID()(in, nonce);
 
-    component isSaltZero = IsZero();
-    isSaltZero.in <== nonce;
+    out <== Mux1()(
+        [calcProfile, in],
+        isSaltZero
+    );
+}
 
-    component selectProfile = Mux1();
-    selectProfile.s <== isSaltZero.out;
-    selectProfile.c[0] <== calcProfile.out;
-    selectProfile.c[1] <== in;
+template cutId() {
+	signal input in;
+	signal output out;
 
-    out <== selectProfile.out;
+	signal idBits[256] <== Num2Bits(256)(in);
+
+	component cutted = Bits2Num(256-16-16-8);
+	for (var i=16; i<256-16-8; i++) {
+		cutted.in[i-16] <== idBits[i];
+	}
+	out <== cutted.out;
+}
+
+template cutState() {
+	signal input in;
+	signal output out;
+
+	signal stateBits[256] <== Num2Bits(256)(in);
+
+	component cutted = Bits2Num(256-16-16-8);
+	for (var i=0; i<256-16-16-8; i++) {
+		cutted.in[i] <== stateBits[i+16+16+8];
+	}
+	out <== cutted.out;
+}
+
+// getIdenState caclulates the Identity state out of the claims tree root,
+// revocations tree root and roots tree root.
+template getIdenState() {
+	signal input claimsTreeRoot;
+	signal input revTreeRoot;
+	signal input rootsTreeRoot;
+
+	signal output idenState <== Poseidon(3)([
+	    claimsTreeRoot,
+	    revTreeRoot,
+	    rootsTreeRoot
+	]);
 }

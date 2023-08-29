@@ -239,6 +239,7 @@ func Test_Generate_Test_Cases(t *testing.T) {
 	nextId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition")
 
 	generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer next transition state", "issuer_next_state_transition")
+	generateStateTransitionData(t, true, UserPK, IssuerPK, "User next transition state", "user_next_state_transition")
 
 	generateMTPData(t, "MTP: Issuer first state", []*gistData{
 		{id, issuerFirstState},

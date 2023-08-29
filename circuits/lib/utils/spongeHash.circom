@@ -1,4 +1,4 @@
-pragma circom 2.0.0;
+pragma circom 2.1.1;
 
 include "../../../node_modules/circomlib/circuits/poseidon.circom";
 
@@ -44,8 +44,7 @@ template SpongeHash(arraySize, hashFnBatchSize) {
 
 
 function getArrayValueByIndex(valueArray, arraySize, idx) {
-
-   if(idx < arraySize) {
+    if(idx < arraySize) {
         return valueArray[idx];
     } else{
         return 0;

@@ -34,7 +34,6 @@ describe("Test credentialAtomicQuerySigOffChain.circom", function () {
         require(`${basePath}/profileID_subject_profileID2.json`),
         require(`${basePath}/profileID_subject_userid.json`),
         require(`${basePath}/regular_claim.json`),
-        // require(`${basePath}/revoked_claim_with_revocation_check.json`),
         require(`${basePath}/revoked_claim_without_revocation_check.json`),
         require(`${basePath}/userID_subject.json`)
     ];
@@ -45,6 +44,20 @@ describe("Test credentialAtomicQuerySigOffChain.circom", function () {
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
+    });
+
+    const failTestCase = [
+        require(`${basePath}/revoked_claim_with_revocation_check.json`)
+    ]
+
+    failTestCase.forEach(({ desc, inputs, expOut }) => {
+    it(`${desc}`, async function () {
+        let error;
+        await circuit.calculateWitness(inputs, true).catch((err) => {
+        error = err;
+        });
+        expect(error.message).to.include("Error in template checkClaimNotRevoked");
+        })
     });
 
 
