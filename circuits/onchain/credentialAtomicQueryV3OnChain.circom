@@ -8,6 +8,7 @@ include "../auth/authV2.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/utils/spongeHash.circom";
+include "../offchain/credentialAtomicQueryV3OffChain.circom";
 
 /**
 credentialAtomicQueryV3OnChain.circom - query claim value and verify claim issuer signature or mtp:
@@ -185,114 +186,53 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         gistMtpNoAux
     );
 
-    /////////////////////////////////////////////////////////////////
-
-    // Check issuerClaim is issued to provided identity
-    verifyCredentialSubjectProfile()(
-        issuerClaim,
-        userGenesisID,
-        claimSubjectProfileNonce
-    );
-
-    // Verify issuerClaim schema
-    verifyCredentialSchema()(1, issuerClaim, claimSchema);
-
-    // verify issuerClaim expiration time
-    verifyExpirationTime()(issuerClaim, timestamp);
-
-    signal isSig;
-    signal isMTP;
-    isSig  <== 1 - proofType;
-    isMTP <== proofType;
-    isSig * isMTP === 0;
-
-    issuerAuthState <== sigFlow(issuerLevels)(
-        enabled <== isSig,
-        issuerAuthClaim <== issuerAuthClaim,
-        issuerAuthClaimsTreeRoot <== issuerAuthClaimsTreeRoot,
-        issuerAuthRevTreeRoot <== issuerAuthRevTreeRoot,
-        issuerAuthRootsTreeRoot <== issuerAuthRootsTreeRoot,
-        issuerAuthClaimMtp <== issuerAuthClaimMtp,
-        issuerAuthClaimNonRevMtp <== issuerAuthClaimNonRevMtp,
-        issuerAuthClaimNonRevMtpNoAux <== issuerAuthClaimNonRevMtpNoAux,
-        issuerAuthClaimNonRevMtpAuxHi <== issuerAuthClaimNonRevMtpAuxHi,
-        issuerAuthClaimNonRevMtpAuxHv <== issuerAuthClaimNonRevMtpAuxHv,
+    (merklized, userID, issuerAuthState) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
+        proofType <== proofType,
+        requestID <== requestID,
+        userGenesisID <== userGenesisID,
+        profileNonce <== profileNonce,
+        claimSubjectProfileNonce <== claimSubjectProfileNonce,
+        issuerID <== issuerID,
+        isRevocationChecked <== isRevocationChecked,
+        issuerClaimNonRevMtp <== issuerClaimNonRevMtp,
+        issuerClaimNonRevMtpNoAux <== issuerClaimNonRevMtpNoAux,
+        issuerClaimNonRevMtpAuxHi <== issuerClaimNonRevMtpAuxHi,
+        issuerClaimNonRevMtpAuxHv <== issuerClaimNonRevMtpAuxHv,
+        issuerClaimNonRevClaimsTreeRoot <== issuerClaimNonRevClaimsTreeRoot,
         issuerClaimNonRevRevTreeRoot <== issuerClaimNonRevRevTreeRoot,
-        issuerClaim <== issuerClaim,
-        issuerClaimSignatureR8x <== issuerClaimSignatureR8x,
-        issuerClaimSignatureR8y <== issuerClaimSignatureR8y,
-        issuerClaimSignatureS <== issuerClaimSignatureS
-    );
-
-    mtpFlow(issuerLevels)(
-        enabled <== isMTP,
+        issuerClaimNonRevRootsTreeRoot <== issuerClaimNonRevRootsTreeRoot,
+        issuerClaimNonRevState <== issuerClaimNonRevState,
+        timestamp <== timestamp,
+        claimSchema <== claimSchema,
+        claimPathNotExists <== claimPathNotExists,
+        claimPathMtp <== claimPathMtp,
+        claimPathMtpNoAux <== claimPathMtpNoAux,
+        claimPathMtpAuxHi <== claimPathMtpAuxHi,
+        claimPathMtpAuxHv <== claimPathMtpAuxHv,
+        claimPathKey <== claimPathKey,
+        claimPathValue <== claimPathValue,
+        slotIndex <== slotIndex,
+        operator <== operator,
+        value <== value,
         issuerClaim <== issuerClaim,
         issuerClaimMtp <== issuerClaimMtp,
         issuerClaimClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
         issuerClaimRevTreeRoot <== issuerClaimRevTreeRoot,
         issuerClaimRootsTreeRoot <== issuerClaimRootsTreeRoot,
-        issuerClaimIdenState <== issuerClaimIdenState
+        issuerClaimIdenState <== issuerClaimIdenState,
+        issuerAuthClaim <== issuerAuthClaim,
+        issuerAuthClaimMtp <== issuerAuthClaimMtp,
+        issuerAuthClaimsTreeRoot <== issuerAuthClaimsTreeRoot,
+        issuerAuthRevTreeRoot <== issuerAuthRevTreeRoot,
+        issuerAuthRootsTreeRoot <== issuerAuthRootsTreeRoot,
+        issuerAuthClaimNonRevMtp <== issuerAuthClaimNonRevMtp,
+        issuerAuthClaimNonRevMtpNoAux <== issuerAuthClaimNonRevMtpNoAux,
+        issuerAuthClaimNonRevMtpAuxHi <== issuerAuthClaimNonRevMtpAuxHi,
+        issuerAuthClaimNonRevMtpAuxHv <== issuerAuthClaimNonRevMtpAuxHv,
+        issuerClaimSignatureR8x <== issuerClaimSignatureR8x,
+        issuerClaimSignatureR8y <== issuerClaimSignatureR8y,
+        issuerClaimSignatureS <== issuerClaimSignatureS
     );
-
-    // non revocation status
-    checkClaimNotRevoked(issuerLevels)(
-        enabled <== isRevocationChecked,
-        claim <== issuerClaim,
-        claimNonRevMTP <== issuerClaimNonRevMtp,
-        noAux <== issuerClaimNonRevMtpNoAux,
-        auxHi <== issuerClaimNonRevMtpAuxHi,
-        auxHv <== issuerClaimNonRevMtpAuxHv,
-        treeRoot <== issuerClaimNonRevRevTreeRoot
-    );
-
-    // verify issuer state for claim non-revocation proof
-    checkIdenStateMatchesRoots()(
-        1,
-        issuerClaimNonRevClaimsTreeRoot,
-        issuerClaimNonRevRevTreeRoot,
-        issuerClaimNonRevRootsTreeRoot,
-        issuerClaimNonRevState
-    );
-
-    component merklize = getClaimMerklizeRoot();
-    merklize.claim <== issuerClaim;
-
-    merklized <== merklize.flag;
-
-    // check path/in node exists in merkletree specified by jsonldRoot
-    SMTVerifier(claimLevels)(
-        enabled <== merklize.flag,  // if merklize flag 0 skip MTP verification
-        fnc <== claimPathNotExists, // inclusion
-        root <== merklize.out,
-        siblings <== claimPathMtp,
-        oldKey <== claimPathMtpAuxHi,
-        oldValue <== claimPathMtpAuxHv,
-        isOld0 <== claimPathMtpNoAux,
-        key <== claimPathKey,
-        value <== claimPathValue
-    );
-
-    // select value from claim by slot index (0-7)
-    signal slotValue <== getValueByIndex()(issuerClaim, slotIndex);
-
-    // select value for query verification,
-    // if claim is merklized merklizeFlag = `1|2`, take claimPathValue
-    // if not merklized merklizeFlag = `0`, take value from selected slot
-    signal fieldValue <== Mux1()(
-        [slotValue, claimPathValue],
-        merklize.flag
-    );
-
-    /////////////////////////////////////////////////////////////////
-
-    // verify query
-    signal querySatisfied <== Query(valueArraySize)(
-        in <== fieldValue,
-        value <== value,
-        operator <== operator
-    );
-
-    querySatisfied === 1;
 
     // verify query hash matches
     signal valueHash <== SpongeHash(valueArraySize, 6)(value); // 6 - max size of poseidon hash available on-chain
@@ -305,91 +245,4 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         claimPathNotExists, // TODO: check if this value should be here
         valueHash
     ]);
-
-    /* ProfileID calculation */
-    userID <== SelectProfile()(userGenesisID, profileNonce);
-}
-
-
-template sigFlow(issuerLevels) {
-    signal input enabled;
-    signal input issuerAuthClaim[8];
-    signal input issuerAuthClaimsTreeRoot;
-    signal input issuerAuthRevTreeRoot;
-    signal input issuerAuthRootsTreeRoot;
-    signal input issuerAuthClaimMtp[issuerLevels];
-    signal input issuerAuthClaimNonRevMtp[issuerLevels];
-    signal input issuerAuthClaimNonRevMtpNoAux;
-    signal input issuerAuthClaimNonRevMtpAuxHi;
-    signal input issuerAuthClaimNonRevMtpAuxHv;
-    signal input issuerClaimNonRevRevTreeRoot;
-    signal input issuerClaim[8];
-    signal input issuerClaimSignatureR8x;
-    signal input issuerClaimSignatureR8y;
-    signal input issuerClaimSignatureS;
-    signal output issuerAuthState;
-
-    verifyCredentialSchema()(
-        enabled,
-        issuerAuthClaim,
-        80551937543569765027552589160822318028
-    );
-
-    signal tmpAuthState;
-    tmpAuthState <== getIdenState()(
-        issuerAuthClaimsTreeRoot,
-        issuerAuthRevTreeRoot,
-        issuerAuthRootsTreeRoot
-    );
-    issuerAuthState <== tmpAuthState * enabled;
-
-    checkClaimExists(issuerLevels)(
-        enabled,
-        issuerAuthClaim,
-        issuerAuthClaimMtp,
-        issuerAuthClaimsTreeRoot
-    );
-
-    checkClaimNotRevoked(issuerLevels)(
-        enabled <== enabled,
-        claim <== issuerAuthClaim,
-        claimNonRevMTP <== issuerAuthClaimNonRevMtp,
-        noAux <== issuerAuthClaimNonRevMtpNoAux,
-        auxHi <== issuerAuthClaimNonRevMtpAuxHi,
-        auxHv <== issuerAuthClaimNonRevMtpAuxHv,
-        treeRoot <== issuerClaimNonRevRevTreeRoot
-    );
-
-    component issuerAuthPubKey = getPubKeyFromClaim();
-    issuerAuthPubKey.claim <== issuerAuthClaim;
-
-    verifyClaimSignature()(
-        enabled,
-        issuerClaim,
-        issuerClaimSignatureR8x,
-        issuerClaimSignatureR8y,
-        issuerClaimSignatureS,
-        issuerAuthPubKey.Ax,
-        issuerAuthPubKey.Ay
-    );
-}
-
-template mtpFlow(issuerLevels) {
-    signal input enabled;
-    signal input issuerClaim[8];
-    signal input issuerClaimMtp[issuerLevels];
-    signal input issuerClaimClaimsTreeRoot;
-    signal input issuerClaimRevTreeRoot;
-    signal input issuerClaimRootsTreeRoot;
-    signal input issuerClaimIdenState;
-
-    verifyClaimIssuance(issuerLevels)(
-        enabled <== enabled,
-        claim <== issuerClaim,
-        claimIssuanceMtp <== issuerClaimMtp,
-        claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
-        claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot,
-        claimIssuanceRootsTreeRoot <== issuerClaimRootsTreeRoot,
-        claimIssuanceIdenState <== issuerClaimIdenState
-    );
 }
