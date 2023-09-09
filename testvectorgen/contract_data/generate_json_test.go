@@ -123,7 +123,7 @@ type CredentialAtomicMTPOnChainV2Inputs struct {
 type CredentialAtomicMTPOnChainV2Outputs struct {
 	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
-	СircuitQueryHash       string `json:"circuitQueryHash"`
+	CircuitQueryHash       string `json:"circuitQueryHash"`
 	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
@@ -217,7 +217,7 @@ type CredentialAtomicSigOnChainV2Inputs struct {
 type CredentialAtomicSigOnChainV2Outputs struct {
 	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
-	СircuitQueryHash       string `json:"circuitQueryHash"`
+	CircuitQueryHash       string `json:"circuitQueryHash"`
 	IssuerAuthState        string `json:"issuerAuthState"`
 	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
@@ -483,6 +483,7 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 		SlotIndex:                       0,
 		Timestamp:                       timestamp,
 		Value:                           utils.PrepareStrArray([]string{valueKey.String()}, 64),
+		IsRevocationChecked:             1,
 	}
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
@@ -504,7 +505,7 @@ func generateMTPData(t *testing.T, desc string, gistData []*gistData, nextState 
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
 		IssuerClaimNonRevState: issuer.State(t).String(),
-		СircuitQueryHash:       circuitQueryHash.String(),
+		CircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
 		Challenge:              challenge.String(),
@@ -684,7 +685,7 @@ func generateSigData(t *testing.T, desc string, gistData []*gistData, nextState 
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
-		СircuitQueryHash:       circuitQueryHash.String(),
+		CircuitQueryHash:       circuitQueryHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
 		IsRevocationChecked:    "1",
