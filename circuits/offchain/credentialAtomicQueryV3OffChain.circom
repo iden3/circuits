@@ -1,7 +1,14 @@
-pragma circom 2.1.5; /* chage to 2.1.6 */
+pragma circom 2.1.5;
 
-include "./credentialAtomicQueryMTPOffChain.circom";
-include "./credentialAtomicQuerySigOffChain.circom";
+include "../../node_modules/circomlib/circuits/mux1.circom";
+include "../../node_modules/circomlib/circuits/mux4.circom";
+include "../../node_modules/circomlib/circuits/bitify.circom";
+include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../lib/query/comparators.circom";
+include "../auth/authV2.circom";
+include "../lib/query/query.circom";
+include "../lib/query/nullify.circom";
+include "../lib/utils/idUtils.circom";
 
 template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize) {
     // common outputs for Sig and MTP
@@ -25,6 +32,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal input issuerClaimNonRevRevTreeRoot;
     signal input issuerClaimNonRevRootsTreeRoot;
     signal input issuerClaimNonRevState;
+
     /* current time */
     signal input timestamp;
 
@@ -68,11 +76,12 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     // Sig specific outputs
     signal output issuerAuthState;
-    
-     /*
-    >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    */
 
+    // Modifier/Computation Operator output ($sd, $nullify)
+    signal output operatorOutput;
+
+    /////////////////////////////////////////////////////////////////
+    // Claim Verification (id, schema, expiration, issuance, revocation)
     /////////////////////////////////////////////////////////////////
 
     // Check issuerClaim is issued to provided identity
@@ -142,6 +151,10 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         issuerClaimNonRevState
     );
 
+    /////////////////////////////////////////////////////////////////
+    // Field Path and Value Verification
+    /////////////////////////////////////////////////////////////////
+
     component merklize = getClaimMerklizeRoot();
     merklize.claim <== issuerClaim;
 
@@ -172,6 +185,8 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     );
 
     /////////////////////////////////////////////////////////////////
+    // Query Operator Processing
+    /////////////////////////////////////////////////////////////////
 
     // verify query
     signal querySatisfied <== Query(valueArraySize)(
@@ -182,7 +197,50 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     querySatisfied === 1;
 
-    /* ProfileID calculation */
+    /////////////////////////////////////////////////////////////////
+    // Modifier/Computation Operators Processing
+    /////////////////////////////////////////////////////////////////
+
+    // selective disclosure calculation
+    // no need to calc anything, fieldValue is just passed as an output
+
+    // nullifier calculation
+    signal isNullifyOp <== IsEqual()([operator, 17]);
+    signal nullifier <== Nullify()(
+        isNullifyOp,
+        userGenesisID,
+        claimSubjectProfileNonce,
+        fieldValue,
+        value[0] // get csr from value array
+    );
+
+    /////////////////////////////////////////////////////////////////
+    // Operator Output Preparation
+    /////////////////////////////////////////////////////////////////
+
+    // parse operator to bits
+    signal opBits[5] <== Num2Bits(5)(operator); // values 0-15 are query operators, 16-31 - modifiers/computations
+
+    // output value calculation
+    signal modifierOutput <== Mux4()(
+        s <== [opBits[0], opBits[1], opBits[2], opBits[3]],
+
+        c <== [
+            fieldValue, // 16 - selective disclosure (16-16 = index 0)
+            nullifier, // 17 - nullify (17-16 = index 1)
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 18-31 - not used
+        ]
+    );
+
+    // output value only if modifier operation was selected
+    operatorOutput <== Mux1()(
+        c <== [0, modifierOutput], // output 0 for non-modifier operations
+        s <== opBits[4] // operator values 0-15 are query operators, 16-31 - modifiers/computations
+    );
+
+    /////////////////////////////////////////////////////////////////
+    // ProfileID calculation
+    /////////////////////////////////////////////////////////////////
     userID <== SelectProfile()(userGenesisID, profileNonce);
 }
 

@@ -31,9 +31,6 @@ idOwnershipLevels - Merkle tree depth level for personal claims
 onChainLevels - Merkle tree depth level for Auth claim on-chain
 */
 template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySize, idOwnershipLevels, onChainLevels) {
-    /*
-    >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    */
     // flag indicates if merklized flag set in issuer claim (if set MTP is used to verify that
     // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed
     // on root stored in the index or value slot
@@ -129,7 +126,6 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     signal input operator;
     signal input value[valueArraySize];
 
-
     // MTP specific
     signal input issuerClaimMtp[issuerLevels];
     signal input issuerClaimClaimsTreeRoot;
@@ -151,14 +147,13 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
 
-
     // Sig specific output
     signal output issuerAuthState;
 
-    /*
-    >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    */
+    signal output operatorOutput;
 
+    /////////////////////////////////////////////////////////////////
+    // Auth check
     /////////////////////////////////////////////////////////////////
 
     checkAuthV2(idOwnershipLevels, onChainLevels)(
@@ -186,7 +181,11 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         gistMtpNoAux
     );
 
-    (merklized, userID, issuerAuthState) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
+    /////////////////////////////////////////////////////////////////
+    // Claim checks
+    /////////////////////////////////////////////////////////////////
+
+    (merklized, userID, issuerAuthState, operatorOutput) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
         proofType <== proofType,
         requestID <== requestID,
         userGenesisID <== userGenesisID,
@@ -234,7 +233,9 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         issuerClaimSignatureS <== issuerClaimSignatureS
     );
 
-    // verify query hash matches
+    /////////////////////////////////////////////////////////////////
+    // Verify query hash matches
+    /////////////////////////////////////////////////////////////////
     signal valueHash <== SpongeHash(valueArraySize, 6)(value); // 6 - max size of poseidon hash available on-chain
 
     circuitQueryHash <== Poseidon(6)([
