@@ -2,6 +2,7 @@ pragma circom 2.1.1;
 include "../../../node_modules/circomlib/circuits/mux4.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
+include "../../../node_modules/circomlib/circuits/gates.circom";
 include "comparators.circom";
 
 /*
