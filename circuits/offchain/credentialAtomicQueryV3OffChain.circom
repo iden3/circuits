@@ -2,6 +2,7 @@ pragma circom 2.1.5; /* chage to 2.1.6 */
 
 include "./credentialAtomicQueryMTPOffChain.circom";
 include "./credentialAtomicQuerySigOffChain.circom";
+include "../lib/linked/linkId.circom";
 
 template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize) {
     // common outputs for Sig and MTP
