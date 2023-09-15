@@ -103,6 +103,8 @@ type Inputs struct {
 	IssuerAuthRootsTreeRoot       string      `json:"issuerAuthRootsTreeRoot"`
 
 	ProofType string `json:"proofType"` // 0 for sig, 1 for mtp
+	// Private random nonce, used to generate LinkID
+	LinkNonce string `json:"linkNonce"`
 }
 
 type Outputs struct {
@@ -118,6 +120,7 @@ type Outputs struct {
 	Challenge              string `json:"challenge"`
 	GistRoot               string `json:"gistRoot"`
 	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
+	LinkID                 string `json:"linkID"`
 	// Sig specific
 	IssuerAuthState string `json:"issuerAuthState"`
 }
@@ -268,6 +271,8 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IssuerAuthRevTreeRoot:         "0",
 		IssuerAuthRootsTreeRoot:       "0",
 
+		LinkNonce: "0",
+
 		ProofType: "1",
 	}
 
@@ -298,6 +303,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IsRevocationChecked:    "1",
 		ProofType:              "1",
 		IssuerAuthState:        "0",
+		LinkID:                 "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -418,6 +424,8 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IssuerAuthRevTreeRoot:         "0",
 		IssuerAuthRootsTreeRoot:       "0",
 
+		LinkNonce: "0",
+
 		ProofType: "1",
 	}
 
@@ -448,6 +456,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IsRevocationChecked:    "0",
 		ProofType:              "1",
 		IssuerAuthState:        "0",
+		LinkID:                 "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -593,6 +602,8 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		IssuerAuthRevTreeRoot:         "0",
 		IssuerAuthRootsTreeRoot:       "0",
 
+		LinkNonce: "0",
+
 		ProofType: "1",
 	}
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
@@ -623,6 +634,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		IsRevocationChecked:    "1",
 		ProofType:              "1",
 		IssuerAuthState:        "0",
+		LinkID:                 "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -754,6 +766,8 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		IssuerAuthRevTreeRoot:         "0",
 		IssuerAuthRootsTreeRoot:       "0",
 
+		LinkNonce: "0",
+
 		ProofType: "1",
 	}
 
@@ -785,6 +799,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		IsRevocationChecked:    "1",
 		ProofType:              "1",
 		IssuerAuthState:        "0",
+		LinkID:                 "0",
 	}
 
 	json, err := json2.Marshal(TestData{
