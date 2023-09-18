@@ -66,7 +66,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
-    
+
     // Sig specific outputs
     signal output issuerAuthState;
 
