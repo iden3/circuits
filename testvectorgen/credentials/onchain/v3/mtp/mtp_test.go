@@ -160,7 +160,7 @@ func Test_ClaimNonMerklized(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
-	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "claimNonMerklized")
+	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "claimNonMerklized")
 }
 
 func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
@@ -469,6 +469,14 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	utils.SaveTestVector(t, fileName, string(json))
 }
 
+func Test_LinkID(t *testing.T) {
+	desc := "LinkId not 0"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+
+	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "94324", "claimWithLinkNonce")
+}
+
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
 	var err error
 
@@ -648,7 +656,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 }
 
-func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
+func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, linkNonce string, fileName string) {
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
@@ -766,7 +774,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		IssuerAuthRevTreeRoot:         "0",
 		IssuerAuthRootsTreeRoot:       "0",
 
-		LinkNonce: "0",
+		LinkNonce: linkNonce,
 
 		ProofType: "1",
 	}
@@ -785,6 +793,9 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	})
 	require.NoError(t, err)
 
+	linkID, err := utils.CalculateLinkID(linkNonce, claim)
+	require.NoError(t, err)
+
 	out := Outputs{
 		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
@@ -799,7 +810,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		IsRevocationChecked:    "1",
 		ProofType:              "1",
 		IssuerAuthState:        "0",
-		LinkID:                 "0",
+		LinkID:                 linkID,
 	}
 
 	json, err := json2.Marshal(TestData{

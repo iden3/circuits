@@ -37,13 +37,15 @@ describe("Test credentialAtomicQueryV3OffChain.circom", function () {
         require(`${sigBasePath}/regular_claim.json`),
         require(`${sigBasePath}/revoked_claim_without_revocation_check.json`),
         require(`${sigBasePath}/userID_subject.json`),
+        require(`${sigBasePath}/claimWithLinkNonce.json`),
 
         // mtp
         require(`${mtpBasePath}/claimIssuedOnProfileID.json`),
         require(`${mtpBasePath}/claimIssuedOnProfileID2.json`),
         require(`${mtpBasePath}/claimIssuedOnUserID.json`),
         require(`${mtpBasePath}/claimNonMerklized.json`),
-        require(`${mtpBasePath}/revoked_claim_without_revocation_check.json`)
+        require(`${mtpBasePath}/revoked_claim_without_revocation_check.json`),
+        require(`${mtpBasePath}/claimWithLinkNonce.json`),
     ];
 
     tests.forEach(({desc, inputs, expOut}) => {

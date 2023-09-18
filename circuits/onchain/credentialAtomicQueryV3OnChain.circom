@@ -45,11 +45,8 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
-    signal output linkID;
-
     // circuits query Hash
     signal output circuitQueryHash;
-
     
     signal input proofType;  // sig 0, mtp 1
 
@@ -152,12 +149,13 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
+    
+    // Sig specific output
+    signal output issuerAuthState;
 
     // Private random nonce, used to generate LinkID
     signal input linkNonce;
-
-    // Sig specific output
-    signal output issuerAuthState;
+    signal output linkID;
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -190,7 +188,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         gistMtpNoAux
     );
 
-    (merklized, userID, linkID, issuerAuthState) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
+    (merklized, userID, issuerAuthState, linkID) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
         proofType <== proofType,
         requestID <== requestID,
         userGenesisID <== userGenesisID,

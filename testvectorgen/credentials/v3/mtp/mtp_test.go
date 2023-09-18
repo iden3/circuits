@@ -139,7 +139,7 @@ func Test_ClaimNonMerklized(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
-	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "claimNonMerklized")
+	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "claimNonMerklized")
 }
 
 func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
@@ -350,6 +350,14 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	utils.SaveTestVector(t, fileName, string(json))
 }
 
+func Test_LinkID(t *testing.T) {
+	desc := "LinkId not 0"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+
+	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "6321", "claimWithLinkNonce")
+}
+
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
 	var err error
 
@@ -480,7 +488,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 }
 
-func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
+func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, linkNonce string, fileName string) {
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
@@ -512,6 +520,9 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
 	requestID := big.NewInt(23)
+
+	linkID, err := utils.CalculateLinkID(linkNonce, claim)
+	require.NoError(t, err)
 
 	inputs := Inputs{
 		RequestID:                       requestID.String(),
@@ -560,7 +571,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		IssuerAuthRevTreeRoot:         "0",
 		IssuerAuthRootsTreeRoot:       "0",
 
-		LinkNonce: "0",
+		LinkNonce: linkNonce,
 
 		ProofType: "1",
 	}
@@ -581,7 +592,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		ProofType:              "1",
 		IssuerAuthState:        "0",
-		LinkID:                 "0",
+		LinkID:                 linkID,
 	}
 
 	json, err := json2.Marshal(TestData{

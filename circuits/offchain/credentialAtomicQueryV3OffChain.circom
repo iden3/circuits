@@ -8,7 +8,6 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     // common outputs for Sig and MTP
     signal output merklized;
     signal output userID;
-    signal output linkID;
 
     // common inputs for Sig and MTP
     signal input proofType;  // sig 0, mtp 1
@@ -67,12 +66,14 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
+    
+    // Sig specific outputs
+    signal output issuerAuthState;
 
     // Private random nonce, used to generate LinkID
     signal input linkNonce;
-
-    // Sig specific outputs
-    signal output issuerAuthState;
+    signal output linkID;
+    
     
      /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
