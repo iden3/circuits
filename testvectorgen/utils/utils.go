@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/big"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -264,10 +263,12 @@ func CalculateLinkID(linkNonce string, claim *core.Claim) (string, error) {
 		return "0", nil
 	}
 
-	nonceInt, err := strconv.Atoi(linkNonce)
-	if err != nil {
-		return "", err
+	nonceInt, ok := big.NewInt(0).SetString(linkNonce, 10)
+
+	if !ok {
+		return "", fmt.Errorf("invalid linkNonce value: '%s'", linkNonce)
 	}
+
 	hi, hv, err := claim.HiHv()
 	if err != nil {
 		return "", err
@@ -278,7 +279,7 @@ func CalculateLinkID(linkNonce string, claim *core.Claim) (string, error) {
 		return "", err
 	}
 
-	linkID, err := poseidon.Hash([]*big.Int{claimHash, big.NewInt(int64(nonceInt))})
+	linkID, err := poseidon.Hash([]*big.Int{claimHash, nonceInt})
 	if err != nil {
 		return "", err
 	}
