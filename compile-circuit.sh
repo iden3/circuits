@@ -19,7 +19,7 @@ compile_and_ts() {
     cp "$CIRCUIT_PATH" circuit.circom
 
     set -x
-    time circom --r1cs --wasm --c --sym "$CIRCUIT_PATH"
+    time circom --inspect --r1cs --wasm --c --sym "$CIRCUIT_PATH"
     mv "${CIRCUIT}.r1cs" circuit.r1cs
     mv "${CIRCUIT}_js/${CIRCUIT}.wasm" circuit.wasm
     mv "${CIRCUIT}.sym" circuit.sym
