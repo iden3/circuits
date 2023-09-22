@@ -75,6 +75,9 @@ type Inputs struct {
 	IssuerClaimRootsTreeRoot  string   `json:"issuerClaimRootsTreeRoot"`
 	IssuerClaimIdenState      string   `json:"issuerClaimIdenState"`
 
+	// Private random nonce, used to generate LinkID
+	LinkNonce string `json:"linkNonce"`
+
 	ProofType string `json:"proofType"`
 }
 
@@ -94,6 +97,7 @@ type Outputs struct {
 	ProofType              string   `json:"proofType"`
 	ClaimPathKey           string   `json:"claimPathKey"`
 	IssuerClaimIdenState   string   `json:"issuerClaimIdenState"`
+	LinkID                 string   `json:"linkID"`
 }
 
 type TestData struct {
@@ -144,7 +148,7 @@ func Test_RegularClaim(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
-	generateTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "regular_claim")
+	generateTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "0", "regular_claim")
 }
 
 func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
@@ -222,6 +226,8 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IssuerClaimRevTreeRoot:    "0",
 		IssuerClaimRootsTreeRoot:  "0",
 
+		LinkNonce: "0",
+
 		ProofType: "0",
 	}
 
@@ -244,6 +250,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		ProofType:            "0",
 		ClaimPathKey:         "0",
 		IssuerClaimIdenState: "0",
+		LinkID:               "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -332,6 +339,8 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IssuerClaimRevTreeRoot:    "0",
 		IssuerClaimRootsTreeRoot:  "0",
 
+		LinkNonce: "0",
+
 		ProofType: "0",
 	}
 
@@ -354,6 +363,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		ProofType:            "0",
 		ClaimPathKey:         "0",
 		IssuerClaimIdenState: "0",
+		LinkID:               "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -375,6 +385,14 @@ func Test_JSON_LD_Proof_non_inclusion(t *testing.T) {
 	isSubjectIDProfile := false
 
 	generateJSONLD_NON_INCLUSIO_TestData(t, isUserIDProfile, isSubjectIDProfile, desc, "jsonld_non_inclusion")
+}
+
+func Test_LinkID(t *testing.T) {
+	desc := "LinkId not 0"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+
+	generateTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "94324", "claimWithLinkNonce")
 }
 
 func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
@@ -481,6 +499,8 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		IssuerClaimRevTreeRoot:    "0",
 		IssuerClaimRootsTreeRoot:  "0",
 
+		LinkNonce: "0",
+
 		ProofType: "0",
 	}
 
@@ -502,6 +522,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		ProofType:              "0",
 		ClaimPathKey:           pathKey.String(),
 		IssuerClaimIdenState:   "0",
+		LinkID:                 "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -514,7 +535,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 	utils.SaveTestVector(t, fileName, string(json))
 }
 
-func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
+func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, linkNonce string, fileName string) {
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
@@ -551,6 +572,9 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	emptyPathMtp := utils.PrepareSiblingsStr([]*merkletree.Hash{&merkletree.HashZero}, 32)
 
 	requestID := big.NewInt(23)
+
+	linkID, err := utils.CalculateLinkID(linkNonce, claim)
+	require.NoError(t, err)
 
 	inputs := Inputs{
 		RequestID:                       requestID.String(),
@@ -605,6 +629,8 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		IssuerClaimRevTreeRoot:    "0",
 		IssuerClaimRootsTreeRoot:  "0",
 
+		LinkNonce: linkNonce,
+
 		ProofType: "0",
 	}
 
@@ -627,6 +653,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		ProofType:            "0",
 		ClaimPathKey:         "0",
 		IssuerClaimIdenState: "0",
+		LinkID:               linkID,
 	}
 
 	json, err := json.Marshal(TestData{
@@ -741,6 +768,8 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		IssuerClaimRevTreeRoot:    "0",
 		IssuerClaimRootsTreeRoot:  "0",
 
+		LinkNonce: "0",
+
 		ProofType: "0",
 	}
 
@@ -763,6 +792,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		ProofType:            "0",
 		ClaimPathKey:         pathKey.String(),
 		IssuerClaimIdenState: "0",
+		LinkID:               "0",
 	}
 
 	json, err := json.Marshal(TestData{

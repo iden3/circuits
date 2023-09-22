@@ -44,7 +44,6 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
 
     // circuits query Hash
     signal output circuitQueryHash;
-
     
     signal input proofType;  // sig 0, mtp 1
 
@@ -146,9 +145,12 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
-
     // Sig specific output
     signal output issuerAuthState;
+
+    // Private random nonce, used to generate LinkID
+    signal input linkNonce;
+    signal output linkID;
 
     signal output operatorOutput;
 
@@ -185,7 +187,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     // Claim checks
     /////////////////////////////////////////////////////////////////
 
-    (merklized, userID, issuerAuthState, operatorOutput) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
+    (merklized, userID, issuerAuthState, linkID, operatorOutput) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
         proofType <== proofType,
         requestID <== requestID,
         userGenesisID <== userGenesisID,
@@ -230,7 +232,8 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         issuerAuthClaimNonRevMtpAuxHv <== issuerAuthClaimNonRevMtpAuxHv,
         issuerClaimSignatureR8x <== issuerClaimSignatureR8x,
         issuerClaimSignatureR8y <== issuerClaimSignatureR8y,
-        issuerClaimSignatureS <== issuerClaimSignatureS
+        issuerClaimSignatureS <== issuerClaimSignatureS,
+        linkNonce <== linkNonce
     );
 
     /////////////////////////////////////////////////////////////////

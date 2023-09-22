@@ -9,6 +9,7 @@ include "../auth/authV2.circom";
 include "../lib/query/query.circom";
 include "../lib/query/nullify.circom";
 include "../lib/utils/idUtils.circom";
+include "../lib/linked/linkId.circom";
 
 template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize) {
     // common outputs for Sig and MTP
@@ -76,6 +77,10 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     // Sig specific outputs
     signal output issuerAuthState;
+
+    // Private random nonce, used to generate LinkID
+    signal input linkNonce;
+    signal output linkID;
 
     // Modifier/Computation Operator output ($sd, $nullify)
     signal output operatorOutput;
@@ -230,6 +235,11 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     // ProfileID calculation
     /////////////////////////////////////////////////////////////////
     userID <== SelectProfile()(userGenesisID, profileNonce);
+
+    /////////////////////////////////////////////////////////////////
+    // Link ID calculation
+    /////////////////////////////////////////////////////////////////
+    linkID <== LinkID()(issuerClaim, linkNonce);
 }
 
 template sigFlow(issuerLevels) {
