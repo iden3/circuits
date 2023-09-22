@@ -1,4 +1,5 @@
 import {describe} from "mocha";
+import {expect} from "chai";
 
 const path = require("path");
 const wasm_tester = require("circom_tester").wasm;
@@ -20,23 +21,23 @@ const GTE = "8"; // greater than or equal
 const BETWEEN = "9"; // between
 
 
-describe("Test query",  function() {
+describe("Test query", function () {
     let circuit;
 
-    before(async function() {
+    before(async function () {
         this.timeout(60000)
         circuit = await wasm_tester(path.join(__dirname, "../circuits/query/", "queryTest.circom"));
     });
 
-    describe("#Noop", function() {
+    describe("#Noop", function () {
         it("#Noop (true)", async () => {
             const inputs = {
                 in: "10",
-                operator:  NOOP,
+                operator: NOOP,
                 value: ["11", "0", "0"],
             }
 
-            const expOut = {out: 1, value: ["11", "0", "0"]}
+            const expOut = { out: 1, value: ["11", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -46,11 +47,11 @@ describe("Test query",  function() {
         it("#Noop (true)", async () => {
             const inputs = {
                 in: "0",
-                operator:  NOOP,
+                operator: NOOP,
                 value: ["0", "0", "0"],
             }
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -58,15 +59,15 @@ describe("Test query",  function() {
         });
     });
 
-    describe("#IsEqual", function() {
+    describe("#IsEqual", function () {
         it("#IsEqual (false)", async () => {
             const inputs = {
                 in: "10",
-                operator:  EQ,
+                operator: EQ,
                 value: ["11", "0", "0"],
             }
 
-            const expOut = {out: 0, value: ["11", "0", "0"]}
+            const expOut = { out: 0, value: ["11", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -76,11 +77,11 @@ describe("Test query",  function() {
         it("#IsEqual (true)", async () => {
             const inputs = {
                 in: "10",
-                operator:  EQ,
+                operator: EQ,
                 value: ["10", "0", "0"],
             }
 
-            const expOut = {out: 1, value: ["10", "0", "0"]}
+            const expOut = { out: 1, value: ["10", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -90,11 +91,11 @@ describe("Test query",  function() {
         it("#IsEqual. Zero in. (false)", async () => {
             const inputs = {
                 in: "0",
-                operator:  EQ,
+                operator: EQ,
                 value: ["11", "0", "0"],
             }
 
-            const expOut = {out: 0, value: ["11", "0", "0"]}
+            const expOut = { out: 0, value: ["11", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -104,11 +105,11 @@ describe("Test query",  function() {
         it("#IsEqual. Zero value. (false)", async () => {
             const inputs = {
                 in: "10",
-                operator:  EQ,
+                operator: EQ,
                 value: ["0", "0", "0"],
             }
 
-            const expOut = {out: 0, value: ["0", "0", "0"]}
+            const expOut = { out: 0, value: ["0", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -118,11 +119,11 @@ describe("Test query",  function() {
         it("#IsEqual. Zero both. (true)", async () => {
             const inputs = {
                 in: "0",
-                operator:  EQ,
+                operator: EQ,
                 value: ["0", "0", "0"],
             }
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -131,7 +132,7 @@ describe("Test query",  function() {
 
     });
 
-    describe("#LessThan", function() {
+    describe("#LessThan", function () {
         it("#LessThan - 10 < 11 (true)", async () => {
             const w = await circuit.calculateWitness({
                 in: "10",
@@ -139,7 +140,7 @@ describe("Test query",  function() {
                 value: ["11", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["11", "0", "0"]}
+            const expOut = { out: 1, value: ["11", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -153,7 +154,7 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["10", "0", "0"]}
+            const expOut = { out: 0, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w1, expOut);
             await circuit.checkConstraints(w1);
@@ -162,11 +163,11 @@ describe("Test query",  function() {
         it("#LessThan - 10 < 9 (false)", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "10",
-                operator:  LT,
+                operator: LT,
                 value: ["9", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["9", "0", "0"]}
+            const expOut = { out: 0, value: ["9", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -179,7 +180,7 @@ describe("Test query",  function() {
                 value: ["11", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["11", "0", "0"]}
+            const expOut = { out: 1, value: ["11", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -192,7 +193,7 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["0", "0", "0"]}
+            const expOut = { out: 0, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -205,7 +206,7 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["0", "0", "0"]}
+            const expOut = { out: 0, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -218,7 +219,7 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, false);
 
-            const expOut = {out: 0, value: ["10", "0", "0"]}
+            const expOut = { out: 0, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -231,7 +232,10 @@ describe("Test query",  function() {
                 value: ["-1", "0", "0"],
             }, false);
 
-            const expOut = {out: 1, value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]}
+            const expOut = {
+                out: 1,
+                value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]
+            }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -244,7 +248,7 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, false);
 
-            const expOut = {out: 0, value: ["10", "0", "0"]}
+            const expOut = { out: 0, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -259,7 +263,7 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, false);
 
-            const expOut = {out: 0, value: ["10", "0", "0"]}
+            const expOut = { out: 0, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -272,14 +276,14 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, false);
 
-            const expOut = {out: 0, value: ["10", "0", "0"]}
+            const expOut = { out: 0, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
     });
 
-    describe("#GreaterThan", function() {
+    describe("#GreaterThan", function () {
         it("#GreaterThan - 11 > 10 (true)", async () => {
             const w = await circuit.calculateWitness({
                 in: "11",
@@ -287,7 +291,7 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["10", "0", "0"]}
+            const expOut = { out: 1, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -301,7 +305,7 @@ describe("Test query",  function() {
                 value: ["11", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["11", "0", "0"]}
+            const expOut = { out: 0, value: ["11", "0", "0"] }
 
             await circuit.assertOut(w1, expOut);
             await circuit.checkConstraints(w1);
@@ -310,11 +314,11 @@ describe("Test query",  function() {
         it("#GreaterThan - 11 > 12 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "11",
-                operator:  GT,
+                operator: GT,
                 value: ["12", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["12", "0", "0"]}
+            const expOut = { out: 0, value: ["12", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -323,11 +327,11 @@ describe("Test query",  function() {
         it("#GreaterThan - 0 > 12 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "0",
-                operator:  GT,
+                operator: GT,
                 value: ["12", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["12", "0", "0"]}
+            const expOut = { out: 0, value: ["12", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -336,11 +340,11 @@ describe("Test query",  function() {
         it("#GreaterThan - 12 > 0 (true) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "12",
-                operator:  GT,
+                operator: GT,
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -349,11 +353,11 @@ describe("Test query",  function() {
         it("#GreaterThan - 0 > 0 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "0",
-                operator:  GT,
+                operator: GT,
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["0", "0", "0"]}
+            const expOut = { out: 0, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -362,11 +366,14 @@ describe("Test query",  function() {
         it("#GreaterThan - p-1 > p-2 (true) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "-1",
-                operator:  GT,
+                operator: GT,
                 value: ["-2", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["21888242871839275222246405745257275088548364400416034343698204186575808495615", "0", "0"]}
+            const expOut = {
+                out: 1,
+                value: ["21888242871839275222246405745257275088548364400416034343698204186575808495615", "0", "0"]
+            }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -375,11 +382,14 @@ describe("Test query",  function() {
         it("#GreaterThan - p-2 > p-1 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "-2",
-                operator:  GT,
+                operator: GT,
                 value: ["-1", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]}
+            const expOut = {
+                out: 0,
+                value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]
+            }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -388,11 +398,11 @@ describe("Test query",  function() {
         it("#GreaterThan - p-1 > 0 (true) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "-1",
-                operator:  GT,
+                operator: GT,
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -400,15 +410,15 @@ describe("Test query",  function() {
 
     });
 
-    describe("#IN", function() {
+    describe("#IN", function () {
         it("#IN 10 in ['12', '11', '10'] (true)", async () => {
             const inputs = {
                 in: "10",
-                operator:  IN,
+                operator: IN,
                 value: ["12", "11", "10"],
             }
 
-            const expOut = {out: 1, value: ["12", "11", "10"]}
+            const expOut = { out: 1, value: ["12", "11", "10"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -418,11 +428,11 @@ describe("Test query",  function() {
         it("#IN 11 in [`10`, `10`, `0`] (false)", async () => {
             const inputs = {
                 in: "11",
-                operator:  IN,
+                operator: IN,
                 value: ["10", "10", "0"],
             }
 
-            const expOut = {out: 0, value: ["10", "10", "0"]}
+            const expOut = { out: 0, value: ["10", "10", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -432,11 +442,11 @@ describe("Test query",  function() {
         it("#IN 0 in [`0`, `10`, `0`] (true)", async () => {
             const inputs = {
                 in: "0",
-                operator:  IN,
+                operator: IN,
                 value: ["0", "10", "0"],
             }
 
-            const expOut = {out: 1, value: ["0", "10", "0"]}
+            const expOut = { out: 1, value: ["0", "10", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -446,11 +456,11 @@ describe("Test query",  function() {
         it("#IN 0 IN [`10`, `11`, `12`] (false)", async () => {
             const inputs = {
                 in: "0",
-                operator:  IN,
+                operator: IN,
                 value: ["10", "11", "12"],
             }
 
-            const expOut = {out: 0, value: ["10", "11", "12"]}
+            const expOut = { out: 0, value: ["10", "11", "12"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -460,11 +470,11 @@ describe("Test query",  function() {
         it("#IN 11 in [`0`, `0`, `0`] (false)", async () => {
             const inputs = {
                 in: "11",
-                operator:  IN,
+                operator: IN,
                 value: ["0", "0", "0"],
             }
 
-            const expOut = {out: 0, value: ["0", "0", "0"]}
+            const expOut = { out: 0, value: ["0", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -474,11 +484,11 @@ describe("Test query",  function() {
         it("#IN 0 in [`0`, `0`, `0`] (true)", async () => {
             const inputs = {
                 in: "0",
-                operator:  IN,
+                operator: IN,
                 value: ["0", "0", "0"],
             }
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -487,15 +497,15 @@ describe("Test query",  function() {
 
     });
 
-    describe("#NOTIN", function() {
+    describe("#NOTIN", function () {
         it("#NOTIN 10 NOT in ['12', '11', '11'] (true)", async () => {
             const inputs = {
                 in: "10",
-                operator:  NIN,
+                operator: NIN,
                 value: ["12", "11", "13"],
             }
 
-            const expOut = {out: 1, value: ["12", "11", "13"]}
+            const expOut = { out: 1, value: ["12", "11", "13"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -505,11 +515,11 @@ describe("Test query",  function() {
         it("#NOTIN 10 NOT in [`10`, `10`, `0`] (false)", async () => {
             const inputs = {
                 in: "10",
-                operator:  NIN,
+                operator: NIN,
                 value: ["10", "10", "0"],
             }
 
-            const expOut = {out: 0, value: ["10", "10", "0"]}
+            const expOut = { out: 0, value: ["10", "10", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -519,11 +529,11 @@ describe("Test query",  function() {
         it("#NOTIN 0 NOT in [`10`, `10`, `10`] (true)", async () => {
             const inputs = {
                 in: "0",
-                operator:  NIN,
+                operator: NIN,
                 value: ["10", "10", "10"],
             }
 
-            const expOut = {out: 1, value: ["10", "10", "10"]}
+            const expOut = { out: 1, value: ["10", "10", "10"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -533,11 +543,11 @@ describe("Test query",  function() {
         it("#NOTIN 10 NOT in [`0`, `0`, `0`] (true)", async () => {
             const inputs = {
                 in: "10",
-                operator:  NIN,
+                operator: NIN,
                 value: ["0", "0", "0"],
             }
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -547,11 +557,11 @@ describe("Test query",  function() {
         it("#NOTIN 0 NOT in [`0`, `0`, `0`] (false)", async () => {
             const inputs = {
                 in: "0",
-                operator:  NIN,
+                operator: NIN,
                 value: ["0", "0", "0"],
             }
 
-            const expOut = {out: 0, value: ["0", "0", "0"]}
+            const expOut = { out: 0, value: ["0", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -560,7 +570,7 @@ describe("Test query",  function() {
 
     });
 
-    describe("#NotEqual", function() {
+    describe("#NotEqual", function () {
         it("10 != 11 (true)", async () => {
             const inputs = {
                 in: "10",
@@ -568,7 +578,7 @@ describe("Test query",  function() {
                 value: ["11", "0", "0"],
             }
 
-            const expOut = {out: 1, value: ["11", "0", "0"]}
+            const expOut = { out: 1, value: ["11", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -582,7 +592,7 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }
 
-            const expOut = {out: 0, value: ["10", "0", "0"]}
+            const expOut = { out: 0, value: ["10", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -596,7 +606,7 @@ describe("Test query",  function() {
                 value: ["11", "0", "0"],
             }
 
-            const expOut = {out: 1, value: ["11", "0", "0"]}
+            const expOut = { out: 1, value: ["11", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -610,7 +620,7 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -624,7 +634,7 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }
 
-            const expOut = {out: 0, value: ["0", "0", "0"]}
+            const expOut = { out: 0, value: ["0", "0", "0"] }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -633,7 +643,7 @@ describe("Test query",  function() {
 
     });
 
-    describe("#LessThanOrEqual", function() {
+    describe("#LessThanOrEqual", function () {
         it("#LessThanOrEqual - 10 <= 11 (true)", async () => {
             const w = await circuit.calculateWitness({
                 in: "10",
@@ -641,7 +651,7 @@ describe("Test query",  function() {
                 value: ["11", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["11", "0", "0"]}
+            const expOut = { out: 1, value: ["11", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -655,7 +665,7 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["10", "0", "0"]}
+            const expOut = { out: 1, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w1, expOut);
             await circuit.checkConstraints(w1);
@@ -664,11 +674,11 @@ describe("Test query",  function() {
         it("#LessThanOrEqual - 10 <= 9 (false)", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "10",
-                operator:  LTE,
+                operator: LTE,
                 value: ["9", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["9", "0", "0"]}
+            const expOut = { out: 0, value: ["9", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -681,7 +691,7 @@ describe("Test query",  function() {
                 value: ["11", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["11", "0", "0"]}
+            const expOut = { out: 1, value: ["11", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -694,7 +704,7 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["0", "0", "0"]}
+            const expOut = { out: 0, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -707,7 +717,7 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -720,7 +730,7 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, false);
 
-            const expOut = {out: 0, value: ["10", "0", "0"]}
+            const expOut = { out: 0, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -733,7 +743,10 @@ describe("Test query",  function() {
                 value: ["-1", "0", "0"],
             }, false);
 
-            const expOut = {out: 1, value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]}
+            const expOut = {
+                out: 1,
+                value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]
+            }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -746,7 +759,7 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, false);
 
-            const expOut = {out: 0, value: ["10", "0", "0"]}
+            const expOut = { out: 0, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -761,7 +774,7 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, false);
 
-            const expOut = {out: 0, value: ["10", "0", "0"]}
+            const expOut = { out: 0, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -774,14 +787,14 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, false);
 
-            const expOut = {out: 0, value: ["10", "0", "0"]}
+            const expOut = { out: 0, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
     });
 
-    describe("#GreaterThanOrEqual", function() {
+    describe("#GreaterThanOrEqual", function () {
         it("#GreaterThanOrEqual - 11 >= 10 (true)", async () => {
             const w = await circuit.calculateWitness({
                 in: "11",
@@ -789,7 +802,7 @@ describe("Test query",  function() {
                 value: ["10", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["10", "0", "0"]}
+            const expOut = { out: 1, value: ["10", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -803,7 +816,7 @@ describe("Test query",  function() {
                 value: ["11", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["11", "0", "0"]}
+            const expOut = { out: 1, value: ["11", "0", "0"] }
 
             await circuit.assertOut(w1, expOut);
             await circuit.checkConstraints(w1);
@@ -812,11 +825,11 @@ describe("Test query",  function() {
         it("#GreaterThanOrEqual - 11 >= 12 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "11",
-                operator:  GTE,
+                operator: GTE,
                 value: ["12", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["12", "0", "0"]}
+            const expOut = { out: 0, value: ["12", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -825,11 +838,11 @@ describe("Test query",  function() {
         it("#GreaterThanOrEqual - 0 >= 12 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "0",
-                operator:  GTE,
+                operator: GTE,
                 value: ["12", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["12", "0", "0"]}
+            const expOut = { out: 0, value: ["12", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -838,11 +851,11 @@ describe("Test query",  function() {
         it("#GreaterThanOrEqual - 12 >= 0 (true) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "12",
-                operator:  GTE,
+                operator: GTE,
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -851,11 +864,11 @@ describe("Test query",  function() {
         it("#GreaterThanOrEqual - 0 >= 0 (true) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "0",
-                operator:  GTE,
+                operator: GTE,
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -864,11 +877,14 @@ describe("Test query",  function() {
         it("#GreaterThanOrEqual - p-1 >= p-2 (true) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "-1",
-                operator:  GTE,
+                operator: GTE,
                 value: ["-2", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["21888242871839275222246405745257275088548364400416034343698204186575808495615", "0", "0"]}
+            const expOut = {
+                out: 1,
+                value: ["21888242871839275222246405745257275088548364400416034343698204186575808495615", "0", "0"]
+            }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -877,11 +893,14 @@ describe("Test query",  function() {
         it("#GreaterThanOrEqual - p-2 >= p-1 (false) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "-2",
-                operator:  GTE,
+                operator: GTE,
                 value: ["-1", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]}
+            const expOut = {
+                out: 0,
+                value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]
+            }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -890,11 +909,11 @@ describe("Test query",  function() {
         it("#GreaterThanOrEqual - p-1 >= 0 (true) ", async () => {
             const w2 = await circuit.calculateWitness({
                 in: "-1",
-                operator:  GTE,
+                operator: GTE,
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w2, expOut);
             await circuit.checkConstraints(w2);
@@ -902,7 +921,7 @@ describe("Test query",  function() {
 
     });
 
-    describe("#Between", function() {
+    describe("#Between", function () {
         it("#Between - 0 [0, 10] (true)", async () => {
             const w = await circuit.calculateWitness({
                 in: "0",
@@ -910,7 +929,7 @@ describe("Test query",  function() {
                 value: ["0", "10", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["0", "10", "0"]}
+            const expOut = { out: 1, value: ["0", "10", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -923,7 +942,7 @@ describe("Test query",  function() {
                 value: ["1", "10", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["1", "10", "0"]}
+            const expOut = { out: 0, value: ["1", "10", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -936,7 +955,7 @@ describe("Test query",  function() {
                 value: ["1", "10", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["1", "10", "0"]}
+            const expOut = { out: 1, value: ["1", "10", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -949,7 +968,7 @@ describe("Test query",  function() {
                 value: ["1", "10", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["1", "10", "0"]}
+            const expOut = { out: 0, value: ["1", "10", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -962,7 +981,7 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 1, value: ["0", "0", "0"]}
+            const expOut = { out: 1, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -975,7 +994,7 @@ describe("Test query",  function() {
                 value: ["0", "0", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["0", "0", "0"]}
+            const expOut = { out: 0, value: ["0", "0", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -988,7 +1007,7 @@ describe("Test query",  function() {
                 value: ["18", "60", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["18", "60", "0"]}
+            const expOut = { out: 0, value: ["18", "60", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -1001,12 +1020,43 @@ describe("Test query",  function() {
                 value: ["18", "60", "0"],
             }, true);
 
-            const expOut = {out: 0, value: ["18", "60", "0"]}
+            const expOut = { out: 0, value: ["18", "60", "0"] }
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
         });
 
+    });
+
+    describe("#Invalid Query Ops", function () {
+        for (let op = 10; op < 32; op++) {
+            it("#Invalid Query Op " + op + " (false)", async () => {
+                const w = await circuit.calculateWitness({
+                    in: "0",
+                    operator: op.toString(),
+                    value: ["0", "0", "0"],
+                }, true)
+
+                const expOut = { out: 0, value: ["0", "0", "0"] }
+
+                await circuit.assertOut(w, expOut);
+                await circuit.checkConstraints(w);
+
+            });
+        }
+
+        it("#Invalid Query Op 32 (should throw error)", async () => {
+            let error;
+            const w = await circuit.calculateWitness({
+                in: "0",
+                operator: "32",
+                value: ["0", "0", "0"],
+            }, true).catch((err) => {
+                error = err;
+            });
+            expect(error).to.be.an.instanceof(Error);
+            expect(error.toString()).to.include("Error in template Query");
+        });
     });
 
 });

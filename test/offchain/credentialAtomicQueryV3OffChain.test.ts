@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import {expect} from "chai";
 import {describe} from "mocha";
 
 const path = require("path");
@@ -48,7 +48,7 @@ describe("Test credentialAtomicQueryV3OffChain.circom", function () {
         require(`${mtpBasePath}/claimWithLinkNonce.json`),
     ];
 
-    tests.forEach(({desc, inputs, expOut}) => {
+    tests.forEach(({ desc, inputs, expOut }) => {
         it(`${desc}`, async function () {
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -62,12 +62,12 @@ describe("Test credentialAtomicQueryV3OffChain.circom", function () {
     ]
 
     failTestCase.forEach(({ desc, inputs, expOut }) => {
-    it(`${desc}`, async function () {
-        let error;
-        await circuit.calculateWitness(inputs, true).catch((err) => {
-        error = err;
-        });
-        expect(error.message).to.include("Error in template checkClaimNotRevoked");
-    })
+        it(`${desc}`, async function () {
+            let error;
+            await circuit.calculateWitness(inputs, true).catch((err) => {
+                error = err;
+            });
+            expect(error.message).to.include("Error in template checkClaimNotRevoked");
+        })
     });
 });

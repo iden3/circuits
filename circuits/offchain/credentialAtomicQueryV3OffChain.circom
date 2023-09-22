@@ -4,12 +4,13 @@ include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/mux4.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
-include "../lib/query/comparators.circom";
 include "../auth/authV2.circom";
-include "../lib/query/query.circom";
-include "../lib/query/nullify.circom";
-include "../lib/utils/idUtils.circom";
 include "../lib/linked/linkId.circom";
+include "../lib/query/comparators.circom";
+include "../lib/query/modifiers.circom";
+include "../lib/query/nullify.circom";
+include "../lib/query/query.circom";
+include "../lib/utils/idUtils.circom";
 
 template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize) {
     // common outputs for Sig and MTP
@@ -200,13 +201,17 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         operator <== operator
     );
 
-    querySatisfied === 1;
+    signal isQueryOp <== LessThan(5)([operator, 16]);
+    ForceEqualIfEnabled()(
+        isQueryOp,
+        [querySatisfied, 1]
+    );
 
     /////////////////////////////////////////////////////////////////
     // Modifier/Computation Operators Processing
     /////////////////////////////////////////////////////////////////
 
-    // selective disclosure calculation
+    // selective disclosure
     // no need to calc anything, fieldValue is just passed as an output
 
     // nullifier calculation
@@ -218,16 +223,16 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     );
 
     /////////////////////////////////////////////////////////////////
-    // Operator Output Preparation
+    // Modifier Operator Validation & Output Preparation
     /////////////////////////////////////////////////////////////////
 
     // output value only if modifier operation was selected
-    operatorOutput <== operatorOutputSelector()(
+    operatorOutput <== modifierValidatorOutputSelector()(
         operator <== operator,
         modifierOutputs <== [
-                    fieldValue, // 16 - selective disclosure (16-16 = index 0)
-                    nullifier, // 17 - nullify (17-16 = index 1)
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 18-31 - not used
+            fieldValue, // 16 - selective disclosure (16-16 = index 0)
+            nullifier, // 17 - nullify (17-16 = index 1)
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 18-31 - not used
         ]
     );
 
@@ -322,26 +327,5 @@ template mtpFlow(issuerLevels) {
         claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot,
         claimIssuanceRootsTreeRoot <== issuerClaimRootsTreeRoot,
         claimIssuanceIdenState <== issuerClaimIdenState
-    );
-}
-
-template operatorOutputSelector() {
-    signal input operator;
-    signal input modifierOutputs[16];
-    signal output out;
-
-    // parse operator to bits
-    signal opBits[5] <== Num2Bits(5)(operator); // values 0-15 are query operators, 16-31 - modifiers/computations
-
-    // output value calculation
-    signal modifierOutput <== Mux4()(
-        s <== [opBits[0], opBits[1], opBits[2], opBits[3]],
-        c <== modifierOutputs
-    );
-
-    // output value only if modifier operation was selected
-    out <== Mux1()(
-        c <== [0, modifierOutput], // output 0 for non-modifier operations
-        s <== opBits[4] // operator values 0-15 are query operators, 16-31 - modifiers/computations
     );
 }

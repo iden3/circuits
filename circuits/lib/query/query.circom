@@ -8,19 +8,23 @@ include "comparators.circom";
 
 /*
   Operators:
-    0 - noop, skip execution. Ignores all `in` and `value` passed to query, out 1
-    1 - equals
-    2 - less than
-    3 - greater than
-    4 - in
-    5 - not in
-    6 - not equals
-    7 - less than or equal
-    8 - greater than or equal
-    9 - between
-    16 - selective disclosure (16 = 10000 binary)
-    17 - nullify (17 = 10001 binary)
+    Query operators:
+      0 - noop, skip execution. Ignores all `in` and `value` passed to query, out 1
+      1 - equals
+      2 - less than
+      3 - greater than
+      4 - in
+      5 - not in
+      6 - not equals
+      7 - less than or equal
+      8 - greater than or equal
+      9 - between
+    Modifier/computation operators:
+      16 - selective disclosure (16 = 10000 binary)
+      17 - nullify (17 = 10001 binary)
 */
+
+// Query template works only with Query operators (0-15), for the rest returns 0
 template Query (valueArraySize) {
     // signals
     signal input in;
@@ -57,7 +61,7 @@ template Query (valueArraySize) {
     component queryOpSatisfied = Mux4();
     queryOpSatisfied.s <== [opBits[0], opBits[1], opBits[2], opBits[3]];
     // We don't use 5th bit (opBits[4]) here; which specifies whether operator is query or
-    // modifier/computation operator. It's used in final mux.
+    // modifier/computation operator. It's used in the final mux.
 
     queryOpSatisfied.c[0] <== 1; // noop; skip execution
     queryOpSatisfied.c[1] <== eq;
@@ -76,18 +80,10 @@ template Query (valueArraySize) {
     queryOpSatisfied.c[14] <== 0; // not used
     queryOpSatisfied.c[15] <== 0; // not used
 
-    // modifier operation validation mux
-    // it only validates that operator number is valid
-    component modifierOpValid = Mux4();
-    modifierOpValid.s <== [opBits[0], opBits[1], opBits[2], opBits[3]];
-    // valid operator: 16 - selective disclosure (16-16 = index 0)
-    // valid operator: 17 - nullify (17-16 = index 1)
-    modifierOpValid.c <== [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
     // final output mux
     out <== Mux1()(
         s <== opBits[4], // specifies whether operator is query or modifier/computation operator
-        c <== [queryOpSatisfied.out, modifierOpValid.out]
+        c <== [queryOpSatisfied.out, 0]
     );
 }
 
