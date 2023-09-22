@@ -79,6 +79,9 @@ type Inputs struct {
 	IssuerAuthRevTreeRoot         string      `json:"issuerAuthRevTreeRoot"`
 	IssuerAuthRootsTreeRoot       string      `json:"issuerAuthRootsTreeRoot"`
 
+	// Private random nonce, used to generate LinkID
+	LinkNonce string `json:"linkNonce"`
+
 	ProofType string `json:"proofType"` // 0 for sig, 1 for mtp
 }
 
@@ -98,6 +101,7 @@ type Outputs struct {
 	ClaimPathNotExists     string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
 	ProofType              string   `json:"proofType"`          // 0 for sig, 1 for mtp
 	IssuerAuthState        string   `json:"issuerAuthState"`
+	LinkID                 string   `json:"linkID"`
 }
 
 type TestData struct {
@@ -135,7 +139,7 @@ func Test_ClaimNonMerklized(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
-	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "claimNonMerklized")
+	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "claimNonMerklized")
 }
 
 func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
@@ -208,6 +212,8 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IssuerAuthRevTreeRoot:         "0",
 		IssuerAuthRootsTreeRoot:       "0",
 
+		LinkNonce: "0",
+
 		ProofType: "1",
 	}
 
@@ -227,6 +233,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		ProofType:              "1",
 		IssuerAuthState:        "0",
+		LinkID:                 "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -309,6 +316,8 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IssuerAuthRevTreeRoot:         "0",
 		IssuerAuthRootsTreeRoot:       "0",
 
+		LinkNonce: "0",
+
 		ProofType: "1",
 	}
 
@@ -328,6 +337,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		ProofType:              "1",
 		IssuerAuthState:        "0",
+		LinkID:                 "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -338,6 +348,14 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	utils.SaveTestVector(t, fileName, string(json))
+}
+
+func Test_LinkID(t *testing.T) {
+	desc := "LinkId not 0"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+
+	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "6321", "claimWithLinkNonce")
 }
 
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
@@ -435,6 +453,8 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		IssuerAuthRevTreeRoot:         "0",
 		IssuerAuthRootsTreeRoot:       "0",
 
+		LinkNonce: "0",
+
 		ProofType: "1",
 	}
 
@@ -454,6 +474,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		ProofType:              "1",
 		IssuerAuthState:        "0",
+		LinkID:                 "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -467,7 +488,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 }
 
-func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
+func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, linkNonce string, fileName string) {
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
@@ -499,6 +520,9 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
 	requestID := big.NewInt(23)
+
+	linkID, err := utils.CalculateLinkID(linkNonce, claim)
+	require.NoError(t, err)
 
 	inputs := Inputs{
 		RequestID:                       requestID.String(),
@@ -547,6 +571,8 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		IssuerAuthRevTreeRoot:         "0",
 		IssuerAuthRootsTreeRoot:       "0",
 
+		LinkNonce: linkNonce,
+
 		ProofType: "1",
 	}
 
@@ -566,6 +592,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		ProofType:              "1",
 		IssuerAuthState:        "0",
+		LinkID:                 linkID,
 	}
 
 	json, err := json2.Marshal(TestData{

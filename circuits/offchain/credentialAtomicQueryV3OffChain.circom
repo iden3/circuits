@@ -2,6 +2,7 @@ pragma circom 2.1.5; /* chage to 2.1.6 */
 
 include "./credentialAtomicQueryMTPOffChain.circom";
 include "./credentialAtomicQuerySigOffChain.circom";
+include "../lib/linked/linkId.circom";
 
 template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize) {
     // common outputs for Sig and MTP
@@ -68,6 +69,11 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     // Sig specific outputs
     signal output issuerAuthState;
+
+    // Private random nonce, used to generate LinkID
+    signal input linkNonce;
+    signal output linkID;
+    
     
      /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -184,6 +190,11 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     /* ProfileID calculation */
     userID <== SelectProfile()(userGenesisID, profileNonce);
+
+    /////////////////////////////////////////////////////////////////
+    // Link ID calculation
+    /////////////////////////////////////////////////////////////////
+    linkID <== LinkID()(issuerClaim, linkNonce);
 }
 
 template sigFlow(issuerLevels) {
