@@ -119,6 +119,7 @@ type Outputs struct {
 	Challenge              string `json:"challenge"`
 	GistRoot               string `json:"gistRoot"`
 	LinkID                 string `json:"linkID"`
+	OperatorOutput         string `json:"operatorOutput"`
 	// MTP specific
 	IssuerClaimIdenState string `json:"issuerClaimIdenState"`
 }
@@ -322,6 +323,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		ProofType:            "0",
 		IssuerClaimIdenState: "0",
 		LinkID:               "0",
+		OperatorOutput:       "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -479,6 +481,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 
 		IssuerClaimIdenState: "0",
 		LinkID:               "0",
+		OperatorOutput:       "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -680,6 +683,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		ProofType:              "0",
 		IssuerClaimIdenState:   "0",
 		LinkID:                 "0",
+		OperatorOutput:         "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -700,7 +704,49 @@ func Test_LinkID(t *testing.T) {
 	generateTestData(t, isUserIDProfile, isSubjectIDProfile, desc, "94324", "claimWithLinkNonce")
 }
 
-func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, linkNonce string, fileName string) {
+func Test_Nullify(t *testing.T) {
+	desc := "Nullify modifier"
+	isUserIDProfile := true
+	isSubjectIDProfile := true
+	operator := int(utils.NULLIFY)
+	value := utils.PrepareStrArray([]string{"94313"}, 64)
+	generateTestDataWithOperaor(t, isUserIDProfile, isSubjectIDProfile, desc, "0", "nullify_modifier", &operator, &value)
+}
+
+func Test_Selective_Disclosure(t *testing.T) {
+	desc := "Selective Disclosure modifier"
+	isUserIDProfile := true
+	isSubjectIDProfile := true
+	operator := int(utils.SD)
+	value := utils.PrepareStrArray([]string{}, 64)
+	generateTestDataWithOperaor(t, isUserIDProfile, isSubjectIDProfile, desc, "0", "selective_disclosure", &operator, &value)
+}
+
+func Test_Between(t *testing.T) {
+	desc := "Between operator"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+	operator := int(utils.BETWEEN)
+	value := utils.PrepareStrArray([]string{"8", "10"}, 64)
+	generateTestDataWithOperaor(t, isUserIDProfile, isSubjectIDProfile, desc, "0", "between_operator", &operator, &value)
+}
+
+func Test_Less_Than_Eq(t *testing.T) {
+	desc := "LTE operator"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+	operator := int(utils.LTE)
+	value := utils.PrepareStrArray([]string{"10"}, 64)
+	generateTestDataWithOperaor(t, isUserIDProfile, isSubjectIDProfile, desc, "0", "less_than_eq_operator", &operator, &value)
+}
+
+func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
+	linkNonce string, fileName string) {
+	generateTestDataWithOperaor(t, isUserIDProfile, isSubjectIDProfile, desc, linkNonce, fileName, nil, nil)
+}
+
+func generateTestDataWithOperaor(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
+	linkNonce string, fileName string, operator *int, value *[]string) {
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
@@ -754,6 +800,15 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
+
+	operatorInput := utils.EQ
+	if operator != nil {
+		operatorInput = *operator
+	}
+	valueInput := utils.PrepareStrArray([]string{"10"}, 64)
+	if value != nil {
+		valueInput = *value
+	}
 
 	inputs := Inputs{
 		RequestID:     requestID.String(),
@@ -814,13 +869,11 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		ClaimPathValue:     "0", // value in this path in merklized json-ld document
 		// value in this path in merklized json-ld document
 
-		Operator:            utils.EQ,
+		Operator:            operatorInput,
 		SlotIndex:           2,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
-		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Value:               valueInput,
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
@@ -853,6 +906,17 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	linkID, err := utils.CalculateLinkID(linkNonce, claim)
 	require.NoError(t, err)
 
+	operatorOutput := "0"
+	if operatorInput == utils.NULLIFY {
+		crs, ok := big.NewInt(0).SetString(valueInput[0], 10)
+		require.True(t, ok)
+
+		operatorOutput, err = utils.CalculateNullify(user.ID.BigInt(), nonceSubject, big.NewInt(10), crs)
+		require.NoError(t, err)
+	} else if operatorInput == utils.SD {
+		operatorOutput = big.NewInt(10).String()
+	}
+
 	out := Outputs{
 		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
@@ -870,6 +934,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 		IssuerClaimIdenState: "0",
 		ProofType:            "0",
 		LinkID:               linkID,
+		OperatorOutput:       operatorOutput,
 	}
 
 	json, err := json.Marshal(TestData{
@@ -1059,6 +1124,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		IssuerClaimIdenState: "0",
 		ProofType:            "0",
 		LinkID:               "0",
+		OperatorOutput:       "0",
 	}
 
 	json, err := json.Marshal(TestData{
