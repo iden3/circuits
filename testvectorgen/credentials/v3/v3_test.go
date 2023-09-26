@@ -112,11 +112,11 @@ type TestData struct {
 	Out  Outputs `json:"expOut"`
 }
 
-type TestType string
+type ProofType string
 
 const (
-	Sig TestType = "sig"
-	Mtp TestType = "mtp"
+	Sig ProofType = "sig"
+	Mtp ProofType = "mtp"
 )
 
 func Test_ClaimIssuedOnUserID(t *testing.T) {
@@ -653,12 +653,12 @@ func Test_Less_Than_Eq(t *testing.T) {
 }
 
 func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce string, fileName string, testType TestType) {
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, testType)
+	linkNonce string, fileName string, proofType ProofType) {
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, proofType)
 }
 
 func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce string, fileName string, operator int, value *[]string, testType TestType) {
+	linkNonce string, fileName string, operator int, value *[]string, testProofType ProofType) {
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
@@ -690,7 +690,7 @@ func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, is
 		issuerAuthRevTreeRoot, issuerAuthRootsTreeRoot, issuerAuthState string
 	var issuerAuthClaim *core.Claim
 	var slotIndex int
-	if testType == Sig {
+	if testProofType == Sig {
 		// Sig claim
 		claimSig := issuer.SignClaim(t, claim)
 		var issuerAuthClaimNodeAux utils.NodeAuxValue
@@ -858,7 +858,7 @@ func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, is
 	utils.SaveTestVector(t, fileName, string(json))
 }
 
-func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, testType TestType) {
+func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, testProofType ProofType) {
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
@@ -906,7 +906,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		issuerAuthRevTreeRoot, issuerAuthRootsTreeRoot, issuerAuthState string
 	var issuerAuthClaim *core.Claim
 	var slotIndex int
-	if testType == Sig {
+	if testProofType == Sig {
 		// Sig claim
 		claimSig := issuer.SignClaim(t, claim)
 		var issuerAuthClaimNodeAux utils.NodeAuxValue
