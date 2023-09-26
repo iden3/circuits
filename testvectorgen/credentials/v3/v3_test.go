@@ -621,8 +621,8 @@ func Test_Nullify(t *testing.T) {
 	isUserIDProfile := true
 	isSubjectIDProfile := true
 	value := utils.PrepareStrArray([]string{"94313"}, 64)
-	generateTestDataWithOperatorSig(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/nullify_modifier", utils.NULLIFY, &value)
-	generateTestDataWithOperatorMtp(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/nullify_modifier", utils.NULLIFY, &value)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/nullify_modifier", utils.NULLIFY, &value, Sig)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/nullify_modifier", utils.NULLIFY, &value, Mtp)
 }
 
 func Test_Selective_Disclosure(t *testing.T) {
@@ -630,8 +630,8 @@ func Test_Selective_Disclosure(t *testing.T) {
 	isUserIDProfile := true
 	isSubjectIDProfile := true
 	value := utils.PrepareStrArray([]string{}, 64)
-	generateTestDataWithOperatorSig(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/selective_disclosure", utils.SD, &value)
-	generateTestDataWithOperatorMtp(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/selective_disclosure", utils.SD, &value)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/selective_disclosure", utils.SD, &value, Sig)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/selective_disclosure", utils.SD, &value, Mtp)
 }
 
 func Test_Between(t *testing.T) {
@@ -639,8 +639,8 @@ func Test_Between(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 	value := utils.PrepareStrArray([]string{"8", "10"}, 64)
-	generateTestDataWithOperatorSig(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/between_operator", utils.BETWEEN, &value)
-	generateTestDataWithOperatorMtp(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/between_operator", utils.BETWEEN, &value)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/between_operator", utils.BETWEEN, &value, Sig)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/between_operator", utils.BETWEEN, &value, Mtp)
 }
 
 func Test_Less_Than_Eq(t *testing.T) {
@@ -648,22 +648,17 @@ func Test_Less_Than_Eq(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 	value := utils.PrepareStrArray([]string{"10"}, 64)
-	generateTestDataWithOperatorSig(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/less_than_eq_operator", utils.LTE, &value)
-	generateTestDataWithOperatorMtp(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/less_than_eq_operator", utils.LTE, &value)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/less_than_eq_operator", utils.LTE, &value, Sig)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/less_than_eq_operator", utils.LTE, &value, Mtp)
 }
 
 func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, testType TestType) {
-	switch testType {
-	case Sig:
-		generateTestDataWithOperatorSig(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil)
-	case Mtp:
-		generateTestDataWithOperatorMtp(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil)
-	}
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, testType)
 }
 
-func generateTestDataWithOperatorMtp(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce string, fileName string, operator int, value *[]string) {
+func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
+	linkNonce string, fileName string, operator int, value *[]string, testType TestType) {
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
@@ -687,10 +682,76 @@ func generateTestDataWithOperatorMtp(t *testing.T, desc string, isUserIDProfile,
 
 	claim := utils.DefaultUserClaim(t, subjectID)
 
-	issuer.AddClaim(t, claim)
+	var issuerClaimMtp, issuerAuthClaimMtp []string
+	var issuerClaimClaimsTreeRoot, issuerClaimRevTreeRoot, issuerClaimRootsTreeRoot *merkletree.Hash
+	var issuerClaimSignatureR8X, issuerClaimSignatureR8Y, issuerClaimSignatureS,
+		issuerAuthClaimNonRevMtpAuxHi, issuerAuthClaimNonRevMtpAuxHv, issuerAuthClaimNonRevMtpNoAux,
+		issuerClaimIdenState, proofType, issuerAuthClaimsTreeRoot,
+		issuerAuthRevTreeRoot, issuerAuthRootsTreeRoot, issuerAuthState string
+	var issuerAuthClaim *core.Claim
+	var slotIndex int
+	if testType == Sig {
+		// Sig claim
+		claimSig := issuer.SignClaim(t, claim)
+		var issuerAuthClaimNodeAux utils.NodeAuxValue
+		issuerAuthClaimMtp, issuerAuthClaimNodeAux = issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
-	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
-	require.NoError(t, err)
+		issuerClaimMtp = utils.PrepareStrArray([]string{}, 40)
+		issuerClaimClaimsTreeRoot = &merkletree.HashZero
+		issuerClaimRevTreeRoot = &merkletree.HashZero
+		issuerClaimRootsTreeRoot = &merkletree.HashZero
+
+		issuerAuthClaimNonRevMtpAuxHi = issuerAuthClaimNodeAux.Key
+		issuerAuthClaimNonRevMtpAuxHv = issuerAuthClaimNodeAux.Value
+		issuerAuthClaimNonRevMtpNoAux = issuerAuthClaimNodeAux.NoAux
+
+		issuerClaimSignatureR8X = claimSig.R8.X.String()
+		issuerClaimSignatureR8Y = claimSig.R8.Y.String()
+		issuerClaimSignatureS = claimSig.S.String()
+
+		issuerAuthClaim = issuer.AuthClaim
+
+		issuerClaimIdenState = "0"
+
+		issuerAuthClaimsTreeRoot = issuer.Clt.Root().BigInt().String()
+		issuerAuthRevTreeRoot = issuer.Ret.Root().BigInt().String()
+		issuerAuthRootsTreeRoot = issuer.Rot.Root().BigInt().String()
+
+		issuerAuthState = issuer.State(t).String()
+
+		slotIndex = 2
+
+		proofType = "0"
+	} else {
+		issuer.AddClaim(t, claim)
+		issuerClaimMtp, _ = issuer.ClaimMTP(t, claim)
+		issuerClaimIdenState = issuer.State(t).String()
+
+		issuerClaimClaimsTreeRoot = issuer.Clt.Root()
+		issuerClaimRevTreeRoot = issuer.Ret.Root()
+		issuerClaimRootsTreeRoot = issuer.Rot.Root()
+
+		issuerClaimSignatureR8X = "0"
+		issuerClaimSignatureR8Y = "0"
+		issuerClaimSignatureS = "0"
+
+		issuerAuthClaimNonRevMtpAuxHi = "0"
+		issuerAuthClaimNonRevMtpAuxHv = "0"
+		issuerAuthClaimNonRevMtpNoAux = "0"
+
+		issuerAuthClaimMtp = utils.PrepareStrArray([]string{}, 40)
+
+		issuerAuthClaim = &core.Claim{}
+
+		issuerAuthClaimsTreeRoot = "0"
+		issuerAuthRevTreeRoot = "0"
+		issuerAuthRootsTreeRoot = "0"
+
+		issuerAuthState = "0"
+
+		slotIndex = 2
+		proofType = "1"
+	}
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
@@ -712,10 +773,10 @@ func generateTestDataWithOperatorMtp(t *testing.T, desc string, isUserIDProfile,
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
 		IssuerClaimMtp:                  issuerClaimMtp,
-		IssuerClaimClaimsTreeRoot:       issuer.Clt.Root(),
-		IssuerClaimRevTreeRoot:          issuer.Ret.Root(),
-		IssuerClaimRootsTreeRoot:        issuer.Rot.Root(),
-		IssuerClaimIdenState:            issuer.State(t).String(),
+		IssuerClaimClaimsTreeRoot:       issuerClaimClaimsTreeRoot,
+		IssuerClaimRevTreeRoot:          issuerClaimRevTreeRoot,
+		IssuerClaimRootsTreeRoot:        issuerClaimRootsTreeRoot,
+		IssuerClaimIdenState:            issuerClaimIdenState,
 		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root(),
 		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root(),
 		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root(),
@@ -734,26 +795,26 @@ func generateTestDataWithOperatorMtp(t *testing.T, desc string, isUserIDProfile,
 		ClaimPathValue:                  "0",
 		IsRevocationChecked:             1,
 		Operator:                        operator,
-		SlotIndex:                       2,
+		SlotIndex:                       slotIndex,
 		Timestamp:                       timestamp,
 		Value:                           valueInput,
 
-		IssuerClaimSignatureR8X:       "0",
-		IssuerClaimSignatureR8Y:       "0",
-		IssuerClaimSignatureS:         "0",
-		IssuerAuthClaim:               &core.Claim{},
-		IssuerAuthClaimMtp:            utils.PrepareStrArray([]string{}, 40),
-		IssuerAuthClaimNonRevMtp:      utils.PrepareStrArray([]string{}, 40),
-		IssuerAuthClaimNonRevMtpAuxHi: "0",
-		IssuerAuthClaimNonRevMtpAuxHv: "0",
-		IssuerAuthClaimNonRevMtpNoAux: "0",
-		IssuerAuthClaimsTreeRoot:      "0",
-		IssuerAuthRevTreeRoot:         "0",
-		IssuerAuthRootsTreeRoot:       "0",
+		IssuerClaimSignatureR8X:       issuerClaimSignatureR8X,
+		IssuerClaimSignatureR8Y:       issuerClaimSignatureR8Y,
+		IssuerClaimSignatureS:         issuerClaimSignatureS,
+		IssuerAuthClaim:               issuerAuthClaim,
+		IssuerAuthClaimMtp:            issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtp:      issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtpAuxHi: issuerAuthClaimNonRevMtpAuxHi,
+		IssuerAuthClaimNonRevMtpAuxHv: issuerAuthClaimNonRevMtpAuxHv,
+		IssuerAuthClaimNonRevMtpNoAux: issuerAuthClaimNonRevMtpNoAux,
+		IssuerAuthClaimsTreeRoot:      issuerAuthClaimsTreeRoot,
+		IssuerAuthRevTreeRoot:         issuerAuthRevTreeRoot,
+		IssuerAuthRootsTreeRoot:       issuerAuthRootsTreeRoot,
 
 		LinkNonce: linkNonce,
 
-		ProofType: "1",
+		ProofType: proofType,
 	}
 
 	operatorOutput := "0"
@@ -771,164 +832,18 @@ func generateTestDataWithOperatorMtp(t *testing.T, desc string, isUserIDProfile,
 		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
-		IssuerClaimIdenState:   issuer.State(t).String(),
+		IssuerClaimIdenState:   issuerClaimIdenState,
 		IssuerClaimNonRevState: issuer.State(t).String(),
 		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
+		SlotIndex:              strconv.Itoa(slotIndex),
 		Operator:               operator,
 		Value:                  valueInput,
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		ClaimPathKey:           "0",
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
-		ProofType:              "1",
-		IssuerAuthState:        "0",
-		LinkID:                 linkID,
-		OperatorOutput:         operatorOutput,
-	}
-
-	json, err := json.Marshal(TestData{
-		desc,
-		inputs,
-		out,
-	})
-	require.NoError(t, err)
-
-	utils.SaveTestVector(t, fileName, string(json))
-}
-
-func generateTestDataWithOperatorSig(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce string, fileName string, operator int, value *[]string) {
-	var err error
-
-	user := utils.NewIdentity(t, userPK)
-
-	issuer := utils.NewIdentity(t, issuerPK)
-
-	userProfileID := user.ID
-	nonce := big.NewInt(0)
-	if isUserIDProfile {
-		nonce = big.NewInt(10)
-		userProfileID, err = core.ProfileID(user.ID, nonce)
-		require.NoError(t, err)
-	}
-
-	subjectID := user.ID
-	nonceSubject := big.NewInt(0)
-	if isSubjectIDProfile {
-		nonceSubject = big.NewInt(999)
-		subjectID, err = core.ProfileID(user.ID, nonceSubject)
-		require.NoError(t, err)
-	}
-
-	claim := utils.DefaultUserClaim(t, subjectID)
-
-	// Sig claim
-	claimSig := issuer.SignClaim(t, claim)
-
-	issuerClaimNonRevState := issuer.State(t)
-
-	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
-
-	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
-
-	emptyPathMtp := utils.PrepareSiblingsStr([]*merkletree.Hash{&merkletree.HashZero}, 32)
-
-	requestID := big.NewInt(23)
-
-	linkID, err := utils.CalculateLinkID(linkNonce, claim)
-	require.NoError(t, err)
-
-	valueInput := utils.PrepareStrArray([]string{"10"}, 64)
-	if value != nil {
-		valueInput = *value
-	}
-
-	inputs := Inputs{
-		RequestID:                       requestID.String(),
-		UserGenesisID:                   user.ID.BigInt().String(),
-		ProfileNonce:                    nonce.String(),
-		ClaimSubjectProfileNonce:        nonceSubject.String(),
-		IssuerID:                        issuer.ID.BigInt().String(),
-		IssuerClaim:                     claim,
-		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root(),
-		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root(),
-		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root(),
-		IssuerClaimNonRevState:          issuerClaimNonRevState.String(),
-		IssuerClaimNonRevMtp:            issuerClaimNonRevMtp,
-		IssuerClaimNonRevMtpAuxHi:       issuerClaimNonRevAux.Key,
-		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
-		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
-		IssuerClaimSignatureR8X:         claimSig.R8.X.String(),
-		IssuerClaimSignatureR8Y:         claimSig.R8.Y.String(),
-		IssuerClaimSignatureS:           claimSig.S.String(),
-		IssuerAuthClaim:                 issuer.AuthClaim,
-		IssuerAuthClaimMtp:              issuerAuthClaimMtp,
-		IssuerAuthClaimNonRevMtp:        issuerAuthClaimMtp,
-		IssuerAuthClaimNonRevMtpAuxHi:   issuerAuthClaimNodeAux.Key,
-		IssuerAuthClaimNonRevMtpAuxHv:   issuerAuthClaimNodeAux.Value,
-		IssuerAuthClaimNonRevMtpNoAux:   issuerAuthClaimNodeAux.NoAux,
-		IssuerAuthClaimsTreeRoot:        issuer.Clt.Root().BigInt().String(),
-		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
-		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
-		ClaimSchema:                     "180410020913331409885634153623124536270",
-
-		ClaimPathNotExists: "0", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:       emptyPathMtp,
-		ClaimPathMtpNoAux:  "0", // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-		ClaimPathMtpAuxHi:  "0", // 0 for inclusion proof
-		ClaimPathMtpAuxHv:  "0", // 0 for inclusion proof
-		ClaimPathKey:       "0", // hash of path in merklized json-ld document
-		ClaimPathValue:     "0", // value in this path in merklized json-ld document
-		// value in this path in merklized json-ld document
-
-		Operator:            operator,
-		SlotIndex:           2,
-		Timestamp:           timestamp,
-		IsRevocationChecked: 1,
-		Value:               valueInput,
-
-		// additional mtp inputs
-		IssuerClaimIdenState:      "0",
-		IssuerClaimMtp:            utils.PrepareStrArray([]string{}, 40),
-		IssuerClaimClaimsTreeRoot: &merkletree.HashZero,
-		IssuerClaimRevTreeRoot:    &merkletree.HashZero,
-		IssuerClaimRootsTreeRoot:  &merkletree.HashZero,
-
-		LinkNonce: linkNonce,
-
-		ProofType: "0",
-	}
-
-	issuerAuthState := issuer.State(t)
-
-	operatorOutput := "0"
-	if operator == utils.NULLIFY {
-		crs, ok := big.NewInt(0).SetString(valueInput[0], 10)
-		require.True(t, ok)
-
-		operatorOutput, err = utils.CalculateNullify(user.ID.BigInt(), nonceSubject, big.NewInt(10), crs)
-		require.NoError(t, err)
-	} else if operator == utils.SD {
-		operatorOutput = big.NewInt(10).String()
-	}
-
-	out := Outputs{
-		RequestID:              requestID.String(),
-		UserID:                 userProfileID.BigInt().String(),
-		IssuerID:               issuer.ID.BigInt().String(),
-		IssuerAuthState:        issuerAuthState.String(),
-		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               operator,
-		Value:                  valueInput,
-		Timestamp:              timestamp,
-		Merklized:              "0",
-		ClaimPathNotExists:     "0",
-		ProofType:              "0",
-		ClaimPathKey:           "0",
-		IssuerClaimIdenState:   "0",
+		ProofType:              proofType,
+		IssuerAuthState:        issuerAuthState,
 		LinkID:                 linkID,
 		OperatorOutput:         operatorOutput,
 	}
