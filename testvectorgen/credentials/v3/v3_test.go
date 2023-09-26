@@ -334,9 +334,7 @@ func Test_RevokedClaimWithRevocationCheckSig(t *testing.T) {
 		SlotIndex:           2,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
-		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Value:               utils.PrepareStrArray([]string{"10"}, 64),
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
@@ -361,16 +359,15 @@ func Test_RevokedClaimWithRevocationCheckSig(t *testing.T) {
 		ClaimSchema:            "180410020913331409885634153623124536270",
 		SlotIndex:              "2",
 		Operator:               utils.EQ,
-		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
-		Timestamp:            timestamp,
-		Merklized:            "0",
-		ClaimPathNotExists:   "0",
-		ProofType:            "0",
-		ClaimPathKey:         "0",
-		IssuerClaimIdenState: "0",
-		LinkID:               "0",
-		OperatorOutput:       "0",
+		Value:                  utils.PrepareStrArray([]string{"10"}, 64),
+		Timestamp:              timestamp,
+		Merklized:              "0",
+		ClaimPathNotExists:     "0",
+		ProofType:              "0",
+		ClaimPathKey:           "0",
+		IssuerClaimIdenState:   "0",
+		LinkID:                 "0",
+		OperatorOutput:         "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -552,9 +549,7 @@ func Test_RevokedClaimWithoutRevocationCheckSig(t *testing.T) {
 		SlotIndex:           2,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 0,
-		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Value:               utils.PrepareStrArray([]string{"10"}, 64),
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
@@ -579,16 +574,15 @@ func Test_RevokedClaimWithoutRevocationCheckSig(t *testing.T) {
 		ClaimSchema:            "180410020913331409885634153623124536270",
 		SlotIndex:              "2",
 		Operator:               utils.EQ,
-		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
-		Timestamp:            timestamp,
-		Merklized:            "0",
-		ClaimPathNotExists:   "0",
-		ProofType:            "0",
-		ClaimPathKey:         "0",
-		IssuerClaimIdenState: "0",
-		LinkID:               "0",
-		OperatorOutput:       "0",
+		Value:                  utils.PrepareStrArray([]string{"10"}, 64),
+		Timestamp:              timestamp,
+		Merklized:              "0",
+		ClaimPathNotExists:     "0",
+		ProofType:              "0",
+		ClaimPathKey:           "0",
+		IssuerClaimIdenState:   "0",
+		LinkID:                 "0",
+		OperatorOutput:         "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -1041,9 +1035,7 @@ func generateJSONLDTestDataSig(t *testing.T, desc string, isUserIDProfile, isSub
 		SlotIndex:           2,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
-		Value: []string{valueKey.String(), "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Value:               utils.PrepareStrArray([]string{valueKey.String()}, 64),
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
@@ -1068,7 +1060,7 @@ func generateJSONLDTestDataSig(t *testing.T, desc string, isUserIDProfile, isSub
 		ClaimSchema:            "180410020913331409885634153623124536270",
 		SlotIndex:              "2",
 		Operator:               utils.EQ,
-		Value:                  []string{"1420070400000000000", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Value:                  utils.PrepareStrArray([]string{"1420070400000000000"}, 64),
 		Timestamp:              timestamp,
 		Merklized:              "1",
 		ClaimPathNotExists:     "0",
@@ -1217,7 +1209,6 @@ func generateJSONLDTestDataMtp(t *testing.T, desc string, isUserIDProfile, isSub
 	require.NoError(t, err)
 
 	utils.SaveTestVector(t, fileName, string(json))
-
 }
 
 func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
@@ -1311,9 +1302,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		SlotIndex:           0,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
-		Value: []string{"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Value:               utils.PrepareStrArray([]string{}, 64),
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
@@ -1338,16 +1327,15 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		ClaimSchema:            "180410020913331409885634153623124536270",
 		SlotIndex:              "0",
 		Operator:               utils.NOOP,
-		Value: []string{"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
-		Timestamp:            timestamp,
-		Merklized:            "1",
-		ClaimPathNotExists:   "1",
-		ProofType:            "0",
-		ClaimPathKey:         pathKey.String(),
-		IssuerClaimIdenState: "0",
-		LinkID:               "0",
-		OperatorOutput:       "0",
+		Value:                  utils.PrepareStrArray([]string{}, 64),
+		Timestamp:              timestamp,
+		Merklized:              "1",
+		ClaimPathNotExists:     "1",
+		ProofType:              "0",
+		ClaimPathKey:           pathKey.String(),
+		IssuerClaimIdenState:   "0",
+		LinkID:                 "0",
+		OperatorOutput:         "0",
 	}
 
 	json, err := json.Marshal(TestData{

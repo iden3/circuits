@@ -592,9 +592,7 @@ func Test_RevokedClaimWithoutRevocationCheckSig(t *testing.T) {
 		SlotIndex:           2,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 0,
-		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Value:               utils.PrepareStrArray([]string{"10"}, 64),
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
@@ -749,9 +747,7 @@ func Test_RevokedClaimWithRevocationCheckSig(t *testing.T) {
 		SlotIndex:           2,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
-		Value: []string{"10", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Value:               utils.PrepareStrArray([]string{"10"}, 64),
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
@@ -1175,9 +1171,7 @@ func generateJSONLDTestDataSig(t *testing.T, desc string, isUserIDProfile, isSub
 		SlotIndex:           2,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
-		Value: []string{valueKey.String(), "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Value:               utils.PrepareStrArray([]string{valueKey.String()}, 64),
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
@@ -1755,9 +1749,7 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		SlotIndex:           0,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
-		Value: []string{"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0",
-			"0", "0",
-			"0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"},
+		Value:               utils.PrepareStrArray([]string{}, 64),
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
