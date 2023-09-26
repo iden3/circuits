@@ -365,36 +365,32 @@ func Test_Nullify(t *testing.T) {
 	desc := "Nullify modifier"
 	isUserIDProfile := true
 	isSubjectIDProfile := true
-	operator := int(utils.NULLIFY)
 	value := utils.PrepareStrArray([]string{"94313"}, 64)
-	generateTestDataWithOperaor(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "nullify_modifier", &operator, &value)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "nullify_modifier", utils.NULLIFY, &value)
 }
 
 func Test_Selective_Disclosure(t *testing.T) {
 	desc := "Selective Disclosure modifier"
 	isUserIDProfile := true
 	isSubjectIDProfile := true
-	operator := int(utils.SD)
 	value := utils.PrepareStrArray([]string{}, 64)
-	generateTestDataWithOperaor(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "selective_disclosure", &operator, &value)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "selective_disclosure", utils.SD, &value)
 }
 
 func Test_Between(t *testing.T) {
 	desc := "Between operator"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
-	operator := int(utils.BETWEEN)
 	value := utils.PrepareStrArray([]string{"8", "10"}, 64)
-	generateTestDataWithOperaor(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "between_operator", &operator, &value)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "between_operator", utils.BETWEEN, &value)
 }
 
 func Test_Less_Than_Eq(t *testing.T) {
 	desc := "LTE operator"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
-	operator := int(utils.LTE)
 	value := utils.PrepareStrArray([]string{"10"}, 64)
-	generateTestDataWithOperaor(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "less_than_eq_operator", &operator, &value)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "less_than_eq_operator", utils.LTE, &value)
 }
 
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
@@ -530,11 +526,11 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string) {
-	generateTestDataWithOperaor(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, nil, nil)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil)
 }
 
-func generateTestDataWithOperaor(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce string, fileName string, operator *int, value *[]string) {
+func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
+	linkNonce string, fileName string, operator int, value *[]string) {
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
@@ -570,10 +566,6 @@ func generateTestDataWithOperaor(t *testing.T, desc string, isUserIDProfile, isS
 	linkID, err := utils.CalculateLinkID(linkNonce, claim)
 	require.NoError(t, err)
 
-	operatorInput := utils.EQ
-	if operator != nil {
-		operatorInput = *operator
-	}
 	valueInput := utils.PrepareStrArray([]string{"10"}, 64)
 	if value != nil {
 		valueInput = *value
@@ -608,7 +600,7 @@ func generateTestDataWithOperaor(t *testing.T, desc string, isUserIDProfile, isS
 		ClaimPathKey:                    "0",
 		ClaimPathValue:                  "0",
 		IsRevocationChecked:             1,
-		Operator:                        operatorInput,
+		Operator:                        operator,
 		SlotIndex:                       2,
 		Timestamp:                       timestamp,
 		Value:                           valueInput,
@@ -632,13 +624,13 @@ func generateTestDataWithOperaor(t *testing.T, desc string, isUserIDProfile, isS
 	}
 
 	operatorOutput := "0"
-	if operatorInput == utils.NULLIFY {
+	if operator == utils.NULLIFY {
 		crs, ok := big.NewInt(0).SetString(valueInput[0], 10)
 		require.True(t, ok)
 
 		operatorOutput, err = utils.CalculateNullify(user.ID.BigInt(), nonceSubject, big.NewInt(10), crs)
 		require.NoError(t, err)
-	} else if operatorInput == utils.SD {
+	} else if operator == utils.SD {
 		operatorOutput = big.NewInt(10).String()
 	}
 
@@ -650,7 +642,7 @@ func generateTestDataWithOperaor(t *testing.T, desc string, isUserIDProfile, isS
 		IssuerClaimNonRevState: issuer.State(t).String(),
 		ClaimSchema:            "180410020913331409885634153623124536270",
 		SlotIndex:              "2",
-		Operator:               operatorInput,
+		Operator:               operator,
 		Value:                  valueInput,
 		Timestamp:              timestamp,
 		Merklized:              "0",
