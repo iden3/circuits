@@ -38,6 +38,10 @@ describe("Test credentialAtomicQueryV3OnChain.circom", function () {
         require(`${sigBasePath}/revoked_claim_without_revocation_check.json`),
         require(`${sigBasePath}/userID_subject.json`),
         require(`${sigBasePath}/claimWithLinkNonce.json`),
+        require(`${sigBasePath}/nullify_modifier.json`),
+        require(`${sigBasePath}/selective_disclosure.json`),
+        require(`${sigBasePath}/between_operator.json`),
+        require(`${sigBasePath}/less_than_eq_operator.json`),
 
         // mtp
         require(`${mtpBasePath}/claimIssuedOnProfileID.json`),
@@ -46,6 +50,10 @@ describe("Test credentialAtomicQueryV3OnChain.circom", function () {
         require(`${mtpBasePath}/claimNonMerklized.json`),
         require(`${mtpBasePath}/revoked_claim_without_revocation_check.json`),
         require(`${mtpBasePath}/claimWithLinkNonce.json`),
+        require(`${mtpBasePath}/nullify_modifier.json`),
+        require(`${mtpBasePath}/selective_disclosure.json`),
+        require(`${mtpBasePath}/between_operator.json`),
+        require(`${mtpBasePath}/less_than_eq_operator.json`),
     ];
 
     tests.forEach(({ desc, inputs, expOut }) => {

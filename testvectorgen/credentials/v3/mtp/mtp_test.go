@@ -102,6 +102,7 @@ type Outputs struct {
 	ProofType              string   `json:"proofType"`          // 0 for sig, 1 for mtp
 	IssuerAuthState        string   `json:"issuerAuthState"`
 	LinkID                 string   `json:"linkID"`
+	OperatorOutput         string   `json:"operatorOutput"`
 }
 
 type TestData struct {
@@ -234,6 +235,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		ProofType:              "1",
 		IssuerAuthState:        "0",
 		LinkID:                 "0",
+		OperatorOutput:         "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -338,6 +340,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		ProofType:              "1",
 		IssuerAuthState:        "0",
 		LinkID:                 "0",
+		OperatorOutput:         "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -356,6 +359,38 @@ func Test_LinkID(t *testing.T) {
 	isSubjectIDProfile := false
 
 	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "6321", "claimWithLinkNonce")
+}
+
+func Test_Nullify(t *testing.T) {
+	desc := "Nullify modifier"
+	isUserIDProfile := true
+	isSubjectIDProfile := true
+	value := utils.PrepareStrArray([]string{"94313"}, 64)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "nullify_modifier", utils.NULLIFY, &value)
+}
+
+func Test_Selective_Disclosure(t *testing.T) {
+	desc := "Selective Disclosure modifier"
+	isUserIDProfile := true
+	isSubjectIDProfile := true
+	value := utils.PrepareStrArray([]string{}, 64)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "selective_disclosure", utils.SD, &value)
+}
+
+func Test_Between(t *testing.T) {
+	desc := "Between operator"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+	value := utils.PrepareStrArray([]string{"8", "10"}, 64)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "between_operator", utils.BETWEEN, &value)
+}
+
+func Test_Less_Than_Eq(t *testing.T) {
+	desc := "LTE operator"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+	value := utils.PrepareStrArray([]string{"10"}, 64)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "less_than_eq_operator", utils.LTE, &value)
 }
 
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
@@ -475,6 +510,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		ProofType:              "1",
 		IssuerAuthState:        "0",
 		LinkID:                 "0",
+		OperatorOutput:         "0",
 	}
 
 	json, err := json2.Marshal(TestData{
@@ -488,7 +524,13 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 }
 
-func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, linkNonce string, fileName string) {
+func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
+	linkNonce string, fileName string) {
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil)
+}
+
+func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
+	linkNonce string, fileName string, operator int, value *[]string) {
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
@@ -524,6 +566,11 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	linkID, err := utils.CalculateLinkID(linkNonce, claim)
 	require.NoError(t, err)
 
+	valueInput := utils.PrepareStrArray([]string{"10"}, 64)
+	if value != nil {
+		valueInput = *value
+	}
+
 	inputs := Inputs{
 		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
@@ -553,10 +600,10 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		ClaimPathKey:                    "0",
 		ClaimPathValue:                  "0",
 		IsRevocationChecked:             1,
-		Operator:                        utils.EQ,
+		Operator:                        operator,
 		SlotIndex:                       2,
 		Timestamp:                       timestamp,
-		Value:                           utils.PrepareStrArray([]string{"10"}, 64),
+		Value:                           valueInput,
 
 		IssuerClaimSignatureR8X:       "0",
 		IssuerClaimSignatureR8Y:       "0",
@@ -576,6 +623,17 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		ProofType: "1",
 	}
 
+	operatorOutput := "0"
+	if operator == utils.NULLIFY {
+		crs, ok := big.NewInt(0).SetString(valueInput[0], 10)
+		require.True(t, ok)
+
+		operatorOutput, err = utils.CalculateNullify(user.ID.BigInt(), nonceSubject, big.NewInt(10), crs)
+		require.NoError(t, err)
+	} else if operator == utils.SD {
+		operatorOutput = big.NewInt(10).String()
+	}
+
 	out := Outputs{
 		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
@@ -584,8 +642,8 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		IssuerClaimNonRevState: issuer.State(t).String(),
 		ClaimSchema:            "180410020913331409885634153623124536270",
 		SlotIndex:              "2",
-		Operator:               utils.EQ,
-		Value:                  utils.PrepareStrArray([]string{"10"}, 64),
+		Operator:               operator,
+		Value:                  valueInput,
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		ClaimPathKey:           "0",
@@ -593,6 +651,7 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 		ProofType:              "1",
 		IssuerAuthState:        "0",
 		LinkID:                 linkID,
+		OperatorOutput:         operatorOutput,
 	}
 
 	json, err := json2.Marshal(TestData{
