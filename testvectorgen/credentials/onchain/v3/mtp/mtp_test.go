@@ -120,10 +120,9 @@ type Outputs struct {
 	Challenge              string `json:"challenge"`
 	GistRoot               string `json:"gistRoot"`
 	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
-	// Sig specific
-	IssuerAuthState string `json:"issuerAuthState"`
-	LinkID          string `json:"linkID"`
-	OperatorOutput  string `json:"operatorOutput"`
+	IssuerAuthState        string `json:"issuerAuthState"` // Sig specific
+	LinkID                 string `json:"linkID"`
+	OperatorOutput         string `json:"operatorOutput"`
 }
 
 type TestData struct {
