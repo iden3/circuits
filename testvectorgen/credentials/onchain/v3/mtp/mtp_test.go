@@ -111,7 +111,7 @@ type Outputs struct {
 	ProofType              string `json:"proofType"` // 0 for sig, 1 for mtp
 	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
-	СircuitQueryHash       string `json:"circuitQueryHash"`
+	CircuitQueryHash       string `json:"circuitQueryHash"`
 	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
@@ -295,7 +295,7 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
 		IssuerClaimNonRevState: issuer.State(t).String(),
-		СircuitQueryHash:       circuitQueryHash.String(),
+		CircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		Challenge:              challenge.String(),
@@ -449,7 +449,7 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
 		IssuerClaimNonRevState: issuer.State(t).String(),
-		СircuitQueryHash:       circuitQueryHash.String(),
+		CircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		Challenge:              challenge.String(),
@@ -668,7 +668,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
 		IssuerClaimNonRevState: issuer.State(t).String(),
-		СircuitQueryHash:       circuitQueryHash.String(),
+		CircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
 		Challenge:              challenge.String(),
@@ -859,7 +859,7 @@ func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, is
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimIdenState:   issuer.State(t).String(),
 		IssuerClaimNonRevState: issuer.State(t).String(),
-		СircuitQueryHash:       circuitQueryHash.String(),
+		CircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
 		Challenge:              challenge.String(),
