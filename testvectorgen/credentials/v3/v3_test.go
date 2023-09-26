@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"math/big"
+	"strconv"
 	"testing"
 
 	"test/utils"
@@ -123,8 +124,8 @@ func Test_ClaimIssuedOnUserID(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
-	generateJSONLDTestDataSig(t, desc, isUserIDProfile, isSubjectIDProfile, "sig/claimIssuedOnUserID")
-	generateJSONLDTestDataMtp(t, desc, isUserIDProfile, isSubjectIDProfile, "mtp/claimIssuedOnUserID")
+	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "sig/claimIssuedOnUserID", Sig)
+	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "mtp/claimIssuedOnUserID", Mtp)
 }
 
 func Test_ClaimIssuedOnUserProfileID(t *testing.T) {
@@ -132,8 +133,8 @@ func Test_ClaimIssuedOnUserProfileID(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := true
 
-	generateJSONLDTestDataSig(t, desc, isUserIDProfile, isSubjectIDProfile, "sig/profileID_subject")
-	generateJSONLDTestDataMtp(t, desc, isUserIDProfile, isSubjectIDProfile, "mtp/profileID_subject")
+	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "sig/profileID_subject", Sig)
+	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "mtp/profileID_subject", Mtp)
 }
 
 func Test_IssueClaimToProfile(t *testing.T) {
@@ -142,8 +143,8 @@ func Test_IssueClaimToProfile(t *testing.T) {
 	isUserIDProfile := true
 	isSubjectIDProfile := false
 
-	generateJSONLDTestDataSig(t, desc, isUserIDProfile, isSubjectIDProfile, "sig/claimIssuedOnProfileID")
-	generateJSONLDTestDataMtp(t, desc, isUserIDProfile, isSubjectIDProfile, "mtp/claimIssuedOnProfileID")
+	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "sig/claimIssuedOnProfileID", Sig)
+	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "mtp/claimIssuedOnProfileID", Mtp)
 }
 
 func Test_ClaimIssuedOnUserProfileID2(t *testing.T) {
@@ -151,8 +152,8 @@ func Test_ClaimIssuedOnUserProfileID2(t *testing.T) {
 	isUserIDProfile := true
 	isSubjectIDProfile := true
 
-	generateJSONLDTestDataSig(t, desc, isUserIDProfile, isSubjectIDProfile, "sig/claimIssuedOnProfileID2")
-	generateJSONLDTestDataMtp(t, desc, isUserIDProfile, isSubjectIDProfile, "mtp/claimIssuedOnProfileID2")
+	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "sig/claimIssuedOnProfileID2", Sig)
+	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "mtp/claimIssuedOnProfileID2", Mtp)
 }
 
 func Test_ClaimNonMerklized(t *testing.T) {
@@ -942,7 +943,7 @@ func generateTestDataWithOperatorSig(t *testing.T, desc string, isUserIDProfile,
 	utils.SaveTestVector(t, fileName, string(json))
 }
 
-func generateJSONLDTestDataSig(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
+func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, testType TestType) {
 	var err error
 
 	user := utils.NewIdentity(t, userPK)
@@ -982,148 +983,76 @@ func generateJSONLDTestDataSig(t *testing.T, desc string, isUserIDProfile, isSub
 	pathKey, err := path.MtEntry()
 	require.NoError(t, err)
 
-	// Sig claim
-	claimSig := issuer.SignClaim(t, claim)
+	var issuerClaimMtp, issuerAuthClaimMtp []string
+	var issuerClaimClaimsTreeRoot, issuerClaimRevTreeRoot, issuerClaimRootsTreeRoot *merkletree.Hash
+	var issuerClaimSignatureR8X, issuerClaimSignatureR8Y, issuerClaimSignatureS,
+		issuerAuthClaimNonRevMtpAuxHi, issuerAuthClaimNonRevMtpAuxHv, issuerAuthClaimNonRevMtpNoAux,
+		issuerClaimIdenState, proofType, issuerAuthClaimsTreeRoot,
+		issuerAuthRevTreeRoot, issuerAuthRootsTreeRoot, issuerAuthState string
+	var issuerAuthClaim *core.Claim
+	var slotIndex int
+	if testType == Sig {
+		// Sig claim
+		claimSig := issuer.SignClaim(t, claim)
+		var issuerAuthClaimNodeAux utils.NodeAuxValue
+		issuerAuthClaimMtp, issuerAuthClaimNodeAux = issuer.ClaimRevMTP(t, issuer.AuthClaim)
 
-	issuerClaimNonRevState := issuer.State(t)
+		issuerClaimMtp = utils.PrepareStrArray([]string{}, 40)
+		issuerClaimClaimsTreeRoot = &merkletree.HashZero
+		issuerClaimRevTreeRoot = &merkletree.HashZero
+		issuerClaimRootsTreeRoot = &merkletree.HashZero
 
-	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
+		issuerAuthClaimNonRevMtpAuxHi = issuerAuthClaimNodeAux.Key
+		issuerAuthClaimNonRevMtpAuxHv = issuerAuthClaimNodeAux.Value
+		issuerAuthClaimNonRevMtpNoAux = issuerAuthClaimNodeAux.NoAux
 
-	issuerAuthClaimMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
+		issuerClaimSignatureR8X = claimSig.R8.X.String()
+		issuerClaimSignatureR8Y = claimSig.R8.Y.String()
+		issuerClaimSignatureS = claimSig.S.String()
 
-	requestID := big.NewInt(23)
+		issuerAuthClaim = issuer.AuthClaim
 
-	inputs := Inputs{
-		RequestID:                       requestID.String(),
-		UserGenesisID:                   user.ID.BigInt().String(),
-		ProfileNonce:                    nonce.String(),
-		ClaimSubjectProfileNonce:        nonceSubject.String(),
-		IssuerID:                        issuer.ID.BigInt().String(),
-		IssuerClaim:                     claim,
-		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root(),
-		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root(),
-		IssuerClaimNonRevRootsTreeRoot:  issuer.Rot.Root(),
-		IssuerClaimNonRevState:          issuerClaimNonRevState.String(),
-		IssuerClaimNonRevMtp:            issuerClaimNonRevMtp,
-		IssuerClaimNonRevMtpAuxHi:       issuerClaimNonRevAux.Key,
-		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
-		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
-		IssuerClaimSignatureR8X:         claimSig.R8.X.String(),
-		IssuerClaimSignatureR8Y:         claimSig.R8.Y.String(),
-		IssuerClaimSignatureS:           claimSig.S.String(),
-		IssuerAuthClaim:                 issuer.AuthClaim,
-		IssuerAuthClaimMtp:              issuerAuthClaimMtp,
-		IssuerAuthClaimNonRevMtp:        issuerAuthClaimMtp,
-		IssuerAuthClaimNonRevMtpAuxHi:   issuerAuthClaimNodeAux.Key,
-		IssuerAuthClaimNonRevMtpAuxHv:   issuerAuthClaimNodeAux.Value,
-		IssuerAuthClaimNonRevMtpNoAux:   issuerAuthClaimNodeAux.NoAux,
-		IssuerAuthClaimsTreeRoot:        issuer.Clt.Root().BigInt().String(),
-		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
-		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
-		ClaimSchema:                     "180410020913331409885634153623124536270",
+		issuerClaimIdenState = "0"
 
-		ClaimPathNotExists: "0", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:       claimJSONLDProof,
-		ClaimPathMtpNoAux:  claimJSONLDProofAux.NoAux, // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-		ClaimPathMtpAuxHi:  claimJSONLDProofAux.Key,   // 0 for inclusion proof
-		ClaimPathMtpAuxHv:  claimJSONLDProofAux.Value, // 0 for inclusion proof
-		ClaimPathKey:       pathKey.String(),          // hash of path in merklized json-ld document
-		ClaimPathValue:     valueKey.String(),         // value in this path in merklized json-ld document
-		// value in this path in merklized json-ld document
+		issuerAuthClaimsTreeRoot = issuer.Clt.Root().BigInt().String()
+		issuerAuthRevTreeRoot = issuer.Ret.Root().BigInt().String()
+		issuerAuthRootsTreeRoot = issuer.Rot.Root().BigInt().String()
 
-		Operator:            utils.EQ,
-		SlotIndex:           2,
-		Timestamp:           timestamp,
-		IsRevocationChecked: 1,
-		Value:               utils.PrepareStrArray([]string{valueKey.String()}, 64),
+		issuerAuthState = issuer.State(t).String()
 
-		// additional mtp inputs
-		IssuerClaimIdenState:      "0",
-		IssuerClaimMtp:            utils.PrepareStrArray([]string{}, 40),
-		IssuerClaimClaimsTreeRoot: &merkletree.HashZero,
-		IssuerClaimRevTreeRoot:    &merkletree.HashZero,
-		IssuerClaimRootsTreeRoot:  &merkletree.HashZero,
+		slotIndex = 2
 
-		LinkNonce: "0",
+		proofType = "0"
+	} else {
+		issuer.AddClaim(t, claim)
+		issuerClaimMtp, _ = issuer.ClaimMTP(t, claim)
+		issuerClaimIdenState = issuer.State(t).String()
 
-		ProofType: "0",
+		issuerClaimClaimsTreeRoot = issuer.Clt.Root()
+		issuerClaimRevTreeRoot = issuer.Ret.Root()
+		issuerClaimRootsTreeRoot = issuer.Rot.Root()
+
+		issuerClaimSignatureR8X = "0"
+		issuerClaimSignatureR8Y = "0"
+		issuerClaimSignatureS = "0"
+
+		issuerAuthClaimNonRevMtpAuxHi = "0"
+		issuerAuthClaimNonRevMtpAuxHv = "0"
+		issuerAuthClaimNonRevMtpNoAux = "0"
+
+		issuerAuthClaimMtp = utils.PrepareStrArray([]string{}, 40)
+
+		issuerAuthClaim = &core.Claim{}
+
+		issuerAuthClaimsTreeRoot = "0"
+		issuerAuthRevTreeRoot = "0"
+		issuerAuthRootsTreeRoot = "0"
+
+		issuerAuthState = "0"
+
+		slotIndex = 0
+		proofType = "1"
 	}
-
-	issuerAuthState := issuer.State(t)
-
-	out := Outputs{
-		RequestID:              requestID.String(),
-		UserID:                 userProfileID.BigInt().String(),
-		IssuerID:               issuer.ID.BigInt().String(),
-		IssuerAuthState:        issuerAuthState.String(),
-		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "2",
-		Operator:               utils.EQ,
-		Value:                  utils.PrepareStrArray([]string{"1420070400000000000"}, 64),
-		Timestamp:              timestamp,
-		Merklized:              "1",
-		ClaimPathNotExists:     "0",
-		ProofType:              "0",
-		ClaimPathKey:           pathKey.String(),
-		IssuerClaimIdenState:   "0",
-		LinkID:                 "0",
-		OperatorOutput:         "0",
-	}
-
-	json, err := json.Marshal(TestData{
-		desc,
-		inputs,
-		out,
-	})
-	require.NoError(t, err)
-
-	utils.SaveTestVector(t, fileName, string(json))
-}
-
-func generateJSONLDTestDataMtp(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string) {
-	var err error
-
-	user := utils.NewIdentity(t, userPK)
-	issuer := utils.NewIdentity(t, issuerPK)
-
-	userProfileID := user.ID
-	nonce := big.NewInt(0)
-	if isUserIDProfile {
-		nonce = big.NewInt(10)
-		userProfileID, err = core.ProfileID(user.ID, nonce)
-		require.NoError(t, err)
-	}
-
-	subjectID := user.ID
-	nonceSubject := big.NewInt(0)
-	if isSubjectIDProfile {
-		nonceSubject = big.NewInt(999)
-		subjectID, err = core.ProfileID(user.ID, nonceSubject)
-		require.NoError(t, err)
-	}
-
-	mz, claim := utils.DefaultJSONUserClaim(t, subjectID)
-
-	path, err := merklize.NewPath(
-		"https://www.w3.org/2018/credentials#credentialSubject",
-		"https://w3id.org/citizenship#residentSince")
-	require.NoError(t, err)
-
-	jsonP, value, err := mz.Proof(context.Background(), path)
-	require.NoError(t, err)
-
-	valueKey, err := value.MtEntry()
-	require.NoError(t, err)
-
-	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP, utils.ClaimLevels)
-
-	pathKey, err := path.MtEntry()
-	require.NoError(t, err)
-
-	issuer.AddClaim(t, claim)
-
-	issuerClaimMtp, _ := issuer.ClaimMTP(t, claim)
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
@@ -1137,10 +1066,10 @@ func generateJSONLDTestDataMtp(t *testing.T, desc string, isUserIDProfile, isSub
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
 		IssuerClaimMtp:                  issuerClaimMtp,
-		IssuerClaimClaimsTreeRoot:       issuer.Clt.Root(),
-		IssuerClaimRevTreeRoot:          issuer.Ret.Root(),
-		IssuerClaimRootsTreeRoot:        issuer.Rot.Root(),
-		IssuerClaimIdenState:            issuer.State(t).String(),
+		IssuerClaimClaimsTreeRoot:       issuerClaimClaimsTreeRoot,
+		IssuerClaimRevTreeRoot:          issuerClaimRevTreeRoot,
+		IssuerClaimRootsTreeRoot:        issuerClaimRootsTreeRoot,
+		IssuerClaimIdenState:            issuerClaimIdenState,
 		IsRevocationChecked:             1,
 		IssuerClaimNonRevClaimsTreeRoot: issuer.Clt.Root(),
 		IssuerClaimNonRevRevTreeRoot:    issuer.Ret.Root(),
@@ -1159,44 +1088,44 @@ func generateJSONLDTestDataMtp(t *testing.T, desc string, isUserIDProfile, isSub
 		ClaimPathKey:                    pathKey.String(),
 		ClaimPathValue:                  valueKey.String(),
 		Operator:                        utils.EQ,
-		SlotIndex:                       0,
+		SlotIndex:                       slotIndex,
 		Timestamp:                       timestamp,
 		Value:                           utils.PrepareStrArray([]string{valueKey.String()}, 64),
 
-		IssuerClaimSignatureR8X:       "0",
-		IssuerClaimSignatureR8Y:       "0",
-		IssuerClaimSignatureS:         "0",
-		IssuerAuthClaim:               &core.Claim{},
-		IssuerAuthClaimMtp:            utils.PrepareStrArray([]string{}, 40),
-		IssuerAuthClaimNonRevMtp:      utils.PrepareStrArray([]string{}, 40),
-		IssuerAuthClaimNonRevMtpAuxHi: "0",
-		IssuerAuthClaimNonRevMtpAuxHv: "0",
-		IssuerAuthClaimNonRevMtpNoAux: "0",
-		IssuerAuthClaimsTreeRoot:      "0",
-		IssuerAuthRevTreeRoot:         "0",
-		IssuerAuthRootsTreeRoot:       "0",
+		IssuerClaimSignatureR8X:       issuerClaimSignatureR8X,
+		IssuerClaimSignatureR8Y:       issuerClaimSignatureR8Y,
+		IssuerClaimSignatureS:         issuerClaimSignatureS,
+		IssuerAuthClaim:               issuerAuthClaim,
+		IssuerAuthClaimMtp:            issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtp:      issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtpAuxHi: issuerAuthClaimNonRevMtpAuxHi,
+		IssuerAuthClaimNonRevMtpAuxHv: issuerAuthClaimNonRevMtpAuxHv,
+		IssuerAuthClaimNonRevMtpNoAux: issuerAuthClaimNonRevMtpNoAux,
+		IssuerAuthClaimsTreeRoot:      issuerAuthClaimsTreeRoot,
+		IssuerAuthRevTreeRoot:         issuerAuthRevTreeRoot,
+		IssuerAuthRootsTreeRoot:       issuerAuthRootsTreeRoot,
 
 		LinkNonce: "0",
 
-		ProofType: "1",
+		ProofType: proofType,
 	}
 
 	out := Outputs{
 		RequestID:              inputs.RequestID,
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
-		IssuerClaimIdenState:   issuer.State(t).String(),
+		IssuerClaimIdenState:   issuerClaimIdenState,
 		IssuerClaimNonRevState: issuer.State(t).String(),
 		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "0",
+		SlotIndex:              strconv.Itoa(slotIndex),
 		Operator:               utils.EQ,
 		Value:                  utils.PrepareStrArray([]string{valueKey.String()}, 64),
 		Timestamp:              timestamp,
 		Merklized:              "1",
 		ClaimPathKey:           pathKey.String(),
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
-		ProofType:              "1",
-		IssuerAuthState:        "0",
+		ProofType:              proofType,
+		IssuerAuthState:        issuerAuthState,
 		LinkID:                 "0",
 		OperatorOutput:         "0",
 	}
