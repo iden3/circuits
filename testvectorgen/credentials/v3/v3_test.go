@@ -254,6 +254,10 @@ func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, is
 	generateTestDataWithOperatorAndRevCkeck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, operator, value, false, 1, false, proofType)
 }
 
+func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, proofType ProofType) {
+	generateTestDataWithOperatorAndRevCkeck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", fileName, utils.EQ, nil, false, 1, true, proofType)
+}
+
 func generateTestDataWithOperatorAndRevCkeck(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, operator int, value *[]string, isRevoked bool, isRevocationChecked int, isJSONLD bool, testProofType ProofType) {
 	var err error
@@ -495,10 +499,6 @@ func generateTestDataWithOperatorAndRevCkeck(t *testing.T, desc string, isUserID
 	require.NoError(t, err)
 
 	utils.SaveTestVector(t, fileName, string(json))
-}
-
-func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCkeck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", fileName, utils.EQ, nil, false, 1, true, proofType)
 }
 
 func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
