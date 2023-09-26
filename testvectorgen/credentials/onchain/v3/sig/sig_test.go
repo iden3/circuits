@@ -109,7 +109,7 @@ type Outputs struct {
 	ProofType              string `json:"proofType"`
 	Merklized              string `json:"merklized"`
 	UserID                 string `json:"userID"`
-	СircuitQueryHash       string `json:"circuitQueryHash"`
+	CircuitQueryHash       string `json:"circuitQueryHash"`
 	IssuerAuthState        string `json:"issuerAuthState"`
 	RequestID              string `json:"requestID"`
 	IssuerID               string `json:"issuerID"`
@@ -118,10 +118,9 @@ type Outputs struct {
 	IsRevocationChecked    string `json:"isRevocationChecked"`
 	Challenge              string `json:"challenge"`
 	GistRoot               string `json:"gistRoot"`
-	// MTP specific
-	IssuerClaimIdenState string `json:"issuerClaimIdenState"`
-	LinkID               string `json:"linkID"`
-	OperatorOutput       string `json:"operatorOutput"`
+	IssuerClaimIdenState   string `json:"issuerClaimIdenState"` // MTP specific
+	LinkID                 string `json:"linkID"`
+	OperatorOutput         string `json:"operatorOutput"`
 }
 
 type TestData struct {
@@ -315,15 +314,14 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		СircuitQueryHash:       circuitQueryHash.String(),
-
-		Challenge:            challenge.String(),
-		GistRoot:             gistRoot.BigInt().String(),
-		IsRevocationChecked:  "0",
-		ProofType:            "0",
-		IssuerClaimIdenState: "0",
-		LinkID:               "0",
-		OperatorOutput:       "0",
+		CircuitQueryHash:       circuitQueryHash.String(),
+		Challenge:              challenge.String(),
+		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "0",
+		ProofType:              "0",
+		IssuerClaimIdenState:   "0",
+		LinkID:                 "0",
+		OperatorOutput:         "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -473,15 +471,13 @@ func Test_RevokedClaimWithRevocationCheck(t *testing.T) {
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		СircuitQueryHash:       circuitQueryHash.String(),
-
-		Challenge:           challenge.String(),
-		GistRoot:            gistRoot.BigInt().String(),
-		IsRevocationChecked: "1",
-
-		IssuerClaimIdenState: "0",
-		LinkID:               "0",
-		OperatorOutput:       "0",
+		CircuitQueryHash:       circuitQueryHash.String(),
+		Challenge:              challenge.String(),
+		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "1",
+		IssuerClaimIdenState:   "0",
+		LinkID:                 "0",
+		OperatorOutput:         "0",
 	}
 
 	json, err := json.Marshal(TestData{
@@ -676,7 +672,7 @@ func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bo
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
-		СircuitQueryHash:       circuitQueryHash.String(),
+		CircuitQueryHash:       circuitQueryHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
 		IsRevocationChecked:    "1",
@@ -917,16 +913,14 @@ func generateTestDataWithOperator(t *testing.T, isUserIDProfile, isSubjectIDProf
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "0",
-		СircuitQueryHash:       circuitQueryHash.String(),
-
-		Challenge: challenge.String(),
-		GistRoot:  gistRoot.BigInt().String(),
-
-		IsRevocationChecked:  "1",
-		IssuerClaimIdenState: "0",
-		ProofType:            "0",
-		LinkID:               linkID,
-		OperatorOutput:       operatorOutput,
+		CircuitQueryHash:       circuitQueryHash.String(),
+		Challenge:              challenge.String(),
+		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "1",
+		IssuerClaimIdenState:   "0",
+		ProofType:              "0",
+		LinkID:                 linkID,
+		OperatorOutput:         operatorOutput,
 	}
 
 	json, err := json.Marshal(TestData{
@@ -1108,15 +1102,14 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
-		СircuitQueryHash:       circuitQueryHash.String(),
-
-		Challenge:            challenge.String(),
-		GistRoot:             gistRoot.BigInt().String(),
-		IsRevocationChecked:  "1",
-		IssuerClaimIdenState: "0",
-		ProofType:            "0",
-		LinkID:               "0",
-		OperatorOutput:       "0",
+		CircuitQueryHash:       circuitQueryHash.String(),
+		Challenge:              challenge.String(),
+		GistRoot:               gistRoot.BigInt().String(),
+		IsRevocationChecked:    "1",
+		IssuerClaimIdenState:   "0",
+		ProofType:              "0",
+		LinkID:                 "0",
+		OperatorOutput:         "0",
 	}
 
 	json, err := json.Marshal(TestData{
