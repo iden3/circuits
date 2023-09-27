@@ -26,34 +26,35 @@ describe("Test credentialAtomicQueryV3OffChain.circom", function () {
         circuit.release()
     })
 
-    const sigBasePath = '../../testvectorgen/credentials/v3/sig/testdata'
-    const mtpBasePath = '../../testvectorgen/credentials/v3/mtp/testdata'
+    const sigBasePath = '../../testvectorgen/credentials/v3/testdata/sig'
+    const mtpBasePath = '../../testvectorgen/credentials/v3/testdata/mtp'
     const tests = [
         // sig
-        require(`${sigBasePath}/jsonld_non_inclusion.json`),
+        require(`${sigBasePath}/claimIssuedOnProfileID.json`),
+        require(`${sigBasePath}/claimIssuedOnProfileID2.json`),
+        require(`${sigBasePath}/claimIssuedOnUserID.json`),
         require(`${sigBasePath}/profileID_subject.json`),
-        require(`${sigBasePath}/profileID_subject_profileID2.json`),
-        require(`${sigBasePath}/profileID_subject_userid.json`),
-        require(`${sigBasePath}/regular_claim.json`),
-        require(`${sigBasePath}/revoked_claim_without_revocation_check.json`),
-        require(`${sigBasePath}/userID_subject.json`),
+        require(`${sigBasePath}/claimNonMerklized.json`),
         require(`${sigBasePath}/claimWithLinkNonce.json`),
-        require(`${sigBasePath}/nullify_modifier.json`),
-        require(`${sigBasePath}/selective_disclosure.json`),
         require(`${sigBasePath}/between_operator.json`),
         require(`${sigBasePath}/less_than_eq_operator.json`),
-        
+        require(`${sigBasePath}/selective_disclosure.json`),
+        require(`${sigBasePath}/nullify_modifier.json`),
+        require(`${sigBasePath}/revoked_claim_without_revocation_check.json`),
+        require(`${sigBasePath}/jsonld_non_inclusion.json`),
+
         // mtp
         require(`${mtpBasePath}/claimIssuedOnProfileID.json`),
         require(`${mtpBasePath}/claimIssuedOnProfileID2.json`),
         require(`${mtpBasePath}/claimIssuedOnUserID.json`),
+        require(`${mtpBasePath}/profileID_subject.json`),
         require(`${mtpBasePath}/claimNonMerklized.json`),
-        require(`${mtpBasePath}/revoked_claim_without_revocation_check.json`),
         require(`${mtpBasePath}/claimWithLinkNonce.json`),
-        require(`${mtpBasePath}/nullify_modifier.json`),
-        require(`${mtpBasePath}/selective_disclosure.json`),
         require(`${mtpBasePath}/between_operator.json`),
         require(`${mtpBasePath}/less_than_eq_operator.json`),
+        require(`${mtpBasePath}/selective_disclosure.json`),
+        require(`${mtpBasePath}/nullify_modifier.json`),
+        require(`${mtpBasePath}/revoked_claim_without_revocation_check.json`),
     ];
 
     tests.forEach(({ desc, inputs, expOut }) => {
