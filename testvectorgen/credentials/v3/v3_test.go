@@ -628,12 +628,12 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		OperatorOutput:         "0",
 	}
 
-	json, err := json.Marshal(TestData{
+	jsonData, err := json.Marshal(TestData{
 		desc,
 		inputs,
 		out,
 	})
 	require.NoError(t, err)
 
-	utils.SaveTestVector(t, fileName, string(json))
+	utils.SaveTestVector(t, fileName, string(jsonData))
 }
