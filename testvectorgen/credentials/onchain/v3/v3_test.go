@@ -247,7 +247,7 @@ func Test_JSON_LD_Proof_non_inclusion(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
-	generateJSONLD_NON_INCLUSIO_TestData(t, isUserIDProfile, isSubjectIDProfile, desc, "sig/jsonld_non_inclusion")
+	generateJSONLD_NON_INCLUSION_TestData(t, isUserIDProfile, isSubjectIDProfile, desc, "sig/jsonld_non_inclusion")
 }
 
 func Test_Less_Than_Eq(t *testing.T) {
@@ -261,24 +261,24 @@ func Test_Less_Than_Eq(t *testing.T) {
 
 func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCkeck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, false, 1, false, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, false, 1, false, proofType)
 }
 
 func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, operator int, value *[]string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCkeck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, operator, value, false, 1, false, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, operator, value, false, 1, false, proofType)
 }
 
 func generateRevokedTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, isRevocationChecked int, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCkeck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, true, isRevocationChecked, false, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, true, isRevocationChecked, false, proofType)
 }
 
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCkeck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", fileName, utils.EQ, nil, false, 1, true, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", fileName, utils.EQ, nil, false, 1, true, proofType)
 }
 
-func generateTestDataWithOperatorAndRevCkeck(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
+func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, operator int, value *[]string, isRevoked bool, isRevocationChecked int, isJSONLD bool, testProofType ProofType) {
 	var err error
 
@@ -557,7 +557,7 @@ func generateTestDataWithOperatorAndRevCkeck(t *testing.T, desc string, isUserID
 		Timestamp:              timestamp,
 		Merklized:              merklized,
 		Challenge:              challenge.String(),
-		GistRoot:               gistRoot.BigInt().String(), // 0 for inclusion, 1 for non-inclusion
+		GistRoot:               gistRoot.BigInt().String(),
 		IsRevocationChecked:    strconv.Itoa(isRevocationChecked),
 		ProofType:              proofType,
 		IssuerAuthState:        issuerAuthState,
@@ -565,17 +565,17 @@ func generateTestDataWithOperatorAndRevCkeck(t *testing.T, desc string, isUserID
 		OperatorOutput:         operatorOutput,
 	}
 
-	json, err := json.Marshal(TestData{
+	jsonData, err := json.Marshal(TestData{
 		desc,
 		inputs,
 		out,
 	})
 	require.NoError(t, err)
 
-	utils.SaveTestVector(t, fileName, string(json))
+	utils.SaveTestVector(t, fileName, string(jsonData))
 }
 
-func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
+func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
 	fileName string) {
 
 	var err error
@@ -752,12 +752,12 @@ func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubje
 		OperatorOutput:         "0",
 	}
 
-	json, err := json.Marshal(TestData{
+	jsonData, err := json.Marshal(TestData{
 		desc,
 		inputs,
 		out,
 	})
 	require.NoError(t, err)
 
-	utils.SaveTestVector(t, fileName, string(json))
+	utils.SaveTestVector(t, fileName, string(jsonData))
 }

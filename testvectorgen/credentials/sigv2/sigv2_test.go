@@ -338,7 +338,7 @@ func Test_JSON_LD_Proof_non_inclusion(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
-	generateJSONLD_NON_INCLUSIO_TestData(t, isUserIDProfile, isSubjectIDProfile, desc, "jsonld_non_inclusion")
+	generateJSONLD_NON_INCLUSION_TestData(t, isUserIDProfile, isSubjectIDProfile, desc, "jsonld_non_inclusion")
 }
 
 func generateJSONLDTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc, fileName string) {
@@ -579,7 +579,7 @@ func generateTestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, de
 	utils.SaveTestVector(t, fileName, string(json))
 }
 
-func generateJSONLD_NON_INCLUSIO_TestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
+func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubjectIDProfile bool, desc,
 	fileName string) {
 
 	var err error
