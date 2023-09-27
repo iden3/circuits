@@ -68,7 +68,7 @@ template getClaimMerklizeRoot() {
 
     out <== mux.out;
 
-    component gt = GreaterThan(252);
+    component gt = GreaterThan(3); // there's only 3 bits in merklizeLocation.out
     gt.in[0] <== merklizeLocation.out;
     gt.in[1] <== 0;
     flag <== gt.out;
@@ -80,18 +80,18 @@ template getClaimMerklizeRoot() {
 template getClaimHeader() {
     signal input claim[8];
 
-    signal output claimType;
+    signal output schema;
     signal output claimFlags[32];
 
-    component i0Bits = Num2Bits(256);
+    component i0Bits = Num2Bits(254);
     i0Bits.in <== claim[0];
 
-    component claimTypeNum = Bits2Num(128);
+    component schemaNum = Bits2Num(128);
 
     for (var i=0; i<128; i++) {
-        claimTypeNum.in[i] <== i0Bits.out[i];
+        schemaNum.in[i] <== i0Bits.out[i];
     }
-    claimType <== claimTypeNum.out;
+    schema <== schemaNum.out;
 
     for (var i=0; i<32; i++) {
         claimFlags[i] <== i0Bits.out[128 + i];
@@ -104,7 +104,7 @@ template getClaimSchema() {
 
     signal output schema;
 
-    component i0Bits = Num2Bits(256);
+    component i0Bits = Num2Bits(254);
     i0Bits.in <== claim[0];
 
     component schemaNum = Bits2Num(128);
@@ -123,7 +123,7 @@ template getClaimRevNonce() {
 
     component claimRevNonce = Bits2Num(64);
 
-    component v0Bits = Num2Bits(256);
+    component v0Bits = Num2Bits(254);
     v0Bits.in <== claim[4];
     for (var i=0; i<64; i++) {
         claimRevNonce.in[i] <== v0Bits.out[i];
@@ -215,15 +215,12 @@ template verifyCredentialSchema() {
 // verifyClaimSignature verifies that claim is signed with the provided public key
 template verifyClaimSignature() {
     signal input enabled;
-    signal input claim[8];
+    signal input claimHash;
     signal input sigR8x;
     signal input sigR8y;
     signal input sigS;
     signal input pubKeyX;
     signal input pubKeyY;
-
-    component hash = getClaimHash();
-    hash.claim <== claim;
 
     // signature verification
     EdDSAPoseidonVerifier()(
@@ -233,7 +230,7 @@ template verifyClaimSignature() {
         S <== sigS,
         R8x <== sigR8x,
         R8y <== sigR8y,
-        M <== hash.hash
+        M <== claimHash
     );
 }
 
@@ -298,7 +295,7 @@ template verifyExpirationTime() {
     signal claimExpiration <==  getClaimExpiration()(claim);
 
     // timestamp < claimExpiration
-    signal lt <== LessEqThan(252)([
+    signal lt <== LessEqThan(64)([
         timestamp,
         claimExpiration]
     );
@@ -319,7 +316,7 @@ template getClaimExpiration() {
 
     component expirationBits = Bits2Num(64);
 
-    component v0Bits = Num2Bits(256);
+    component v0Bits = Num2Bits(254);
     v0Bits.in <== claim[4];
     for (var i=0; i<64; i++) {
         expirationBits.in[i] <== v0Bits.out[i+64];

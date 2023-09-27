@@ -241,6 +241,22 @@ describe("Test query", function () {
             await circuit.checkConstraints(w);
         });
 
+        it("#LessThan: p-2 < p-1 should be true", async () => {
+            const w = await circuit.calculateWitness({
+                in: "-2",
+                operator: LT,
+                value: ["-1", "0", "0"],
+            }, false);
+
+            const expOut = {
+                out: 1,
+                value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]
+            }
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
         it("#LessThan: p-4294967290 < 10 should be false", async () => {
             const w = await circuit.calculateWitness({
                 in: "-4294967290",
@@ -739,6 +755,22 @@ describe("Test query", function () {
         it("#LessThanOrEqual: 10 <= p-1 should be true", async () => {
             const w = await circuit.calculateWitness({
                 in: "10",
+                operator: LTE,
+                value: ["-1", "0", "0"],
+            }, false);
+
+            const expOut = {
+                out: 1,
+                value: ["21888242871839275222246405745257275088548364400416034343698204186575808495616", "0", "0"]
+            }
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("#LessThanOrEqual: p-2 <= p-1 should be true", async () => {
+            const w = await circuit.calculateWitness({
+                in: "-2",
                 operator: LTE,
                 value: ["-1", "0", "0"],
             }, false);

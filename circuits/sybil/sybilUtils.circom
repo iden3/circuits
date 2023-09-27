@@ -1,4 +1,4 @@
-pragma circom 2.1.1;
+pragma circom 2.1.5;
 
 template GetStateCommitmentPosition() {
     signal output out;
@@ -26,9 +26,13 @@ template VerifyStateCommitment(UserLevels, GistLevels){ // stateCommitmentClaim
 
     signal input genesisID;
 
+    signal claimHi, claimHv;
+	(claimHi, claimHv) <== getClaimHiHv()(claim);
+
     // Verify claim is included in claims tree root
     component claimIssuanceCheck = checkClaimExists(UserLevels);
-    for (var i=0; i<8; i++) { claimIssuanceCheck.claim[i] <== claim[i]; }
+    claimIssuanceCheck.claimHi <== claimHi;
+    claimIssuanceCheck.claimHv <== claimHv;
     for (var i=0; i<UserLevels; i++) { claimIssuanceCheck.claimMTP[i] <== claimMtp[i]; }
     claimIssuanceCheck.treeRoot <== claimClaimsRoot;
     claimIssuanceCheck.enabled <== 1;

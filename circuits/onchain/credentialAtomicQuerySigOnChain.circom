@@ -210,10 +210,14 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
         issuerAuthRootsTreeRoot
     );
 
+    signal issuerAuthClaimHi, issuerAuthClaimHv;
+	(issuerAuthClaimHi, issuerAuthClaimHv) <== getClaimHiHv()(issuerAuthClaim);
+
     // issuerAuthClaim proof of existence (isProofExist)
     checkClaimExists(issuerLevels)(
         1,
-        issuerAuthClaim,
+        issuerAuthClaimHi,
+        issuerAuthClaimHv,
         issuerAuthClaimMtp,
         issuerAuthClaimsTreeRoot
     );
@@ -232,10 +236,13 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     component issuerAuthPubKey = getPubKeyFromClaim();
     issuerAuthPubKey.claim <== issuerAuthClaim;
 
+   signal issuerClaimHash;
+    (issuerClaimHash, _, _) <== getClaimHash()(issuerClaim);
+
     // issuerClaim check signature
     verifyClaimSignature()(
         1,
-        issuerClaim,
+        issuerClaimHash,
         issuerClaimSignatureR8x,
         issuerClaimSignatureR8y,
         issuerClaimSignatureS,

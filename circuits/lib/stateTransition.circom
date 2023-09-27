@@ -75,8 +75,11 @@ template StateTransition(IdOwnershipLevels) {
         signatureS
     );
 
+    signal authClaimHi, authClaimHv;
+	(authClaimHi, authClaimHv) <== getClaimHiHv()(authClaim);
+
     // check auth claim exists in newClaimsTreeRoot and newUserState
-    checkClaimExists(IdOwnershipLevels)(1, authClaim, newAuthClaimMtp, newClaimsTreeRoot);
+    checkClaimExists(IdOwnershipLevels)(1, authClaimHi, authClaimHv, newAuthClaimMtp, newClaimsTreeRoot);
 
     checkIdenStateMatchesRoots()(1, newClaimsTreeRoot, newRevTreeRoot, newRootsTreeRoot, newUserState);
 }

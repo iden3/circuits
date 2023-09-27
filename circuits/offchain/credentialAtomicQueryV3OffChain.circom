@@ -98,19 +98,22 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         issuerClaim,
         userGenesisID,
         claimSubjectProfileNonce
-    );
+    ); // 1744 constraints
 
     // Verify issuerClaim schema
-    verifyCredentialSchema()(1, issuerClaim, claimSchema);
+    verifyCredentialSchema()(1, issuerClaim, claimSchema); // 254 constraints
 
     // verify issuerClaim expiration time
-    verifyExpirationTime()(issuerClaim, timestamp);
+    verifyExpirationTime()(issuerClaim, timestamp); // 574 constraints
     
     signal isSig;
     signal isMTP;
     isSig  <== 1 - proofType;
     isMTP <== proofType;
     isSig * isMTP === 0;
+
+    signal issuerClaimHash, issuerClaimHi, issuerClaimHv;
+    (issuerClaimHash, issuerClaimHi, issuerClaimHv) <== getClaimHash()(issuerClaim);
 
     issuerAuthState <== sigFlow(issuerLevels)(
         enabled <== isSig,
@@ -125,20 +128,22 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         issuerAuthClaimNonRevMtpAuxHv <== issuerAuthClaimNonRevMtpAuxHv,
         issuerClaimNonRevRevTreeRoot <== issuerClaimNonRevRevTreeRoot,
         issuerClaim <== issuerClaim,
+        issuerClaimHash <== issuerClaimHash,
         issuerClaimSignatureR8x <== issuerClaimSignatureR8x,
         issuerClaimSignatureR8y <== issuerClaimSignatureR8y,
         issuerClaimSignatureS <== issuerClaimSignatureS
-    );
+    ); // 28265 constraints
 
     mtpFlow(issuerLevels)(
         enabled <== isMTP,
-        issuerClaim <== issuerClaim,
+        issuerClaimHi <== issuerClaimHi,
+        issuerClaimHv <== issuerClaimHv,
         issuerClaimMtp <== issuerClaimMtp,
         issuerClaimClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
         issuerClaimRevTreeRoot <== issuerClaimRevTreeRoot,
         issuerClaimRootsTreeRoot <== issuerClaimRootsTreeRoot,
         issuerClaimIdenState <== issuerClaimIdenState
-    );
+    ); // 11436 constraints
 
     // non revocation status
     checkClaimNotRevoked(issuerLevels)(
@@ -149,7 +154,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         auxHi <== issuerClaimNonRevMtpAuxHi,
         auxHv <== issuerClaimNonRevMtpAuxHv,
         treeRoot <== issuerClaimNonRevRevTreeRoot
-    );
+    ); // 11763 constraints
 
     // verify issuer state for claim non-revocation proof
     checkIdenStateMatchesRoots()(
@@ -158,7 +163,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         issuerClaimNonRevRevTreeRoot,
         issuerClaimNonRevRootsTreeRoot,
         issuerClaimNonRevState
-    );
+    ); // 261 constraints
 
     /////////////////////////////////////////////////////////////////
     // Field Path and Value Verification
@@ -180,7 +185,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         isOld0 <== claimPathMtpNoAux,
         key <== claimPathKey,
         value <== claimPathValue
-    );
+    ); // 9585 constraints
 
     // select value from claim by slot index (0-7)
     signal slotValue <== getValueByIndex()(issuerClaim, slotIndex);
@@ -198,6 +203,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     /////////////////////////////////////////////////////////////////
 
     // verify query
+    // 2482 constraints (Query+LessThan+ForceEqualIfEnabled)
     signal querySatisfied <== Query(valueArraySize)(
         in <== fieldValue,
         value <== value,
@@ -225,7 +231,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         fieldValue,
         verifierID,
         value[0] // get csr from value array
-    );
+    ); // 300 constraints
 
     /////////////////////////////////////////////////////////////////
     // Modifier Operator Validation & Output Preparation
@@ -244,12 +250,12 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     /////////////////////////////////////////////////////////////////
     // ProfileID calculation
     /////////////////////////////////////////////////////////////////
-    userID <== SelectProfile()(userGenesisID, profileNonce);
+    userID <== SelectProfile()(userGenesisID, profileNonce); // 1485 constraints
 
     /////////////////////////////////////////////////////////////////
     // Link ID calculation
     /////////////////////////////////////////////////////////////////
-    linkID <== LinkID()(issuerClaim, linkNonce);
+    linkID <== LinkID()(issuerClaim, linkNonce); // 1077 constraints
 }
 
 template sigFlow(issuerLevels) {
@@ -265,6 +271,7 @@ template sigFlow(issuerLevels) {
     signal input issuerAuthClaimNonRevMtpAuxHv;
     signal input issuerClaimNonRevRevTreeRoot;
     signal input issuerClaim[8];
+    signal input issuerClaimHash;
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
@@ -284,12 +291,17 @@ template sigFlow(issuerLevels) {
     );
     issuerAuthState <== tmpAuthState * enabled;
 
+    signal issuerAuthClaimHi, issuerAuthClaimHv;
+	(issuerAuthClaimHi, issuerAuthClaimHv) <== getClaimHiHv()(issuerAuthClaim);
+
+    // TODO: combine checkClaimExists & checkClaimNotRevoked for claim in mtp flow and authClaim in sig flow
     checkClaimExists(issuerLevels)(
         enabled,
-        issuerAuthClaim,
+        issuerAuthClaimHi,
+        issuerAuthClaimHv,
         issuerAuthClaimMtp,
         issuerAuthClaimsTreeRoot
-    );
+    ); // 11172 constraints
 
     checkClaimNotRevoked(issuerLevels)(
         enabled <== enabled,
@@ -298,26 +310,27 @@ template sigFlow(issuerLevels) {
         noAux <== issuerAuthClaimNonRevMtpNoAux,
         auxHi <== issuerAuthClaimNonRevMtpAuxHi,
         auxHv <== issuerAuthClaimNonRevMtpAuxHv,
-        treeRoot <== issuerClaimNonRevRevTreeRoot
-    );
+        treeRoot <== issuerClaimNonRevRevTreeRoot // TODO: can we reuse issuerAuthRevTreeRoot & state here?
+    ); // 11763 constraints
 
     component issuerAuthPubKey = getPubKeyFromClaim();
     issuerAuthPubKey.claim <== issuerAuthClaim;
 
     verifyClaimSignature()(
         enabled,
-        issuerClaim,
+        issuerClaimHash,
         issuerClaimSignatureR8x,
         issuerClaimSignatureR8y,
         issuerClaimSignatureS,
         issuerAuthPubKey.Ax,
         issuerAuthPubKey.Ay
-    );
+    ); // 4217 constraints
 }
 
 template mtpFlow(issuerLevels) {
     signal input enabled;
-    signal input issuerClaim[8];
+    signal input issuerClaimHi;
+    signal input issuerClaimHv;
     signal input issuerClaimMtp[issuerLevels];
     signal input issuerClaimClaimsTreeRoot;
     signal input issuerClaimRevTreeRoot;
@@ -326,7 +339,8 @@ template mtpFlow(issuerLevels) {
 
     verifyClaimIssuance(issuerLevels)(
         enabled <== enabled,
-        claim <== issuerClaim,
+        claimHi <== issuerClaimHi,
+        claimHv <== issuerClaimHv,
         claimIssuanceMtp <== issuerClaimMtp,
         claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
         claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot,

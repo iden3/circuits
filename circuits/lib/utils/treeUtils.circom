@@ -11,12 +11,10 @@ include "claimUtils.circom";
 // checkClaimExists verifies that claim is included into the claim tree root
 template checkClaimExists(IssuerLevels) {
     signal input enabled;
-	signal input claim[8];
+	signal input claimHi;
+	signal input claimHv;
 	signal input claimMTP[IssuerLevels];
 	signal input treeRoot;
-
-	component claimHiHv = getClaimHiHv();
-	claimHiHv.claim <== claim;
 
 	SMTVerifier(IssuerLevels)(
 	    enabled <== enabled,  // enabled
@@ -25,8 +23,8 @@ template checkClaimExists(IssuerLevels) {
         oldKey <== 0, // oldKey
         oldValue <== 0, // oldValue
         isOld0 <== 0, // isOld0
-        key <== claimHiHv.hi, // key
-        value <== claimHiHv.hv, // value
+        key <== claimHi, // key
+        value <== claimHv, // value
         fnc <== 0 // fnc = inclusion
     );
 }
@@ -80,6 +78,8 @@ template checkIdenStateMatchesRoots() {
 // TODO: review if we need both verifyClaimIssuanceNonRev and verifyClaimIssuance
 template verifyClaimIssuanceNonRev(IssuerLevels) {
 	signal input claim[8];
+	signal input claimHi;
+	signal input claimHv;
 	signal input claimIssuanceMtp[IssuerLevels];
 	signal input claimIssuanceClaimsTreeRoot;
 	signal input claimIssuanceRevTreeRoot;
@@ -98,7 +98,8 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 
     verifyClaimIssuance(IssuerLevels)(
         1,
-        claim,
+        claimHi,
+        claimHv,
         claimIssuanceMtp,
         claimIssuanceClaimsTreeRoot,
         claimIssuanceRevTreeRoot,
@@ -130,7 +131,8 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 // verifyClaimIssuance verifies that claim is issued by the issuer
 template verifyClaimIssuance(IssuerLevels) {
     signal input enabled;
-	signal input claim[8];
+	signal input claimHi;
+	signal input claimHv;
 	signal input claimIssuanceMtp[IssuerLevels];
 	signal input claimIssuanceClaimsTreeRoot;
 	signal input claimIssuanceRevTreeRoot;
@@ -140,7 +142,8 @@ template verifyClaimIssuance(IssuerLevels) {
     // verify country claim is included in claims tree root
     checkClaimExists(IssuerLevels)(
         enabled,
-        claim,
+        claimHi,
+        claimHv,
         claimIssuanceMtp,
         claimIssuanceClaimsTreeRoot
     );
@@ -182,9 +185,13 @@ template VerifyAuthClaimAndSignature(nLevels) {
         80551937543569765027552589160822318028
     );
 
+    signal authClaimHi, authClaimHv;
+	(authClaimHi, authClaimHv) <== getClaimHiHv()(authClaim);
+
     checkClaimExists(nLevels)(
         1,
-        authClaim,
+        authClaimHi,
+        authClaimHv,
         authClaimMtp,
         claimsTreeRoot
     );

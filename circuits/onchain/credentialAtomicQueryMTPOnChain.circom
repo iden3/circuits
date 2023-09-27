@@ -181,10 +181,14 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
 
     /////////////////////////////////////////////////////////////////
 
+    signal issuerClaimHi, issuerClaimHv;
+	(issuerClaimHi, issuerClaimHv) <== getClaimHiHv()(issuerClaim);
+
     // verify issuerClaim issued
     verifyClaimIssuance(issuerLevels)(
         enabled <== 1,
-        claim <== issuerClaim,
+        claimHi <== issuerClaimHi,
+        claimHv <== issuerClaimHv,
         claimIssuanceMtp <== issuerClaimMtp,
         claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
         claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot,
