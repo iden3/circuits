@@ -286,3 +286,20 @@ func CalculateLinkID(linkNonce string, claim *core.Claim) (string, error) {
 
 	return linkID.String(), nil
 }
+
+// CalculateNullify returns nullify operator
+func CalculateNullify(genesisID, claimSubjectProfileNonce, claimSchema, fieldValue, verifierID, crs *big.Int) (string, error) {
+	if claimSubjectProfileNonce == big.NewInt(0) {
+		return "0", nil
+	}
+	if verifierID == big.NewInt(0) {
+		return "0", nil
+	}
+
+	nullifier, err := poseidon.Hash([]*big.Int{genesisID, claimSubjectProfileNonce, claimSchema, fieldValue, verifierID, crs})
+	if err != nil {
+		return "", err
+	}
+
+	return nullifier.String(), nil
+}

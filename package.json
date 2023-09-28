@@ -13,18 +13,18 @@
     "circomlib": "^2.0.5"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.22",
-    "@types/mocha": "^5.2.6",
-    "@types/node": "^14.0.0",
-    "adm-zip": "^0.5.9",
-    "aws-sdk": "^2.1036.0",
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.5.7",
+    "adm-zip": "^0.5.10",
+    "aws-sdk": "^2.1447.0",
     "circom_tester": "^0.0.19",
     "circomlibjs": "v0.1.7",
-    "chai": "^4.3.4",
-    "mocha": "^9.1.2",
+    "chai": "^4.3.8",
+    "mocha": "^10.2.0",
     "mocha-steps": "^1.3.0",
-    "ts-node": "^7.0.1",
-    "tslint": "^5.18.0",
-    "typescript": "^3.9.10"
+    "ts-node": "^10.9.1",
+    "eslint": "^8.48.0",
+    "typescript": "^5.2.2"
   }
 }

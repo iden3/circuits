@@ -1,19 +1,30 @@
 pragma circom 2.1.1;
-include "../../../node_modules/circomlib/circuits/mux3.circom";
+include "../../../node_modules/circomlib/circuits/mux1.circom";
+include "../../../node_modules/circomlib/circuits/mux4.circom";
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
+include "../../../node_modules/circomlib/circuits/gates.circom";
 include "comparators.circom";
 
 /*
   Operators:
- "0" - noop, skip execution. Ignores all `in` and `value` passed to query, out 1
- "1" - equals
- "2" - less-than
- "3" - greater-than
- "4" - in
- "5" - notin
- "6" - not equals
+    Query operators:
+      0 - noop, skip execution. Ignores all `in` and `value` passed to query, out 1
+      1 - equals
+      2 - less than
+      3 - greater than
+      4 - in
+      5 - not in
+      6 - not equals
+      7 - less than or equal
+      8 - greater than or equal
+      9 - between
+    Modifier/computation operators:
+      16 - selective disclosure (16 = 10000 binary)
+      17 - nullify (17 = 10001 binary)
 */
+
+// Query template works only with Query operators (0-15), for the rest returns 0
 template Query (valueArraySize) {
     // signals
     signal input in;
@@ -21,47 +32,59 @@ template Query (valueArraySize) {
     signal input operator;
     signal output out;
 
-    // operation components
-    component eq = IsEqual();
-    eq.in[0] <== in;
-    eq.in[1] <== value[0];
+    // Equals
+    signal eq <== IsEqual()([in, value[0]]);
 
     // LessThan
-    component lt = LessThan254();
-    lt.in[0] <== in;
-    lt.in[1] <== value[0];
+    signal lt <== LessThan254()([in, value[0]]);
 
-    component gt = GreaterThan254();
-    gt.in[0] <== in;
-    gt.in[1] <== value[0];
+    // GreaterThan
+    signal gt <== GreaterThan254()([in, value[0]]);
 
     // in
-    component inComp = IN(valueArraySize);
-    inComp.in <== in;
-    for(var i = 0; i<valueArraySize; i++){inComp.value[i] <== value[i];}
+    signal inComp <== IN(valueArraySize)(in, value);
 
-    // mux
-    component mux = Mux3();
-    component n2b = Num2Bits(3);
-    n2b.in <== operator;
+    // lte
+    signal lte <== 1 - gt; // lte === !gt
 
-    mux.s[0] <== n2b.out[0];
-    mux.s[1] <== n2b.out[1];
-    mux.s[2] <== n2b.out[2];
+    // gte
+    signal gte <== 1 - lt; // gte === !lt
 
-    mux.c[0] <== 1; // noop, skip execution
-    mux.c[1] <== eq.out;
-    mux.c[2] <== lt.out;
-    mux.c[3] <== gt.out;
-    mux.c[4] <== inComp.out; // in
+    // between (value[0] <= in <= value[1])
+    signal gt2 <== GreaterThan254()([in, value[1]]);
+    signal lte2 <== 1 - gt2; // lte === !gt
+    signal between <== AND()(gte, lte2);
 
-    mux.c[5] <== 1-inComp.out; // nin
+    signal opBits[5] <== Num2Bits(5)(operator); // values 0-15 are query operators, 16-31 - modifiers/computations
 
-    mux.c[6] <== 1-eq.out; // neq
-    mux.c[7] <== 0; // not in use
+    // query operator mux
+    component queryOpSatisfied = Mux4();
+    queryOpSatisfied.s <== [opBits[0], opBits[1], opBits[2], opBits[3]];
+    // We don't use 5th bit (opBits[4]) here; which specifies whether operator is query or
+    // modifier/computation operator. It's used in the final mux.
 
-    // output
-    out <== mux.out;
+    queryOpSatisfied.c[0] <== 1; // noop; skip execution
+    queryOpSatisfied.c[1] <== eq;
+    queryOpSatisfied.c[2] <== lt;
+    queryOpSatisfied.c[3] <== gt;
+    queryOpSatisfied.c[4] <== inComp; // in
+    queryOpSatisfied.c[5] <== 1-inComp; // nin
+    queryOpSatisfied.c[6] <== 1-eq; // neq
+    queryOpSatisfied.c[7] <== lte; // lte === !gt
+    queryOpSatisfied.c[8] <== gte; // gte === !lt
+    queryOpSatisfied.c[9] <== between; // between
+    queryOpSatisfied.c[10] <== 0; // not used
+    queryOpSatisfied.c[11] <== 0; // not used
+    queryOpSatisfied.c[12] <== 0; // not used
+    queryOpSatisfied.c[13] <== 0; // not used
+    queryOpSatisfied.c[14] <== 0; // not used
+    queryOpSatisfied.c[15] <== 0; // not used
+
+    // final output mux
+    out <== Mux1()(
+        s <== opBits[4], // specifies whether operator is query or modifier/computation operator
+        c <== [queryOpSatisfied.out, 0]
+    );
 }
 
 

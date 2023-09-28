@@ -10,5 +10,6 @@ component main{public [requestID,
                        isRevocationChecked,
                        challenge,
                        gistRoot,
-                       proofType
+                       proofType,
+                       verifierID
                        ]} = credentialAtomicQueryV3OnChain(40, 32, 64, 40, 64);

@@ -1,8 +1,16 @@
-pragma circom 2.1.5; /* chage to 2.1.6 */
+pragma circom 2.1.5;
 
-include "./credentialAtomicQueryMTPOffChain.circom";
-include "./credentialAtomicQuerySigOffChain.circom";
+include "../../node_modules/circomlib/circuits/mux1.circom";
+include "../../node_modules/circomlib/circuits/mux4.circom";
+include "../../node_modules/circomlib/circuits/bitify.circom";
+include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../auth/authV2.circom";
 include "../lib/linked/linkId.circom";
+include "../lib/query/comparators.circom";
+include "../lib/query/modifiers.circom";
+include "../lib/query/nullify.circom";
+include "../lib/query/query.circom";
+include "../lib/utils/idUtils.circom";
 
 template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize) {
     // common outputs for Sig and MTP
@@ -26,6 +34,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal input issuerClaimNonRevRevTreeRoot;
     signal input issuerClaimNonRevRootsTreeRoot;
     signal input issuerClaimNonRevState;
+
     /* current time */
     signal input timestamp;
 
@@ -73,12 +82,15 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     // Private random nonce, used to generate LinkID
     signal input linkNonce;
     signal output linkID;
-    
-    
-     /*
-    >>>>>>>>>>>>>>>>>>>>>>>>>>> End Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    */
 
+    // Identifier of the verifier
+    signal input verifierID;
+
+    // Modifier/Computation Operator output ($sd, $nullify)
+    signal output operatorOutput;
+
+    /////////////////////////////////////////////////////////////////
+    // Claim Verification (id, schema, expiration, issuance, revocation)
     /////////////////////////////////////////////////////////////////
 
     // Check issuerClaim is issued to provided identity
@@ -148,6 +160,10 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         issuerClaimNonRevState
     );
 
+    /////////////////////////////////////////////////////////////////
+    // Field Path and Value Verification
+    /////////////////////////////////////////////////////////////////
+
     component merklize = getClaimMerklizeRoot();
     merklize.claim <== issuerClaim;
 
@@ -178,6 +194,8 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     );
 
     /////////////////////////////////////////////////////////////////
+    // Query Operator Processing
+    /////////////////////////////////////////////////////////////////
 
     // verify query
     signal querySatisfied <== Query(valueArraySize)(
@@ -186,9 +204,46 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         operator <== operator
     );
 
-    querySatisfied === 1;
+    signal isQueryOp <== LessThan(5)([operator, 16]);
+    ForceEqualIfEnabled()(
+        isQueryOp,
+        [querySatisfied, 1]
+    );
 
-    /* ProfileID calculation */
+    /////////////////////////////////////////////////////////////////
+    // Modifier/Computation Operators Processing
+    /////////////////////////////////////////////////////////////////
+
+    // selective disclosure
+    // no need to calc anything, fieldValue is just passed as an output
+
+    // nullifier calculation
+    signal nullifier <== Nullify()(
+        userGenesisID,
+        claimSubjectProfileNonce,
+        claimSchema,
+        fieldValue,
+        verifierID,
+        value[0] // get csr from value array
+    );
+
+    /////////////////////////////////////////////////////////////////
+    // Modifier Operator Validation & Output Preparation
+    /////////////////////////////////////////////////////////////////
+
+    // output value only if modifier operation was selected
+    operatorOutput <== modifierValidatorOutputSelector()(
+        operator <== operator,
+        modifierOutputs <== [
+            fieldValue, // 16 - selective disclosure (16-16 = index 0)
+            nullifier, // 17 - nullify (17-16 = index 1)
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 18-31 - not used
+        ]
+    );
+
+    /////////////////////////////////////////////////////////////////
+    // ProfileID calculation
+    /////////////////////////////////////////////////////////////////
     userID <== SelectProfile()(userGenesisID, profileNonce);
 
     /////////////////////////////////////////////////////////////////

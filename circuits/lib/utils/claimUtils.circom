@@ -75,7 +75,7 @@ template getClaimMerklizeRoot() {
 }
 
 
-// getClaimHeader gets the header of a claim, outputing the claimType as an
+// getClaimHeader gets the header of a claim, outputting the claimType as an
 // integer and the claimFlags as a bit array.
 template getClaimHeader() {
     signal input claim[8];
@@ -172,9 +172,6 @@ template verifyCredentialSubject() {
     signal input claim[8];
     signal input id;
 
-    component header = getClaimHeader();
-    header.claim <== claim;
-
     component subjectOtherIden = getClaimSubjectOtherIden();
     subjectOtherIden.claim <== claim;
 
@@ -187,9 +184,6 @@ template verifyCredentialSubjectProfile() {
     signal input claim[8];
     signal input id;
     signal input nonce;
-
-    component header = getClaimHeader();
-    header.claim <== claim;
 
     component subjectOtherIden = getClaimSubjectOtherIden();
     subjectOtherIden.claim <== claim;

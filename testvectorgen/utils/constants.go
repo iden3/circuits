@@ -9,6 +9,11 @@ const (
 	IN
 	NIN
 	NE
+	LTE
+	GTE
+	BETWEEN
+	SD      = 16
+	NULLIFY = 17
 )
 
 const TestClaimDocument = `{
