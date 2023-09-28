@@ -115,7 +115,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal issuerClaimHash, issuerClaimHi, issuerClaimHv;
     (issuerClaimHash, issuerClaimHi, issuerClaimHv) <== getClaimHash()(issuerClaim);
 
-    issuerAuthState <== sigFlow(issuerLevels)(
+    sigFlow(issuerLevels)(
         enabled <== isSig,
         issuerAuthClaim <== issuerAuthClaim,
         issuerAuthClaimsTreeRoot <== issuerAuthClaimsTreeRoot,
@@ -134,16 +134,54 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         issuerClaimSignatureS <== issuerClaimSignatureS
     ); // 28265 constraints
 
-    mtpFlow(issuerLevels)(
-        enabled <== isMTP,
-        issuerClaimHi <== issuerClaimHi,
-        issuerClaimHv <== issuerClaimHv,
-        issuerClaimMtp <== issuerClaimMtp,
-        issuerClaimClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
-        issuerClaimRevTreeRoot <== issuerClaimRevTreeRoot,
-        issuerClaimRootsTreeRoot <== issuerClaimRootsTreeRoot,
-        issuerClaimIdenState <== issuerClaimIdenState
-    ); // 11436 constraints
+    // TODO: move calc outside of the circuit
+    signal tmpAuthState;
+    tmpAuthState <== getIdenState()(
+        issuerAuthClaimsTreeRoot,
+        issuerAuthRevTreeRoot,
+        issuerAuthRootsTreeRoot
+    );
+    issuerAuthState <== tmpAuthState * isSig;
+
+//    mtpFlow(issuerLevels)(
+//        enabled <== isMTP,
+//        issuerClaimHi <== issuerClaimHi,
+//        issuerClaimHv <== issuerClaimHv,
+//        issuerClaimMtp <== issuerClaimMtp,
+//        issuerClaimClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
+//        issuerClaimRevTreeRoot <== issuerClaimRevTreeRoot,
+//        issuerClaimRootsTreeRoot <== issuerClaimRootsTreeRoot,
+//        issuerClaimIdenState <== issuerClaimIdenState
+//    ); // 11436 constraints
+
+    signal issuerAuthClaimHi, issuerAuthClaimHv;
+	(issuerAuthClaimHi, issuerAuthClaimHv) <== getClaimHiHv()(issuerAuthClaim);
+
+    signal tmpClaimHi, tmpClaimHv, tmpClaimIssuanceMtp[issuerLevels],
+        tmpClaimIssuanceClaimsTreeRoot, tmpClaimIssuanceRevTreeRoot,
+        tmpClaimIssuanceRootsTreeRoot, tmpClaimIssuanceIdenState;
+
+    tmpClaimHi <== Mux1()([issuerClaimHi, issuerAuthClaimHi], isSig);
+    tmpClaimHv <== Mux1()([issuerClaimHv, issuerAuthClaimHv], isSig);
+    for (var i = 0; i < issuerLevels; i++) {
+        tmpClaimIssuanceMtp[i] <== Mux1()([issuerClaimMtp[i], issuerAuthClaimMtp[i]], isSig);
+    }
+    tmpClaimIssuanceClaimsTreeRoot <== Mux1()([issuerClaimClaimsTreeRoot, issuerAuthClaimsTreeRoot], isSig);
+    tmpClaimIssuanceRevTreeRoot <== Mux1()([issuerClaimRevTreeRoot, issuerAuthRevTreeRoot], isSig);
+    tmpClaimIssuanceRootsTreeRoot <== Mux1()([issuerClaimRootsTreeRoot, issuerAuthRootsTreeRoot], isSig);
+    tmpClaimIssuanceIdenState <== Mux1()([issuerClaimIdenState, issuerAuthState], isSig);
+
+    // Verify issuance of claim in case of MTP proof OR issuance of auth claim in case of Sig proof
+    verifyClaimIssuance(issuerLevels)(
+        enabled <== 1,
+        claimHi <== tmpClaimHi,
+        claimHv <== tmpClaimHv,
+        claimIssuanceMtp <== tmpClaimIssuanceMtp,
+        claimIssuanceClaimsTreeRoot <== tmpClaimIssuanceClaimsTreeRoot,
+        claimIssuanceRevTreeRoot <== tmpClaimIssuanceRevTreeRoot,
+        claimIssuanceRootsTreeRoot <== tmpClaimIssuanceRootsTreeRoot,
+        claimIssuanceIdenState <== tmpClaimIssuanceIdenState
+    );
 
     // non revocation status
     checkClaimNotRevoked(issuerLevels)(
@@ -275,33 +313,12 @@ template sigFlow(issuerLevels) {
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
-    signal output issuerAuthState;
 
     verifyCredentialSchema()(
         enabled,
         issuerAuthClaim,
         80551937543569765027552589160822318028
     );
-
-    signal tmpAuthState;
-    tmpAuthState <== getIdenState()(
-        issuerAuthClaimsTreeRoot,
-        issuerAuthRevTreeRoot,
-        issuerAuthRootsTreeRoot
-    );
-    issuerAuthState <== tmpAuthState * enabled;
-
-    signal issuerAuthClaimHi, issuerAuthClaimHv;
-	(issuerAuthClaimHi, issuerAuthClaimHv) <== getClaimHiHv()(issuerAuthClaim);
-
-    // TODO: combine checkClaimExists & checkClaimNotRevoked for claim in mtp flow and authClaim in sig flow
-    checkClaimExists(issuerLevels)(
-        enabled,
-        issuerAuthClaimHi,
-        issuerAuthClaimHv,
-        issuerAuthClaimMtp,
-        issuerAuthClaimsTreeRoot
-    ); // 11172 constraints
 
     checkClaimNotRevoked(issuerLevels)(
         enabled <== enabled,
