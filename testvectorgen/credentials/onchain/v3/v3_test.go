@@ -113,6 +113,8 @@ type Inputs struct {
 	ProofType string `json:"proofType"` // 0 for sig, 1 for mtp
 	// Private random nonce, used to generate LinkID
 	LinkNonce string `json:"linkNonce"`
+
+	VerifierID string `json:"verifierID"`
 }
 
 type Outputs struct {
@@ -130,6 +132,7 @@ type Outputs struct {
 	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
 	IssuerAuthState        string `json:"issuerAuthState"` // Sig specific
 	LinkID                 string `json:"linkID"`
+	VerifierID             string `json:"verifierID"`
 	OperatorOutput         string `json:"operatorOutput"`
 }
 
@@ -264,14 +267,14 @@ func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDPro
 	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, false, 1, false, proofType)
 }
 
-func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce string, fileName string, operator int, value *[]string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, operator, value, false, 1, false, proofType)
-}
-
 func generateRevokedTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, isRevocationChecked int, proofType ProofType) {
 	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, true, isRevocationChecked, false, proofType)
+}
+
+func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
+	linkNonce string, fileName string, operator int, value *[]string, proofType ProofType) {
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, operator, value, false, 1, false, proofType)
 }
 
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, proofType ProofType) {
@@ -447,30 +450,28 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := Inputs{
-		RequestID:     requestID.String(),
-		UserGenesisID: user.ID.BigInt().String(),
-		ProfileNonce:  nonce.String(),
-
-		UserAuthClaim:               user.AuthClaim,
-		UserAuthClaimMtp:            authMTProof,
-		UserAuthClaimNonRevMtp:      authNonRevMTProof,
-		UserAuthClaimNonRevMtpAuxHi: nodeAuxNonRev.Key,
-		UserAuthClaimNonRevMtpAuxHv: nodeAuxNonRev.Value,
-		UserAuthClaimNonRevMtpNoAux: nodeAuxNonRev.NoAux,
-		Challenge:                   challenge.String(),
-		ChallengeSignatureR8X:       sig.R8.X.String(),
-		ChallengeSignatureR8Y:       sig.R8.Y.String(),
-		ChallengeSignatureS:         sig.S.String(),
-		UserClaimsTreeRoot:          user.Clt.Root().BigInt().String(),
-		UserRevTreeRoot:             user.Ret.Root().BigInt().String(),
-		UserRootsTreeRoot:           user.Rot.Root().BigInt().String(),
-		UserState:                   user.State(t).String(),
-		GistRoot:                    gistRoot.BigInt().String(),
-		GistMtp:                     gistProof,
-		GistMtpAuxHi:                gistNodAux.Key,
-		GistMtpAuxHv:                gistNodAux.Value,
-		GistMtpNoAux:                gistNodAux.NoAux,
-
+		RequestID:                       requestID.String(),
+		UserGenesisID:                   user.ID.BigInt().String(),
+		ProfileNonce:                    nonce.String(),
+		UserAuthClaim:                   user.AuthClaim,
+		UserAuthClaimMtp:                authMTProof,
+		UserAuthClaimNonRevMtp:          authNonRevMTProof,
+		UserAuthClaimNonRevMtpAuxHi:     nodeAuxNonRev.Key,
+		UserAuthClaimNonRevMtpAuxHv:     nodeAuxNonRev.Value,
+		UserAuthClaimNonRevMtpNoAux:     nodeAuxNonRev.NoAux,
+		Challenge:                       challenge.String(),
+		ChallengeSignatureR8X:           sig.R8.X.String(),
+		ChallengeSignatureR8Y:           sig.R8.Y.String(),
+		ChallengeSignatureS:             sig.S.String(),
+		UserClaimsTreeRoot:              user.Clt.Root().BigInt().String(),
+		UserRevTreeRoot:                 user.Ret.Root().BigInt().String(),
+		UserRootsTreeRoot:               user.Rot.Root().BigInt().String(),
+		UserState:                       user.State(t).String(),
+		GistRoot:                        gistRoot.BigInt().String(),
+		GistMtp:                         gistProof,
+		GistMtpAuxHi:                    gistNodAux.Key,
+		GistMtpAuxHv:                    gistNodAux.Value,
+		GistMtpNoAux:                    gistNodAux.NoAux,
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
@@ -517,6 +518,8 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		LinkNonce: linkNonce,
 
 		ProofType: proofType,
+
+		VerifierID: "21929109382993718606847853573861987353620810345503358891473103689157378049",
 	}
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
@@ -541,7 +544,20 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		crs, ok := big.NewInt(0).SetString(valueInput[0], 10)
 		require.True(t, ok)
 
-		operatorOutput, err = utils.CalculateNullify(user.ID.BigInt(), nonceSubject, big.NewInt(10), crs)
+		claimSchema, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
+		require.True(t, ok)
+
+		verifierID, ok := big.NewInt(0).SetString(inputs.VerifierID, 10)
+		require.True(t, ok)
+
+		operatorOutput, err = utils.CalculateNullify(
+			user.ID.BigInt(),
+			nonceSubject,
+			claimSchema,
+			big.NewInt(10), // fieldValue
+			verifierID,
+			crs,
+		)
 		require.NoError(t, err)
 	} else if operator == utils.SD {
 		operatorOutput = big.NewInt(10).String()
@@ -563,6 +579,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		IssuerAuthState:        issuerAuthState,
 		LinkID:                 linkID,
 		OperatorOutput:         operatorOutput,
+		VerifierID:             inputs.VerifierID,
 	}
 
 	jsonData, err := json.Marshal(TestData{
@@ -642,30 +659,28 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	inputs := Inputs{
-		RequestID:     requestID.String(),
-		UserGenesisID: user.ID.BigInt().String(),
-		ProfileNonce:  nonce.String(),
-
-		UserAuthClaim:               user.AuthClaim,
-		UserAuthClaimMtp:            authMTProof,
-		UserAuthClaimNonRevMtp:      authNonRevMTProof,
-		UserAuthClaimNonRevMtpAuxHi: nodeAuxNonRev.Key,
-		UserAuthClaimNonRevMtpAuxHv: nodeAuxNonRev.Value,
-		UserAuthClaimNonRevMtpNoAux: nodeAuxNonRev.NoAux,
-		Challenge:                   challenge.String(),
-		ChallengeSignatureR8X:       sig.R8.X.String(),
-		ChallengeSignatureR8Y:       sig.R8.Y.String(),
-		ChallengeSignatureS:         sig.S.String(),
-		UserClaimsTreeRoot:          user.Clt.Root().BigInt().String(),
-		UserRevTreeRoot:             user.Ret.Root().BigInt().String(),
-		UserRootsTreeRoot:           user.Rot.Root().BigInt().String(),
-		UserState:                   user.State(t).String(),
-		GistRoot:                    gistRoot.BigInt().String(),
-		GistMtp:                     gistProof,
-		GistMtpAuxHi:                gistNodAux.Key,
-		GistMtpAuxHv:                gistNodAux.Value,
-		GistMtpNoAux:                gistNodAux.NoAux,
-
+		RequestID:                       requestID.String(),
+		UserGenesisID:                   user.ID.BigInt().String(),
+		ProfileNonce:                    nonce.String(),
+		UserAuthClaim:                   user.AuthClaim,
+		UserAuthClaimMtp:                authMTProof,
+		UserAuthClaimNonRevMtp:          authNonRevMTProof,
+		UserAuthClaimNonRevMtpAuxHi:     nodeAuxNonRev.Key,
+		UserAuthClaimNonRevMtpAuxHv:     nodeAuxNonRev.Value,
+		UserAuthClaimNonRevMtpNoAux:     nodeAuxNonRev.NoAux,
+		Challenge:                       challenge.String(),
+		ChallengeSignatureR8X:           sig.R8.X.String(),
+		ChallengeSignatureR8Y:           sig.R8.Y.String(),
+		ChallengeSignatureS:             sig.S.String(),
+		UserClaimsTreeRoot:              user.Clt.Root().BigInt().String(),
+		UserRevTreeRoot:                 user.Ret.Root().BigInt().String(),
+		UserRootsTreeRoot:               user.Rot.Root().BigInt().String(),
+		UserState:                       user.State(t).String(),
+		GistRoot:                        gistRoot.BigInt().String(),
+		GistMtp:                         gistProof,
+		GistMtpAuxHi:                    gistNodAux.Key,
+		GistMtpAuxHv:                    gistNodAux.Value,
+		GistMtpNoAux:                    gistNodAux.NoAux,
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
@@ -716,6 +731,8 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		LinkNonce: "0",
 
 		ProofType: "0",
+
+		VerifierID: "21929109382993718606847853573861987353620810345503358891473103689157378049",
 	}
 
 	issuerAuthState := issuer.State(t)
@@ -749,6 +766,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		IssuerClaimIdenState:   "0",
 		ProofType:              "0",
 		LinkID:                 "0",
+		VerifierID:             inputs.VerifierID,
 		OperatorOutput:         "0",
 	}
 

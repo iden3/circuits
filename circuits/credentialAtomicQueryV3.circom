@@ -21,4 +21,6 @@ component main{public [requestID,
                        timestamp, 
                        isRevocationChecked,
                        issuerClaimIdenState, // MTP specific
-                       proofType]} = credentialAtomicQueryV3OffChain(40, 32, 64);
+                       proofType,
+                       verifierID
+                       ]} = credentialAtomicQueryV3OffChain(40, 32, 64);

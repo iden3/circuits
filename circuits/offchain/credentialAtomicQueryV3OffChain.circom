@@ -83,6 +83,9 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal input linkNonce;
     signal output linkID;
 
+    // Identifier of the verifier
+    signal input verifierID;
+
     // Modifier/Computation Operator output ($sd, $nullify)
     signal output operatorOutput;
 
@@ -218,7 +221,9 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal nullifier <== Nullify()(
         userGenesisID,
         claimSubjectProfileNonce,
+        claimSchema,
         fieldValue,
+        verifierID,
         value[0] // get csr from value array
     );
 
