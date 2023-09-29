@@ -251,7 +251,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         slotIndex,
         operator,
         claimPathKey,
-        claimPathNotExists, // TODO: check if this value should be here
+        claimPathNotExists,
         valueHash
     ]);
 }

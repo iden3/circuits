@@ -118,10 +118,6 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     sigFlow(issuerLevels)(
         enabled <== isSig,
         issuerAuthClaim <== issuerAuthClaim,
-        issuerAuthClaimsTreeRoot <== issuerAuthClaimsTreeRoot,
-        issuerAuthRevTreeRoot <== issuerAuthRevTreeRoot,
-        issuerAuthRootsTreeRoot <== issuerAuthRootsTreeRoot,
-        issuerAuthClaimMtp <== issuerAuthClaimMtp,
         issuerAuthClaimNonRevMtp <== issuerAuthClaimNonRevMtp,
         issuerAuthClaimNonRevMtpNoAux <== issuerAuthClaimNonRevMtpNoAux,
         issuerAuthClaimNonRevMtpAuxHi <== issuerAuthClaimNonRevMtpAuxHi,
@@ -142,17 +138,6 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         issuerAuthRootsTreeRoot
     );
     issuerAuthState <== tmpAuthState * isSig;
-
-//    mtpFlow(issuerLevels)(
-//        enabled <== isMTP,
-//        issuerClaimHi <== issuerClaimHi,
-//        issuerClaimHv <== issuerClaimHv,
-//        issuerClaimMtp <== issuerClaimMtp,
-//        issuerClaimClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
-//        issuerClaimRevTreeRoot <== issuerClaimRevTreeRoot,
-//        issuerClaimRootsTreeRoot <== issuerClaimRootsTreeRoot,
-//        issuerClaimIdenState <== issuerClaimIdenState
-//    ); // 11436 constraints
 
     signal issuerAuthClaimHi, issuerAuthClaimHv;
 	(issuerAuthClaimHi, issuerAuthClaimHv) <== getClaimHiHv()(issuerAuthClaim);
@@ -299,10 +284,6 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 template sigFlow(issuerLevels) {
     signal input enabled;
     signal input issuerAuthClaim[8];
-    signal input issuerAuthClaimsTreeRoot;
-    signal input issuerAuthRevTreeRoot;
-    signal input issuerAuthRootsTreeRoot;
-    signal input issuerAuthClaimMtp[issuerLevels];
     signal input issuerAuthClaimNonRevMtp[issuerLevels];
     signal input issuerAuthClaimNonRevMtpNoAux;
     signal input issuerAuthClaimNonRevMtpAuxHi;
@@ -342,26 +323,4 @@ template sigFlow(issuerLevels) {
         issuerAuthPubKey.Ax,
         issuerAuthPubKey.Ay
     ); // 4217 constraints
-}
-
-template mtpFlow(issuerLevels) {
-    signal input enabled;
-    signal input issuerClaimHi;
-    signal input issuerClaimHv;
-    signal input issuerClaimMtp[issuerLevels];
-    signal input issuerClaimClaimsTreeRoot;
-    signal input issuerClaimRevTreeRoot;
-    signal input issuerClaimRootsTreeRoot;
-    signal input issuerClaimIdenState;
-
-    verifyClaimIssuance(issuerLevels)(
-        enabled <== enabled,
-        claimHi <== issuerClaimHi,
-        claimHv <== issuerClaimHv,
-        claimIssuanceMtp <== issuerClaimMtp,
-        claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
-        claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot,
-        claimIssuanceRootsTreeRoot <== issuerClaimRootsTreeRoot,
-        claimIssuanceIdenState <== issuerClaimIdenState
-    );
 }
