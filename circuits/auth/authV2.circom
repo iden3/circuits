@@ -51,7 +51,6 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     checkAuthV2(IdOwnershipLevels, onChainLevels)(
         1,
         genesisID,
-        profileNonce,
         state,
         claimsTreeRoot,
         revTreeRoot,
@@ -81,9 +80,6 @@ template checkAuthV2(IdOwnershipLevels, onChainLevels) {
     signal input enabled;
 
     signal input genesisID;
-    // random number, which should be stored by user
-    // if there is a need to generate the same userID (ProfileID) output for different proofs
-    signal input profileNonce;
 
     // user state
     signal input state;

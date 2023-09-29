@@ -169,7 +169,6 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     checkAuthV2(idOwnershipLevels, onChainLevels)(
         1, // enabled
         userGenesisID,
-        profileNonce,
         userState, // user state
         userClaimsTreeRoot,
         userRevTreeRoot,

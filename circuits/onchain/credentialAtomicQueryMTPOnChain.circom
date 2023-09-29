@@ -142,7 +142,6 @@ template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySi
     checkAuthV2(idOwnershipLevels, onChainLevels)(
         1, // enabled
         userGenesisID,
-        profileNonce,
         userState, // user state
         userClaimsTreeRoot,
         userRevTreeRoot,
