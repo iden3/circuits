@@ -21,6 +21,13 @@ const (
 	timestamp = "1642074362"
 )
 
+type ProofType string
+
+const (
+	Sig ProofType = "sig"
+	Mtp ProofType = "mtp"
+)
+
 type Inputs struct {
 	RequestID string `json:"requestID"`
 
@@ -79,11 +86,12 @@ type Inputs struct {
 	IssuerAuthClaimsTreeRoot      string      `json:"issuerAuthClaimsTreeRoot"`
 	IssuerAuthRevTreeRoot         string      `json:"issuerAuthRevTreeRoot"`
 	IssuerAuthRootsTreeRoot       string      `json:"issuerAuthRootsTreeRoot"`
+	IssuerAuthState               string      `json:"issuerAuthState"`
+
+	ProofType string `json:"proofType"` // 0 for sig, 1 for mtp
 
 	// Private random nonce, used to generate LinkID
 	LinkNonce string `json:"linkNonce"`
-
-	ProofType string `json:"proofType"` // 0 for sig, 1 for mtp
 
 	VerifierID string `json:"verifierID"`
 }
@@ -92,18 +100,18 @@ type Outputs struct {
 	RequestID              string   `json:"requestID"`
 	UserID                 string   `json:"userID"`
 	IssuerID               string   `json:"issuerID"`
-	IssuerClaimIdenState   string   `json:"issuerClaimIdenState"`
 	IssuerClaimNonRevState string   `json:"issuerClaimNonRevState"`
 	ClaimSchema            string   `json:"claimSchema"`
 	SlotIndex              string   `json:"slotIndex"`
 	Operator               int      `json:"operator"`
+	ClaimPathKey           string   `json:"claimPathKey"`
+	ClaimPathNotExists     string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
 	Value                  []string `json:"value"`
 	Timestamp              string   `json:"timestamp"`
 	Merklized              string   `json:"merklized"`
-	ClaimPathKey           string   `json:"claimPathKey"`
-	ClaimPathNotExists     string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
-	ProofType              string   `json:"proofType"`          // 0 for sig, 1 for mtp
-	IssuerAuthState        string   `json:"issuerAuthState"`
+	ProofType              string   `json:"proofType"` // 0 for sig, 1 for mtp
+	IsRevocationChecked    string   `json:"isRevocationChecked"`
+	IssuerState            string   `json:"issuerState"`
 	LinkID                 string   `json:"linkID"`
 	VerifierID             string   `json:"verifierID"`
 	OperatorOutput         string   `json:"operatorOutput"`
@@ -114,13 +122,6 @@ type TestData struct {
 	In   Inputs  `json:"inputs"`
 	Out  Outputs `json:"expOut"`
 }
-
-type ProofType string
-
-const (
-	Sig ProofType = "sig"
-	Mtp ProofType = "mtp"
-)
 
 func Test_ClaimIssuedOnUserID(t *testing.T) {
 	desc := "User == Subject. Claim issued on UserID"
@@ -142,7 +143,7 @@ func Test_ClaimIssuedOnUserProfileID(t *testing.T) {
 
 func Test_IssueClaimToProfile(t *testing.T) {
 
-	desc := "UserID != Subject. UserProfile out. Claim issued on Profile (subject nonce = 0)"
+	desc := "UserID != Subject. UserProfile out. User nonce = 10. Claim issued on Profile (subject nonce = 0) (Merklized claim)"
 	isUserIDProfile := true
 	isSubjectIDProfile := false
 
@@ -244,7 +245,7 @@ func Test_Less_Than_Eq(t *testing.T) {
 
 func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, proofType ProofType) {
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, false, 1, false, proofType)
 }
 
 func generateRevokedTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
@@ -458,6 +459,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		IssuerAuthClaimsTreeRoot:      issuerAuthClaimsTreeRoot,
 		IssuerAuthRevTreeRoot:         issuerAuthRevTreeRoot,
 		IssuerAuthRootsTreeRoot:       issuerAuthRootsTreeRoot,
+		IssuerAuthState:               issuerAuthState,
 
 		LinkNonce: linkNonce,
 
@@ -493,22 +495,31 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		operatorOutput = big.NewInt(10).String()
 	}
 
+	var issuerState string
+	if proofType == "0" {
+		// sig
+		issuerState = issuerAuthState
+	} else {
+		// mtp
+		issuerState = issuerClaimIdenState
+	}
+
 	out := Outputs{
 		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
-		IssuerClaimIdenState:   issuerClaimIdenState,
 		IssuerClaimNonRevState: issuer.State(t).String(),
 		ClaimSchema:            "180410020913331409885634153623124536270",
 		SlotIndex:              strconv.Itoa(slotIndex),
+		ClaimPathKey:           claimPathKey,
+		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		Operator:               operator,
 		Value:                  valueInput,
 		Timestamp:              timestamp,
 		Merklized:              merklized,
-		ClaimPathKey:           claimPathKey,
-		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
+		IsRevocationChecked:    strconv.Itoa(isRevocationChecked),
 		ProofType:              proofType,
-		IssuerAuthState:        issuerAuthState,
+		IssuerState:            issuerState,
 		LinkID:                 linkID,
 		OperatorOutput:         operatorOutput,
 		VerifierID:             inputs.VerifierID,
@@ -600,6 +611,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		IssuerAuthClaimsTreeRoot:        issuer.Clt.Root().BigInt().String(),
 		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
 		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
+		IssuerAuthState:                 issuer.State(t).String(),
 		ClaimSchema:                     "180410020913331409885634153623124536270",
 
 		ClaimPathNotExists: "1", // 0 for inclusion, 1 for non-inclusion
@@ -637,18 +649,18 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
-		IssuerAuthState:        issuerAuthState.String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		ClaimSchema:            "180410020913331409885634153623124536270",
 		SlotIndex:              "0",
 		Operator:               utils.NOOP,
+		ClaimPathKey:           pathKey.String(),
+		ClaimPathNotExists:     "1",
 		Value:                  utils.PrepareStrArray([]string{}, 64),
 		Timestamp:              timestamp,
 		Merklized:              "1",
-		ClaimPathNotExists:     "1",
+		IssuerState:            issuerAuthState.String(),
+		IsRevocationChecked:    "1",
 		ProofType:              "0",
-		ClaimPathKey:           pathKey.String(),
-		IssuerClaimIdenState:   "0",
 		LinkID:                 "0",
 		VerifierID:             inputs.VerifierID,
 		OperatorOutput:         "0",

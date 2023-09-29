@@ -138,6 +138,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     signal input issuerAuthClaimsTreeRoot;
     signal input issuerAuthRevTreeRoot;
     signal input issuerAuthRootsTreeRoot;
+    signal input issuerAuthState;
     signal input issuerAuthClaimNonRevMtp[issuerLevels];
     signal input issuerAuthClaimNonRevMtpNoAux;
     signal input issuerAuthClaimNonRevMtpAuxHi;
@@ -145,8 +146,11 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
-    // Sig specific output
-    signal output issuerAuthState;
+
+    // Issuer State to be checked outside of the circuit
+    // in case of MTP proof issuerState = issuerClaimIdenState
+    // in case of Sig proof issuerState = issuerAuthState
+    signal output issuerState;
 
     // Private random nonce, used to generate LinkID
     signal input linkNonce;
@@ -191,7 +195,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     // Claim checks
     /////////////////////////////////////////////////////////////////
 
-    (merklized, userID, issuerAuthState, linkID, operatorOutput) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
+    (merklized, userID, issuerState, linkID, operatorOutput) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
         proofType <== proofType,
         requestID <== requestID,
         userGenesisID <== userGenesisID,
@@ -230,6 +234,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         issuerAuthClaimsTreeRoot <== issuerAuthClaimsTreeRoot,
         issuerAuthRevTreeRoot <== issuerAuthRevTreeRoot,
         issuerAuthRootsTreeRoot <== issuerAuthRootsTreeRoot,
+        issuerAuthState <== issuerAuthState,
         issuerAuthClaimNonRevMtp <== issuerAuthClaimNonRevMtp,
         issuerAuthClaimNonRevMtpNoAux <== issuerAuthClaimNonRevMtpNoAux,
         issuerAuthClaimNonRevMtpAuxHi <== issuerAuthClaimNonRevMtpAuxHi,

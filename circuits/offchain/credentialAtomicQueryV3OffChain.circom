@@ -68,6 +68,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal input issuerAuthClaimsTreeRoot;
     signal input issuerAuthRevTreeRoot;
     signal input issuerAuthRootsTreeRoot;
+    signal input issuerAuthState;
     signal input issuerAuthClaimNonRevMtp[issuerLevels];
     signal input issuerAuthClaimNonRevMtpNoAux;
     signal input issuerAuthClaimNonRevMtpAuxHi;
@@ -76,8 +77,10 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
 
-    // Sig specific outputs
-    signal output issuerAuthState;
+    // Issuer State to be checked outside of the circuit
+    // in case of MTP proof issuerState = issuerClaimIdenState
+    // in case of Sig proof issuerState = issuerAuthState
+    signal output issuerState;
 
     // Private random nonce, used to generate LinkID
     signal input linkNonce;
@@ -130,45 +133,38 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         issuerClaimSignatureS <== issuerClaimSignatureS
     ); // 28265 constraints
 
-    // TODO: move calc outside of the circuit
-    signal tmpAuthState;
-    tmpAuthState <== getIdenState()(
-        issuerAuthClaimsTreeRoot,
-        issuerAuthRevTreeRoot,
-        issuerAuthRootsTreeRoot
-    );
-    issuerAuthState <== tmpAuthState * isSig;
-
     signal issuerAuthClaimHi, issuerAuthClaimHv;
 	(issuerAuthClaimHi, issuerAuthClaimHv) <== getClaimHiHv()(issuerAuthClaim);
 
-    signal tmpClaimHi, tmpClaimHv, tmpClaimIssuanceMtp[issuerLevels],
-        tmpClaimIssuanceClaimsTreeRoot, tmpClaimIssuanceRevTreeRoot,
-        tmpClaimIssuanceRootsTreeRoot, tmpClaimIssuanceIdenState;
+    signal _claimHi, _claimHv, _claimIssuanceMtp[issuerLevels],
+        _claimIssuanceClaimsTreeRoot, _claimIssuanceRevTreeRoot,
+        _claimIssuanceRootsTreeRoot, _claimIssuanceIdenState;
 
-    tmpClaimHi <== Mux1()([issuerClaimHi, issuerAuthClaimHi], isSig);
-    tmpClaimHv <== Mux1()([issuerClaimHv, issuerAuthClaimHv], isSig);
+    // switch between claim and authClaim issuance proof depending if Sig or MTP proof is provided
+    issuerState <== Mux1()([issuerClaimIdenState, issuerAuthState], isSig);
+    _claimHi <== Mux1()([issuerClaimHi, issuerAuthClaimHi], isSig);
+    _claimHv <== Mux1()([issuerClaimHv, issuerAuthClaimHv], isSig);
     for (var i = 0; i < issuerLevels; i++) {
-        tmpClaimIssuanceMtp[i] <== Mux1()([issuerClaimMtp[i], issuerAuthClaimMtp[i]], isSig);
+        _claimIssuanceMtp[i] <== Mux1()([issuerClaimMtp[i], issuerAuthClaimMtp[i]], isSig);
     }
-    tmpClaimIssuanceClaimsTreeRoot <== Mux1()([issuerClaimClaimsTreeRoot, issuerAuthClaimsTreeRoot], isSig);
-    tmpClaimIssuanceRevTreeRoot <== Mux1()([issuerClaimRevTreeRoot, issuerAuthRevTreeRoot], isSig);
-    tmpClaimIssuanceRootsTreeRoot <== Mux1()([issuerClaimRootsTreeRoot, issuerAuthRootsTreeRoot], isSig);
-    tmpClaimIssuanceIdenState <== Mux1()([issuerClaimIdenState, issuerAuthState], isSig);
+    _claimIssuanceClaimsTreeRoot <== Mux1()([issuerClaimClaimsTreeRoot, issuerAuthClaimsTreeRoot], isSig);
+    _claimIssuanceRevTreeRoot <== Mux1()([issuerClaimRevTreeRoot, issuerAuthRevTreeRoot], isSig);
+    _claimIssuanceRootsTreeRoot <== Mux1()([issuerClaimRootsTreeRoot, issuerAuthRootsTreeRoot], isSig);
+    _claimIssuanceIdenState <== Mux1()([issuerClaimIdenState, issuerAuthState], isSig);
 
     // Verify issuance of claim in case of MTP proof OR issuance of auth claim in case of Sig proof
     verifyClaimIssuance(issuerLevels)(
         enabled <== 1,
-        claimHi <== tmpClaimHi,
-        claimHv <== tmpClaimHv,
-        claimIssuanceMtp <== tmpClaimIssuanceMtp,
-        claimIssuanceClaimsTreeRoot <== tmpClaimIssuanceClaimsTreeRoot,
-        claimIssuanceRevTreeRoot <== tmpClaimIssuanceRevTreeRoot,
-        claimIssuanceRootsTreeRoot <== tmpClaimIssuanceRootsTreeRoot,
-        claimIssuanceIdenState <== tmpClaimIssuanceIdenState
+        claimHi <== _claimHi,
+        claimHv <== _claimHv,
+        claimIssuanceMtp <== _claimIssuanceMtp,
+        claimIssuanceClaimsTreeRoot <== _claimIssuanceClaimsTreeRoot,
+        claimIssuanceRevTreeRoot <== _claimIssuanceRevTreeRoot,
+        claimIssuanceRootsTreeRoot <== _claimIssuanceRootsTreeRoot,
+        claimIssuanceIdenState <== issuerState
     );
 
-    // non revocation status
+    // check claim is not revoked
     checkClaimNotRevoked(issuerLevels)(
         enabled <== isRevocationChecked,
         claim <== issuerClaim,
@@ -301,6 +297,7 @@ template sigFlow(issuerLevels) {
         80551937543569765027552589160822318028
     );
 
+    // check authClaim is not revoked
     checkClaimNotRevoked(issuerLevels)(
         enabled <== enabled,
         claim <== issuerAuthClaim,
@@ -308,7 +305,7 @@ template sigFlow(issuerLevels) {
         noAux <== issuerAuthClaimNonRevMtpNoAux,
         auxHi <== issuerAuthClaimNonRevMtpAuxHi,
         auxHv <== issuerAuthClaimNonRevMtpAuxHv,
-        treeRoot <== issuerClaimNonRevRevTreeRoot // TODO: can we reuse issuerAuthRevTreeRoot & state here?
+        treeRoot <== issuerClaimNonRevRevTreeRoot // the same value as for the claim non-revocation check
     ); // 11763 constraints
 
     component issuerAuthPubKey = getPubKeyFromClaim();
