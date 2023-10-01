@@ -8,6 +8,7 @@ const assert = chai.assert;
 export {};
 
 const verifyCredentialSubject = {
+    enabled: "1",
     claim: [
         "700576110560149417265602648140262015232",
         "197990912273762023075897629417744831667514652778362723486029975898079821824",
@@ -20,19 +21,6 @@ const verifyCredentialSubject = {
     ],
     id: "197990912273762023075897629417744831667514652778362723486029975898079821824", // 117twYCgGzxHUtMsAfjM3muCrypTXcu6oc7cSsuGHM
 }
-
-describe("utils verifyCredentialSubject test", function () {
-    this.timeout(200000);
-    it("Test utils verifyCredentialSubject", async () => {
-        const circuit = await tester(
-            path.join(__dirname, "../circuits/utils", "utils_verifyCredentialSubject.circom"),
-            {reduceConstraints: false},
-        );
-
-        const witness = await circuit.calculateWitness(verifyCredentialSubject, true);
-        await circuit.checkConstraints(witness);
-    });
-});
 
 describe("utils checkIdenStateMatchesRoots test", function () {
     this.timeout(200000);

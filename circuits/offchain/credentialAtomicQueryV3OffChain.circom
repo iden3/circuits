@@ -93,21 +93,36 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal output operatorOutput;
 
     /////////////////////////////////////////////////////////////////
+    // FIXME: `===` without multiplications gives 0 constraints!!!
+    // because compiler removes all linear constraints during optimization pass
+    // ForceEqualIfEnabled(1, [x, y]) gives 0 too, so we need to do a workaround:
+    // calculate signal with value 1 and pass it to ForceEqualIfEnabled as an enabled signal
+    /////////////////////////////////////////////////////////////////
+    signal zero <== IsZero()(userGenesisID);  // comparing to zero something that can't be zero to get zero as an output
+    signal one <== 1 - zero;
+    zero * one === 0;
+
+    /////////////////////////////////////////////////////////////////
     // Claim Verification (id, schema, expiration, issuance, revocation)
     /////////////////////////////////////////////////////////////////
 
+    component issuerClaimHeader = getClaimHeader();
+    issuerClaimHeader.claim <== issuerClaim;
+
     // Check issuerClaim is issued to provided identity
     verifyCredentialSubjectProfile()(
+        one,
         issuerClaim,
+        issuerClaimHeader.claimFlags,
         userGenesisID,
         claimSubjectProfileNonce
-    ); // 1744 constraints
+    ); // 1236 constraints
 
     // Verify issuerClaim schema
-    verifyCredentialSchema()(1, issuerClaim, claimSchema); // 254 constraints
+    verifyCredentialSchema()(one, issuerClaimHeader.schema, claimSchema); // 3 constraints
 
     // verify issuerClaim expiration time
-    verifyExpirationTime()(issuerClaim, timestamp); // 574 constraints
+    verifyExpirationTime()(issuerClaimHeader.claimFlags[3], issuerClaim, timestamp); // 322 constraints
     
     signal isSig;
     signal isMTP;
@@ -126,12 +141,11 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         issuerAuthClaimNonRevMtpAuxHi <== issuerAuthClaimNonRevMtpAuxHi,
         issuerAuthClaimNonRevMtpAuxHv <== issuerAuthClaimNonRevMtpAuxHv,
         issuerClaimNonRevRevTreeRoot <== issuerClaimNonRevRevTreeRoot,
-        issuerClaim <== issuerClaim,
         issuerClaimHash <== issuerClaimHash,
         issuerClaimSignatureR8x <== issuerClaimSignatureR8x,
         issuerClaimSignatureR8y <== issuerClaimSignatureR8y,
         issuerClaimSignatureS <== issuerClaimSignatureS
-    ); // 28265 constraints
+    ); // 16237 constraints
 
     signal issuerAuthClaimHi, issuerAuthClaimHv;
 	(issuerAuthClaimHi, issuerAuthClaimHv) <== getClaimHiHv()(issuerAuthClaim);
@@ -154,7 +168,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     // Verify issuance of claim in case of MTP proof OR issuance of auth claim in case of Sig proof
     verifyClaimIssuance(issuerLevels)(
-        enabled <== 1,
+        enabled <== one,
         claimHi <== _claimHi,
         claimHv <== _claimHv,
         claimIssuanceMtp <== _claimIssuanceMtp,
@@ -162,7 +176,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         claimIssuanceRevTreeRoot <== _claimIssuanceRevTreeRoot,
         claimIssuanceRootsTreeRoot <== _claimIssuanceRootsTreeRoot,
         claimIssuanceIdenState <== issuerState
-    );
+    ); // 11184 constraints
 
     // check claim is not revoked
     checkClaimNotRevoked(issuerLevels)(
@@ -177,7 +191,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     // verify issuer state for claim non-revocation proof
     checkIdenStateMatchesRoots()(
-        1,
+        one,
         issuerClaimNonRevClaimsTreeRoot,
         issuerClaimNonRevRevTreeRoot,
         issuerClaimNonRevRootsTreeRoot,
@@ -190,6 +204,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     component merklize = getClaimMerklizeRoot();
     merklize.claim <== issuerClaim;
+    merklize.claimFlags <== issuerClaimHeader.claimFlags;
 
     merklized <== merklize.flag;
 
@@ -250,7 +265,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         fieldValue,
         verifierID,
         value[0] // get csr from value array
-    ); // 300 constraints
+    ); // 362 constraints
 
     /////////////////////////////////////////////////////////////////
     // Modifier Operator Validation & Output Preparation
@@ -269,12 +284,12 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     /////////////////////////////////////////////////////////////////
     // ProfileID calculation
     /////////////////////////////////////////////////////////////////
-    userID <== SelectProfile()(userGenesisID, profileNonce); // 1485 constraints
+    userID <== SelectProfile()(userGenesisID, profileNonce); // 1231 constraints
 
     /////////////////////////////////////////////////////////////////
     // Link ID calculation
     /////////////////////////////////////////////////////////////////
-    linkID <== LinkID()(issuerClaim, linkNonce); // 1077 constraints
+    linkID <== LinkID()(issuerClaimHash, linkNonce); // 243 constraints
 }
 
 template sigFlow(issuerLevels) {
@@ -285,15 +300,17 @@ template sigFlow(issuerLevels) {
     signal input issuerAuthClaimNonRevMtpAuxHi;
     signal input issuerAuthClaimNonRevMtpAuxHv;
     signal input issuerClaimNonRevRevTreeRoot;
-    signal input issuerClaim[8];
     signal input issuerClaimHash;
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
 
+    component issuerAuthClaimHeader = getClaimHeader();
+    issuerAuthClaimHeader.claim <== issuerAuthClaim;
+
     verifyCredentialSchema()(
         enabled,
-        issuerAuthClaim,
+        issuerAuthClaimHeader.schema,
         80551937543569765027552589160822318028
     );
 

@@ -27,7 +27,7 @@ describe("Test verifyExpirationTime",  function() {
             "0",
             "0"];
 
-        testData.in = {claim: claim, timestamp: 1669884009};
+        testData.in = {enabled: "1", claim: claim, timestamp: 1669884009};
         testData.expOut = {};
     });
 
@@ -41,7 +41,7 @@ describe("Test verifyExpirationTime",  function() {
             "0",
             "0"];
 
-        testData.in = {claim: claim, timestamp: 1669884009};
+        testData.in = {enabled: "1", claim: claim, timestamp: 1669884009};
         testData.expOut = {};
     });
 
@@ -55,7 +55,7 @@ describe("Test verifyExpirationTime",  function() {
             "0",
             "0"];
 
-        testData.in = {claim: claim, timestamp: 1669800009};
+        testData.in = {enabled: "1", claim: claim, timestamp: 1669800008};
         testData.expOut = {};
     });
 

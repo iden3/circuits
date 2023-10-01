@@ -97,7 +97,7 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 	signal input claimNonRevIssuerState;
 
     verifyClaimIssuance(IssuerLevels)(
-        1,
+        1, //tmp
         claimHi,
         claimHv,
         claimIssuanceMtp,
@@ -120,7 +120,7 @@ template verifyClaimIssuanceNonRev(IssuerLevels) {
 
     // check issuer state matches for non-revocation proof
     checkIdenStateMatchesRoots()(
-        1,
+        1, //tmp
         claimNonRevIssuerClaimsTreeRoot,
         claimNonRevIssuerRevTreeRoot,
         claimNonRevIssuerRootsTreeRoot,
@@ -176,12 +176,15 @@ template VerifyAuthClaimAndSignature(nLevels) {
 	signal input challengeSignatureR8y;
 	signal input challengeSignatureS;
 
+    component authClaimHeader = getClaimHeader();
+    authClaimHeader.claim <== authClaim;
+
     // AuthHash cca3371a6cb1b715004407e325bd993c
     // BigInt: 80551937543569765027552589160822318028
     // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
     verifyCredentialSchema()(
         enabled,
-        authClaim,
+        authClaimHeader.schema,
         80551937543569765027552589160822318028
     );
 
@@ -189,7 +192,7 @@ template VerifyAuthClaimAndSignature(nLevels) {
 	(authClaimHi, authClaimHv) <== getClaimHiHv()(authClaim);
 
     checkClaimExists(nLevels)(
-        1,
+        enabled,
         authClaimHi,
         authClaimHv,
         authClaimMtp,
@@ -207,6 +210,7 @@ template VerifyAuthClaimAndSignature(nLevels) {
     );
 
     checkDataSignatureWithPubKeyInClaim()(
+        enabled,
         authClaim,
         challengeSignatureS,
         challengeSignatureR8x,

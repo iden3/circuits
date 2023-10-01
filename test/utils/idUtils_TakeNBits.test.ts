@@ -33,7 +33,7 @@ describe("idUtils.circom:", async function() {
     });
 
     tests.forEach(({desc, input, output}) => {
-        it(`auth ${desc}`, async function() {
+        it(`TakeNBits - ${desc}`, async function() {
             const w = await circuit.calculateWitness(input, true);
             await circuit.checkConstraints(w);
             await circuit.assertOut(w, output);

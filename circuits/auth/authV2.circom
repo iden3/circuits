@@ -48,8 +48,12 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
+    signal zero <== IsZero()(genesisID); // comparing to zero something that can't be zero to get zero as an output
+    signal one <== 1 - zero;
+    zero * one === 0;
+
     checkAuthV2(IdOwnershipLevels, onChainLevels)(
-        1,
+        one,
         genesisID,
         state,
         claimsTreeRoot,
