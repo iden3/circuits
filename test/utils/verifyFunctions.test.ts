@@ -27,7 +27,6 @@ describe("utils checkIdenStateMatchesRoots test", function () {
     it("Test utils checkIdenStateMatchesRoots", async () => {
         const circuit = await tester(
             path.join(__dirname, "../circuits/utils", "utils_checkIdenStateMatchesRoots.circom"),
-            //{reduceConstraints: false},
         );
 
         const witness = await circuit.calculateWitness({
@@ -46,7 +45,6 @@ describe("utils verifyClaimSignature test", function () {
     it("Test utils verifyClaimSignature", async () => {
         const circuit = await tester(
             path.join(__dirname, "../circuits/utils", "utils_verifyClaimSignature.circom"),
-            //{reduceConstraints: false},
         );
 
         //"claim": ["0","0","0","0","0","0","0","0"]

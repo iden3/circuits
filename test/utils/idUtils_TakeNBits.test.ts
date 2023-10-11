@@ -27,7 +27,6 @@ describe("idUtils.circom:", async function() {
             {
                 output: path.join(__dirname, "../circuits", "build/idUtils_TakeNBits"),
                 recompile: true,
-                reduceConstraints: true,
             },
         );
     });

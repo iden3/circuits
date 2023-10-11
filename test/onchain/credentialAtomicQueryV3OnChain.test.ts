@@ -16,7 +16,6 @@ describe("Test credentialAtomicQueryV3OnChain.circom", function () {
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,
-                reduceConstraints: false,
             },
         );
 

@@ -98,8 +98,10 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     // ForceEqualIfEnabled(1, [x, y]) gives 0 too, so we need to do a workaround:
     // calculate signal with value 1 and pass it to ForceEqualIfEnabled as an enabled signal
     /////////////////////////////////////////////////////////////////
-    signal zero <== IsZero()(userGenesisID);  // comparing to zero something that can't be zero to get zero as an output
-    signal one <== 1 - zero;
+    signal tmp <== IsZero()(userGenesisID);
+    signal tmp2 <== NOT()(tmp);
+    signal zero <== IsEqual()([tmp, tmp2]);
+    signal one <== IsZero()(zero);
     zero * one === 0;
 
     /////////////////////////////////////////////////////////////////

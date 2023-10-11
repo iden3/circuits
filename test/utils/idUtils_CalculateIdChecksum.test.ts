@@ -39,7 +39,6 @@ describe("idUtils.circom:", async function() {
             {
                 output: path.join(__dirname, "../circuits", "build/idUtils_CalculateIdChecksum"),
                 recompile: true,
-                reduceConstraints: true,
             },
         );
     });

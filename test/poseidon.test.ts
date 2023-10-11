@@ -24,7 +24,6 @@ describe("poseidon test", function () {
     it("Test circomlib/poseidon. 3 inputs", async () => {
         const circuit = await tester(
                     path.join(__dirname, "circuits", "poseidon.circom"),
-                    { reduceConstraints: false }
         );
 
         let witness = await circuit.calculateWitness({
@@ -70,7 +69,6 @@ describe("poseidon test", function () {
         // poseidon with 14 inputs
         const circuit = await tester(
             path.join(__dirname, "circuits", "poseidon14.circom"),
-            { reduceConstraints: false }
         );
 
         let witness = await circuit.calculateWitness({
@@ -103,8 +101,7 @@ describe("poseidon test", function () {
 
         // poseidon with 16 inputs
         const circuit = await tester(
-            path.join(__dirname, "circuits", "poseidon16.circom"),
-            { reduceConstraints: false }
+            path.join(__dirname, "circuits", "poseidon16.circom")
         );
 
         let witness = await circuit.calculateWitness({

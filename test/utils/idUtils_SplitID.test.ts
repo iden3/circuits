@@ -29,7 +29,6 @@ describe("idUtils.circom:", async function() {
             {
                 output: path.join(__dirname, "../circuits", "build/idUtils_SplitID"),
                 recompile: true,
-                reduceConstraints: true,
             },
         );
     });
