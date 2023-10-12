@@ -29,13 +29,12 @@ describe("idUtils.circom:", async function() {
             {
                 output: path.join(__dirname, "../circuits", "build/idUtils_SplitID"),
                 recompile: true,
-                reduceConstraints: true,
             },
         );
     });
 
     tests.forEach(({desc, input, output}) => {
-        it(`auth ${desc}`, async function() {
+        it(`SplitID - ${desc}`, async function() {
             const w = await circuit.calculateWitness(input, true);
             await circuit.checkConstraints(w);
             await circuit.assertOut(w, output);

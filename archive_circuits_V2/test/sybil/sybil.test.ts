@@ -21,7 +21,6 @@ describe("sybilTestMTP.circom:", async function() {
             {
                 output: path.join(__dirname, "../circuits", "build/sybil"),
                 recompile: true,
-                reduceConstraints: false,
             },
         );
     });
@@ -74,7 +73,6 @@ describe("sybilTestSig.circom:", async function() {
             {
                 output: path.join(__dirname, "../circuits", "build/sybilSig"),
                 recompile: true,
-                reduceConstraints: false,
             },
         );
     });

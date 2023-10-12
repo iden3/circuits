@@ -17,7 +17,6 @@ describe("Test credentialAtomicQueryMTPOffChain.circom", function () {
       {
         output: path.join(__dirname, "circuits", "build"),
         recompile: true,
-        reduceConstraints: false,
       },
     );
 

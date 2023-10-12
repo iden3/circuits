@@ -36,9 +36,10 @@ type Inputs struct {
 	RequestID string `json:"requestID"`
 
 	// user data
-	UserGenesisID               string      `json:"userGenesisID"`            //
-	ProfileNonce                string      `json:"profileNonce"`             //
-	ClaimSubjectProfileNonce    string      `json:"claimSubjectProfileNonce"` //
+	UserGenesisID            string `json:"userGenesisID"`            //
+	ProfileNonce             string `json:"profileNonce"`             //
+	ClaimSubjectProfileNonce string `json:"claimSubjectProfileNonce"` //
+
 	UserAuthClaim               *core.Claim `json:"authClaim"`
 	UserAuthClaimMtp            []string    `json:"authClaimIncMtp"`
 	UserAuthClaimNonRevMtp      []string    `json:"authClaimNonRevMtp"`
@@ -109,8 +110,10 @@ type Inputs struct {
 	IssuerAuthClaimsTreeRoot      string      `json:"issuerAuthClaimsTreeRoot"`
 	IssuerAuthRevTreeRoot         string      `json:"issuerAuthRevTreeRoot"`
 	IssuerAuthRootsTreeRoot       string      `json:"issuerAuthRootsTreeRoot"`
+	IssuerAuthState               string      `json:"issuerAuthState"`
 
 	ProofType string `json:"proofType"` // 0 for sig, 1 for mtp
+
 	// Private random nonce, used to generate LinkID
 	LinkNonce string `json:"linkNonce"`
 
@@ -118,19 +121,18 @@ type Inputs struct {
 }
 
 type Outputs struct {
-	ProofType              string `json:"proofType"` // 0 for sig, 1 for mtp
-	Merklized              string `json:"merklized"`
-	UserID                 string `json:"userID"`
-	CircuitQueryHash       string `json:"circuitQueryHash"`
 	RequestID              string `json:"requestID"`
+	UserID                 string `json:"userID"`
 	IssuerID               string `json:"issuerID"`
 	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
+	CircuitQueryHash       string `json:"circuitQueryHash"`
+	GistRoot               string `json:"gistRoot"`
 	Timestamp              string `json:"timestamp"`
+	Merklized              string `json:"merklized"`
+	ProofType              string `json:"proofType"` // 0 for sig, 1 for mtp
 	IsRevocationChecked    string `json:"isRevocationChecked"`
 	Challenge              string `json:"challenge"`
-	GistRoot               string `json:"gistRoot"`
-	IssuerClaimIdenState   string `json:"issuerClaimIdenState"`
-	IssuerAuthState        string `json:"issuerAuthState"` // Sig specific
+	IssuerState            string `json:"issuerState"`
 	LinkID                 string `json:"linkID"`
 	VerifierID             string `json:"verifierID"`
 	OperatorOutput         string `json:"operatorOutput"`
@@ -160,7 +162,7 @@ func Test_ClaimIssuedOnUserProfileID(t *testing.T) {
 	generateJSONLDTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "sig/claimIssuedOnProfileID", Sig)
 }
 
-func Test_IssueClaimToProfile_2(t *testing.T) {
+func Test_IssueClaimToProfile(t *testing.T) {
 
 	desc := "UserID != Subject. UserProfile out. User nonce = 10. Claim issued on Profile (subject nonce = 0) (Merklized claim)"
 	isUserIDProfile := true
@@ -206,13 +208,24 @@ func Test_RevokedClaimWithoutRevocationCheck(t *testing.T) {
 	generateRevokedTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/revoked_claim_without_revocation_check", 0, Mtp)
 }
 
+func Test_JSON_LD_Proof_non_inclusion(t *testing.T) {
+
+	desc := "JSON-LD proof non inclusion. UserID = Subject. UserID out. User nonce = 0, " +
+		"Subject nonce = 0 claim issued on userID (" +
+		"Merklized claim)"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+
+	generateJSONLD_NON_INCLUSION_TestData(t, isUserIDProfile, isSubjectIDProfile, desc, "sig/jsonld_non_inclusion")
+}
+
 func Test_LinkID(t *testing.T) {
 	desc := "LinkId not 0"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 
-	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "94324", "mtp/claimWithLinkNonce", Mtp)
-	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "94324", "sig/claimWithLinkNonce", Sig)
+	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "6321", "mtp/claimWithLinkNonce", Mtp)
+	generateTestData(t, desc, isUserIDProfile, isSubjectIDProfile, "6321", "sig/claimWithLinkNonce", Sig)
 }
 
 func Test_Nullify(t *testing.T) {
@@ -240,17 +253,6 @@ func Test_Between(t *testing.T) {
 	value := utils.PrepareStrArray([]string{"8", "10"}, 64)
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/between_operator", utils.BETWEEN, &value, Mtp)
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/between_operator", utils.BETWEEN, &value, Sig)
-}
-
-func Test_JSON_LD_Proof_non_inclusion(t *testing.T) {
-
-	desc := "JSON-LD proof non inclusion. UserID = Subject. UserID out. User nonce = 0, " +
-		"Subject nonce = 0 claim issued on userID (" +
-		"Merklized claim)"
-	isUserIDProfile := false
-	isSubjectIDProfile := false
-
-	generateJSONLD_NON_INCLUSION_TestData(t, isUserIDProfile, isSubjectIDProfile, desc, "sig/jsonld_non_inclusion")
 }
 
 func Test_Less_Than_Eq(t *testing.T) {
@@ -514,6 +516,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		IssuerAuthClaimsTreeRoot:      issuerAuthClaimsTreeRoot,
 		IssuerAuthRevTreeRoot:         issuerAuthRevTreeRoot,
 		IssuerAuthRootsTreeRoot:       issuerAuthRootsTreeRoot,
+		IssuerAuthState:               issuerAuthState,
 
 		LinkNonce: linkNonce,
 
@@ -563,11 +566,19 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		operatorOutput = big.NewInt(10).String()
 	}
 
+	var issuerState string
+	if proofType == "0" {
+		// sig
+		issuerState = issuerAuthState
+	} else {
+		// mtp
+		issuerState = issuerClaimIdenState
+	}
+
 	out := Outputs{
 		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
-		IssuerClaimIdenState:   issuerClaimIdenState,
 		IssuerClaimNonRevState: issuer.State(t).String(),
 		CircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
@@ -576,7 +587,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		GistRoot:               gistRoot.BigInt().String(),
 		IsRevocationChecked:    strconv.Itoa(isRevocationChecked),
 		ProofType:              proofType,
-		IssuerAuthState:        issuerAuthState,
+		IssuerState:            issuerState,
 		LinkID:                 linkID,
 		OperatorOutput:         operatorOutput,
 		VerifierID:             inputs.VerifierID,
@@ -704,6 +715,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		IssuerAuthClaimsTreeRoot:        issuer.Clt.Root().BigInt().String(),
 		IssuerAuthRevTreeRoot:           issuer.Ret.Root().BigInt().String(),
 		IssuerAuthRootsTreeRoot:         issuer.Rot.Root().BigInt().String(),
+		IssuerAuthState:                 issuer.State(t).String(),
 		ClaimSchema:                     "180410020913331409885634153623124536270",
 
 		ClaimPathNotExists: "1", // 0 for inclusion, 1 for non-inclusion
@@ -755,15 +767,14 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		RequestID:              requestID.String(),
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
-		IssuerAuthState:        issuerAuthState.String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
 		Merklized:              "1",
 		CircuitQueryHash:       circuitQueryHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
+		IssuerState:            issuerAuthState.String(),
 		IsRevocationChecked:    "1",
-		IssuerClaimIdenState:   "0",
 		ProofType:              "0",
 		LinkID:                 "0",
 		VerifierID:             inputs.VerifierID,

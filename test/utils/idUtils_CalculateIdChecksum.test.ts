@@ -17,6 +17,17 @@ describe("idUtils.circom:", async function() {
                 out: "4565",
             },
         },
+        {
+            desc: "Max values",
+            input: {
+                typ: "65535", // 0xffff
+                // 0xffffffffffffffffffffffffffffffffffffffffffffffffffffff
+                genesis: "105312291668557186697918027683670432318895095400549111254310977535",
+            },
+            output: {
+                out: "7395", // 0x1CE3 - max checksum value possible
+            },
+        },
     ];
 
     let circuit;
@@ -28,13 +39,12 @@ describe("idUtils.circom:", async function() {
             {
                 output: path.join(__dirname, "../circuits", "build/idUtils_CalculateIdChecksum"),
                 recompile: true,
-                reduceConstraints: true,
             },
         );
     });
 
     tests.forEach(({desc, input, output}) => {
-        it(`auth ${desc}`, async function() {
+        it(`CalculateIdChecksum - ${desc}`, async function() {
             const w = await circuit.calculateWitness(input, true);
             await circuit.checkConstraints(w);
             await circuit.assertOut(w, output);

@@ -92,7 +92,7 @@ template GatherID() {
 template TakeNBits(n) {
     signal input in;
     signal output out;
-    // We take only least significant 27 * 8 bits from 254 bit number. 
+    // We take only n least significant bits from 254 bit number.
     component bits = Num2Bits(254);
     bits.in <== in;
 
@@ -138,21 +138,8 @@ template CalculateIdChecksum() {
         k++;
     }
 
-    out <== LastNBits(16)(sum[k]);
-}
-
-template LastNBits(n) {
-    signal input in;
-    signal output out;
-
-    component inBits = Num2Bits(254);
-    inBits.in <== in;
-
-    component outBits = Bits2Num(n);
-    for (var i = 0; i < n; i++) {
-        outBits.in[i] <== inBits.out[i];
-    }
-    out <== outBits.out;
+    // no need to cut last 16 bits of sum, because max value of sum is 255*29 = 7395 = 0x1CE3 - 16 bits
+    out <== sum[k];
 }
 
 // SelectProfile `out` output signal will be assigned with user profile,
@@ -163,12 +150,12 @@ template SelectProfile() {
 
     signal output out;
 
-    signal isSaltZero <== IsZero()(nonce);
+    signal isNonceZero <== IsZero()(nonce);
     signal calcProfile <== ProfileID()(in, nonce);
 
     out <== Mux1()(
         [calcProfile, in],
-        isSaltZero
+        isNonceZero
     );
 }
 
@@ -178,11 +165,11 @@ template cutId() {
 
 	signal idBits[256] <== Num2Bits(256)(in);
 
-	component cutted = Bits2Num(256-16-16-8);
+	component cut = Bits2Num(256-16-16-8);
 	for (var i=16; i<256-16-8; i++) {
-		cutted.in[i-16] <== idBits[i];
+		cut.in[i-16] <== idBits[i];
 	}
-	out <== cutted.out;
+	out <== cut.out;
 }
 
 template cutState() {
@@ -191,14 +178,14 @@ template cutState() {
 
 	signal stateBits[256] <== Num2Bits(256)(in);
 
-	component cutted = Bits2Num(256-16-16-8);
+	component cut = Bits2Num(256-16-16-8);
 	for (var i=0; i<256-16-16-8; i++) {
-		cutted.in[i] <== stateBits[i+16+16+8];
+		cut.in[i] <== stateBits[i+16+16+8];
 	}
-	out <== cutted.out;
+	out <== cut.out;
 }
 
-// getIdenState caclulates the Identity state out of the claims tree root,
+// getIdenState calculates the Identity state out of the claims tree root,
 // revocations tree root and roots tree root.
 template getIdenState() {
 	signal input claimsTreeRoot;

@@ -98,8 +98,7 @@ describe("Sponge Hash tests", function () {
           __dirname,
           relativePath,
           `${templateName}${testCases[index].length}.circom`
-        ),
-        { reduceConstraints: false }
+        )
       );
 
       const witness = await circuit.calculateWitness({

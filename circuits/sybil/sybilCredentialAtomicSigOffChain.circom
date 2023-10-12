@@ -187,9 +187,13 @@ template VerifyIssuerClaim(IssuerLevels){
     // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
     verifyCredentialSchema()(1, issuerAuthClaim, 80551937543569765027552589160822318028);
 
+    signal issuerAuthClaimHi, issuerAuthClaimHv;
+	(issuerAuthClaimHi, issuerAuthClaimHv) <== getClaimHiHv()(issuerAuthClaim);
+
     // IssuerAuthClaim proof of existence (isProofExist)
     component smtIssuerAuthClaimExists = checkClaimExists(IssuerLevels);
-    for (var i=0; i<8; i++) { smtIssuerAuthClaimExists.claim[i] <== issuerAuthClaim[i]; }
+    smtIssuerAuthClaimExists.claimHi <== issuerAuthClaimHi;
+    smtIssuerAuthClaimExists.claimHv <== issuerAuthClaimHv;
     for (var i=0; i<IssuerLevels; i++) { smtIssuerAuthClaimExists.claimMTP[i] <== issuerAuthClaimMtp[i]; }
     smtIssuerAuthClaimExists.treeRoot <== issuerAuthClaimsRoot;
     smtIssuerAuthClaimExists.enabled <== 1;
@@ -214,9 +218,12 @@ template VerifyIssuerClaim(IssuerLevels){
     component issuerAuthPubKey = getPubKeyFromClaim();
     for (var i=0; i<8; i++){ issuerAuthPubKey.claim[i] <== issuerAuthClaim[i]; }
 
+    signal issuerClaimHash;
+    (issuerClaimHash, _, _) <== getClaimHash()(issuerClaim);
+
     // IssuerClaim  check signature
     component verifyClaimSig = verifyClaimSignature();
-    for (var i=0; i<8; i++) { verifyClaimSig.claim[i] <== issuerClaim[i]; }
+    verifyClaimSig.claimHash <== issuerClaimHash;
     verifyClaimSig.sigR8x <== issuerClaimSignatureR8x;
     verifyClaimSig.sigR8y <== issuerClaimSignatureR8y;
     verifyClaimSig.sigS <== issuerClaimSignatureS;

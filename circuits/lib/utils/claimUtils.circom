@@ -11,15 +11,12 @@ include "./idUtils.circom";
 // getClaimSubjectOtherIden checks that a claim Subject is OtherIden and outputs the identity within.
 template getClaimSubjectOtherIden() {
     signal input claim[8];
+    signal input claimFlags[32];
     signal output id;
-
-    // get header flags from claim.
-    component header = getClaimHeader();
-    header.claim <== claim;
 
     // get subject location from header flags.
     component subjectLocation = getSubjectLocation();
-    subjectLocation.claimFlags <== header.claimFlags;
+    subjectLocation.claimFlags <== claimFlags;
 
     component mux = Mux2();
     component n2b = Num2Bits(2);
@@ -39,6 +36,7 @@ template getClaimSubjectOtherIden() {
 // getClaimMerkilizeFlag checks that a claim flag is set and return merklized slot.
 template getClaimMerklizeRoot() {
     signal input claim[8];
+    signal input claimFlags[32];
     signal output flag; // 0 non merklized, 1 merklized
 
     // merklizeFlag = 0 out = 0 , non merkilized
@@ -46,17 +44,12 @@ template getClaimMerklizeRoot() {
     // merklizeFlag = 2 out=claim_v_2, root is stored in value slot 2 (v_2)
     signal output out;
 
-    // get header flags from claim.
-    component header = getClaimHeader();
-    header.claim <== claim;
-
     // get subject location from header flags.
-    component merklizeLocation = getMerklizeLocation();
-    merklizeLocation.claimFlags <== header.claimFlags;
+    signal merklizeLocation <== getMerklizeLocation()(claimFlags);
 
     component mux = Mux2();
     component n2b = Num2Bits(2);
-    n2b.in <== merklizeLocation.out;
+    n2b.in <== merklizeLocation;
 
     mux.s[0] <== n2b.out[0];
     mux.s[1] <== n2b.out[1];
@@ -68,8 +61,8 @@ template getClaimMerklizeRoot() {
 
     out <== mux.out;
 
-    component gt = GreaterThan(252);
-    gt.in[0] <== merklizeLocation.out;
+    component gt = GreaterThan(3); // there's only 3 bits in merklizeLocation
+    gt.in[0] <== merklizeLocation;
     gt.in[1] <== 0;
     flag <== gt.out;
 }
@@ -80,31 +73,10 @@ template getClaimMerklizeRoot() {
 template getClaimHeader() {
     signal input claim[8];
 
-    signal output claimType;
+    signal output schema;
     signal output claimFlags[32];
 
-    component i0Bits = Num2Bits(256);
-    i0Bits.in <== claim[0];
-
-    component claimTypeNum = Bits2Num(128);
-
-    for (var i=0; i<128; i++) {
-        claimTypeNum.in[i] <== i0Bits.out[i];
-    }
-    claimType <== claimTypeNum.out;
-
-    for (var i=0; i<32; i++) {
-        claimFlags[i] <== i0Bits.out[128 + i];
-    }
-}
-
-// getClaimSchema gets the schema of a claim
-template getClaimSchema() {
-    signal input claim[8];
-
-    signal output schema;
-
-    component i0Bits = Num2Bits(256);
+    component i0Bits = Num2Bits(254);
     i0Bits.in <== claim[0];
 
     component schemaNum = Bits2Num(128);
@@ -113,6 +85,10 @@ template getClaimSchema() {
         schemaNum.in[i] <== i0Bits.out[i];
     }
     schema <== schemaNum.out;
+
+    for (var i=0; i<32; i++) {
+        claimFlags[i] <== i0Bits.out[128 + i];
+    }
 }
 
 // getClaimRevNonce gets the revocation nonce out of a claim outputing it as an integer.
@@ -123,7 +99,7 @@ template getClaimRevNonce() {
 
     component claimRevNonce = Bits2Num(64);
 
-    component v0Bits = Num2Bits(256);
+    component v0Bits = Num2Bits(254);
     v0Bits.in <== claim[4];
     for (var i=0; i<64; i++) {
         claimRevNonce.in[i] <== v0Bits.out[i];
@@ -159,71 +135,54 @@ template getClaimHash() {
     signal output hi;
     signal output hv;
 
-    component hihv = getClaimHiHv();
-    hihv.claim <== claim;
+    (hi, hv) <== getClaimHiHv()(claim);
 
-    hash <== Poseidon(2)([hihv.hi, hihv.hv]);
-    hi <== hihv.hi;
-    hv <== hihv.hv;
-}
-
-// verifyCredentialSubject verifies that claim is issued to a specified identity
-template verifyCredentialSubject() {
-    signal input claim[8];
-    signal input id;
-
-    component subjectOtherIden = getClaimSubjectOtherIden();
-    subjectOtherIden.claim <== claim;
-
-    subjectOtherIden.id === id;
+    hash <== Poseidon(2)([hi, hv]);
 }
 
 // verifyCredentialSubject verifies that claim is issued to a specified identity or identity profile
 // if nonce 0 is used, the claim should be issued to the genesis identity
 template verifyCredentialSubjectProfile() {
+    signal input enabled;
     signal input claim[8];
+    signal input claimFlags[32];
     signal input id;
     signal input nonce;
 
-    component subjectOtherIden = getClaimSubjectOtherIden();
-    subjectOtherIden.claim <== claim;
-
+    signal subjectOtherIdenId <== getClaimSubjectOtherIden()(claim, claimFlags);
 
     /* ProfileID calculation */
     component profile = SelectProfile();
     profile.in <== id;
     profile.nonce <== nonce;
 
-    subjectOtherIden.id === profile.out;
+    ForceEqualIfEnabled()(
+        enabled,
+        [subjectOtherIdenId, profile.out]
+    );
 }
 
 // verifyCredentialSchema verifies that claim matches provided schema
 template verifyCredentialSchema() {
     signal input enabled;
-    signal input claim[8];
+    signal input claimSchema;
     signal input schema;
-
-    component claimSchema = getClaimSchema();
-    claimSchema.claim <== claim;
 
     ForceEqualIfEnabled()(
         enabled,
-        [claimSchema.schema, schema]
+        [claimSchema, schema]
     );
 }
 
 // verifyClaimSignature verifies that claim is signed with the provided public key
 template verifyClaimSignature() {
     signal input enabled;
-    signal input claim[8];
+    signal input claimHash;
     signal input sigR8x;
     signal input sigR8y;
     signal input sigS;
     signal input pubKeyX;
     signal input pubKeyY;
-
-    component hash = getClaimHash();
-    hash.claim <== claim;
 
     // signature verification
     EdDSAPoseidonVerifier()(
@@ -233,11 +192,12 @@ template verifyClaimSignature() {
         S <== sigS,
         R8x <== sigR8x,
         R8y <== sigR8y,
-        M <== hash.hash
+        M <== claimHash
     );
 }
 
 template checkDataSignatureWithPubKeyInClaim() {
+    signal input enabled;
     signal input claim[8];
     signal input signatureS;
     signal input signatureR8X;
@@ -248,7 +208,7 @@ template checkDataSignatureWithPubKeyInClaim() {
     getPubKey.claim <== claim;
 
     EdDSAPoseidonVerifier()(
-        enabled <== 1,
+        enabled <== enabled,
         Ax <== getPubKey.Ax,
         Ay <== getPubKey.Ay,
         S <== signatureS,
@@ -269,46 +229,42 @@ template getPubKeyFromClaim() {
 
 // getValueByIndex select slot from claim by given index
 template getValueByIndex(){
-  signal input claim[8];
-  signal input index;
-  signal output value; // value from the selected slot claim[index]
+    signal input claim[8];
+    signal input index;
+    signal output value; // value from the selected slot claim[index]
 
-  component mux = Mux3();
-  component n2b = Num2Bits(8);
-  n2b.in <== index;
-  for(var i=0;i<8;i++){
-    mux.c[i] <== claim[i];
-  }
+    component mux = Mux3();
+    component n2b = Num2Bits(3);
+    n2b.in <== index;
+    for(var i=0;i<8;i++){
+        mux.c[i] <== claim[i];
+    }
 
-  mux.s[0] <== n2b.out[0];
-  mux.s[1] <== n2b.out[1];
-  mux.s[2] <== n2b.out[2];
+    mux.s[0] <== n2b.out[0];
+    mux.s[1] <== n2b.out[1];
+    mux.s[2] <== n2b.out[2];
 
-  value <== mux.out;
+    value <== mux.out;
 }
 
 // verify that the claim has expiration time and it is less then timestamp
 template verifyExpirationTime() {
+    signal input enabled; // claimFlags[3] (expiration flag) is set
     signal input claim[8];
     signal input timestamp;
-
-    component header = getClaimHeader();
-    header.claim <== claim;
 
     signal claimExpiration <==  getClaimExpiration()(claim);
 
     // timestamp < claimExpiration
-    signal lt <== LessEqThan(252)([
+    signal lt <== LessEqThan(64)([
         timestamp,
         claimExpiration]
     );
 
-    component res = Mux1();
-    res.c[0] <== 1;
-    res.c[1] <== lt;
-    res.s <== header.claimFlags[3];
-
-    res.out === 1;
+    ForceEqualIfEnabled()(
+        enabled,
+        [lt, 1]
+    );
 }
 
 // getClaimExpiration extract expiration date from claim
@@ -319,7 +275,7 @@ template getClaimExpiration() {
 
     component expirationBits = Bits2Num(64);
 
-    component v0Bits = Num2Bits(256);
+    component v0Bits = Num2Bits(254);
     v0Bits.in <== claim[4];
     for (var i=0; i<64; i++) {
         expirationBits.in[i] <== v0Bits.out[i+64];

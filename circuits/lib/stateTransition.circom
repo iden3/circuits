@@ -36,6 +36,10 @@ template StateTransition(IdOwnershipLevels) {
     signal input newRevTreeRoot;
     signal input newRootsTreeRoot;
 
+    signal zero <== IsZero()(userID); // comparing to zero something that can't be zero to get zero as an output
+    signal one <== 1 - zero;
+    zero * one === 0;
+
     signal cutId <== cutId()(userID);
 
     signal cutState <== cutState()(oldUserState);
@@ -48,17 +52,17 @@ template StateTransition(IdOwnershipLevels) {
 
     // check newUserState is not zero
     signal stateIsNotZero <== IsZero()(newUserState);
-    stateIsNotZero === 0;
+    ForceEqualIfEnabled()(one, [stateIsNotZero, 0]);
 
     // old & new state checks
     signal oldNewNotEqual <== IsEqual()([oldUserState, newUserState]);
-    oldNewNotEqual === 0;
+    ForceEqualIfEnabled()(one, [oldNewNotEqual, 0]);
 
     // check userID ownership by correct signature of a hash of old state and new state
     signal challenge <== Poseidon(2)([oldUserState, newUserState]);
 
     IdOwnership(IdOwnershipLevels)(
-        1,
+        one,
         oldUserState,
         claimsTreeRoot,
         authClaimMtp,
@@ -75,8 +79,11 @@ template StateTransition(IdOwnershipLevels) {
         signatureS
     );
 
-    // check auth claim exists in newClaimsTreeRoot and newUserState
-    checkClaimExists(IdOwnershipLevels)(1, authClaim, newAuthClaimMtp, newClaimsTreeRoot);
+    signal authClaimHi, authClaimHv;
+	(authClaimHi, authClaimHv) <== getClaimHiHv()(authClaim);
 
-    checkIdenStateMatchesRoots()(1, newClaimsTreeRoot, newRevTreeRoot, newRootsTreeRoot, newUserState);
+    // check auth claim exists in newClaimsTreeRoot and newUserState
+    checkClaimExists(IdOwnershipLevels)(one, authClaimHi, authClaimHv, newAuthClaimMtp, newClaimsTreeRoot);
+
+    checkIdenStateMatchesRoots()(one, newClaimsTreeRoot, newRevTreeRoot, newRootsTreeRoot, newUserState);
 }

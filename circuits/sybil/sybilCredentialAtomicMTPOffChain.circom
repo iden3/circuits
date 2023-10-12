@@ -139,10 +139,15 @@ template VerifyIssuerClaim(IssuerLevels){
     signal input profileNonce;
     signal input claimSubjectProfileNonce;
 
+    signal claimHi, claimHv;
+	(claimHi, claimHv) <== getClaimHiHv()(claim);
+
     // Verify claim issued
     component vci = verifyClaimIssuanceNonRev(IssuerLevels);
     vci.enabledNonRevCheck <== 1;
     for (var i=0; i<8; i++) { vci.claim[i] <== claim[i]; }
+    vci.claimHi <== claimHi;
+    vci.claimHv <== claimHv;
     for (var i=0; i<IssuerLevels; i++) { vci.claimIssuanceMtp[i] <== claimMtp[i]; }
     vci.claimIssuanceClaimsTreeRoot <== claimClaimsRoot;
     vci.claimIssuanceRevTreeRoot <== claimRevRoot;

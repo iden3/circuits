@@ -8,6 +8,7 @@ const assert = chai.assert;
 export {};
 
 const verifyCredentialSubject = {
+    enabled: "1",
     claim: [
         "700576110560149417265602648140262015232",
         "197990912273762023075897629417744831667514652778362723486029975898079821824",
@@ -21,25 +22,11 @@ const verifyCredentialSubject = {
     id: "197990912273762023075897629417744831667514652778362723486029975898079821824", // 117twYCgGzxHUtMsAfjM3muCrypTXcu6oc7cSsuGHM
 }
 
-describe("utils verifyCredentialSubject test", function () {
-    this.timeout(200000);
-    it("Test utils verifyCredentialSubject", async () => {
-        const circuit = await tester(
-            path.join(__dirname, "../circuits/utils", "utils_verifyCredentialSubject.circom"),
-            {reduceConstraints: false},
-        );
-
-        const witness = await circuit.calculateWitness(verifyCredentialSubject, true);
-        await circuit.checkConstraints(witness);
-    });
-});
-
 describe("utils checkIdenStateMatchesRoots test", function () {
     this.timeout(200000);
     it("Test utils checkIdenStateMatchesRoots", async () => {
         const circuit = await tester(
             path.join(__dirname, "../circuits/utils", "utils_checkIdenStateMatchesRoots.circom"),
-            //{reduceConstraints: false},
         );
 
         const witness = await circuit.calculateWitness({
@@ -58,12 +45,12 @@ describe("utils verifyClaimSignature test", function () {
     it("Test utils verifyClaimSignature", async () => {
         const circuit = await tester(
             path.join(__dirname, "../circuits/utils", "utils_verifyClaimSignature.circom"),
-            //{reduceConstraints: false},
         );
 
+        //"claim": ["0","0","0","0","0","0","0","0"]
         const witness = await circuit.calculateWitness({
             "enabled": "1",
-            "claim": ["0","0","0","0","0","0","0","0"],
+            "claimHash": "5723720832300544730179969191054372086051633243972178196193101286943139171509",
             "sigR8x": "9813265844413837380082826071463892301278045128546516139211810884421030840917",
             "sigR8y": "7110066446166689493462986682910785889642607369745074815971396692733663407188",
             "sigS": "1837652275043347007743363280039859735198580922853822340283578942174886737707",

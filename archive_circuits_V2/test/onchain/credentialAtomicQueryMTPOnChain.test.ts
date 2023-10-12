@@ -15,9 +15,8 @@ describe("Test On Chain credentialAtomicQueryMTPOnChain.circom", function () {
         circuit = await wasm(
             path.join(__dirname, "../../circuits/", "credentialAtomicQueryMTPV2OnChain.circom"),
             {
-                // output: path.join(__dirname, "circuits", "build"),
-                // recompile: true,
-                // reduceConstraints: false,
+                output: path.join(__dirname, "circuits", "build"),
+                recompile: true,
             },
         );
 

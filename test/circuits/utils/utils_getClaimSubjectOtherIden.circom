@@ -1,5 +1,5 @@
 pragma circom 2.1.1;
 
-include "../../../circuits/lib/utils/claimUtils.circom";
+include "../../../circuits/lib/utils/claimUtilsWrappers.circom";
 
-component main{public[claim]} = getClaimSubjectOtherIden();
+component main{public[claim]} = getClaimSubjectOtherIdenWrapper();

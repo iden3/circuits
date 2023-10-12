@@ -73,6 +73,7 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
 
     // claim issued by issuer to the user
     signal input issuerClaim[8];
+
     // issuerClaim non rev inputs
     signal input isRevocationChecked;
     signal input issuerClaimNonRevMtp[issuerLevels];
@@ -146,10 +147,14 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
         issuerAuthRootsTreeRoot
     );
 
+    signal issuerAuthClaimHi, issuerAuthClaimHv;
+	(issuerAuthClaimHi, issuerAuthClaimHv) <== getClaimHiHv()(issuerAuthClaim);
+
     // issuerAuthClaim proof of existence (isProofExist)
     checkClaimExists(issuerLevels)(
         1,
-        issuerAuthClaim,
+        issuerAuthClaimHi,
+        issuerAuthClaimHv,
         issuerAuthClaimMtp,
         issuerAuthClaimsTreeRoot
     );
@@ -168,10 +173,13 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
     component issuerAuthPubKey = getPubKeyFromClaim();
     issuerAuthPubKey.claim <== issuerAuthClaim;
 
+    signal issuerClaimHash;
+    (issuerClaimHash, _, _) <== getClaimHash()(issuerClaim);
+
     // issuerClaim  check signature
     verifyClaimSignature()(
         1,
-        issuerClaim,
+        issuerClaimHash,
         issuerClaimSignatureR8x,
         issuerClaimSignatureR8y,
         issuerClaimSignatureS,
