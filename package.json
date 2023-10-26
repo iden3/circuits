@@ -18,7 +18,7 @@
     "@types/node": "^20.5.7",
     "adm-zip": "^0.5.10",
     "aws-sdk": "^2.1447.0",
-    "circom_tester": "^0.0.19",
+    "circom_tester": "^0.0.20",
     "circomlibjs": "v0.1.7",
     "chai": "^4.3.8",
     "mocha": "^10.2.0",
