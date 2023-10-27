@@ -1,8 +1,8 @@
 pragma circom 2.1.1;
-include "../../node_modules/circomlib/circuits/mux1.circom";
-include "../../node_modules/circomlib/circuits/bitify.circom";
-include "../../node_modules/circomlib/circuits/comparators.circom";
-include "../../node_modules/circomlib/circuits/poseidon.circom";
+include "../../../node_modules/circomlib/circuits/mux1.circom";
+include "../../../node_modules/circomlib/circuits/bitify.circom";
+include "../../../node_modules/circomlib/circuits/comparators.circom";
+include "../../../node_modules/circomlib/circuits/poseidon.circom";
 include "../lib/query/comparators.circom";
 include "../auth/authV2.circom";
 include "../lib/query/query.circom";
@@ -10,7 +10,7 @@ include "../lib/utils/idUtils.circom";
 include "../lib/utils/spongeHash.circom";
 
 /**
-credentialAtomicQuerySigOnChain.circom - query claim value and verify claim issuer signature:
+credentialJsonLDAtomicQueryMTP.circom - query claim value and verify claim MTP
 
 checks:
 - identity ownership
@@ -29,7 +29,8 @@ comparison ["1", "2", "3"]
 idOwnershipLevels - Merkle tree depth level for personal claims
 onChainLevels - Merkle tree depth level for Auth claim on-chain
 */
-template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySize, idOwnershipLevels, onChainLevels) {
+template CredentialAtomicQueryMTPOnChain(issuerLevels, claimLevels, valueArraySize, idOwnershipLevels, onChainLevels) {
+
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
@@ -93,22 +94,15 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     // issuer ID
     signal input issuerID;
 
-    // issuer auth proof of existence
-    signal input issuerAuthClaim[8];
-    signal input issuerAuthClaimMtp[issuerLevels];
-    signal input issuerAuthClaimsTreeRoot;
-    signal input issuerAuthRevTreeRoot;
-    signal input issuerAuthRootsTreeRoot;
-    signal output issuerAuthState;
-
-    // issuer auth claim non rev proof
-    signal input issuerAuthClaimNonRevMtp[issuerLevels];
-    signal input issuerAuthClaimNonRevMtpNoAux;
-    signal input issuerAuthClaimNonRevMtpAuxHi;
-    signal input issuerAuthClaimNonRevMtpAuxHv;
-
-    // claim issued by issuer to the user
+    /* issuerClaim signals */
     signal input issuerClaim[8];
+
+    // issuerClaim MTP of issuance
+    signal input issuerClaimMtp[issuerLevels];
+    signal input issuerClaimClaimsTreeRoot;
+    signal input issuerClaimRevTreeRoot;
+    signal input issuerClaimRootsTreeRoot;
+    signal input issuerClaimIdenState;
 
     // issuerClaim non rev inputs
     signal input isRevocationChecked;
@@ -120,11 +114,6 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
     signal input issuerClaimNonRevRevTreeRoot;
     signal input issuerClaimNonRevRootsTreeRoot;
     signal input issuerClaimNonRevState;
-
-    // issuerClaim signature
-    signal input issuerClaimSignatureR8x;
-    signal input issuerClaimSignatureR8y;
-    signal input issuerClaimSignatureS;
 
     /* current time */
     signal input timestamp;
@@ -192,55 +181,15 @@ template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySi
 
     /////////////////////////////////////////////////////////////////
 
-    // verify issuerAuthClaim Schema
-    // AuthHash cca3371a6cb1b715004407e325bd993c
-    // BigInt: 80551937543569765027552589160822318028
-    // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
-    verifyCredentialSchema()(
-        1,
-        issuerAuthClaim,
-        80551937543569765027552589160822318028
-    );
-
-    // verify authClaim issued and not revoked
-    // calculate issuerAuthState
-    issuerAuthState <== getIdenState()(
-        issuerAuthClaimsTreeRoot,
-        issuerAuthRevTreeRoot,
-        issuerAuthRootsTreeRoot
-    );
-
-    // issuerAuthClaim proof of existence (isProofExist)
-    checkClaimExists(issuerLevels)(
-        1,
-        issuerAuthClaim,
-        issuerAuthClaimMtp,
-        issuerAuthClaimsTreeRoot
-    );
-
-    // issuerAuthClaim proof of non-revocation
-    checkClaimNotRevoked(issuerLevels)(
+    // verify issuerClaim issued
+    verifyClaimIssuance(issuerLevels)(
         enabled <== 1,
-        claim <== issuerAuthClaim,
-        claimNonRevMTP <== issuerAuthClaimNonRevMtp,
-        noAux <== issuerAuthClaimNonRevMtpNoAux,
-        auxHi <== issuerAuthClaimNonRevMtpAuxHi,
-        auxHv <== issuerAuthClaimNonRevMtpAuxHv,
-        treeRoot <== issuerClaimNonRevRevTreeRoot
-    );
-
-    component issuerAuthPubKey = getPubKeyFromClaim();
-    issuerAuthPubKey.claim <== issuerAuthClaim;
-
-    // issuerClaim check signature
-    verifyClaimSignature()(
-        1,
-        issuerClaim,
-        issuerClaimSignatureR8x,
-        issuerClaimSignatureR8y,
-        issuerClaimSignatureS,
-        issuerAuthPubKey.Ax,
-        issuerAuthPubKey.Ay
+        claim <== issuerClaim,
+        claimIssuanceMtp <== issuerClaimMtp,
+        claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
+        claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot,
+        claimIssuanceRootsTreeRoot <== issuerClaimRootsTreeRoot,
+        claimIssuanceIdenState <== issuerClaimIdenState
     );
 
     /////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 pragma circom 2.1.1;
-include "../../node_modules/circomlib/circuits/mux1.circom";
-include "../../node_modules/circomlib/circuits/bitify.circom";
-include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../../../node_modules/circomlib/circuits/mux1.circom";
+include "../../../node_modules/circomlib/circuits/bitify.circom";
+include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "../lib/query/comparators.circom";
 include "../auth/authV2.circom";
 include "../lib/query/query.circom";
@@ -9,7 +9,7 @@ include "../lib/utils/idUtils.circom";
 
 
 /**
-credentialAtomicQuerySig.circom - query claim value and verify claim issuer signature:
+credentialJsonLDAtomicQueryMTP.circom - query claim value and verify claim MTP
 
 checks:
 - identity ownership
@@ -27,7 +27,7 @@ valueArraySize - Number of elements in comparison array for in/notin operation i
 comparison ["1", "2", "3"]
 
 */
-template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArraySize) {
+template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArraySize) {
 
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -35,7 +35,7 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
     // we have no constraints for "requestID" in this circuit, it is used as a unique identifier for the request
     // and verifier can use it to identify the request, and verify the proof of specific request in case of multiple query requests
     signal input requestID;
-    
+
     // flag indicates if merklized flag set in issuer claim (if set MTP is used to verify that
     // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed
     // on root stored in the index or value slot
@@ -57,22 +57,14 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
     // issuer ID
     signal input issuerID;
 
-    // issuer auth proof of existence
-    signal input issuerAuthClaim[8];
-    signal input issuerAuthClaimMtp[issuerLevels];
-    signal input issuerAuthClaimsTreeRoot;
-    signal input issuerAuthRevTreeRoot;
-    signal input issuerAuthRootsTreeRoot;
-    signal output issuerAuthState;
-
-    // issuer auth claim non rev proof
-    signal input issuerAuthClaimNonRevMtp[issuerLevels];
-    signal input issuerAuthClaimNonRevMtpNoAux;
-    signal input issuerAuthClaimNonRevMtpAuxHi;
-    signal input issuerAuthClaimNonRevMtpAuxHv;
-
-    // claim issued by issuer to the user
+    /* issuerClaim signals */
     signal input issuerClaim[8];
+    signal input issuerClaimMtp[issuerLevels];
+    signal input issuerClaimClaimsTreeRoot;
+    signal input issuerClaimRevTreeRoot;
+    signal input issuerClaimRootsTreeRoot;
+    signal input issuerClaimIdenState;
+
     // issuerClaim non rev inputs
     signal input isRevocationChecked;
     signal input issuerClaimNonRevMtp[issuerLevels];
@@ -83,11 +75,6 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
     signal input issuerClaimNonRevRevTreeRoot;
     signal input issuerClaimNonRevRootsTreeRoot;
     signal input issuerClaimNonRevState;
-
-    // issuerClaim signature
-    signal input issuerClaimSignatureR8x;
-    signal input issuerClaimSignatureR8y;
-    signal input issuerClaimSignatureS;
 
     /* current time */
     signal input timestamp;
@@ -128,55 +115,15 @@ template credentialAtomicQuerySigOffChain(issuerLevels, claimLevels, valueArrayS
 
     /////////////////////////////////////////////////////////////////
 
-    // verify issuerAuthClaim Schema
-    // AuthHash cca3371a6cb1b715004407e325bd993c
-    // BigInt: 80551937543569765027552589160822318028
-    // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
-    verifyCredentialSchema()(
-        1,
-        issuerAuthClaim,
-        80551937543569765027552589160822318028
-    );
-
-    // verify authClaim issued and not revoked
-    // calculate issuerAuthState
-    issuerAuthState <== getIdenState()(
-        issuerAuthClaimsTreeRoot,
-        issuerAuthRevTreeRoot,
-        issuerAuthRootsTreeRoot
-    );
-
-    // issuerAuthClaim proof of existence (isProofExist)
-    checkClaimExists(issuerLevels)(
-        1,
-        issuerAuthClaim,
-        issuerAuthClaimMtp,
-        issuerAuthClaimsTreeRoot
-    );
-
-    // issuerAuthClaim proof of non-revocation
-    checkClaimNotRevoked(issuerLevels)(
+    // verify issuerClaim issued
+    verifyClaimIssuance(issuerLevels)(
         enabled <== 1,
-        claim <== issuerAuthClaim,
-        claimNonRevMTP <== issuerAuthClaimNonRevMtp,
-        noAux <== issuerAuthClaimNonRevMtpNoAux,
-        auxHi <== issuerAuthClaimNonRevMtpAuxHi,
-        auxHv <== issuerAuthClaimNonRevMtpAuxHv,
-        treeRoot <== issuerClaimNonRevRevTreeRoot
-    );
-
-    component issuerAuthPubKey = getPubKeyFromClaim();
-    issuerAuthPubKey.claim <== issuerAuthClaim;
-
-    // issuerClaim  check signature
-    verifyClaimSignature()(
-        1,
-        issuerClaim,
-        issuerClaimSignatureR8x,
-        issuerClaimSignatureR8y,
-        issuerClaimSignatureS,
-        issuerAuthPubKey.Ax,
-        issuerAuthPubKey.Ay
+        claim <== issuerClaim,
+        claimIssuanceMtp <== issuerClaimMtp,
+        claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
+        claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot,
+        claimIssuanceRootsTreeRoot <== issuerClaimRootsTreeRoot,
+        claimIssuanceIdenState <== issuerClaimIdenState
     );
 
     /////////////////////////////////////////////////////////////////

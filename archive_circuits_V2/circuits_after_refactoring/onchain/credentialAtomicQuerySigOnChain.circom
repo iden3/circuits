@@ -1,15 +1,16 @@
 pragma circom 2.1.1;
-include "../../node_modules/circomlib/circuits/mux1.circom";
-include "../../node_modules/circomlib/circuits/bitify.circom";
-include "../../node_modules/circomlib/circuits/comparators.circom";
+include "../../../node_modules/circomlib/circuits/mux1.circom";
+include "../../../node_modules/circomlib/circuits/bitify.circom";
+include "../../../node_modules/circomlib/circuits/comparators.circom";
+include "../../../node_modules/circomlib/circuits/poseidon.circom";
 include "../lib/query/comparators.circom";
 include "../auth/authV2.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
-
+include "../lib/utils/spongeHash.circom";
 
 /**
-credentialJsonLDAtomicQueryMTP.circom - query claim value and verify claim MTP
+credentialAtomicQuerySigOnChain.circom - query claim value and verify claim issuer signature:
 
 checks:
 - identity ownership
@@ -25,17 +26,13 @@ issuerLevels - Merkle tree depth level for claims issued by the issuer
 claimLevels - Merkle tree depth level for claim JSON-LD document
 valueArraySize - Number of elements in comparison array for in/notin operation if level = 3 number of values for
 comparison ["1", "2", "3"]
-
+idOwnershipLevels - Merkle tree depth level for personal claims
+onChainLevels - Merkle tree depth level for Auth claim on-chain
 */
-template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArraySize) {
-
+template credentialAtomicQuerySigOnChain(issuerLevels, claimLevels, valueArraySize, idOwnershipLevels, onChainLevels) {
     /*
     >>>>>>>>>>>>>>>>>>>>>>>>>>> Inputs <<<<<<<<<<<<<<<<<<<<<<<<<<<<
     */
-    // we have no constraints for "requestID" in this circuit, it is used as a unique identifier for the request
-    // and verifier can use it to identify the request, and verify the proof of specific request in case of multiple query requests
-    signal input requestID;
-
     // flag indicates if merklized flag set in issuer claim (if set MTP is used to verify that
     // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed
     // on root stored in the index or value slot
@@ -47,9 +44,48 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
+    // circuits query Hash
+    signal output circuitQueryHash;
+
+    // we have no constraints for "requestID" in this circuit, it is used as a unique identifier for the request
+    // and verifier can use it to identify the request, and verify the proof of specific request in case of multiple query requests
+    signal input requestID;
+
     /* userID ownership signals */
     signal input userGenesisID;
     signal input profileNonce; /* random number */
+
+    // user state
+    signal input userState;
+    signal input userClaimsTreeRoot;
+    signal input userRevTreeRoot;
+    signal input userRootsTreeRoot;
+
+    // Auth claim
+    signal input authClaim[8];
+
+    // auth claim. merkle tree proof of inclusion to claim tree
+    signal input authClaimIncMtp[idOwnershipLevels];
+
+    // auth claim - rev nonce. merkle tree proof of non-inclusion to rev tree
+    signal input authClaimNonRevMtp[idOwnershipLevels];
+    signal input authClaimNonRevMtpNoAux;
+    signal input authClaimNonRevMtpAuxHi;
+    signal input authClaimNonRevMtpAuxHv;
+
+    // challenge signature
+    signal input challenge;
+    signal input challengeSignatureR8x;
+    signal input challengeSignatureR8y;
+    signal input challengeSignatureS;
+
+    // global identity state tree on chain
+    signal input gistRoot;
+    // proof of inclusion or exclusion of the user in the global state
+    signal input gistMtp[onChainLevels];
+    signal input gistMtpAuxHi;
+    signal input gistMtpAuxHv;
+    signal input gistMtpNoAux;
 
     /* issuerClaim signals */
     signal input claimSubjectProfileNonce; // nonce of the profile that claim is issued to, 0 if claim is issued to genesisID
@@ -57,13 +93,22 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
     // issuer ID
     signal input issuerID;
 
-    /* issuerClaim signals */
+    // issuer auth proof of existence
+    signal input issuerAuthClaim[8];
+    signal input issuerAuthClaimMtp[issuerLevels];
+    signal input issuerAuthClaimsTreeRoot;
+    signal input issuerAuthRevTreeRoot;
+    signal input issuerAuthRootsTreeRoot;
+    signal output issuerAuthState;
+
+    // issuer auth claim non rev proof
+    signal input issuerAuthClaimNonRevMtp[issuerLevels];
+    signal input issuerAuthClaimNonRevMtpNoAux;
+    signal input issuerAuthClaimNonRevMtpAuxHi;
+    signal input issuerAuthClaimNonRevMtpAuxHv;
+
+    // claim issued by issuer to the user
     signal input issuerClaim[8];
-    signal input issuerClaimMtp[issuerLevels];
-    signal input issuerClaimClaimsTreeRoot;
-    signal input issuerClaimRevTreeRoot;
-    signal input issuerClaimRootsTreeRoot;
-    signal input issuerClaimIdenState;
 
     // issuerClaim non rev inputs
     signal input isRevocationChecked;
@@ -75,6 +120,11 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
     signal input issuerClaimNonRevRevTreeRoot;
     signal input issuerClaimNonRevRootsTreeRoot;
     signal input issuerClaimNonRevState;
+
+    // issuerClaim signature
+    signal input issuerClaimSignatureR8x;
+    signal input issuerClaimSignatureR8y;
+    signal input issuerClaimSignatureS;
 
     /* current time */
     signal input timestamp;
@@ -100,6 +150,33 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
 
     /////////////////////////////////////////////////////////////////
 
+    checkAuthV2(idOwnershipLevels, onChainLevels)(
+        1, // enabled
+        userGenesisID,
+        profileNonce,
+        userState, // user state
+        userClaimsTreeRoot,
+        userRevTreeRoot,
+        userRootsTreeRoot,
+        authClaim,
+        authClaimIncMtp,
+        authClaimNonRevMtp,
+        authClaimNonRevMtpNoAux,
+        authClaimNonRevMtpAuxHi,
+        authClaimNonRevMtpAuxHv,
+        challenge, // challenge & signature
+        challengeSignatureR8x,
+        challengeSignatureR8y,
+        challengeSignatureS,
+        gistRoot, // global identity state tree on chain
+        gistMtp, // proof of inclusion or exclusion of the user in the global state
+        gistMtpAuxHi,
+        gistMtpAuxHv,
+        gistMtpNoAux
+    );
+
+    /////////////////////////////////////////////////////////////////
+
     // Check issuerClaim is issued to provided identity
     verifyCredentialSubjectProfile()(
         issuerClaim,
@@ -115,15 +192,55 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
 
     /////////////////////////////////////////////////////////////////
 
-    // verify issuerClaim issued
-    verifyClaimIssuance(issuerLevels)(
+    // verify issuerAuthClaim Schema
+    // AuthHash cca3371a6cb1b715004407e325bd993c
+    // BigInt: 80551937543569765027552589160822318028
+    // https://schema.iden3.io/core/jsonld/auth.jsonld#AuthBJJCredential
+    verifyCredentialSchema()(
+        1,
+        issuerAuthClaim,
+        80551937543569765027552589160822318028
+    );
+
+    // verify authClaim issued and not revoked
+    // calculate issuerAuthState
+    issuerAuthState <== getIdenState()(
+        issuerAuthClaimsTreeRoot,
+        issuerAuthRevTreeRoot,
+        issuerAuthRootsTreeRoot
+    );
+
+    // issuerAuthClaim proof of existence (isProofExist)
+    checkClaimExists(issuerLevels)(
+        1,
+        issuerAuthClaim,
+        issuerAuthClaimMtp,
+        issuerAuthClaimsTreeRoot
+    );
+
+    // issuerAuthClaim proof of non-revocation
+    checkClaimNotRevoked(issuerLevels)(
         enabled <== 1,
-        claim <== issuerClaim,
-        claimIssuanceMtp <== issuerClaimMtp,
-        claimIssuanceClaimsTreeRoot <== issuerClaimClaimsTreeRoot,
-        claimIssuanceRevTreeRoot <== issuerClaimRevTreeRoot,
-        claimIssuanceRootsTreeRoot <== issuerClaimRootsTreeRoot,
-        claimIssuanceIdenState <== issuerClaimIdenState
+        claim <== issuerAuthClaim,
+        claimNonRevMTP <== issuerAuthClaimNonRevMtp,
+        noAux <== issuerAuthClaimNonRevMtpNoAux,
+        auxHi <== issuerAuthClaimNonRevMtpAuxHi,
+        auxHv <== issuerAuthClaimNonRevMtpAuxHv,
+        treeRoot <== issuerClaimNonRevRevTreeRoot
+    );
+
+    component issuerAuthPubKey = getPubKeyFromClaim();
+    issuerAuthPubKey.claim <== issuerAuthClaim;
+
+    // issuerClaim check signature
+    verifyClaimSignature()(
+        1,
+        issuerClaim,
+        issuerClaimSignatureR8x,
+        issuerClaimSignatureR8y,
+        issuerClaimSignatureS,
+        issuerAuthPubKey.Ax,
+        issuerAuthPubKey.Ay
     );
 
     /////////////////////////////////////////////////////////////////
@@ -189,6 +306,18 @@ template CredentialAtomicQueryMTPOffChain(issuerLevels, claimLevels, valueArrayS
     );
 
     querySatisfied === 1;
+
+    // verify query hash matches
+    signal valueHash <== SpongeHash(valueArraySize, 6)(value); // 6 - max size of poseidon hash available on-chain
+
+    circuitQueryHash <== Poseidon(6)([
+        claimSchema,
+        slotIndex,
+        operator,
+        claimPathKey,
+        claimPathNotExists, // TODO: check if this value should be here
+        valueHash
+    ]);
 
     /* ProfileID calculation */
     userID <== SelectProfile()(userGenesisID, profileNonce);
