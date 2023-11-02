@@ -158,6 +158,8 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
 
     // Identifier of the verifier
     signal input verifierID;
+    signal input verifierSessionID;
+    signal output nullifier;
 
     // Modifier/Computation Operator output ($sd, $nullify)
     signal output operatorOutput;
@@ -204,7 +206,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     // Claim checks
     /////////////////////////////////////////////////////////////////
 
-    (merklized, userID, issuerState, linkID, operatorOutput) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
+    (merklized, userID, issuerState, linkID, nullifier, operatorOutput) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
         proofType <== proofType,
         requestID <== requestID,
         userGenesisID <== userGenesisID,
@@ -252,7 +254,8 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         issuerClaimSignatureR8y <== issuerClaimSignatureR8y,
         issuerClaimSignatureS <== issuerClaimSignatureS,
         linkNonce <== linkNonce,
-        verifierID <== verifierID
+        verifierID <== verifierID,
+        verifierSessionID <== verifierSessionID
     );
 
     /////////////////////////////////////////////////////////////////
