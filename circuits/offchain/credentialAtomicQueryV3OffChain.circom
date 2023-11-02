@@ -91,7 +91,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal input verifierSessionID;
     signal output nullifier;
 
-    // Modifier/Computation Operator output ($sd, $nullify)
+    // Modifier/Computation Operator output ($sd)
     signal output operatorOutput;
 
     /////////////////////////////////////////////////////////////////
