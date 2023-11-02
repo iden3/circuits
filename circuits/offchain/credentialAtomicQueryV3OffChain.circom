@@ -88,6 +88,8 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     // Identifier of the verifier
     signal input verifierID;
+    signal input verifierSessionID;
+    signal output nullifier;
 
     // Modifier/Computation Operator output ($sd, $nullify)
     signal output operatorOutput;
@@ -260,13 +262,12 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     // no need to calc anything, fieldValue is just passed as an output
 
     // nullifier calculation
-    signal nullifier <== Nullify()(
+    nullifier <== Nullify()(
         userGenesisID,
         claimSubjectProfileNonce,
         claimSchema,
-        fieldValue,
         verifierID,
-        value[0] // get csr from value array
+        verifierSessionID
     ); // 362 constraints
 
     /////////////////////////////////////////////////////////////////
@@ -278,8 +279,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         operator <== operator,
         modifierOutputs <== [
             fieldValue, // 16 - selective disclosure (16-16 = index 0)
-            nullifier, // 17 - nullify (17-16 = index 1)
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 18-31 - not used
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 17-31 - not used
         ]
     );
 
