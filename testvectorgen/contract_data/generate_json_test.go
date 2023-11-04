@@ -9,11 +9,11 @@ import (
 	"test/utils"
 
 	"github.com/ethereum/go-ethereum/common"
-	core "github.com/iden3/go-iden3-core"
+	core "github.com/iden3/go-iden3-core/v2"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
-	"github.com/iden3/go-schema-processor/merklize"
+	"github.com/iden3/go-schema-processor/v2/merklize"
 	"github.com/stretchr/testify/require"
 )
 

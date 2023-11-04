@@ -45,7 +45,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     // circuits query Hash
     signal output circuitQueryHash;
     
-    signal input proofType;  // sig 0, mtp 1
+    signal input proofType;  // sig 1, mtp 2
 
     // we have no constraints for "requestID" in this circuit, it is used as a unique identifier for the request
     // and verifier can use it to identify the request, and verify the proof of specific request in case of multiple query requests

@@ -4,21 +4,34 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"math/big"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	core "github.com/iden3/go-iden3-core"
+	core "github.com/iden3/go-iden3-core/v2"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql/v2"
-	"github.com/iden3/go-schema-processor/merklize"
+	"github.com/iden3/go-schema-processor/v2/loaders"
+	"github.com/iden3/go-schema-processor/v2/merklize"
 )
 
 func DefaultJSONUserClaim(t testing.TB, subject core.ID) (*merklize.Merklizer, *core.Claim) {
-	mz, err := merklize.MerklizeJSONLD(context.Background(), strings.NewReader(TestClaimDocument))
+	opts := loaders.WithEmbeddedDocumentBytes(w3cSchemaURL, w3cSchemaBody)
+	memoryCacheEngine, err := loaders.NewMemoryCacheEngine(opts)
+	if err != nil {
+		log.Fatalf("failed init memory cache engine: %v", err)
+	}
+	documentLoader := loaders.NewDocumentLoader(nil, "https://ipfs.io/",
+		loaders.WithCacheEngine(memoryCacheEngine))
+
+	merklizeOpts := []merklize.MerklizeOption{
+		merklize.WithDocumentLoader(documentLoader),
+	}
+	mz, err := merklize.MerklizeJSONLD(context.Background(), strings.NewReader(TestClaimDocument), merklizeOpts...)
 	if err != nil {
 		t.Fatalf("failed marklize claim: %v", err)
 	}
@@ -126,12 +139,12 @@ func PrepareStrArray(siblings []string, levels int) []string {
 }
 
 func IDFromState(state *big.Int) (*core.ID, error) {
-	typ, err := core.BuildDIDType(core.DIDMethodIden3, core.NoChain, core.NoNetwork)
+	typ, err := core.BuildDIDType(core.DIDMethodIden3, core.Polygon, core.Mumbai)
 	if err != nil {
 		return nil, err
 	}
 	// create new identity
-	return core.IdGenesisFromIdenState(typ, state)
+	return core.NewIDFromIdenState(typ, state)
 }
 
 func PrepareSiblingsStr(siblings []*merkletree.Hash, levels int) []string {
@@ -288,7 +301,7 @@ func CalculateLinkID(linkNonce string, claim *core.Claim) (string, error) {
 }
 
 // CalculateNullify returns nullify operator
-func CalculateNullify(genesisID, claimSubjectProfileNonce, claimSchema, fieldValue, verifierID, crs *big.Int) (string, error) {
+func CalculateNullify(genesisID, claimSubjectProfileNonce, claimSchema, verifierID, verifierSessionID *big.Int) (string, error) {
 	if claimSubjectProfileNonce == big.NewInt(0) {
 		return "0", nil
 	}
@@ -296,7 +309,7 @@ func CalculateNullify(genesisID, claimSubjectProfileNonce, claimSchema, fieldVal
 		return "0", nil
 	}
 
-	nullifier, err := poseidon.Hash([]*big.Int{genesisID, claimSubjectProfileNonce, claimSchema, fieldValue, verifierID, crs})
+	nullifier, err := poseidon.Hash([]*big.Int{genesisID, claimSubjectProfileNonce, claimSchema, verifierID, verifierSessionID})
 	if err != nil {
 		return "", err
 	}

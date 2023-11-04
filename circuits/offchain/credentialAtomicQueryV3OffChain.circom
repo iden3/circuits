@@ -1,5 +1,6 @@
 pragma circom 2.1.5;
 
+include "../../node_modules/circomlib/circuits/gates.circom";
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/mux4.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
@@ -18,7 +19,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal output userID;
 
     // common inputs for Sig and MTP
-    signal input proofType;  // sig 0, mtp 1
+    signal input proofType;  // sig 1, mtp 2
     signal input requestID;
     signal input userGenesisID;
     signal input profileNonce;
@@ -128,11 +129,10 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     // verify issuerClaim expiration time
     verifyExpirationTime()(issuerClaimHeader.claimFlags[3], issuerClaim, timestamp); // 322 constraints
     
-    signal isSig;
-    signal isMTP;
-    isSig  <== 1 - proofType;
-    isMTP <== proofType;
-    isSig * isMTP === 0;
+    signal isSig  <== IsEqual()([proofType, 1]);
+    signal isMTP <== IsEqual()([proofType, 2]);
+    signal validProofType <== OR()(isSig, isMTP);
+    ForceEqualIfEnabled()(one, [validProofType, 1]);
 
     signal issuerClaimHash, issuerClaimHi, issuerClaimHv;
     (issuerClaimHash, issuerClaimHi, issuerClaimHv) <== getClaimHash()(issuerClaim);

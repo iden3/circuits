@@ -7,6 +7,8 @@ include "./onchain/credentialAtomicQueryV3OnChain.circom";
  userID - user profile id
  merklized - `1` if claim is merklized
  issuerState - equals to issuerAuthState for sig, and to issuerClaimIdenState for mtp
+ nullifier - sybil resistant user identifier for session id
+ linkID - linked proof identifier
 */
 component main{public [requestID,
                        issuerID,
