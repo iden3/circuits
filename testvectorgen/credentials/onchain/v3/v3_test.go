@@ -9,11 +9,11 @@ import (
 
 	"test/utils"
 
-	core "github.com/iden3/go-iden3-core"
+	core "github.com/iden3/go-iden3-core/v2"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
-	"github.com/iden3/go-schema-processor/merklize"
+	"github.com/iden3/go-schema-processor/v2/merklize"
 	"github.com/stretchr/testify/require"
 )
 
@@ -112,12 +112,13 @@ type Inputs struct {
 	IssuerAuthRootsTreeRoot       string      `json:"issuerAuthRootsTreeRoot"`
 	IssuerAuthState               string      `json:"issuerAuthState"`
 
-	ProofType string `json:"proofType"` // 0 for sig, 1 for mtp
+	ProofType string `json:"proofType"` // 1 for sig, 2 for mtp
 
 	// Private random nonce, used to generate LinkID
 	LinkNonce string `json:"linkNonce"`
 
-	VerifierID string `json:"verifierID"`
+	VerifierID        string `json:"verifierID"`
+	VerifierSessionID string `json:"verifierSessionID"`
 }
 
 type Outputs struct {
@@ -129,13 +130,15 @@ type Outputs struct {
 	GistRoot               string `json:"gistRoot"`
 	Timestamp              string `json:"timestamp"`
 	Merklized              string `json:"merklized"`
-	ProofType              string `json:"proofType"` // 0 for sig, 1 for mtp
+	ProofType              string `json:"proofType"` // 1 for sig, 2 for mtp
 	IsRevocationChecked    string `json:"isRevocationChecked"`
 	Challenge              string `json:"challenge"`
 	IssuerState            string `json:"issuerState"`
 	LinkID                 string `json:"linkID"`
 	VerifierID             string `json:"verifierID"`
+	VerifierSessionID      string `json:"verifierSessionID"`
 	OperatorOutput         string `json:"operatorOutput"`
+	Nullifier              string `json:"nullifier"`
 }
 
 type TestData struct {
@@ -229,12 +232,13 @@ func Test_LinkID(t *testing.T) {
 }
 
 func Test_Nullify(t *testing.T) {
-	desc := "Nullify modifier"
+	desc := "Nullify"
 	isUserIDProfile := true
 	isSubjectIDProfile := true
 	value := utils.PrepareStrArray([]string{"94313"}, 64)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/nullify_modifier", utils.NULLIFY, &value, Mtp)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/nullify_modifier", utils.NULLIFY, &value, Sig)
+	// FIXME: pass verifier session id
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/nullify", utils.NOOP, &value, Mtp)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/nullify", utils.NOOP, &value, Sig)
 }
 
 func Test_Selective_Disclosure(t *testing.T) {
@@ -266,25 +270,25 @@ func Test_Less_Than_Eq(t *testing.T) {
 
 func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, false, 1, false, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, utils.EQ, nil, false, 1, false, proofType)
 }
 
 func generateRevokedTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, isRevocationChecked int, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, utils.EQ, nil, true, isRevocationChecked, false, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, utils.EQ, nil, true, isRevocationChecked, false, proofType)
 }
 
 func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, operator int, value *[]string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, fileName, operator, value, false, 1, false, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, operator, value, false, 1, false, proofType)
 }
 
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", fileName, utils.EQ, nil, false, 1, true, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "0", fileName, utils.EQ, nil, false, 1, true, proofType)
 }
 
 func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce string, fileName string, operator int, value *[]string, isRevoked bool, isRevocationChecked int, isJSONLD bool, testProofType ProofType) {
+	linkNonce, verifierSessionID, fileName string, operator int, value *[]string, isRevoked bool, isRevocationChecked int, isJSONLD bool, testProofType ProofType) {
 	var err error
 
 	valueInput := utils.PrepareStrArray([]string{"10"}, 64)
@@ -398,7 +402,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 
 		slotIndex = 2
 
-		proofType = "0"
+		proofType = "1"
 	} else {
 		issuer.AddClaim(t, claim)
 		issuerClaimMtp, _ = issuer.ClaimMTP(t, claim)
@@ -427,7 +431,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		issuerAuthState = "0"
 
 		slotIndex = 2
-		proofType = "1"
+		proofType = "2"
 	}
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
@@ -522,7 +526,8 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 
 		ProofType: proofType,
 
-		VerifierID: "21929109382993718606847853573861987353620810345503358891473103689157378049",
+		VerifierID:        "21929109382993718606847853573861987353620810345503358891473103689157378049",
+		VerifierSessionID: verifierSessionID,
 	}
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
@@ -543,31 +548,33 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 	require.NoError(t, err)
 
 	operatorOutput := "0"
-	if operator == utils.NULLIFY {
-		crs, ok := big.NewInt(0).SetString(valueInput[0], 10)
-		require.True(t, ok)
-
+	nullifier := "0"
+	if inputs.VerifierSessionID != "0" {
 		claimSchema, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
 		require.True(t, ok)
 
 		verifierID, ok := big.NewInt(0).SetString(inputs.VerifierID, 10)
 		require.True(t, ok)
 
-		operatorOutput, err = utils.CalculateNullify(
+		verifierSessionID_, ok := big.NewInt(0).SetString(inputs.VerifierSessionID, 10)
+		require.True(t, ok)
+
+		nullifier, err = utils.CalculateNullify(
 			user.ID.BigInt(),
 			nonceSubject,
 			claimSchema,
-			big.NewInt(10), // fieldValue
 			verifierID,
-			crs,
+			verifierSessionID_,
 		)
 		require.NoError(t, err)
-	} else if operator == utils.SD {
+	}
+
+	if operator == utils.SD {
 		operatorOutput = big.NewInt(10).String()
 	}
 
 	var issuerState string
-	if proofType == "0" {
+	if proofType == "1" {
 		// sig
 		issuerState = issuerAuthState
 	} else {
@@ -591,6 +598,8 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		LinkID:                 linkID,
 		OperatorOutput:         operatorOutput,
 		VerifierID:             inputs.VerifierID,
+		VerifierSessionID:      inputs.VerifierSessionID,
+		Nullifier:              nullifier,
 	}
 
 	jsonData, err := json.Marshal(TestData{
@@ -742,9 +751,10 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 
 		LinkNonce: "0",
 
-		ProofType: "0",
+		ProofType: "1",
 
-		VerifierID: "21929109382993718606847853573861987353620810345503358891473103689157378049",
+		VerifierID:        "21929109382993718606847853573861987353620810345503358891473103689157378049",
+		VerifierSessionID: "0",
 	}
 
 	issuerAuthState := issuer.State(t)
@@ -775,10 +785,12 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		GistRoot:               gistRoot.BigInt().String(),
 		IssuerState:            issuerAuthState.String(),
 		IsRevocationChecked:    "1",
-		ProofType:              "0",
+		ProofType:              "1",
 		LinkID:                 "0",
 		VerifierID:             inputs.VerifierID,
+		VerifierSessionID:      inputs.VerifierSessionID,
 		OperatorOutput:         "0",
+		Nullifier:              "0",
 	}
 
 	jsonData, err := json.Marshal(TestData{

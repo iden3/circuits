@@ -1,5 +1,6 @@
 pragma circom 2.1.5;
 
+include "../../node_modules/circomlib/circuits/gates.circom";
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/mux4.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
@@ -18,7 +19,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal output userID;
 
     // common inputs for Sig and MTP
-    signal input proofType;  // sig 0, mtp 1
+    signal input proofType;  // sig 1, mtp 2
     signal input requestID;
     signal input userGenesisID;
     signal input profileNonce;
@@ -88,8 +89,10 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     // Identifier of the verifier
     signal input verifierID;
+    signal input verifierSessionID;
+    signal output nullifier;
 
-    // Modifier/Computation Operator output ($sd, $nullify)
+    // Modifier/Computation Operator output ($sd)
     signal output operatorOutput;
 
     /////////////////////////////////////////////////////////////////
@@ -126,11 +129,10 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     // verify issuerClaim expiration time
     verifyExpirationTime()(issuerClaimHeader.claimFlags[3], issuerClaim, timestamp); // 322 constraints
     
-    signal isSig;
-    signal isMTP;
-    isSig  <== 1 - proofType;
-    isMTP <== proofType;
-    isSig * isMTP === 0;
+    signal isSig  <== IsEqual()([proofType, 1]);
+    signal isMTP <== IsEqual()([proofType, 2]);
+    signal validProofType <== OR()(isSig, isMTP);
+    ForceEqualIfEnabled()(one, [validProofType, 1]);
 
     signal issuerClaimHash, issuerClaimHi, issuerClaimHv;
     (issuerClaimHash, issuerClaimHi, issuerClaimHv) <== getClaimHash()(issuerClaim);
@@ -260,13 +262,12 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     // no need to calc anything, fieldValue is just passed as an output
 
     // nullifier calculation
-    signal nullifier <== Nullify()(
+    nullifier <== Nullify()(
         userGenesisID,
         claimSubjectProfileNonce,
         claimSchema,
-        fieldValue,
         verifierID,
-        value[0] // get csr from value array
+        verifierSessionID
     ); // 362 constraints
 
     /////////////////////////////////////////////////////////////////
@@ -278,8 +279,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         operator <== operator,
         modifierOutputs <== [
             fieldValue, // 16 - selective disclosure (16-16 = index 0)
-            nullifier, // 17 - nullify (17-16 = index 1)
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 18-31 - not used
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 17-31 - not used
         ]
     );
 

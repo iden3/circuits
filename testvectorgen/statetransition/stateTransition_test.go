@@ -7,7 +7,7 @@ import (
 
 	"test/utils"
 
-	core "github.com/iden3/go-iden3-core"
+	core "github.com/iden3/go-iden3-core/v2"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/stretchr/testify/require"
 )
