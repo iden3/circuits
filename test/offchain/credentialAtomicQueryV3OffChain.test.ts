@@ -38,7 +38,7 @@ describe("Test credentialAtomicQueryV3OffChain.circom", function () {
         require(`${sigBasePath}/between_operator.json`),
         require(`${sigBasePath}/less_than_eq_operator.json`),
         require(`${sigBasePath}/selective_disclosure.json`),
-        require(`${sigBasePath}/nullify_modifier.json`),
+        require(`${sigBasePath}/nullify.json`),
         require(`${sigBasePath}/revoked_claim_without_revocation_check.json`),
         require(`${sigBasePath}/jsonld_non_inclusion.json`),
 

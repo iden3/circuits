@@ -14,8 +14,7 @@ const (
 	LTE
 	GTE
 	BETWEEN
-	SD      = 16
-	NULLIFY = 17
+	SD = 16
 )
 
 var (

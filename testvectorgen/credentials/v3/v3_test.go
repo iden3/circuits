@@ -215,9 +215,8 @@ func Test_Nullify(t *testing.T) {
 	isUserIDProfile := true
 	isSubjectIDProfile := true
 	value := utils.PrepareStrArray([]string{"94313"}, 64)
-	// FIXME: pass verifier session id
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/nullify", utils.NOOP, &value, Mtp)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/nullify", utils.NOOP, &value, Sig)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "123", "mtp/nullify", utils.NOOP, &value, false, 1, false, Mtp)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "123", "sig/nullify", utils.NOOP, &value, false, 1, false, Sig)
 }
 
 func Test_Selective_Disclosure(t *testing.T) {
