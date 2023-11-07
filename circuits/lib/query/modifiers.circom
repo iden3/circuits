@@ -7,7 +7,6 @@ include "../../../node_modules/circomlib/circuits/mux4.circom";
 /*
     Modifier/computation operators:
       16 - selective disclosure (16 = 10000 binary)
-      17 - nullify (17 = 10001 binary)
 */
 
 // modifierValidatorOutputSelector validates modifier operation and selects output value
@@ -25,8 +24,7 @@ template modifierValidatorOutputSelector() {
     modifierOpValid.s <== [opBits[0], opBits[1], opBits[2], opBits[3]];
     modifierOpValid.c <== [
         1, // valid operator: 16 - selective disclosure (16-16 = index 0)
-        1, // valid operator: 17 - nullify (17-16 = index 1)
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ];
 
     ForceEqualIfEnabled()(
