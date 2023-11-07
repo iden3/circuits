@@ -253,7 +253,7 @@ template verifyExpirationTime() {
     signal input claim[8];
     signal input timestamp;
 
-    signal claimExpiration <==  getClaimExpiration()(claim);
+    signal claimExpiration <== getClaimExpiration()(claim);
 
     // timestamp < claimExpiration
     signal lt <== LessEqThan(64)([
