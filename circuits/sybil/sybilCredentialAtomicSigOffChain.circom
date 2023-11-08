@@ -253,11 +253,8 @@ template VerifyIssuerClaim(IssuerLevels){
     verifyCredentialSchema()(1, issuerClaim, claimSchema);
 
     // Verify issuerClaim expiration time
-    component claimHeader = getClaimHeader();
-    for (var i=0; i<8; i++) { claimHeader.claim[i] <== claim[i]; }
     component claimExpirationCheck = verifyExpirationTime();
     for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== issuerClaim[i]; }
-    claimExpirationCheck.expirationFlag = claimHeader.claimFlags[3];
     claimExpirationCheck.timestamp <== timestamp;
 
     // Verify Issued to provided identity
