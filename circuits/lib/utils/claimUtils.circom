@@ -249,11 +249,11 @@ template getValueByIndex(){
 
 // verify that the claim has expiration time and it is less then timestamp
 template verifyExpirationTime() {
-    signal input enabled; // claimFlags[3] (expiration flag) is set
+    signal input expirationFlag; // claimFlags[3] (expiration flag) is set
     signal input claim[8];
     signal input timestamp;
 
-    signal claimExpiration <==  getClaimExpiration()(claim);
+    signal claimExpiration <== getClaimExpiration()(claim);
 
     // timestamp < claimExpiration
     signal lt <== LessEqThan(64)([
@@ -262,7 +262,7 @@ template verifyExpirationTime() {
     );
 
     ForceEqualIfEnabled()(
-        enabled,
+        expirationFlag,
         [lt, 1]
     );
 }
