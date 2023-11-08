@@ -166,7 +166,7 @@ template VerifyIssuerClaim(IssuerLevels){
 
     // Verify issuerClaim expiration time
     component claimHeader = getClaimHeader();
-    claimHeader.claim[0] = claim[0];
+    for (var i=0; i<8; i++) { claimHeader.claim[i] <== claim[i]; }
     component claimExpirationCheck = verifyExpirationTime();
     for (var i=0; i<8; i++) { claimExpirationCheck.claim[i] <== claim[i]; }
     claimExpirationCheck.expirationFlag = claimHeader.claimFlags[3];
