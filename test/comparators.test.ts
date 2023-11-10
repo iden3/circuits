@@ -15,8 +15,7 @@ describe("comparator test", function () {
 
     it("LessThan254", async () => {
         const circuit = await tester(
-                    path.join(__dirname, "circuits", "comparators.circom"),
-                    { reduceConstraints: false }
+                    path.join(__dirname, "circuits", "comparators.circom")
         );
 
         var witness = await circuit.calculateWitness({
@@ -122,8 +121,7 @@ describe("comparator test", function () {
 
     it("GreaterThan254", async () => {
         const circuit = await tester(
-                    path.join(__dirname, "circuits", "comparators_greater_than.circom"),
-                    { reduceConstraints: false }
+                    path.join(__dirname, "circuits", "comparators_greater_than.circom")
         );
 
         var witness = await circuit.calculateWitness({

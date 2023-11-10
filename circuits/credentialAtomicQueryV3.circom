@@ -3,11 +3,12 @@ pragma circom 2.1.1;
 include "offchain/credentialAtomicQueryV3OffChain.circom";
 
 /*
- public signals:
+ public output signals:
  userID - user profile id
  merklized - `1` if claim is merklized
- issuerAuthState // for sig
- issuerClaimIdenState // for mtp
+ issuerState - equals to issuerAuthState for sig, and to issuerClaimIdenState for mtp
+ nullifier - sybil resistant user identifier for session id
+ linkID - linked proof identifier
 */
 component main{public [requestID,
                        issuerID,
@@ -20,7 +21,7 @@ component main{public [requestID,
                        value,
                        timestamp, 
                        isRevocationChecked,
-                       issuerClaimIdenState, // MTP specific
                        proofType,
-                       verifierID
+                       verifierID,
+                       verifierSessionID
                        ]} = credentialAtomicQueryV3OffChain(40, 32, 64);

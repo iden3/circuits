@@ -8,11 +8,12 @@ import (
 	"math/big"
 	"testing"
 
-	core "github.com/iden3/go-iden3-core"
+	"test/utils"
+
+	core "github.com/iden3/go-iden3-core/v2"
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
 	"github.com/stretchr/testify/require"
-	"test/utils"
 )
 
 const (
@@ -243,7 +244,7 @@ func TestTre(t *testing.T) {
 
 	typ, err := core.BuildDIDType(core.DIDMethodIden3, core.Polygon, core.Mumbai)
 	require.NoError(t, err)
-	id, err := core.IdGenesisFromIdenState(typ, state)
+	id, err := core.NewIDFromIdenState(typ, state)
 	require.NoError(t, err)
 
 	fmt.Println("id", id.BigInt())

@@ -45,7 +45,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     // circuits query Hash
     signal output circuitQueryHash;
     
-    signal input proofType;  // sig 0, mtp 1
+    signal input proofType;  // sig 1, mtp 2
 
     // we have no constraints for "requestID" in this circuit, it is used as a unique identifier for the request
     // and verifier can use it to identify the request, and verify the proof of specific request in case of multiple query requests
@@ -138,6 +138,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     signal input issuerAuthClaimsTreeRoot;
     signal input issuerAuthRevTreeRoot;
     signal input issuerAuthRootsTreeRoot;
+    signal input issuerAuthState;
     signal input issuerAuthClaimNonRevMtp[issuerLevels];
     signal input issuerAuthClaimNonRevMtpNoAux;
     signal input issuerAuthClaimNonRevMtpAuxHi;
@@ -145,8 +146,11 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     signal input issuerClaimSignatureR8x;
     signal input issuerClaimSignatureR8y;
     signal input issuerClaimSignatureS;
-    // Sig specific output
-    signal output issuerAuthState;
+
+    // Issuer State to be checked outside of the circuit
+    // in case of MTP proof issuerState = issuerClaimIdenState
+    // in case of Sig proof issuerState = issuerAuthState
+    signal output issuerState;
 
     // Private random nonce, used to generate LinkID
     signal input linkNonce;
@@ -154,18 +158,29 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
 
     // Identifier of the verifier
     signal input verifierID;
+    signal input verifierSessionID;
+    signal output nullifier;
 
     // Modifier/Computation Operator output ($sd, $nullify)
     signal output operatorOutput;
+
+    /////////////////////////////////////////////////////////////////
+    // FIXME: `===` without multiplications gives 0 constraints!!!
+    // because compiler removes all linear constraints during optimization pass
+    // ForceEqualIfEnabled(1, [x, y]) gives 0 too, so we need to do a workaround:
+    // calculate signal with value 1 and pass it to ForceEqualIfEnabled as an enabled signal
+    /////////////////////////////////////////////////////////////////
+    signal zero <== IsZero()(userGenesisID);  // comparing to zero something that can't be zero to get zero as an output
+    signal one <== 1 - zero;
+    zero * one === 0;
 
     /////////////////////////////////////////////////////////////////
     // Auth check
     /////////////////////////////////////////////////////////////////
 
     checkAuthV2(idOwnershipLevels, onChainLevels)(
-        1, // enabled
+        one, // enabled
         userGenesisID,
-        profileNonce,
         userState, // user state
         userClaimsTreeRoot,
         userRevTreeRoot,
@@ -191,7 +206,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     // Claim checks
     /////////////////////////////////////////////////////////////////
 
-    (merklized, userID, issuerAuthState, linkID, operatorOutput) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
+    (merklized, userID, issuerState, linkID, nullifier, operatorOutput) <== credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize)(
         proofType <== proofType,
         requestID <== requestID,
         userGenesisID <== userGenesisID,
@@ -230,6 +245,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         issuerAuthClaimsTreeRoot <== issuerAuthClaimsTreeRoot,
         issuerAuthRevTreeRoot <== issuerAuthRevTreeRoot,
         issuerAuthRootsTreeRoot <== issuerAuthRootsTreeRoot,
+        issuerAuthState <== issuerAuthState,
         issuerAuthClaimNonRevMtp <== issuerAuthClaimNonRevMtp,
         issuerAuthClaimNonRevMtpNoAux <== issuerAuthClaimNonRevMtpNoAux,
         issuerAuthClaimNonRevMtpAuxHi <== issuerAuthClaimNonRevMtpAuxHi,
@@ -238,7 +254,8 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         issuerClaimSignatureR8y <== issuerClaimSignatureR8y,
         issuerClaimSignatureS <== issuerClaimSignatureS,
         linkNonce <== linkNonce,
-        verifierID <== verifierID
+        verifierID <== verifierID,
+        verifierSessionID <== verifierSessionID
     );
 
     /////////////////////////////////////////////////////////////////
@@ -251,7 +268,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         slotIndex,
         operator,
         claimPathKey,
-        claimPathNotExists, // TODO: check if this value should be here
+        claimPathNotExists,
         valueHash
     ]);
 }

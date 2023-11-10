@@ -1,5 +1,7 @@
 package utils
 
+import _ "embed"
+
 // List of available operators.
 const (
 	NOOP int = iota // No operation, skip query verification in circuit
@@ -12,8 +14,13 @@ const (
 	LTE
 	GTE
 	BETWEEN
-	SD      = 16
-	NULLIFY = 17
+	SD = 16
+)
+
+var (
+	w3cSchemaURL = "https://www.w3.org/2018/credentials/v1"
+	//go:embed w3cSchema.json
+	w3cSchemaBody []byte
 )
 
 const TestClaimDocument = `{

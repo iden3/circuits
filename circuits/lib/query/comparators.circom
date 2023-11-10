@@ -21,7 +21,7 @@ template IN (valueArraySize){
         }
 
         // Greater than
-        component gt = GreaterThan(252);
+        component gt = GreaterThan(16);
         gt.in[0] <== count[valueArraySize];
         gt.in[1] <== 0;
 
@@ -47,15 +47,12 @@ template LessThan254() {
         h1.in[i-252] <== n1b.out[i];
     }
 
-    component hiBitLt = LessThan(4);
+    component hiBitLt = LessThan(2);
     hiBitLt.in[0] <== h0.out;
     hiBitLt.in[1] <== h1.out;
     component hiBitEq = IsEqual();
     hiBitEq.in[0] <== h0.out;
     hiBitEq.in[1] <== h1.out;
-    component hiBitGt = GreaterThan(4);
-    hiBitGt.in[0] <== h0.out;
-    hiBitGt.in[1] <== h1.out;
 
     // number for lower 252 bits
     component n0  = Bits2Num(252);
@@ -69,7 +66,7 @@ template LessThan254() {
     lt.in[0] <== n0.out;
     lt.in[1] <== n1.out;
 
-    out <== (hiBitEq.out * lt.out) + (hiBitLt.out * 1) + (hiBitGt.out * 0);
+    out <== (hiBitEq.out * lt.out) + (hiBitLt.out * 1);
 }
 
 template GreaterThan254() {

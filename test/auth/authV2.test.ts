@@ -22,7 +22,6 @@ describe("authV2Test.circom:", async function() {
             {
                 output: path.join(__dirname, "../circuits", "build/authV2"),
                 recompile: true,
-                reduceConstraints: false,
             },
         );
     });

@@ -48,10 +48,21 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
+    /////////////////////////////////////////////////////////////////
+    // FIXME: `===` without multiplications gives 0 constraints!!!
+    // because compiler removes all linear constraints during optimization pass
+    // ForceEqualIfEnabled(1, [x, y]) gives 0 too, so we need to do a workaround:
+    // calculate signal with value 1 and pass it to ForceEqualIfEnabled as an enabled signal
+    /////////////////////////////////////////////////////////////////
+    signal tmp <== IsZero()(genesisID);
+    signal tmp2 <== NOT()(tmp);
+    signal zero <== IsEqual()([tmp, tmp2]);
+    signal one <== IsZero()(zero);
+    zero * one === 0;
+
     checkAuthV2(IdOwnershipLevels, onChainLevels)(
-        1,
+        one,
         genesisID,
-        profileNonce,
         state,
         claimsTreeRoot,
         revTreeRoot,
@@ -81,9 +92,6 @@ template checkAuthV2(IdOwnershipLevels, onChainLevels) {
     signal input enabled;
 
     signal input genesisID;
-    // random number, which should be stored by user
-    // if there is a need to generate the same userID (ProfileID) output for different proofs
-    signal input profileNonce;
 
     // user state
     signal input state;
