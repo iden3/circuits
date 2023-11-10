@@ -119,6 +119,8 @@ type Inputs struct {
 
 	VerifierID        string `json:"verifierID"`
 	VerifierSessionID string `json:"verifierSessionID"`
+
+	CheckAuthV2 int `json:"checkAuthV2"`
 }
 
 type Outputs struct {
@@ -139,6 +141,7 @@ type Outputs struct {
 	VerifierSessionID      string `json:"verifierSessionID"`
 	OperatorOutput         string `json:"operatorOutput"`
 	Nullifier              string `json:"nullifier"`
+	CheckAuthV2            string `json:"checkAuthV2"`
 }
 
 type TestData struct {
@@ -527,6 +530,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 
 		VerifierID:        "21929109382993718606847853573861987353620810345503358891473103689157378049",
 		VerifierSessionID: verifierSessionID,
+		CheckAuthV2:       1,
 	}
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
@@ -599,6 +603,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		VerifierID:             inputs.VerifierID,
 		VerifierSessionID:      inputs.VerifierSessionID,
 		Nullifier:              nullifier,
+		CheckAuthV2:            "1",
 	}
 
 	jsonData, err := json.Marshal(TestData{
@@ -754,6 +759,8 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 
 		VerifierID:        "21929109382993718606847853573861987353620810345503358891473103689157378049",
 		VerifierSessionID: "0",
+
+		CheckAuthV2: 1,
 	}
 
 	issuerAuthState := issuer.State(t)
@@ -790,6 +797,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		VerifierSessionID:      inputs.VerifierSessionID,
 		OperatorOutput:         "0",
 		Nullifier:              "0",
+		CheckAuthV2:            "1",
 	}
 
 	jsonData, err := json.Marshal(TestData{

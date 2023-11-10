@@ -19,5 +19,6 @@ component main{public [requestID,
                        gistRoot,
                        proofType,
                        verifierID,
-                       verifierSessionID
+                       verifierSessionID,
+                       checkAuthV2
                        ]} = credentialAtomicQueryV3OnChain(40, 32, 64, 40, 64);

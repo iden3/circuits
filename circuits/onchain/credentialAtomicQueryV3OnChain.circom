@@ -164,6 +164,9 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     // Modifier/Computation Operator output ($sd, $nullify)
     signal output operatorOutput;
 
+    // Enabled/disable checkAuthV2 verification
+    signal input checkAuthV2;
+
     /////////////////////////////////////////////////////////////////
     // FIXME: `===` without multiplications gives 0 constraints!!!
     // because compiler removes all linear constraints during optimization pass
