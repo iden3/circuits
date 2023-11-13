@@ -165,24 +165,14 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     signal output operatorOutput;
 
     // Enabled/disable checkAuthV2 verification
-    signal input checkAuthV2;
-
-    /////////////////////////////////////////////////////////////////
-    // FIXME: `===` without multiplications gives 0 constraints!!!
-    // because compiler removes all linear constraints during optimization pass
-    // ForceEqualIfEnabled(1, [x, y]) gives 0 too, so we need to do a workaround:
-    // calculate signal with value 1 and pass it to ForceEqualIfEnabled as an enabled signal
-    /////////////////////////////////////////////////////////////////
-    signal zero <== IsZero()(userGenesisID);  // comparing to zero something that can't be zero to get zero as an output
-    signal one <== 1 - zero;
-    zero * one === 0;
+    signal input authV2Enabled;
 
     /////////////////////////////////////////////////////////////////
     // Auth check
     /////////////////////////////////////////////////////////////////
 
     checkAuthV2(idOwnershipLevels, onChainLevels)(
-        one, // enabled
+        authV2Enabled, // enabled
         userGenesisID,
         userState, // user state
         userClaimsTreeRoot,
