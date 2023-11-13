@@ -120,7 +120,7 @@ type Inputs struct {
 	VerifierID        string `json:"verifierID"`
 	VerifierSessionID string `json:"verifierSessionID"`
 
-	AuthV2Enabled int `json:"authV2Enabled"`
+	AuthEnabled int `json:"authEnabled"`
 }
 
 type Outputs struct {
@@ -141,7 +141,7 @@ type Outputs struct {
 	VerifierSessionID      string `json:"verifierSessionID"`
 	OperatorOutput         string `json:"operatorOutput"`
 	Nullifier              string `json:"nullifier"`
-	AuthV2Enabled          string `json:"authV2Enabled"`
+	AuthEnabled            string `json:"authEnabled"`
 }
 
 type TestData struct {
@@ -266,8 +266,8 @@ func Test_No_AuthV2_Check(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 	value := utils.PrepareStrArray([]string{"8", "10"}, 64)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/auth_v2_disabled", utils.BETWEEN, &value, Mtp, 0)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/auth_v2_disabled", utils.BETWEEN, &value, Sig, 0)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/auth_check_disabled", utils.BETWEEN, &value, Mtp, 0)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/auth_check_disabled", utils.BETWEEN, &value, Sig, 0)
 }
 
 func Test_Less_Than_Eq(t *testing.T) {
@@ -290,8 +290,8 @@ func generateRevokedTestData(t *testing.T, desc string, isUserIDProfile, isSubje
 }
 
 func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce string, fileName string, operator int, value *[]string, proofType ProofType, authV2Enabled int) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, operator, value, false, 1, false, proofType, authV2Enabled)
+	linkNonce string, fileName string, operator int, value *[]string, proofType ProofType, authEnabled int) {
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, operator, value, false, 1, false, proofType, authEnabled)
 }
 
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, proofType ProofType) {
@@ -300,7 +300,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce, verifierSessionID, fileName string, operator int, value *[]string, isRevoked bool, isRevocationChecked int, isJSONLD bool, testProofType ProofType,
-	authV2Enabled int) {
+	authEnabled int) {
 	var err error
 
 	valueInput := utils.PrepareStrArray([]string{"10"}, 64)
@@ -540,7 +540,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 
 		VerifierID:        "21929109382993718606847853573861987353620810345503358891473103689157378049",
 		VerifierSessionID: verifierSessionID,
-		AuthV2Enabled:     authV2Enabled,
+		AuthEnabled:       authEnabled,
 	}
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
@@ -613,7 +613,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		VerifierID:             inputs.VerifierID,
 		VerifierSessionID:      inputs.VerifierSessionID,
 		Nullifier:              nullifier,
-		AuthV2Enabled:          strconv.Itoa(authV2Enabled),
+		AuthEnabled:            strconv.Itoa(authEnabled),
 	}
 
 	jsonData, err := json.Marshal(TestData{
@@ -770,7 +770,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		VerifierID:        "21929109382993718606847853573861987353620810345503358891473103689157378049",
 		VerifierSessionID: "0",
 
-		AuthV2Enabled: 1,
+		AuthEnabled: 1,
 	}
 
 	issuerAuthState := issuer.State(t)
@@ -807,7 +807,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		VerifierSessionID:      inputs.VerifierSessionID,
 		OperatorOutput:         "0",
 		Nullifier:              "0",
-		AuthV2Enabled:          "1",
+		AuthEnabled:            "1",
 	}
 
 	jsonData, err := json.Marshal(TestData{

@@ -165,14 +165,14 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     signal output operatorOutput;
 
     // Enabled/disable checkAuthV2 verification
-    signal input authV2Enabled;
+    signal input authEnabled;
 
     /////////////////////////////////////////////////////////////////
     // Auth check
     /////////////////////////////////////////////////////////////////
 
     checkAuthV2(idOwnershipLevels, onChainLevels)(
-        authV2Enabled, // enabled
+        authEnabled, // enabled
         userGenesisID,
         userState, // user state
         userClaimsTreeRoot,

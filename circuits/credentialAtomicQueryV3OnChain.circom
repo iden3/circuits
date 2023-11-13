@@ -20,5 +20,5 @@ component main{public [requestID,
                        proofType,
                        verifierID,
                        verifierSessionID,
-                       authV2Enabled
+                       authEnabled
                        ]} = credentialAtomicQueryV3OnChain(40, 32, 64, 40, 64);
