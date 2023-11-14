@@ -119,6 +119,8 @@ type Inputs struct {
 
 	VerifierID        string `json:"verifierID"`
 	VerifierSessionID string `json:"verifierSessionID"`
+
+	AuthEnabled int `json:"authEnabled"`
 }
 
 type Outputs struct {
@@ -139,6 +141,7 @@ type Outputs struct {
 	VerifierSessionID      string `json:"verifierSessionID"`
 	OperatorOutput         string `json:"operatorOutput"`
 	Nullifier              string `json:"nullifier"`
+	AuthEnabled            string `json:"authEnabled"`
 }
 
 type TestData struct {
@@ -236,8 +239,8 @@ func Test_Nullify(t *testing.T) {
 	isUserIDProfile := true
 	isSubjectIDProfile := true
 	value := utils.PrepareStrArray([]string{"94313"}, 64)
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "123", "mtp/nullify", utils.NOOP, &value, false, 1, false, Mtp)
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "123", "sig/nullify", utils.NOOP, &value, false, 1, false, Sig)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "123", "mtp/nullify", utils.NOOP, &value, false, 1, false, Mtp, 1)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "123", "sig/nullify", utils.NOOP, &value, false, 1, false, Sig, 1)
 }
 
 func Test_Selective_Disclosure(t *testing.T) {
@@ -245,8 +248,8 @@ func Test_Selective_Disclosure(t *testing.T) {
 	isUserIDProfile := true
 	isSubjectIDProfile := true
 	value := utils.PrepareStrArray([]string{}, 64)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/selective_disclosure", utils.SD, &value, Mtp)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/selective_disclosure", utils.SD, &value, Sig)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/selective_disclosure", utils.SD, &value, Mtp, 1)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/selective_disclosure", utils.SD, &value, Sig, 1)
 }
 
 func Test_Between(t *testing.T) {
@@ -254,8 +257,17 @@ func Test_Between(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 	value := utils.PrepareStrArray([]string{"8", "10"}, 64)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/between_operator", utils.BETWEEN, &value, Mtp)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/between_operator", utils.BETWEEN, &value, Sig)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/between_operator", utils.BETWEEN, &value, Mtp, 1)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/between_operator", utils.BETWEEN, &value, Sig, 1)
+}
+
+func Test_No_AuthV2_Check(t *testing.T) {
+	desc := "Skip Auth V2 check"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+	value := utils.PrepareStrArray([]string{"8", "10"}, 64)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/auth_check_disabled", utils.BETWEEN, &value, Mtp, 0)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/auth_check_disabled", utils.BETWEEN, &value, Sig, 0)
 }
 
 func Test_Less_Than_Eq(t *testing.T) {
@@ -263,31 +275,32 @@ func Test_Less_Than_Eq(t *testing.T) {
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 	value := utils.PrepareStrArray([]string{"10"}, 64)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/less_than_eq_operator", utils.LTE, &value, Mtp)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/less_than_eq_operator", utils.LTE, &value, Sig)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/less_than_eq_operator", utils.LTE, &value, Mtp, 1)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/less_than_eq_operator", utils.LTE, &value, Sig, 1)
 }
 
 func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, utils.EQ, nil, false, 1, false, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, utils.EQ, nil, false, 1, false, proofType, 1)
 }
 
 func generateRevokedTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, isRevocationChecked int, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, utils.EQ, nil, true, isRevocationChecked, false, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, utils.EQ, nil, true, isRevocationChecked, false, proofType, 1)
 }
 
 func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce string, fileName string, operator int, value *[]string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, operator, value, false, 1, false, proofType)
+	linkNonce string, fileName string, operator int, value *[]string, proofType ProofType, authEnabled int) {
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, operator, value, false, 1, false, proofType, authEnabled)
 }
 
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "0", fileName, utils.EQ, nil, false, 1, true, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "0", fileName, utils.EQ, nil, false, 1, true, proofType, 1)
 }
 
 func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce, verifierSessionID, fileName string, operator int, value *[]string, isRevoked bool, isRevocationChecked int, isJSONLD bool, testProofType ProofType) {
+	linkNonce, verifierSessionID, fileName string, operator int, value *[]string, isRevoked bool, isRevocationChecked int, isJSONLD bool, testProofType ProofType,
+	authEnabled int) {
 	var err error
 
 	valueInput := utils.PrepareStrArray([]string{"10"}, 64)
@@ -527,6 +540,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 
 		VerifierID:        "21929109382993718606847853573861987353620810345503358891473103689157378049",
 		VerifierSessionID: verifierSessionID,
+		AuthEnabled:       authEnabled,
 	}
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
@@ -599,6 +613,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		VerifierID:             inputs.VerifierID,
 		VerifierSessionID:      inputs.VerifierSessionID,
 		Nullifier:              nullifier,
+		AuthEnabled:            strconv.Itoa(authEnabled),
 	}
 
 	jsonData, err := json.Marshal(TestData{
@@ -754,6 +769,8 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 
 		VerifierID:        "21929109382993718606847853573861987353620810345503358891473103689157378049",
 		VerifierSessionID: "0",
+
+		AuthEnabled: 1,
 	}
 
 	issuerAuthState := issuer.State(t)
@@ -790,6 +807,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		VerifierSessionID:      inputs.VerifierSessionID,
 		OperatorOutput:         "0",
 		Nullifier:              "0",
+		AuthEnabled:            "1",
 	}
 
 	jsonData, err := json.Marshal(TestData{
