@@ -37,21 +37,21 @@ template Query (valueArraySize) {
     // LessThan
     signal lt <== LessThan254()([in, value[0]]);
 
+    // lte
+    signal lte <== OR()(lt, eq); // lte === lt || eq
+
     // GreaterThan
-    signal gt <== GreaterThan254()([in, value[0]]);
+    signal gt <== NOT()(lte); // gt === !lte
+
+    // gte
+    signal gte <== NOT()(lt); // gte === !lt
 
     // in
     signal inComp <== IN(valueArraySize)(in, value);
 
-    // lte
-    signal lte <== 1 - gt; // lte === !gt
-
-    // gte
-    signal gte <== 1 - lt; // gte === !lt
-
     // between (value[0] <= in <= value[1])
     signal gt2 <== GreaterThan254()([in, value[1]]);
-    signal lte2 <== 1 - gt2; // lte === !gt
+    signal lte2 <== NOT()(gt2); // lte === !gt
     signal between <== AND()(gte, lte2);
 
     signal opBits[5] <== Num2Bits(5)(operator); // values 0-15 are query operators, 16-31 - modifiers/computations
@@ -61,14 +61,15 @@ template Query (valueArraySize) {
     queryOpSatisfied.s <== [opBits[0], opBits[1], opBits[2], opBits[3]];
     // We don't use 5th bit (opBits[4]) here; which specifies whether operator is query or
     // modifier/computation operator. It's used in the final mux.
+    _ <== opBits[4];
 
     queryOpSatisfied.c[0] <== 1; // noop; skip execution
     queryOpSatisfied.c[1] <== eq;
     queryOpSatisfied.c[2] <== lt;
     queryOpSatisfied.c[3] <== gt;
     queryOpSatisfied.c[4] <== inComp; // in
-    queryOpSatisfied.c[5] <== 1-inComp; // nin
-    queryOpSatisfied.c[6] <== 1-eq; // neq
+    queryOpSatisfied.c[5] <== NOT()(inComp); // nin
+    queryOpSatisfied.c[6] <== NOT()(eq); // neq
     queryOpSatisfied.c[7] <== lte; // lte === !gt
     queryOpSatisfied.c[8] <== gte; // gte === !lt
     queryOpSatisfied.c[9] <== between; // between

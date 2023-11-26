@@ -1,9 +1,10 @@
 pragma circom 2.1.1;
 
 include "../../../node_modules/circomlib/circuits/comparators.circom";
+include "../../../node_modules/circomlib/circuits/gates.circom";
 
 // nElements - number of value elements
-// Example nElements = 3, '1' v ['12', '1231', '9999'], 1 not in array of values
+// Example nElements = 3, '1' in ['12', '1231', '9999'], 1 not in array of values
 template IN (valueArraySize){
 
         signal input in;
@@ -11,21 +12,16 @@ template IN (valueArraySize){
         signal output out;
 
         component eq[valueArraySize];
-        signal count[valueArraySize+1];
-        count[0] <== 0;
+        signal isEq[valueArraySize+1];
+        isEq[0] <== 0;
         for (var i=0; i<valueArraySize; i++) {
             eq[i] = IsEqual();
             eq[i].in[0] <== in;
             eq[i].in[1] <== value[i];
-            count[i+1] <== count[i] + eq[i].out;
+            isEq[i+1] <== OR()(isEq[i], eq[i].out);
         }
 
-        // Greater than
-        component gt = GreaterThan(16);
-        gt.in[0] <== count[valueArraySize];
-        gt.in[1] <== 0;
-
-        out <== gt.out; // 1 - if in signal in the list, 0 - if it is not
+        out <== isEq[valueArraySize];
 }
 
 // As LessThan but for all possible numbers from field (not only 252-bit-max like LessThan)
