@@ -7,6 +7,7 @@ include "../../node_modules/circomlib/circuits/poseidon.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/smt/smtverifier.circom";
 include "../../node_modules/circomlib/circuits/smt/smtprocessor.circom";
+include "utils/safeOne.circom";
 include "idOwnership.circom";
 
 template StateTransition(IdOwnershipLevels) {
@@ -36,9 +37,8 @@ template StateTransition(IdOwnershipLevels) {
     signal input newRevTreeRoot;
     signal input newRootsTreeRoot;
 
-    signal zero <== IsZero()(userID); // comparing to zero something that can't be zero to get zero as an output
-    signal one <== 1 - zero;
-    zero * one === 0;
+    // get safe one values to be used in ForceEqualIfEnabled
+    signal one <== SafeOne()(userID);
 
     signal cutId <== cutId()(userID);
 

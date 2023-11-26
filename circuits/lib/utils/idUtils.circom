@@ -16,6 +16,10 @@ template ProfileID(){
     genesisIdParts.id <== in;
 
     out <== NewID()(genesisIdParts.typ, genesis);
+
+    // explicitly state that these signals are not used and it's ok
+    _ <== genesisIdParts.genesis;
+    _ <== genesisIdParts.checksum;
 }
 
 // Split ID into type, genesys and checksum
@@ -46,6 +50,11 @@ template SplitID() {
         typBits.in[i] <== bs.out[i];
     }
     typ <== typBits.out;
+
+    // explicitly state that some of these signals are not used and it's ok
+    for (var i=0; i<254; i++) {
+        _ <== bs.out[i];
+    }
 }
 
 template NewID() {
@@ -101,6 +110,11 @@ template TakeNBits(n) {
         outBits.in[i] <== bits.out[i];
     }
     out <== outBits.out;
+
+    // explicitly state that these signals are not used and it's ok
+    for (var i=n; i<254; i++) {
+        _ <== bits.out[i];
+    }
 }
 
 template CalculateIdChecksum() {
