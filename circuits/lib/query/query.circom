@@ -35,7 +35,7 @@ template Query (valueArraySize) {
     signal eq <== IsEqual()([in, value[0]]);
 
     // LessThan
-    signal lt <== LessThan254()([in, value[0]]);
+    signal lt <== LessThan254()([in, value[0]]); // 767 constraints
 
     // lte
     signal lte <== OR()(lt, eq); // lte === lt || eq

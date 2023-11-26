@@ -233,7 +233,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     /////////////////////////////////////////////////////////////////
 
     // verify query
-    // 2482 constraints (Query+LessThan+ForceEqualIfEnabled)
+    // 1756 constraints (Query+LessThan+ForceEqualIfEnabled)
     signal querySatisfied <== Query(valueArraySize)(
         in <== fieldValue,
         value <== value,
@@ -260,7 +260,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         claimSchema,
         verifierID,
         verifierSessionID
-    ); // 362 constraints
+    ); // 330 constraints
 
     /////////////////////////////////////////////////////////////////
     // Modifier Operator Validation & Output Preparation
