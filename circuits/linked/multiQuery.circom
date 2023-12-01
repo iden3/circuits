@@ -1,11 +1,12 @@
 pragma circom 2.1.5;
 
 include "../../node_modules/circomlib/circuits/comparators.circom";
-include "../lib/linked/linkId.circom";
 include "../lib/query/query.circom";
 include "../lib/query/modifiers.circom";
-include "../lib/utils/safeOne.circom";
+include "../lib/linked/linkId.circom";
 include "../lib/utils/claimUtils.circom";
+include "../lib/utils/safeOne.circom";
+include "../lib/utils/spongeHash.circom";
 
 // This circuit generates nullifier for a given claim using linked proof
 template LinkedMultiQuery(N, claimLevels, valueArraySize) {
@@ -16,8 +17,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
     signal input issuerClaim[8];
 
     // query signals
-    // TODO: add enabled flag for each query
-    // TODO: add query hash
+    signal input claimSchema;
     signal input claimPathNotExists[N]; // 0 for inclusion, 1 for non-inclusion
     signal input claimPathMtp[N][claimLevels];
     signal input claimPathMtpNoAux[N]; // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
@@ -25,32 +25,45 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
     signal input claimPathMtpAuxHv[N]; // 0 for inclusion proof
     signal input claimPathKey[N]; // hash of path in merklized json-ld document
     signal input claimPathValue[N]; // value in this path in merklized json-ld document
-
     signal input slotIndex[N];
     signal input operator[N];
     signal input value[N][valueArraySize];
 
-    // Modifier/Computation Operator output ($sd)
-    signal output operatorOutput[N];
+    // Outputs
     signal output merklized;
+    signal output operatorOutput[N];
+    signal output circuitQueryHash[N];
+
+    /////////////////////////////////////////////////////////////////
+    // General verifications
+    /////////////////////////////////////////////////////////////////
 
     // get safe one values to be used in ForceEqualIfEnabled
     signal one <== SafeOne()(linkID); // 7 constraints
 
+    // get claim header
     component issuerClaimHeader = getClaimHeader(); // 300 constraints
     issuerClaimHeader.claim <== issuerClaim;
 
+    // get merklized flag & root
     component merklize = getClaimMerklizeRoot();
     merklize.claim <== issuerClaim;
     merklize.claimFlags <== issuerClaimHeader.claimFlags;
 
     merklized <== merklize.flag;
 
+    // Verify issuerClaim schema
+    verifyCredentialSchema()(one, issuerClaimHeader.schema, claimSchema); // 3 constraints
+
     signal slotValue[N];
     signal fieldValue[N];
     signal querySatisfied[N];
     signal isQueryOp[N];
+    signal valueHash[N];
 
+    /////////////////////////////////////////////////////////////////
+    // Query Processing Loop
+    /////////////////////////////////////////////////////////////////
     for (var i=0; i<N; i++) {
 
         /////////////////////////////////////////////////////////////////
@@ -118,5 +131,20 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 17-31 - not used
             ]
         );
+
+        /////////////////////////////////////////////////////////////////
+        // Calculate query hash
+        /////////////////////////////////////////////////////////////////
+        // 4950 constraints (SpongeHash+Poseidon)
+        valueHash[i] <== SpongeHash(valueArraySize, 6)(value[i]); // 6 - max size of poseidon hash available on-chain
+
+        circuitQueryHash[i] <== Poseidon(6)([
+            claimSchema,
+            slotIndex[i],
+            operator[i],
+            claimPathKey[i],
+            claimPathNotExists[i],
+            valueHash[i]
+        ]);
     }
 }
