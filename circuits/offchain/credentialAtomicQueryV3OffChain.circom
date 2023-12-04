@@ -7,9 +7,7 @@ include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../auth/authV2.circom";
 include "../lib/linked/linkId.circom";
-include "../lib/query/comparators.circom";
-include "../lib/query/modifiers.circom";
-include "../lib/query/query.circom";
+include "../lib/query/processQueryWithModifiers.circom";
 include "../lib/utils/nullify.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/utils/safeOne.circom";
@@ -50,7 +48,6 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal input claimPathMtpAuxHv; // 0 for inclusion proof
     signal input claimPathKey; // hash of path in merklized json-ld document
     signal input claimPathValue; // value in this path in merklized json-ld document
-
     signal input slotIndex;
     signal input operator;
     signal input value[valueArraySize];
@@ -231,29 +228,24 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     );
 
     /////////////////////////////////////////////////////////////////
-    // Query Operator Processing
+    // Process Query with Modifiers
     /////////////////////////////////////////////////////////////////
-
-    // verify query
-    // 1756 constraints (Query+LessThan+ForceEqualIfEnabled)
-    signal querySatisfied <== Query(valueArraySize)(
-        in <== fieldValue,
-        value <== value,
-        operator <== operator
+    // output value only if modifier operation was selected
+    operatorOutput <== ProcessQueryWithModifiers(claimLevels, valueArraySize)(
+        claimPathNotExists,
+        claimPathMtp,
+        claimPathMtpNoAux,
+        claimPathMtpAuxHi,
+        claimPathMtpAuxHv,
+        claimPathKey,
+        claimPathValue,
+        slotIndex,
+        operator,
+        value,
+        issuerClaim,
+        merklized,
+        merklize.out
     );
-
-    signal isQueryOp <== LessThan(5)([operator, 16]);
-    ForceEqualIfEnabled()(
-        isQueryOp,
-        [querySatisfied, 1]
-    );
-
-    /////////////////////////////////////////////////////////////////
-    // Modifier/Computation Operators Processing
-    /////////////////////////////////////////////////////////////////
-
-    // selective disclosure
-    // no need to calc anything, fieldValue is just passed as an output
 
     // nullifier calculation
     nullifier <== Nullify()(
@@ -263,19 +255,6 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         verifierID,
         nullifierSessionID
     ); // 330 constraints
-
-    /////////////////////////////////////////////////////////////////
-    // Modifier Operator Validation & Output Preparation
-    /////////////////////////////////////////////////////////////////
-
-    // output value only if modifier operation was selected
-    operatorOutput <== modifierValidatorOutputSelector()(
-        operator <== operator,
-        modifierOutputs <== [
-            fieldValue, // 16 - selective disclosure (16-16 = index 0)
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 17-31 - not used
-        ]
-    );
 
     /////////////////////////////////////////////////////////////////
     // ProfileID calculation

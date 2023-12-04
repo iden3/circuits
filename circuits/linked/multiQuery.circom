@@ -1,8 +1,7 @@
 pragma circom 2.1.5;
 
 include "../../node_modules/circomlib/circuits/comparators.circom";
-include "../lib/query/query.circom";
-include "../lib/query/modifiers.circom";
+include "../lib/query/processQueryWithModifiers.circom";
 include "../lib/linked/linkId.circom";
 include "../lib/utils/claimUtils.circom";
 include "../lib/utils/safeOne.circom";
@@ -66,70 +65,21 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
     /////////////////////////////////////////////////////////////////
     for (var i=0; i<N; i++) {
 
-        /////////////////////////////////////////////////////////////////
-        // Field Path and Value Verification
-        /////////////////////////////////////////////////////////////////
-
-        // check path/in node exists in merkletree specified by jsonldRoot
-        SMTVerifier(claimLevels)(
-            enabled <== merklize.flag,  // if merklize flag 0 skip MTP verification
-            fnc <== claimPathNotExists[i], // inclusion
-            root <== merklize.out,
-            siblings <== claimPathMtp[i],
-            oldKey <== claimPathMtpAuxHi[i],
-            oldValue <== claimPathMtpAuxHv[i],
-            isOld0 <== claimPathMtpNoAux[i],
-            key <== claimPathKey[i],
-            value <== claimPathValue[i]
-        ); // 9585 constraints
-
-        // select value from claim by slot index (0-7)
-        slotValue[i] <== getValueByIndex()(issuerClaim, slotIndex[i]);
-
-        // select value for query verification,
-        // if claim is merklized merklizeFlag = `1|2`, take claimPathValue
-        // if not merklized merklizeFlag = `0`, take value from selected slot
-        fieldValue[i] <== Mux1()(
-            [slotValue[i], claimPathValue[i]],
-            merklize.flag
-        );
-
-        /////////////////////////////////////////////////////////////////
-        // Query Operator Processing
-        /////////////////////////////////////////////////////////////////
-
-        // verify query
-        // 1756 constraints (Query+LessThan+ForceEqualIfEnabled)
-        querySatisfied[i] <== Query(valueArraySize)(
-            in <== fieldValue[i],
-            value <== value[i],
-            operator <== operator[i]
-        );
-
-        isQueryOp[i] <== LessThan(5)([operator[i], 16]);
-        ForceEqualIfEnabled()(
-            isQueryOp[i],
-            [querySatisfied[i], 1]
-        );
-
-        /////////////////////////////////////////////////////////////////
-        // Modifier/Computation Operators Processing
-        /////////////////////////////////////////////////////////////////
-
-        // selective disclosure
-        // no need to calc anything, fieldValue is just passed as an output
-
-        /////////////////////////////////////////////////////////////////
-        // Modifier Operator Validation & Output Preparation
-        /////////////////////////////////////////////////////////////////
-
         // output value only if modifier operation was selected
-        operatorOutput[i] <== modifierValidatorOutputSelector()(
-            operator <== operator[i],
-            modifierOutputs <== [
-                fieldValue[i], // 16 - selective disclosure (16-16 = index 0)
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 17-31 - not used
-            ]
+        operatorOutput[i] <== ProcessQueryWithModifiers(claimLevels, valueArraySize)(
+            claimPathNotExists[i],
+            claimPathMtp[i],
+            claimPathMtpNoAux[i],
+            claimPathMtpAuxHi[i],
+            claimPathMtpAuxHv[i],
+            claimPathKey[i],
+            claimPathValue[i],
+            slotIndex[i],
+            operator[i],
+            value[i],
+            issuerClaim,
+            merklized,
+            merklize.out
         );
 
         /////////////////////////////////////////////////////////////////
