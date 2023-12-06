@@ -74,60 +74,6 @@ template checkIdenStateMatchesRoots() {
     );
 }
 
-// verifyClaimIssuanceNonRev verifies that claim is issued by the issuer and not revoked
-// TODO: review if we need both verifyClaimIssuanceNonRev and verifyClaimIssuance
-template verifyClaimIssuanceNonRev(IssuerLevels) {
-	signal input claim[8];
-	signal input claimHi;
-	signal input claimHv;
-	signal input claimIssuanceMtp[IssuerLevels];
-	signal input claimIssuanceClaimsTreeRoot;
-	signal input claimIssuanceRevTreeRoot;
-	signal input claimIssuanceRootsTreeRoot;
-	signal input claimIssuanceIdenState;
-
-	signal input enabledNonRevCheck;
-	signal input claimNonRevMtp[IssuerLevels];
-	signal input claimNonRevMtpNoAux;
-	signal input claimNonRevMtpAuxHi;
-	signal input claimNonRevMtpAuxHv;
-	signal input claimNonRevIssuerClaimsTreeRoot;
-	signal input claimNonRevIssuerRevTreeRoot;
-	signal input claimNonRevIssuerRootsTreeRoot;
-	signal input claimNonRevIssuerState;
-
-    verifyClaimIssuance(IssuerLevels)(
-        1, //tmp
-        claimHi,
-        claimHv,
-        claimIssuanceMtp,
-        claimIssuanceClaimsTreeRoot,
-        claimIssuanceRevTreeRoot,
-        claimIssuanceRootsTreeRoot,
-        claimIssuanceIdenState
-    );
-
-    // check non-revocation proof for claim
-    checkClaimNotRevoked(IssuerLevels)(
-        enabledNonRevCheck,
-        claim,
-        claimNonRevMtp,
-        claimIssuanceRevTreeRoot,
-        claimNonRevMtpNoAux,
-        claimNonRevMtpAuxHi,
-        claimNonRevMtpAuxHv
-    );
-
-    // check issuer state matches for non-revocation proof
-    checkIdenStateMatchesRoots()(
-        1, //tmp
-        claimNonRevIssuerClaimsTreeRoot,
-        claimNonRevIssuerRevTreeRoot,
-        claimNonRevIssuerRootsTreeRoot,
-        claimNonRevIssuerState
-    );
-}
-
 // verifyClaimIssuance verifies that claim is issued by the issuer
 template verifyClaimIssuance(IssuerLevels) {
     signal input enabled;
@@ -217,4 +163,9 @@ template VerifyAuthClaimAndSignature(nLevels) {
         challengeSignatureR8y,
         challenge
     );
+
+    // explicitly state that some of these signals are not used and it's ok
+    for (var i=0; i<32; i++) {
+        _ <== authClaimHeader.claimFlags[i];
+    }
 }

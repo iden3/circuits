@@ -31,6 +31,11 @@ template getClaimSubjectOtherIden() {
     mux.c[3] <== claim[1*4 + 1];
 
     id <== mux.out;
+
+    // explicitly state that these signals are not used and it's ok
+    for (var i=0; i<8; i++) {
+        _ <== claim[i];
+    }
 }
 
 // getClaimMerkilizeFlag checks that a claim flag is set and return merklized slot.
@@ -65,6 +70,11 @@ template getClaimMerklizeRoot() {
     gt.in[0] <== merklizeLocation;
     gt.in[1] <== 0;
     flag <== gt.out;
+
+    // explicitly state that these signals are not used and it's ok
+    for (var i=0; i<8; i++) {
+        _ <== claim[i];
+    }
 }
 
 
@@ -89,6 +99,14 @@ template getClaimHeader() {
     for (var i=0; i<32; i++) {
         claimFlags[i] <== i0Bits.out[128 + i];
     }
+
+    // explicitly state that some of these signals are not used and it's ok
+    for (var i=1; i<8; i++) {
+        _ <== claim[i];
+    }
+    for (var i=160; i<254; i++) {
+        _ <== i0Bits.out[i];
+    }
 }
 
 // getClaimRevNonce gets the revocation nonce out of a claim outputing it as an integer.
@@ -105,6 +123,14 @@ template getClaimRevNonce() {
         claimRevNonce.in[i] <== v0Bits.out[i];
     }
     revNonce <== claimRevNonce.out;
+
+    // explicitly state that some of these signals are not used and it's ok
+    for (var i=0; i<8; i++) {
+        _ <== claim[i];
+    }
+    for (var i=0; i<254; i++) {
+        _ <== v0Bits.out[i];
+    }
 }
 
 //  getClaimHiHv calculates the hashes Hi and Hv of a claim (to be used as
@@ -225,6 +251,11 @@ template getPubKeyFromClaim() {
 
     Ax <== claim[2]; // Ax should be in indexSlotA
     Ay <== claim[3]; // Ay should be in indexSlotB
+
+    // explicitly state that these signals are not used and it's ok
+    for (var i=0; i<8; i++) {
+        _ <== claim[i];
+    }
 }
 
 // getValueByIndex select slot from claim by given index
@@ -281,6 +312,14 @@ template getClaimExpiration() {
         expirationBits.in[i] <== v0Bits.out[i+64];
     }
     expiration <== expirationBits.out;
+
+    // explicitly state that some of these signals are not used and it's ok
+    for (var i=0; i<8; i++) {
+        _ <== claim[i];
+    }
+    for (var i=0; i<254; i++) {
+        _ <== v0Bits.out[i];
+    }
 }
 
 // getSubjectLocation extract subject from claim flags.
@@ -295,6 +334,11 @@ template getSubjectLocation() {
     }
 
     out <== subjectBits.out;
+
+    // explicitly state that some of these signals are not used and it's ok
+    for (var i=0; i<32; i++) {
+        _ <== claimFlags[i];
+    }
 }
 
 // getMerklizeLocation extract merklize from claim flags.
@@ -310,6 +354,11 @@ template getMerklizeLocation() {
     }
 
     out <== mtBits.out;
+
+    // explicitly state that some of these signals are not used and it's ok
+    for (var i=0; i<32; i++) {
+        _ <== claimFlags[i];
+    }
 }
 
 // isExpirable return 1 if expiration flag is set otherwise 0.

@@ -12,6 +12,7 @@ include "../lib/query/modifiers.circom";
 include "../lib/query/nullify.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
+include "../lib/utils/safeOne.circom";
 
 template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize) {
     // common outputs for Sig and MTP
@@ -95,17 +96,8 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     // Modifier/Computation Operator output ($sd)
     signal output operatorOutput;
 
-    /////////////////////////////////////////////////////////////////
-    // FIXME: `===` without multiplications gives 0 constraints!!!
-    // because compiler removes all linear constraints during optimization pass
-    // ForceEqualIfEnabled(1, [x, y]) gives 0 too, so we need to do a workaround:
-    // calculate signal with value 1 and pass it to ForceEqualIfEnabled as an enabled signal
-    /////////////////////////////////////////////////////////////////
-    signal tmp <== IsZero()(userGenesisID);
-    signal tmp2 <== NOT()(tmp);
-    signal zero <== IsEqual()([tmp, tmp2]);
-    signal one <== IsZero()(zero);
-    zero * one === 0;
+    // get safe one values to be used in ForceEqualIfEnabled
+    signal one <== SafeOne()(userGenesisID);
 
     /////////////////////////////////////////////////////////////////
     // Claim Verification (id, schema, expiration, issuance, revocation)
@@ -241,7 +233,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     /////////////////////////////////////////////////////////////////
 
     // verify query
-    // 2482 constraints (Query+LessThan+ForceEqualIfEnabled)
+    // 1756 constraints (Query+LessThan+ForceEqualIfEnabled)
     signal querySatisfied <== Query(valueArraySize)(
         in <== fieldValue,
         value <== value,
@@ -268,7 +260,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         claimSchema,
         verifierID,
         verifierSessionID
-    ); // 362 constraints
+    ); // 330 constraints
 
     /////////////////////////////////////////////////////////////////
     // Modifier Operator Validation & Output Preparation
@@ -339,4 +331,9 @@ template sigFlow(issuerLevels) {
         issuerAuthPubKey.Ax,
         issuerAuthPubKey.Ay
     ); // 4217 constraints
+
+    // explicitly state that these signals are not used and it's ok
+    for (var i=0; i<32; i++) {
+        _ <== issuerAuthClaimHeader.claimFlags[i];
+    }
 }

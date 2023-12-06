@@ -1,10 +1,11 @@
 pragma circom 2.1.1;
 
-include "../lib/idOwnership.circom";
-include "../lib/utils/idUtils.circom";
 include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../../node_modules/circomlib/circuits/eddsaposeidon.circom";
+include "../lib/idOwnership.circom";
+include "../lib/utils/idUtils.circom";
+include "../lib/utils/safeOne.circom";
 
 template AuthV2(IdOwnershipLevels, onChainLevels) {
     signal input genesisID;
@@ -48,17 +49,8 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
 
-    /////////////////////////////////////////////////////////////////
-    // FIXME: `===` without multiplications gives 0 constraints!!!
-    // because compiler removes all linear constraints during optimization pass
-    // ForceEqualIfEnabled(1, [x, y]) gives 0 too, so we need to do a workaround:
-    // calculate signal with value 1 and pass it to ForceEqualIfEnabled as an enabled signal
-    /////////////////////////////////////////////////////////////////
-    signal tmp <== IsZero()(genesisID);
-    signal tmp2 <== NOT()(tmp);
-    signal zero <== IsEqual()([tmp, tmp2]);
-    signal one <== IsZero()(zero);
-    zero * one === 0;
+    // get safe zero and one values to be used in ForceEqualIfEnabled
+    signal one <== SafeOne()(genesisID);
 
     checkAuthV2(IdOwnershipLevels, onChainLevels)(
         one,
