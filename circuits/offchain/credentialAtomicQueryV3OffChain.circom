@@ -9,8 +9,8 @@ include "../auth/authV2.circom";
 include "../lib/linked/linkId.circom";
 include "../lib/query/comparators.circom";
 include "../lib/query/modifiers.circom";
-include "../lib/query/nullify.circom";
 include "../lib/query/query.circom";
+include "../lib/utils/nullify.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/utils/safeOne.circom";
 
@@ -90,7 +90,9 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
 
     // Identifier of the verifier
     signal input verifierID;
-    signal input verifierSessionID;
+
+    // nullifier input & output signals
+    signal input nullifierSessionID;
     signal output nullifier;
 
     // Modifier/Computation Operator output ($sd)
@@ -259,7 +261,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         claimSubjectProfileNonce,
         claimSchema,
         verifierID,
-        verifierSessionID
+        nullifierSessionID
     ); // 330 constraints
 
     /////////////////////////////////////////////////////////////////
