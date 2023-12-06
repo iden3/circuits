@@ -158,7 +158,9 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
 
     // Identifier of the verifier
     signal input verifierID;
-    signal input verifierSessionID;
+
+    // nullifier input & output signals
+    signal input nullifierSessionID;
     signal output nullifier;
 
     // Modifier/Computation Operator output ($sd, $nullify)
@@ -248,7 +250,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
         issuerClaimSignatureS <== issuerClaimSignatureS,
         linkNonce <== linkNonce,
         verifierID <== verifierID,
-        verifierSessionID <== verifierSessionID
+        nullifierSessionID <== nullifierSessionID
     );
 
     /////////////////////////////////////////////////////////////////

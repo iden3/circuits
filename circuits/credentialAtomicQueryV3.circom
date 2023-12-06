@@ -23,5 +23,5 @@ component main{public [requestID,
                        isRevocationChecked,
                        proofType,
                        verifierID,
-                       verifierSessionID
+                       nullifierSessionID
                        ]} = credentialAtomicQueryV3OffChain(40, 32, 64);

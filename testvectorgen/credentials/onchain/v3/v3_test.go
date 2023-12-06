@@ -117,8 +117,8 @@ type Inputs struct {
 	// Private random nonce, used to generate LinkID
 	LinkNonce string `json:"linkNonce"`
 
-	VerifierID        string `json:"verifierID"`
-	VerifierSessionID string `json:"verifierSessionID"`
+	VerifierID         string `json:"verifierID"`
+	NullifierSessionID string `json:"nullifierSessionID"`
 
 	AuthEnabled int `json:"authEnabled"`
 }
@@ -138,7 +138,7 @@ type Outputs struct {
 	IssuerState            string `json:"issuerState"`
 	LinkID                 string `json:"linkID"`
 	VerifierID             string `json:"verifierID"`
-	VerifierSessionID      string `json:"verifierSessionID"`
+	NullifierSessionID     string `json:"nullifierSessionID"`
 	OperatorOutput         string `json:"operatorOutput"`
 	Nullifier              string `json:"nullifier"`
 	AuthEnabled            string `json:"authEnabled"`
@@ -299,7 +299,7 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 }
 
 func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce, verifierSessionID, fileName string, operator int, value *[]string, isRevoked bool, isRevocationChecked int, isJSONLD bool, testProofType ProofType,
+	linkNonce, nullifierSessionID, fileName string, operator int, value *[]string, isRevoked bool, isRevocationChecked int, isJSONLD bool, testProofType ProofType,
 	authEnabled int) {
 	var err error
 
@@ -538,9 +538,9 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 
 		ProofType: proofType,
 
-		VerifierID:        "21929109382993718606847853573861987353620810345503358891473103689157378049",
-		VerifierSessionID: verifierSessionID,
-		AuthEnabled:       authEnabled,
+		VerifierID:         "21929109382993718606847853573861987353620810345503358891473103689157378049",
+		NullifierSessionID: nullifierSessionID,
+		AuthEnabled:        authEnabled,
 	}
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
@@ -562,14 +562,14 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 
 	operatorOutput := "0"
 	nullifier := "0"
-	if inputs.VerifierSessionID != "0" {
+	if inputs.NullifierSessionID != "0" {
 		claimSchema, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
 		require.True(t, ok)
 
 		verifierID, ok := big.NewInt(0).SetString(inputs.VerifierID, 10)
 		require.True(t, ok)
 
-		verifierSessionID_, ok := big.NewInt(0).SetString(inputs.VerifierSessionID, 10)
+		nullifierSessionID_, ok := big.NewInt(0).SetString(inputs.NullifierSessionID, 10)
 		require.True(t, ok)
 
 		nullifier, err = utils.CalculateNullify(
@@ -577,7 +577,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 			nonceSubject,
 			claimSchema,
 			verifierID,
-			verifierSessionID_,
+			nullifierSessionID_,
 		)
 		require.NoError(t, err)
 	}
@@ -611,7 +611,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		LinkID:                 linkID,
 		OperatorOutput:         operatorOutput,
 		VerifierID:             inputs.VerifierID,
-		VerifierSessionID:      inputs.VerifierSessionID,
+		NullifierSessionID:     inputs.NullifierSessionID,
 		Nullifier:              nullifier,
 		AuthEnabled:            strconv.Itoa(authEnabled),
 	}
@@ -767,8 +767,8 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 
 		ProofType: "1",
 
-		VerifierID:        "21929109382993718606847853573861987353620810345503358891473103689157378049",
-		VerifierSessionID: "0",
+		VerifierID:         "21929109382993718606847853573861987353620810345503358891473103689157378049",
+		NullifierSessionID: "0",
 
 		AuthEnabled: 1,
 	}
@@ -804,7 +804,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		ProofType:              "1",
 		LinkID:                 "0",
 		VerifierID:             inputs.VerifierID,
-		VerifierSessionID:      inputs.VerifierSessionID,
+		NullifierSessionID:     inputs.NullifierSessionID,
 		OperatorOutput:         "0",
 		Nullifier:              "0",
 		AuthEnabled:            "1",

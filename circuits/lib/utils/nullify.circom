@@ -10,18 +10,18 @@ template Nullify() {
     signal input claimSubjectProfileNonce;
     signal input claimSchema;
     signal input verifierID;
-    signal input verifierSessionID;
+    signal input nullifierSessionID;
 
     signal output nullifier;
 
     signal isZeroNonce <== IsZero()(claimSubjectProfileNonce);
     signal isZeroVerifierID <== IsZero()(verifierID);
-    signal isZeroVerifierSessionID <== IsZero()(verifierSessionID);
+    signal isZeroNullifierSessionID <== IsZero()(nullifierSessionID);
 
-    signal hash <== Poseidon(5)([genesisID, claimSubjectProfileNonce, claimSchema, verifierID, verifierSessionID]);
+    signal hash <== Poseidon(5)([genesisID, claimSubjectProfileNonce, claimSchema, verifierID, nullifierSessionID]);
 
     signal isZero1 <== OR()(isZeroNonce, isZeroVerifierID);
-    signal isZero2 <== OR()(isZero1, isZeroVerifierSessionID);
+    signal isZero2 <== OR()(isZero1, isZeroNullifierSessionID);
 
     nullifier <== Mux1()(
         [hash, 0],
