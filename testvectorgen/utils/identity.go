@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
 	core "github.com/iden3/go-iden3-core/v2"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-iden3-crypto/poseidon"
@@ -167,6 +168,50 @@ func NewIdentity(t testing.TB, privKHex string) *IdentityTest {
 	}
 
 	it.ID = *identifier
+
+	return &it
+}
+
+func NewEthereumBasedIdentity(t testing.TB, ethAddr string) *IdentityTest {
+
+	it := IdentityTest{}
+	var err error
+
+	// init claims tree
+
+	it.Clt, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IdentityTreeLevels)
+	if err != nil {
+		t.Fatalf("Error creating Claims merkle tree: %v", err)
+	}
+	it.Ret, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IdentityTreeLevels)
+	if err != nil {
+		t.Fatalf("Error creating Revocation merkle tree: %v", err)
+	}
+	it.Rot, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IdentityTreeLevels)
+	if err != nil {
+		t.Fatalf("Error creating Roots merkle tree: %v", err)
+	}
+
+	addr := common.HexToAddress(ethAddr)
+	currentState := core.GenesisFromEthAddress(addr)
+	if err != nil {
+		t.Fatalf("Error creating genesis state from address: %v", err)
+	}
+
+	didType, err := core.BuildDIDType(core.DIDMethodIden3, core.Polygon, core.Mumbai)
+	if err != nil {
+		t.Fatalf("Error creating did type: %v", err)
+	}
+
+	did, err := core.NewDID(didType, currentState)
+	if err != nil {
+		t.Fatalf("Error creating new did : %v", err)
+	}
+
+	it.ID, err = core.IDFromDID(*did)
+	if err != nil {
+		t.Fatalf("Error creating id from did: %v", err)
+	}
 
 	return &it
 }
