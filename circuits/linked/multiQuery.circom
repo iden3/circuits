@@ -11,7 +11,6 @@ include "../lib/utils/spongeHash.circom";
 template LinkedMultiQuery(N, claimLevels, valueArraySize) {
 
     // linked proof signals
-    signal input linkID;
     signal input linkNonce;
     signal input issuerClaim[8];
 
@@ -29,6 +28,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
     signal input value[N][valueArraySize];
 
     // Outputs
+    signal output linkID;
     signal output merklized;
     signal output operatorOutput[N];
     signal output circuitQueryHash[N];
@@ -38,7 +38,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
     /////////////////////////////////////////////////////////////////
 
     // get safe one values to be used in ForceEqualIfEnabled
-    signal one <== SafeOne()(linkID); // 7 constraints
+    signal one <== SafeOne()(linkNonce); // 7 constraints
 
     // get claim header
     component issuerClaimHeader = getClaimHeader(); // 300 constraints
@@ -59,6 +59,13 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
     signal querySatisfied[N];
     signal isQueryOp[N];
     signal valueHash[N];
+
+    signal issuerClaimHash, issuerClaimHi, issuerClaimHv;
+    (issuerClaimHash, issuerClaimHi, issuerClaimHv) <== getClaimHash()(issuerClaim); // 834 constraints
+    ////////////////////////////////////////////////////////////////////////
+    // calculate linkID
+    ////////////////////////////////////////////////////////////////////////
+    linkID <== LinkID()(issuerClaimHash, linkNonce); // 243 constraints
 
     /////////////////////////////////////////////////////////////////
     // Query Processing Loop

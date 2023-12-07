@@ -2,7 +2,7 @@ pragma circom 2.1.5;
 
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../lib/linked/linkId.circom";
-include "../lib/query/nullify.circom";
+include "../lib/utils/nullify.circom";
 include "../lib/utils/safeOne.circom";
 include "../lib/utils/claimUtils.circom";
 
@@ -10,7 +10,6 @@ include "../lib/utils/claimUtils.circom";
 template LinkedNullifier(){
 
     // linked proof signals
-    signal input linkID;
     signal input linkNonce;
     signal input issuerClaim[8];
 
@@ -19,9 +18,10 @@ template LinkedNullifier(){
     signal input claimSubjectProfileNonce;
     signal input claimSchema;
     signal input verifierID;
-    signal input verifierSessionID;
+    signal input nullifierSessionID;
 
     signal output nullifier;
+    signal output linkID;
 
     // get safe one values to be used in ForceEqualIfEnabled
     signal one <== SafeOne()(userGenesisID); // 7 constraints
@@ -49,10 +49,9 @@ template LinkedNullifier(){
     (issuerClaimHash, issuerClaimHi, issuerClaimHv) <== getClaimHash()(issuerClaim); // 834 constraints
 
     ////////////////////////////////////////////////////////////////////////
-    // verify linkID
+    // calculate linkID
     ////////////////////////////////////////////////////////////////////////
-    signal calculatedLinkID <== LinkID()(issuerClaimHash, linkNonce); // 243 constraints
-    ForceEqualIfEnabled()(one, [calculatedLinkID, linkID]);
+    linkID <== LinkID()(issuerClaimHash, linkNonce); // 243 constraints
 
     signal linkIDisNotZero <== NOT()(IsZero()(linkID));
     ForceEqualIfEnabled()(one, [linkIDisNotZero, one]);
@@ -65,7 +64,7 @@ template LinkedNullifier(){
         claimSubjectProfileNonce,
         claimSchema,
         verifierID,
-        verifierSessionID
+        nullifierSessionID
     ); // 330 constraints
 
 }
