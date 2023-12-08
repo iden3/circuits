@@ -235,11 +235,11 @@ type TestDataSigV2 struct {
 
 func Test_Generate_Test_Cases(t *testing.T) {
 
-	id, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis state", "issuer_genesis_state")
-	nextId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition")
+	id, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis state", "issuer_genesis_state", false)
+	nextId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition", false)
 
-	generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer next transition state", "issuer_next_state_transition")
-	generateStateTransitionData(t, true, UserPK, IssuerPK, "User next transition state", "user_next_state_transition")
+	generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer next transition state", "issuer_next_state_transition", false)
+	generateStateTransitionData(t, true, UserPK, IssuerPK, "User next transition state", "user_next_state_transition", false)
 
 	generateMTPData(t, "MTP: Issuer first state", []*gistData{
 		{id, issuerFirstState},
@@ -272,8 +272,9 @@ type gistData struct {
 	state *big.Int
 }
 
-func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, secondaryPK, desc, fileName string) (*big.Int, *big.Int) {
+func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, secondaryPK, desc, fileName string, isSubjectIDProfile bool) (*big.Int, *big.Int) {
 
+	var err error
 	primaryEntity := utils.NewIdentity(t, primaryPK)
 	secondaryEntity := utils.NewIdentity(t, secondaryPK)
 
@@ -291,7 +292,14 @@ func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, second
 	//if genesis == false {
 	// extract pubKey
 
-	_, secondaryEntityClaim := utils.DefaultJSONUserClaim(t, secondaryEntity.ID)
+	subjectID := secondaryEntity.ID
+	if isSubjectIDProfile {
+		nonceSubject := big.NewInt(999)
+		subjectID, err = core.ProfileID(secondaryEntity.ID, nonceSubject)
+		require.NoError(t, err)
+	}
+
+	_, secondaryEntityClaim := utils.DefaultJSONNormalUserClaim(t, subjectID)
 	primaryEntity.AddClaim(t, secondaryEntityClaim)
 
 	if nextState {

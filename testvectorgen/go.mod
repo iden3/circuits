@@ -3,6 +3,7 @@ module test
 go 1.18
 
 require (
+	github.com/iden3/go-iden3-core v1.0.2
 	github.com/iden3/go-iden3-core/v2 v2.0.0
 	github.com/iden3/go-iden3-crypto v0.0.15
 	github.com/iden3/go-merkletree-sql/v2 v2.0.6
@@ -10,10 +11,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 )
 
-require (
-	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
-	github.com/holiman/uint256 v1.2.3 // indirect
-)
+require github.com/pkg/errors v0.9.1 // indirect
 
 require (
 	github.com/benbjohnson/clock v1.3.5 // indirect

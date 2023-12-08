@@ -262,7 +262,7 @@ func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, is
 }
 
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, proofType ProofType) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "0", fileName, utils.EQ, nil, false, 1, true, proofType)
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "0", fileName, utils.LT, nil, false, 1, true, proofType)
 }
 
 func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,

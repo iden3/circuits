@@ -59,6 +59,44 @@ func DefaultJSONUserClaim(t testing.TB, subject core.ID) (*merklize.Merklizer, *
 	return mz, claim
 }
 
+func DefaultJSONNormalUserClaim(t testing.TB, subject core.ID) (*merklize.Merklizer, *core.Claim) {
+	opts := loaders.WithEmbeddedDocumentBytes(w3cSchemaURL, w3cSchemaBody)
+	memoryCacheEngine, err := loaders.NewMemoryCacheEngine(opts)
+	if err != nil {
+		log.Fatalf("failed init memory cache engine: %v", err)
+	}
+	documentLoader := loaders.NewDocumentLoader(nil, "https://ipfs.io/",
+		loaders.WithCacheEngine(memoryCacheEngine))
+
+	merklizeOpts := []merklize.MerklizeOption{
+		merklize.WithDocumentLoader(documentLoader),
+	}
+	mz, err := merklize.MerklizeJSONLD(context.Background(), strings.NewReader(TestNormalClaimDocument), merklizeOpts...)
+	if err != nil {
+		t.Fatalf("failed marklize claim: %v", err)
+	}
+
+	schemaHash, err := core.NewSchemaHashFromHex("508991bcf0336ba99935ef498d797ec9")
+	if err != nil {
+		t.Fatalf("failed marklize claim: %v", err)
+	}
+
+	nonce := 10
+
+	claim, err := core.NewClaim(
+		schemaHash,
+		core.WithIndexID(subject),
+		core.WithExpirationDate(time.Unix(1669884010, 0)), //Thu Dec 01 2022 08:40:10 GMT+0000
+		core.WithRevocationNonce(uint64(nonce)),
+		core.WithIndexMerklizedRoot(mz.Root().BigInt()))
+
+	if err != nil {
+		t.Fatalf("failed generate core claim %v", err)
+	}
+
+	return mz, claim
+}
+
 func DefaultUserClaim(t testing.TB, subject core.ID) *core.Claim {
 	dataSlotA, err := core.NewElemBytesFromInt(big.NewInt(10))
 	if err != nil {

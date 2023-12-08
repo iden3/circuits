@@ -317,7 +317,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		user = utils.NewIdentity(t, userPK)
 	} else {
 		// generate onchain identity
-		user = utils.NewEthereumBasedIdentity(t, "ethereum address")
+		user = utils.NewEthereumBasedIdentity(t, ethAddress)
 	}
 	issuer := utils.NewIdentity(t, issuerPK)
 
