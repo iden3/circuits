@@ -24,19 +24,35 @@ const (
 
 func Test_Generate_Test_CasesV3(t *testing.T) {
 
-	issuerId, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis state", "v3/issuer_genesis_state_v3", true)
-	//userId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition")
+	// genesis => first => second
+	issuerId, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition", "v3/issuer_from_genesis_state_to_first_transition_v3", true)
+	userId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "v3/user_from_genesis_state_to_first_transition_v3", false)
 
-	//generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer next transition state", "issuer_next_state_transition")
-	//generateStateTransitionData(t, true, UserPK, IssuerPK, "User next transition state", "user_next_state_transition")
+	_, issuerSecondState := generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer from first to second transition", "v3/issuer_from_first_state_to_second_transition_v3", true)
+	_, userSecondState := generateStateTransitionData(t, true, UserPK, IssuerPK, "User from first to second transition", "v3/user_from_first_state_to_second_transition_v3", false)
 
 	generateData(t, "BJJ: Issuer first state / user - genesis state", []*gistData{
 		{issuerId, issuerFirstState},
-	}, false, "v3/valid_bjj_user_genesis_v3", verifiable.BJJSignatureProofType, 1)
-	//generateMTPData(t, "MTP: User non genesis but latest", []*gistData{
-	//	{id, issuerFirstState},
-	//	{nextId, userFirstState},
-	//}, true, "valid_mtp_user_non_genesis", false)
+	}, false, false, false, "v3/valid_bjj_user_genesis_v3", verifiable.BJJSignatureProofType, 1)
+
+	generateData(t, "BJJ: Issuer first state / user first state - valid proof", []*gistData{
+
+		{issuerId, issuerFirstState},
+		{userId, userFirstState},
+	}, true, false, false, "v3/valid_bjj_user_first_v3", verifiable.BJJSignatureProofType, 1)
+
+	generateData(t, "BJJ: Issuer second state / user first state - valid proof", []*gistData{
+
+		{userId, userFirstState},
+		{issuerId, issuerSecondState},
+	}, true, false, true, "v3/valid_bjj_user_first_issuer_second_v3", verifiable.BJJSignatureProofType, 1)
+
+	generateData(t, "BJJ: Issuer first state / user second state - valid proof", []*gistData{
+
+		{userId, userSecondState},
+		{issuerId, issuerSecondState},
+	}, true, true, false, "v3/valid_bjj_user_second_issuer_first_v3", verifiable.BJJSignatureProofType, 1)
+
 	//generateMTPData(t, "MTP: User sign with address challenge genesis", []*gistData{
 	//	{id, issuerFirstState},
 	//	{nextId, userFirstState},
@@ -56,7 +72,7 @@ func Test_Generate_Test_CasesV3(t *testing.T) {
 
 }
 
-func generateData(t *testing.T, desc string, gistData []*gistData, nextState bool, fileName string, testProofType verifiable.ProofType, authEnabled int) {
+func generateData(t *testing.T, desc string, gistData []*gistData, userFirstState bool, userSecondState bool, issuerSecondState bool, fileName string, testProofType verifiable.ProofType, authEnabled int) {
 
 	var linkNonce = "18"
 	var nullifierSessionID string = "1234569"
@@ -136,37 +152,68 @@ func generateData(t *testing.T, desc string, gistData []*gistData, nextState boo
 		slotIndex = 2
 		pathKey = big.NewInt(0)
 	}
-	if nextState {
-		_, claim1 := utils.DefaultJSONUserClaim(t, issuer.ID)
+
+	if userFirstState {
+		_, claim1 := utils.DefaultJSONNormalUserClaim(t, issuer.ID)
 		user.AddClaim(t, claim1)
+
+		if userSecondState {
+			claim2 := utils.DefaultUserClaim(t, user.ID)
+			user.AddClaim(t, claim2)
+		}
 	}
+
 	if isRevoked {
 		revNonce := claim.GetRevocationNonce()
 		revNonceBigInt := new(big.Int).SetUint64(revNonce)
 		issuer.Ret.Add(context.Background(), revNonceBigInt, big.NewInt(0))
 	}
 
-	var issuerClaimMtp, issuerAuthClaimMtp []string
+	var issuerClaimMtp, issuerAuthClaimMtp, issuerAuthClaimNonRevMtp []string
 	var issuerClaimClaimsTreeRoot, issuerClaimRevTreeRoot, issuerClaimRootsTreeRoot *merkletree.Hash
 	var issuerClaimSignatureR8X, issuerClaimSignatureR8Y, issuerClaimSignatureS,
 		issuerAuthClaimNonRevMtpAuxHi, issuerAuthClaimNonRevMtpAuxHv, issuerAuthClaimNonRevMtpNoAux,
-		issuerClaimIdenState, proofType, issuerAuthClaimsTreeRoot,
-		issuerAuthRevTreeRoot, issuerAuthRootsTreeRoot, issuerAuthState string
+		issuerClaimIdenState, proofType string
+
+	var issuerAuthClaimsTreeRoot, issuerAuthRevTreeRoot, issuerAuthRootsTreeRoot string
+	var issuerAuthState string
 	var issuerAuthClaim *core.Claim
+
+	issuerAuthClaimsTreeRoot = issuer.Clt.Root().BigInt().String()
+	issuerAuthRevTreeRoot = issuer.Ret.Root().BigInt().String()
+	issuerAuthRootsTreeRoot = issuer.Rot.Root().BigInt().String()
+
+	issuerAuthState = issuer.State(t).String()
+
+	issuerAuthClaimMtp, _ = issuer.ClaimMTP(t, issuer.AuthClaim)
+
+	issuer.AddClaim(t, claim)
+
+	issuerClaimMtp, _ = issuer.ClaimMTP(t, claim)
+	require.NoError(t, err)
+	issuerClaimIdenState = issuer.State(t).String()
+
+	issuerClaimClaimsTreeRoot = issuer.Clt.Root()
+	issuerClaimRevTreeRoot = issuer.Ret.Root()
+	issuerClaimRootsTreeRoot = issuer.Rot.Root()
+
+	// add another claim to issuer if it is a second state
+	if issuerSecondState {
+		primaryEntityClaim := utils.DefaultUserClaim(t, issuer.ID)
+		issuer.AddClaim(t, primaryEntityClaim)
+	}
+
+	// prove revocation on latest state of the issuer
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
+
+	issuerAuthClaimNonRevMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
+	issuerAuthClaimNonRevMtpNoAux = issuerAuthClaimNodeAux.NoAux
+	issuerAuthClaimNonRevMtpAuxHi = issuerAuthClaimNodeAux.Key
+	issuerAuthClaimNonRevMtpAuxHv = issuerAuthClaimNodeAux.Value
+
 	if testProofType == verifiable.BJJSignatureProofType {
 		// Sig claim
 		claimSig := issuer.SignClaim(t, claim)
-		var issuerAuthClaimNodeAux utils.NodeAuxValue
-		issuerAuthClaimMtp, issuerAuthClaimNodeAux = issuer.ClaimRevMTP(t, issuer.AuthClaim)
-
-		issuerClaimMtp = utils.PrepareStrArray([]string{}, 40)
-		issuerClaimClaimsTreeRoot = &merkletree.HashZero
-		issuerClaimRevTreeRoot = &merkletree.HashZero
-		issuerClaimRootsTreeRoot = &merkletree.HashZero
-
-		issuerAuthClaimNonRevMtpAuxHi = issuerAuthClaimNodeAux.Key
-		issuerAuthClaimNonRevMtpAuxHv = issuerAuthClaimNodeAux.Value
-		issuerAuthClaimNonRevMtpNoAux = issuerAuthClaimNodeAux.NoAux
 
 		issuerClaimSignatureR8X = claimSig.R8.X.String()
 		issuerClaimSignatureR8Y = claimSig.R8.Y.String()
@@ -174,23 +221,8 @@ func generateData(t *testing.T, desc string, gistData []*gistData, nextState boo
 
 		issuerAuthClaim = issuer.AuthClaim
 
-		issuerClaimIdenState = "0"
-
-		issuerAuthClaimsTreeRoot = issuer.Clt.Root().BigInt().String()
-		issuerAuthRevTreeRoot = issuer.Ret.Root().BigInt().String()
-		issuerAuthRootsTreeRoot = issuer.Rot.Root().BigInt().String()
-
-		issuerAuthState = issuer.State(t).String()
-
 		proofType = "1"
 	} else {
-		issuer.AddClaim(t, claim)
-		issuerClaimMtp, _ = issuer.ClaimMTP(t, claim)
-		issuerClaimIdenState = issuer.State(t).String()
-
-		issuerClaimClaimsTreeRoot = issuer.Clt.Root()
-		issuerClaimRevTreeRoot = issuer.Ret.Root()
-		issuerClaimRootsTreeRoot = issuer.Rot.Root()
 
 		issuerClaimSignatureR8X = "0"
 		issuerClaimSignatureR8Y = "0"
@@ -204,17 +236,15 @@ func generateData(t *testing.T, desc string, gistData []*gistData, nextState boo
 
 		issuerAuthClaim = &core.Claim{}
 
-		issuerAuthClaimsTreeRoot = "0"
-		issuerAuthRevTreeRoot = "0"
-		issuerAuthRootsTreeRoot = "0"
+		issuerAuthClaimsTreeRoot = (&merkletree.HashZero).BigInt().String()
+		issuerAuthRevTreeRoot = (&merkletree.HashZero).BigInt().String()
+		issuerAuthRootsTreeRoot = (&merkletree.HashZero).BigInt().String()
 
 		issuerAuthState = "0"
 
 		slotIndex = 2
 		proofType = "2"
 	}
-
-	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
@@ -227,8 +257,8 @@ func generateData(t *testing.T, desc string, gistData []*gistData, nextState boo
 
 	var authMTProof []string
 	var challenge *big.Int
-	var authNonRevMTProof []string
-	var nodeAuxNonRev utils.NodeAuxValue
+	var userAuthNonRevMTProof []string
+	var userNodeAuxNonRev utils.NodeAuxValue
 	var sig *babyjub.Signature
 	var gistRoot *merkletree.Hash
 	var gistProof []string
@@ -237,7 +267,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, nextState boo
 	if authEnabled == 1 {
 		challenge = big.NewInt(12345)
 		authMTProof = user.AuthMTPStrign(t)
-		authNonRevMTProof, nodeAuxNonRev = user.ClaimRevMTP(t, user.AuthClaim)
+		userAuthNonRevMTProof, userNodeAuxNonRev = user.ClaimRevMTP(t, user.AuthClaim)
 		sig = user.Sign(challenge)
 		gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
 		require.NoError(t, err)
@@ -248,8 +278,8 @@ func generateData(t *testing.T, desc string, gistData []*gistData, nextState boo
 
 		emptyArr := make([]*merkletree.Hash, 0)
 		authMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
-		authNonRevMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
-		nodeAuxNonRev = utils.NodeAuxValue{
+		userAuthNonRevMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
+		userNodeAuxNonRev = utils.NodeAuxValue{
 			Key:   merkletree.HashZero.String(),
 			Value: merkletree.HashZero.String(),
 			NoAux: "0",
@@ -270,6 +300,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, nextState boo
 			NoAux: "0",
 		}
 	}
+	t.Log(issuer.State(t).String())
 
 	inputs := Inputs{
 		RequestID:                       requestID,
@@ -277,10 +308,10 @@ func generateData(t *testing.T, desc string, gistData []*gistData, nextState boo
 		ProfileNonce:                    nonce.String(),
 		UserAuthClaim:                   user.AuthClaim,
 		UserAuthClaimMtp:                authMTProof,
-		UserAuthClaimNonRevMtp:          authNonRevMTProof,
-		UserAuthClaimNonRevMtpAuxHi:     nodeAuxNonRev.Key,
-		UserAuthClaimNonRevMtpAuxHv:     nodeAuxNonRev.Value,
-		UserAuthClaimNonRevMtpNoAux:     nodeAuxNonRev.NoAux,
+		UserAuthClaimNonRevMtp:          userAuthNonRevMTProof,
+		UserAuthClaimNonRevMtpAuxHi:     userNodeAuxNonRev.Key,
+		UserAuthClaimNonRevMtpAuxHv:     userNodeAuxNonRev.Value,
+		UserAuthClaimNonRevMtpNoAux:     userNodeAuxNonRev.NoAux,
 		Challenge:                       challenge.String(),
 		ChallengeSignatureR8X:           sig.R8.X.String(),
 		ChallengeSignatureR8Y:           sig.R8.Y.String(),
@@ -329,7 +360,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, nextState boo
 		IssuerClaimSignatureS:         issuerClaimSignatureS,
 		IssuerAuthClaim:               issuerAuthClaim,
 		IssuerAuthClaimMtp:            issuerAuthClaimMtp,
-		IssuerAuthClaimNonRevMtp:      issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtp:      issuerAuthClaimNonRevMtp,
 		IssuerAuthClaimNonRevMtpAuxHi: issuerAuthClaimNonRevMtpAuxHi,
 		IssuerAuthClaimNonRevMtpAuxHv: issuerAuthClaimNonRevMtpAuxHv,
 		IssuerAuthClaimNonRevMtpNoAux: issuerAuthClaimNonRevMtpNoAux,
