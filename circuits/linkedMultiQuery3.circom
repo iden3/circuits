@@ -2,4 +2,4 @@ pragma circom 2.1.1;
 
 include "linked/multiQuery.circom";
 
-component main = LinkedMultiQuery(3, 32, 64); // 49300 constraints
+component main {public [enabled]} = LinkedMultiQuery(3, 32, 64); // 50383 constraints

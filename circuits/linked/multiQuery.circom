@@ -15,6 +15,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
     signal input issuerClaim[8];
 
     // query signals
+    signal input enabled[N]; // 1 if query non-empty, 0 to skip query check
     signal input claimSchema;
     signal input claimPathNotExists[N]; // 0 for inclusion, 1 for non-inclusion
     signal input claimPathMtp[N][claimLevels];
@@ -74,6 +75,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
 
         // output value only if modifier operation was selected
         operatorOutput[i] <== ProcessQueryWithModifiers(claimLevels, valueArraySize)(
+            enabled[i],
             claimPathNotExists[i],
             claimPathMtp[i],
             claimPathMtpNoAux[i],
