@@ -26,13 +26,13 @@ const (
 func Test_Generate_Test_CasesV3(t *testing.T) {
 
 	// genesis => first => second
-	issuerId, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition", "v3/issuer_from_genesis_state_to_first_transition_v3", true, 1)
-	userId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "v3/user_from_genesis_state_to_first_transition_v3", false, 1)
+	issuerId, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition", "v3/issuer_from_genesis_state_to_first_transition_v3", true, false)
+	userId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "v3/user_from_genesis_state_to_first_transition_v3", false, false)
 
-	_, issuerSecondState := generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer from first to second transition", "v3/issuer_from_first_state_to_second_transition_v3", true, 1)
-	_, userSecondState := generateStateTransitionData(t, true, UserPK, IssuerPK, "User from first to second transition", "v3/user_from_first_state_to_second_transition_v3", false, 1)
+	_, issuerSecondState := generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer from first to second transition", "v3/issuer_from_first_state_to_second_transition_v3", true, false)
+	_, userSecondState := generateStateTransitionData(t, true, UserPK, IssuerPK, "User from first to second transition", "v3/user_from_first_state_to_second_transition_v3", false, false)
 
-	_, issuerAuthDisabledFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition auth disabled", "v3/issuer_from_genesis_state_to_first_auth_disabled_transition_v3", true, 0)
+	_, issuerAuthDisabledFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition auth disabled", "v3/issuer_from_genesis_state_to_first_auth_disabled_transition_v3", true, true)
 
 	generateData(t, "BJJ: Issuer first state / user - genesis state", []*gistData{
 		{issuerId, issuerFirstState},
