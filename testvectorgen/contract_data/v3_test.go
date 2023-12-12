@@ -36,53 +36,57 @@ func Test_Generate_Test_CasesV3(t *testing.T) {
 
 	generateData(t, "BJJ: Issuer first state / user - genesis state", []*gistData{
 		{issuerId, issuerFirstState},
-	}, false, false, false, "v3/valid_bjj_user_genesis_v3", verifiable.BJJSignatureProofType, 1)
+	}, false, false, false, false, "v3/valid_bjj_user_genesis_v3", verifiable.BJJSignatureProofType, 1)
 
 	generateData(t, "BJJ: Issuer first state / user first state - valid proof", []*gistData{
 		{issuerId, issuerFirstState},
 		{userId, userFirstState},
-	}, true, false, false, "v3/valid_bjj_user_first_v3", verifiable.BJJSignatureProofType, 1)
+	}, true, false, false, false, "v3/valid_bjj_user_first_v3", verifiable.BJJSignatureProofType, 1)
 
 	generateData(t, "BJJ: Issuer second state / user first state - valid proof", []*gistData{
 		{userId, userFirstState},
 		{issuerId, issuerSecondState},
-	}, true, false, true, "v3/valid_bjj_user_first_issuer_second_v3", verifiable.BJJSignatureProofType, 1)
+	}, true, false, false, true, "v3/valid_bjj_user_first_issuer_second_v3", verifiable.BJJSignatureProofType, 1)
 
 	generateData(t, "BJJ: Issuer first state / user second state - valid proof", []*gistData{
 		{userId, userSecondState},
 		{issuerId, issuerSecondState},
-	}, true, true, false, "v3/valid_bjj_user_second_issuer_first_v3", verifiable.BJJSignatureProofType, 1)
+	}, true, true, false, false, "v3/valid_bjj_user_second_issuer_first_v3", verifiable.BJJSignatureProofType, 1)
 
 	generateData(t, "BJJ: Issuer first state / user - genesis state - Auth Disabled", []*gistData{
 		{issuerId, issuerAuthDisabledFirstState},
-	}, false, false, false, "v3/valid_bjj_user_genesis_auth_disabled_v3", verifiable.BJJSignatureProofType, 0)
+	}, false, false, false, false, "v3/valid_bjj_user_genesis_auth_disabled_v3", verifiable.BJJSignatureProofType, 0)
 
 	// MTP Data:
 	generateData(t, "MTP: Issuer first state / user - genesis state", []*gistData{
 		{issuerId, issuerFirstState},
-	}, false, false, false, "v3/valid_mtp_user_genesis_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
+	}, false, false, false, false, "v3/valid_mtp_user_genesis_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
 
 	generateData(t, "MTP: Issuer first state / user first state - valid proof", []*gistData{
 		{issuerId, issuerFirstState},
 		{userId, userFirstState},
-	}, true, false, false, "v3/valid_mtp_user_first_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
+	}, true, false, false, false, "v3/valid_mtp_user_first_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
 
 	generateData(t, "MTP: Issuer second state / user first state - valid proof", []*gistData{
 		{userId, userFirstState},
 		{issuerId, issuerSecondState},
-	}, true, false, true, "v3/valid_mtp_user_first_issuer_second_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
+	}, true, false, false, true, "v3/valid_mtp_user_first_issuer_second_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
 
 	generateData(t, "MTP: Issuer first state / user second state - valid proof", []*gistData{
 		{userId, userSecondState},
 		{issuerId, issuerSecondState},
-	}, true, true, false, "v3/valid_mtp_user_second_issuer_first_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
+	}, true, true, false, false, "v3/valid_mtp_user_second_issuer_first_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
 
 	generateData(t, "MTP: Issuer first state / user - genesis state - Auth Disabled", []*gistData{
 		{issuerId, issuerAuthDisabledFirstState},
-	}, false, false, false, "v3/valid_mtp_user_genesis_auth_disabled_v3", verifiable.Iden3SparseMerkleTreeProofType, 0)
+	}, false, false, false, false, "v3/valid_mtp_user_genesis_auth_disabled_v3", verifiable.Iden3SparseMerkleTreeProofType, 0)
+
+	generateData(t, "BJJ: Issuer genesis state / user - first state", []*gistData{
+		{userId, userFirstState},
+	}, true, false, true, false, "v3/valid_bjj_user_first_issuer_genesis_v3", verifiable.BJJSignatureProofType, 1)
 }
 
-func generateData(t *testing.T, desc string, gistData []*gistData, userFirstState bool, userSecondState bool, issuerSecondState bool, fileName string, testProofType verifiable.ProofType, authEnabled int) {
+func generateData(t *testing.T, desc string, gistData []*gistData, userFirstState bool, userSecondState bool, issuetGenesisState bool, issuerSecondState bool, fileName string, testProofType verifiable.ProofType, authEnabled int) {
 
 	var linkNonce = "18"
 	var nullifierSessionID string = "1234569"
@@ -197,7 +201,9 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 
 	issuerAuthClaimMtp, _ = issuer.ClaimMTP(t, issuer.AuthClaim)
 
-	issuer.AddClaim(t, claim)
+	if !issuetGenesisState {
+		issuer.AddClaim(t, claim)
+	}
 
 	issuerClaimMtp, _ = issuer.ClaimMTP(t, claim)
 	require.NoError(t, err)
