@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
 	core "github.com/iden3/go-iden3-core/v2"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-iden3-crypto/poseidon"
@@ -25,33 +26,36 @@ const (
 func Test_Generate_Test_CasesV3(t *testing.T) {
 
 	// genesis => first => second
-	issuerId, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition", "v3/issuer_from_genesis_state_to_first_transition_v3", true)
-	userId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "v3/user_from_genesis_state_to_first_transition_v3", false)
+	issuerId, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition", "v3/issuer_from_genesis_state_to_first_transition_v3", true, 1)
+	userId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "v3/user_from_genesis_state_to_first_transition_v3", false, 1)
 
-	_, issuerSecondState := generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer from first to second transition", "v3/issuer_from_first_state_to_second_transition_v3", true)
-	_, userSecondState := generateStateTransitionData(t, true, UserPK, IssuerPK, "User from first to second transition", "v3/user_from_first_state_to_second_transition_v3", false)
+	_, issuerSecondState := generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer from first to second transition", "v3/issuer_from_first_state_to_second_transition_v3", true, 1)
+	_, userSecondState := generateStateTransitionData(t, true, UserPK, IssuerPK, "User from first to second transition", "v3/user_from_first_state_to_second_transition_v3", false, 1)
+
+	_, issuerAuthDisabledFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition auth disabled", "v3/issuer_from_genesis_state_to_first_auth_disabled_transition_v3", true, 0)
 
 	generateData(t, "BJJ: Issuer first state / user - genesis state", []*gistData{
 		{issuerId, issuerFirstState},
 	}, false, false, false, "v3/valid_bjj_user_genesis_v3", verifiable.BJJSignatureProofType, 1)
 
 	generateData(t, "BJJ: Issuer first state / user first state - valid proof", []*gistData{
-
 		{issuerId, issuerFirstState},
 		{userId, userFirstState},
 	}, true, false, false, "v3/valid_bjj_user_first_v3", verifiable.BJJSignatureProofType, 1)
 
 	generateData(t, "BJJ: Issuer second state / user first state - valid proof", []*gistData{
-
 		{userId, userFirstState},
 		{issuerId, issuerSecondState},
 	}, true, false, true, "v3/valid_bjj_user_first_issuer_second_v3", verifiable.BJJSignatureProofType, 1)
 
 	generateData(t, "BJJ: Issuer first state / user second state - valid proof", []*gistData{
-
 		{userId, userSecondState},
 		{issuerId, issuerSecondState},
 	}, true, true, false, "v3/valid_bjj_user_second_issuer_first_v3", verifiable.BJJSignatureProofType, 1)
+
+	generateData(t, "BJJ: Issuer first state / user - genesis state - Auth Disabled", []*gistData{
+		{issuerId, issuerAuthDisabledFirstState},
+	}, false, false, false, "v3/valid_bjj_user_genesis_auth_disabled_v3", verifiable.BJJSignatureProofType, 0)
 
 	//generateMTPData(t, "MTP: User sign with address challenge genesis", []*gistData{
 	//	{id, issuerFirstState},
@@ -263,6 +267,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 	var gistRoot *merkletree.Hash
 	var gistProof []string
 	var gistNodeAux utils.NodeAuxValue
+
 	// user
 	if authEnabled == 1 {
 		challenge = big.NewInt(12345)
@@ -275,6 +280,8 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		gistProof, gistNodeAux = utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	} else {
+		addr := common.HexToAddress(ethAddress)
+		challenge = new(big.Int).SetBytes(merkletree.SwapEndianness(addr.Bytes()))
 
 		emptyArr := make([]*merkletree.Hash, 0)
 		authMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
@@ -299,6 +306,8 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 			Value: merkletree.HashZero.String(),
 			NoAux: "0",
 		}
+
+		user.AuthClaim = &core.Claim{}
 	}
 	t.Log(issuer.State(t).String())
 
