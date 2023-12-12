@@ -57,23 +57,29 @@ func Test_Generate_Test_CasesV3(t *testing.T) {
 		{issuerId, issuerAuthDisabledFirstState},
 	}, false, false, false, "v3/valid_bjj_user_genesis_auth_disabled_v3", verifiable.BJJSignatureProofType, 0)
 
-	//generateMTPData(t, "MTP: User sign with address challenge genesis", []*gistData{
-	//	{id, issuerFirstState},
-	//	{nextId, userFirstState},
-	//}, true, "valid_mtp_user_non_genesis_challenge_address", true)
-	//
-	//generateSigData(t, "Sig: Issuer first state", []*gistData{
-	//	{id, issuerFirstState},
-	//}, false, "valid_sig_user_genesis", false)
-	//generateSigData(t, "Sig: User non genesis latest", []*gistData{
-	//	{id, issuerFirstState},
-	//	{nextId, userFirstState},
-	//}, true, "valid_sig_user_non_genesis", false)
-	//generateSigData(t, "Sig: User sign with address challenge genesis", []*gistData{
-	//	{id, issuerFirstState},
-	//	{nextId, userFirstState},
-	//}, true, "valid_sig_user_non_genesis_challenge_address", true)
+	// MTP Data:
+	generateData(t, "MTP: Issuer first state / user - genesis state", []*gistData{
+		{issuerId, issuerFirstState},
+	}, false, false, false, "v3/valid_mtp_user_genesis_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
 
+	generateData(t, "MTP: Issuer first state / user first state - valid proof", []*gistData{
+		{issuerId, issuerFirstState},
+		{userId, userFirstState},
+	}, true, false, false, "v3/valid_mtp_user_first_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
+
+	generateData(t, "MTP: Issuer second state / user first state - valid proof", []*gistData{
+		{userId, userFirstState},
+		{issuerId, issuerSecondState},
+	}, true, false, true, "v3/valid_mtp_user_first_issuer_second_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
+
+	generateData(t, "MTP: Issuer first state / user second state - valid proof", []*gistData{
+		{userId, userSecondState},
+		{issuerId, issuerSecondState},
+	}, true, true, false, "v3/valid_mtp_user_second_issuer_first_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
+
+	generateData(t, "MTP: Issuer first state / user - genesis state - Auth Disabled", []*gistData{
+		{issuerId, issuerAuthDisabledFirstState},
+	}, false, false, false, "v3/valid_mtp_user_genesis_auth_disabled_v3", verifiable.Iden3SparseMerkleTreeProofType, 0)
 }
 
 func generateData(t *testing.T, desc string, gistData []*gistData, userFirstState bool, userSecondState bool, issuerSecondState bool, fileName string, testProofType verifiable.ProofType, authEnabled int) {
