@@ -235,11 +235,11 @@ type TestDataSigV2 struct {
 
 func Test_Generate_Test_Cases(t *testing.T) {
 
-	id, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis state", "issuer_genesis_state", false, 1)
-	nextId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition", false, 1)
+	id, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis state", "issuer_genesis_state", false, false)
+	nextId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "user_state_transition", false, false)
 
-	generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer next transition state", "issuer_next_state_transition", false, 1)
-	generateStateTransitionData(t, true, UserPK, IssuerPK, "User next transition state", "user_next_state_transition", false, 1)
+	generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer next transition state", "issuer_next_state_transition", false, false)
+	generateStateTransitionData(t, true, UserPK, IssuerPK, "User next transition state", "user_next_state_transition", false, false)
 
 	generateMTPData(t, "MTP: Issuer first state", []*gistData{
 		{id, issuerFirstState},
@@ -272,14 +272,14 @@ type gistData struct {
 	state *big.Int
 }
 
-func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, secondaryPK, desc, fileName string, isSubjectIDProfile bool, authEnabled int) (*big.Int, *big.Int) {
+func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, secondaryPK, desc, fileName string, isSubjectIDProfile bool, isEthBased bool) (*big.Int, *big.Int) {
 
 	var err error
 	primaryEntity := utils.NewIdentity(t, primaryPK)
 
 	var secondaryEntity *utils.IdentityTest
 
-	if authEnabled == 1 {
+	if !isEthBased {
 		secondaryEntity = utils.NewIdentity(t, secondaryPK)
 	} else {
 		// generate onchain identity
