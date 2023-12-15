@@ -198,7 +198,7 @@ func NewEthereumBasedIdentity(t testing.TB, ethAddr string) *IdentityTest {
 		t.Fatalf("Error creating genesis state from address: %v", err)
 	}
 
-	didType, err := core.BuildDIDType(core.DIDMethodIden3, core.Polygon, core.Mumbai)
+	didType, err := core.BuildDIDType(core.DIDMethodPolygonID, core.Polygon, core.Mumbai)
 	if err != nil {
 		t.Fatalf("Error creating did type: %v", err)
 	}

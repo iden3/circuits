@@ -32,7 +32,7 @@ func Test_Generate_Test_CasesV3(t *testing.T) {
 	_, issuerSecondState := generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer from first to second transition", "v3/issuer_from_first_state_to_second_transition_v3", true, false)
 	_, userSecondState := generateStateTransitionData(t, true, UserPK, IssuerPK, "User from first to second transition", "v3/user_from_first_state_to_second_transition_v3", false, false)
 
-	_, issuerAuthDisabledFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition auth disabled", "v3/issuer_from_genesis_state_to_first_auth_disabled_transition_v3", true, true)
+	_, issuerAuthDisabledFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition auth disabled", "v3/issuer_from_genesis_state_to_first_auth_disabled_transition_v3", false, true)
 
 	generateData(t, "BJJ: Issuer first state / user - genesis state", []*gistData{
 		{issuerId, issuerFirstState},
@@ -107,6 +107,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 	} else {
 		// generate onchain identity
 		user = utils.NewEthereumBasedIdentity(t, ethAddress)
+		nullifierSessionID = "0"
 	}
 	issuer := utils.NewIdentity(t, IssuerPK)
 
@@ -116,7 +117,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 	subjectID := user.ID
 
 	var nonceSubject = new(big.Int)
-	if isSubjectIDProfile {
+	if isSubjectIDProfile && authEnabled == 1 {
 		nonceSubject = big.NewInt(999)
 		subjectID, err = core.ProfileID(user.ID, nonceSubject)
 		require.NoError(t, err)
