@@ -232,6 +232,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     /////////////////////////////////////////////////////////////////
     // output value only if modifier operation was selected
     operatorOutput <== ProcessQueryWithModifiers(claimLevels, valueArraySize)(
+        one,
         claimPathNotExists,
         claimPathMtp,
         claimPathMtpNoAux,
