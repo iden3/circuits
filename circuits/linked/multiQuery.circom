@@ -7,7 +7,7 @@ include "../lib/utils/claimUtils.circom";
 include "../lib/utils/safeOne.circom";
 include "../lib/utils/spongeHash.circom";
 
-// This circuit generates nullifier for a given claim using linked proof
+// This circuit processes multiple query requests at once for a given claim using linked proof
 template LinkedMultiQuery(N, claimLevels, valueArraySize) {
 
     // linked proof signals
