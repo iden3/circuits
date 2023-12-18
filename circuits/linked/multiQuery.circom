@@ -15,6 +15,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
     signal input issuerClaim[8];
 
     // query signals
+    signal input enabled[N]; // 1 if query non-empty, 0 to skip query check
     signal input claimSchema;
     signal input claimPathNotExists[N]; // 0 for inclusion, 1 for non-inclusion
     signal input claimPathMtp[N][claimLevels];
@@ -54,11 +55,8 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
     // Verify issuerClaim schema
     verifyCredentialSchema()(one, issuerClaimHeader.schema, claimSchema); // 3 constraints
 
-    signal slotValue[N];
-    signal fieldValue[N];
-    signal querySatisfied[N];
-    signal isQueryOp[N];
     signal valueHash[N];
+    signal queryHash[N];
 
     signal issuerClaimHash, issuerClaimHi, issuerClaimHv;
     (issuerClaimHash, issuerClaimHi, issuerClaimHv) <== getClaimHash()(issuerClaim); // 834 constraints
@@ -74,6 +72,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
 
         // output value only if modifier operation was selected
         operatorOutput[i] <== ProcessQueryWithModifiers(claimLevels, valueArraySize)(
+            enabled[i],
             claimPathNotExists[i],
             claimPathMtp[i],
             claimPathMtpNoAux[i],
@@ -94,8 +93,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
         /////////////////////////////////////////////////////////////////
         // 4950 constraints (SpongeHash+Poseidon)
         valueHash[i] <== SpongeHash(valueArraySize, 6)(value[i]); // 6 - max size of poseidon hash available on-chain
-
-        circuitQueryHash[i] <== Poseidon(6)([
+        queryHash[i] <== Poseidon(6)([
             claimSchema,
             slotIndex[i],
             operator[i],
@@ -103,5 +101,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
             claimPathNotExists[i],
             valueHash[i]
         ]);
+
+        circuitQueryHash[i] <== Mux1()([0, queryHash[i]], enabled[i]);
     }
 }

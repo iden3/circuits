@@ -6,6 +6,7 @@ include "modifiers.circom";
 include "../utils/claimUtils.circom";
 
 template ProcessQueryWithModifiers(claimLevels, valueArraySize){
+    signal input enabled; 
     signal input claimPathNotExists; // 0 for inclusion, 1 for non-inclusion
     signal input claimPathMtp[claimLevels];
     signal input claimPathMtpNoAux; // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
@@ -24,9 +25,11 @@ template ProcessQueryWithModifiers(claimLevels, valueArraySize){
     // Modifier/Computation Operator output ($sd)
     signal output operatorOutput;
 
+    signal smtEnabled <== AND()(enabled, merklized);
+
     // check path/in node exists in merkletree specified by jsonldRoot
     SMTVerifier(claimLevels)(
-        enabled <== merklized,  // if merklize flag 0 skip MTP verification
+        enabled <== smtEnabled,  // if merklize flag 0 or enabled 0 skip MTP verification
         fnc <== claimPathNotExists, // inclusion
         root <== merklizedRoot,
         siblings <== claimPathMtp,
@@ -61,8 +64,9 @@ template ProcessQueryWithModifiers(claimLevels, valueArraySize){
     );
 
     signal isQueryOp <== LessThan(5)([operator, 16]);
+    signal querySatisfiedEnabled <== AND()(enabled, isQueryOp);
     ForceEqualIfEnabled()(
-        isQueryOp,
+        querySatisfiedEnabled,
         [querySatisfied, 1]
     );
 
