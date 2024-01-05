@@ -187,9 +187,15 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         treeRoot <== issuerClaimNonRevRevTreeRoot
     ); // 11763 constraints
 
+    // check issuer non revocation state only if we need it:
+    // 1. if Sig proof is provided we need to check non revocation of authClaim always
+    // AND non revocation of issuerClaim only if isRevocationChecked = 1
+    // 2. if MTP proof is provided we need to check non revocation of claim only if isRevocationChecked = 1
+    signal checkIssuerClaimNonRevState <== OR()(isSig, isRevocationChecked);
+
     // verify issuer state for claim non-revocation proof
     checkIdenStateMatchesRoots()(
-        one,
+        checkIssuerClaimNonRevState,
         issuerClaimNonRevClaimsTreeRoot,
         issuerClaimNonRevRevTreeRoot,
         issuerClaimNonRevRootsTreeRoot,
