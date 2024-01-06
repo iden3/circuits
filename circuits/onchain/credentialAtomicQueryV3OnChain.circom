@@ -173,6 +173,8 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, valueArraySiz
     // Auth check
     /////////////////////////////////////////////////////////////////
 
+    ForceEqualIfEnabled()(NOT()(authEnabled), [profileNonce, 0]);
+
     checkAuthV2(idOwnershipLevels, onChainLevels)(
         authEnabled, // enabled
         userGenesisID,
