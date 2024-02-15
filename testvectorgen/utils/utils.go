@@ -319,17 +319,17 @@ func CalculateNullify(genesisID, claimSubjectProfileNonce, claimSchema, verifier
 
 func GetValueArraySizeForOperator(operator int) int {
 	result := 0
-	opeSizeOps := []int{1, 2, 3, 6, 7, 8}
-	twoSizeOps := []int{9}
-	maxSizeOps := []int{4, 5}
+	oneArrLengthOps := []int{1, 2, 3, 6, 7, 8}
+	twoArrLengthOps := []int{9}
+	maxArrLengthOps := []int{4, 5}
 
-	if contains(opeSizeOps, operator) {
+	if contains(oneArrLengthOps, operator) {
 		return 1
 	}
-	if contains(twoSizeOps, operator) {
+	if contains(twoArrLengthOps, operator) {
 		return 2
 	}
-	if contains(maxSizeOps, operator) {
+	if contains(maxArrLengthOps, operator) {
 		return 64
 	}
 	return result
