@@ -24,10 +24,10 @@ include "comparators.circom";
 */
 
 // Query template works only with Query operators (0-15), for the rest returns 0
-template Query (valueArraySize) {
+template Query (maxValueArraySize) {
     // signals
     signal input in;
-    signal input value[valueArraySize];
+    signal input value[maxValueArraySize];
     signal input operator;
     signal output out;
 
@@ -47,7 +47,7 @@ template Query (valueArraySize) {
     signal gte <== NOT()(lt); // gte === !lt
 
     // in
-    signal inComp <== IN(valueArraySize)(in, value);
+    signal inComp <== IN(maxValueArraySize)(in, value);
 
     // between (value[0] <= in <= value[1])
     signal gt2 <== GreaterThan254()([in, value[1]]);

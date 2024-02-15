@@ -92,10 +92,11 @@ type Inputs struct {
 	ClaimPathKey       string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
 	ClaimPathValue     string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
 
-	Operator  int      `json:"operator"`
-	SlotIndex int      `json:"slotIndex"`
-	Timestamp string   `json:"timestamp"`
-	Value     []string `json:"value"`
+	Operator       int      `json:"operator"`
+	SlotIndex      int      `json:"slotIndex"`
+	Timestamp      string   `json:"timestamp"`
+	Value          []string `json:"value"`
+	ValueArraySize int      `json:"valueArraySize"`
 
 	// additional sig inputs
 	IssuerClaimSignatureR8X       string      `json:"issuerClaimSignatureR8x"`
@@ -519,6 +520,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		SlotIndex:                       slotIndex,
 		Timestamp:                       timestamp,
 		Value:                           valueInput,
+		ValueArraySize:                  utils.GetValueArraySizeForOperator(operator),
 
 		IssuerClaimSignatureR8X:       issuerClaimSignatureR8X,
 		IssuerClaimSignatureR8Y:       issuerClaimSignatureR8Y,
@@ -755,6 +757,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
 		Value:               utils.PrepareStrArray([]string{}, 64),
+		ValueArraySize:      utils.GetValueArraySizeForOperator(utils.NOOP),
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",

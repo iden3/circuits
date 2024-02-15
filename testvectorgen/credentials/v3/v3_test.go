@@ -68,10 +68,11 @@ type Inputs struct {
 	ClaimPathKey       string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
 	ClaimPathValue     string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
 
-	Operator  int      `json:"operator"`
-	SlotIndex int      `json:"slotIndex"`
-	Timestamp string   `json:"timestamp"`
-	Value     []string `json:"value"`
+	Operator       int      `json:"operator"`
+	SlotIndex      int      `json:"slotIndex"`
+	Timestamp      string   `json:"timestamp"`
+	Value          []string `json:"value"`
+	ValueArraySize int      `json:"valueArraySize"`
 
 	// additional sig inputs
 	IssuerClaimSignatureR8X       string      `json:"issuerClaimSignatureR8x"`
@@ -108,6 +109,7 @@ type Outputs struct {
 	ClaimPathKey           string   `json:"claimPathKey"`
 	ClaimPathNotExists     string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
 	Value                  []string `json:"value"`
+	ValueArraySize         int      `json:"valueArraySize"`
 	Timestamp              string   `json:"timestamp"`
 	Merklized              string   `json:"merklized"`
 	ProofType              string   `json:"proofType"` // 1 for sig, 2 for mtp
@@ -449,6 +451,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		SlotIndex:                       slotIndex,
 		Timestamp:                       timestamp,
 		Value:                           valueInput,
+		ValueArraySize:                  utils.GetValueArraySizeForOperator(operator),
 
 		IssuerClaimSignatureR8X:       issuerClaimSignatureR8X,
 		IssuerClaimSignatureR8Y:       issuerClaimSignatureR8Y,
@@ -521,6 +524,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		Operator:               operator,
 		Value:                  valueInput,
+		ValueArraySize:         utils.GetValueArraySizeForOperator(operator),
 		Timestamp:              timestamp,
 		Merklized:              merklized,
 		IsRevocationChecked:    strconv.Itoa(isRevocationChecked),
@@ -636,6 +640,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
 		Value:               utils.PrepareStrArray([]string{}, 64),
+		ValueArraySize:      utils.GetValueArraySizeForOperator(utils.NOOP),
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
@@ -665,6 +670,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		ClaimPathKey:           pathKey.String(),
 		ClaimPathNotExists:     "1",
 		Value:                  utils.PrepareStrArray([]string{}, 64),
+		ValueArraySize:         utils.GetValueArraySizeForOperator(utils.NOOP),
 		Timestamp:              timestamp,
 		Merklized:              "1",
 		IssuerState:            issuerAuthState.String(),

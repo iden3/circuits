@@ -316,3 +316,30 @@ func CalculateNullify(genesisID, claimSubjectProfileNonce, claimSchema, verifier
 
 	return nullifier.String(), nil
 }
+
+func GetValueArraySizeForOperator(operator int) int {
+	result := 0
+	opeSizeOps := []int{1, 2, 3, 6, 7, 8}
+	twoSizeOps := []int{9}
+	maxSizeOps := []int{4, 5}
+
+	if contains(opeSizeOps, operator) {
+		return 1
+	}
+	if contains(twoSizeOps, operator) {
+		return 2
+	}
+	if contains(maxSizeOps, operator) {
+		return 64
+	}
+	return result
+}
+
+func contains(s []int, e int) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
