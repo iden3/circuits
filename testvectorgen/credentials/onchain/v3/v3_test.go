@@ -468,6 +468,8 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
+	valueArraySize := utils.GetValueArraySizeForOperator(operator)
+
 	inputs := Inputs{
 		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
@@ -520,7 +522,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		SlotIndex:                       slotIndex,
 		Timestamp:                       timestamp,
 		Value:                           valueInput,
-		ValueArraySize:                  utils.GetValueArraySizeForOperator(operator),
+		ValueArraySize:                  valueArraySize,
 
 		IssuerClaimSignatureR8X:       issuerClaimSignatureR8X,
 		IssuerClaimSignatureR8Y:       issuerClaimSignatureR8Y,
@@ -556,6 +558,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		pathKey,
 		big.NewInt(0),
 		valuesHash,
+		big.NewInt(int64(valueArraySize)),
 	})
 	require.NoError(t, err)
 
@@ -694,6 +697,8 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
+	valueArraySize := utils.GetValueArraySizeForOperator(utils.NOOP)
+
 	inputs := Inputs{
 		RequestID:                       requestID.String(),
 		UserGenesisID:                   user.ID.BigInt().String(),
@@ -757,7 +762,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
 		Value:               utils.PrepareStrArray([]string{}, 64),
-		ValueArraySize:      utils.GetValueArraySizeForOperator(utils.NOOP),
+		ValueArraySize:      valueArraySize,
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
@@ -789,6 +794,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		pathKey,
 		big.NewInt(1),
 		valuesHash,
+		big.NewInt(int64(valueArraySize)),
 	})
 	require.NoError(t, err)
 

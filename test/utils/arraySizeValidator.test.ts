@@ -61,6 +61,38 @@ describe("Test ArraySizeValidator template:", async function () {
             },
             expOut: { out: "0" }
         },
+        {
+            desc: "nin eq 0",
+            input: {
+                valueArraySize: "0",
+                operator: "5",
+            },
+            expOut: { out: "0" }
+        },
+        {
+            desc: "in eq 0",
+            input: {
+                valueArraySize: "0",
+                operator: "4",
+            },
+            expOut: { out: "0" }
+        },
+        {
+            desc: "in eq max",
+            input: {
+                valueArraySize: "64",
+                operator: "4",
+            },
+            expOut: { out: "1" }
+        },
+        {
+            desc: "in more than max",
+            input: {
+                valueArraySize: "66",
+                operator: "4",
+            },
+            expOut: { out: "0" }
+        },
     ];
 
     let circuit;

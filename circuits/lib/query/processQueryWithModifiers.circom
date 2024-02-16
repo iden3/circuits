@@ -58,7 +58,7 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     /////////////////////////////////////////////////////////////////
 
     // verify value array length
-    // 801 constraints (ArraySizeValidator+ForceEqualIfEnabled)
+    // 802 constraints (ArraySizeValidator+ForceEqualIfEnabled)
     signal arrSizeSatisfied <== ArraySizeValidator(maxValueArraySize)(
         valueArraySize <== valueArraySize,
         operator <== operator

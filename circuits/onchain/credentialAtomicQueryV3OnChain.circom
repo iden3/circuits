@@ -262,12 +262,13 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
     /////////////////////////////////////////////////////////////////
     signal valueHash <== SpongeHash(maxValueArraySize, 6)(value); // 6 - max size of poseidon hash available on-chain
 
-    circuitQueryHash <== Poseidon(6)([
+    circuitQueryHash <== Poseidon(7)([
         claimSchema,
         slotIndex,
         operator,
         claimPathKey,
         claimPathNotExists,
-        valueHash
+        valueHash,
+        valueArraySize
     ]);
 }
