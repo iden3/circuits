@@ -7,6 +7,8 @@ import (
 	"log"
 	"math/big"
 	"os"
+	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -185,23 +187,25 @@ func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 
 func SaveTestVector(t *testing.T, fileName string, data string) {
 	t.Helper()
+	dir := "testdata"
 
-	err := os.MkdirAll("testdata", os.ModeDir)
+	fullFilePath := path.Join(dir, fileName+".json")
+	directoryPath := filepath.Dir(fullFilePath)
+
+	err := os.MkdirAll(directoryPath, 0777)
 	if err != nil {
 		t.Fatal("Error creatind directory testdata", err)
 	}
 
-	path := "testdata/" + fileName + ".json"
+	file, err := os.Create(fullFilePath)
 
-	f, err := os.Create(path)
-	defer f.Close()
 	if err != nil {
-		t.Fatalf("Error writing to file %s: %s", path, err)
+		t.Fatalf("Error writing to file %s: %s", fileName, err)
 	}
 
-	_, err = f.WriteString(data)
+	_, err = file.WriteString(data)
 	if err != nil {
-		t.Fatalf("Error writing to file %s: %s", path, err)
+		t.Fatalf("Error writing to file %s: %s", fileName, err)
 	}
 }
 
