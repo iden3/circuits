@@ -185,6 +185,12 @@ func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 
 func SaveTestVector(t *testing.T, fileName string, data string) {
 	t.Helper()
+
+	err := os.MkdirAll("testdata", os.ModeDir)
+	if err != nil {
+		t.Fatal("Error creatind directory testdata", err)
+	}
+
 	path := "testdata/" + fileName + ".json"
 
 	f, err := os.Create(path)
