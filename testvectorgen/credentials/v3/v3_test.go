@@ -239,6 +239,15 @@ func Test_Between(t *testing.T) {
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/between_operator", utils.BETWEEN, &value, Sig)
 }
 
+func Test_Noop(t *testing.T) {
+	desc := "Noop operator"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+	value := utils.PrepareStrArray([]string{}, 64)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/noop_operator", utils.NOOP, &value, Mtp)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/noop_operator", utils.NOOP, &value, Sig)
+}
+
 func Test_Less_Than_Eq(t *testing.T) {
 	desc := "LTE operator"
 	isUserIDProfile := false

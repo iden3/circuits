@@ -280,6 +280,15 @@ func Test_Less_Than_Eq(t *testing.T) {
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/less_than_eq_operator", utils.LTE, &value, Sig, 1)
 }
 
+func Test_Noop(t *testing.T) {
+	desc := "NOOP operator"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+	value := utils.PrepareStrArray([]string{}, 64)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/noop_operator", utils.NOOP, &value, Mtp, 1)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/noop_operator", utils.NOOP, &value, Sig, 1)
+}
+
 func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce string, fileName string, proofType ProofType) {
 	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, utils.EQ, nil, false, 1, false, proofType, 1)

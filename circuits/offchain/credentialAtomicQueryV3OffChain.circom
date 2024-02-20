@@ -210,8 +210,9 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
     merklized <== merklize.flag;
 
     // check path/in node exists in merkletree specified by jsonldRoot
+    signal operatorNotNoop <== NOT()(IsEqual()([operator, 0]));
     SMTVerifier(claimLevels)(
-        enabled <== merklize.flag,  // if merklize flag 0 skip MTP verification
+        enabled <== AND()(merklize.flag, operatorNotNoop),  // if merklize flag 0 or NOOP operator skip MTP verification
         fnc <== claimPathNotExists, // inclusion
         root <== merklize.out,
         siblings <== claimPathMtp,
