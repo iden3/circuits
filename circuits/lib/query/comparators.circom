@@ -25,25 +25,27 @@ template IN (valueArraySize){
 }
 
 // Same as IN but stops checking on stopIndx
-template InWithStopIndx (valueArraySize){
+template InWithDynamicArraySize (maxValueArraySize){
         signal input in;
-        signal input value[valueArraySize];
-        signal input stopIndx;
+        signal input value[maxValueArraySize];
+        signal input valueArraySize;
         signal output out;
 
-        component eq[valueArraySize];
-        signal isEq[valueArraySize+1];
-        signal lt[valueArraySize];
+        assert(maxValueArraySize < 256);
+
+        component eq[maxValueArraySize];
+        signal isEq[maxValueArraySize+1];
+        signal lt[maxValueArraySize];
         isEq[0] <== 0;
-        for (var i=0; i<valueArraySize; i++) {
-            lt[i] <== LessThan(6)([i, stopIndx]);
+        for (var i=0; i<maxValueArraySize; i++) {
+            lt[i] <== LessThan(8)([i, valueArraySize]);
             eq[i] = IsEqual();
             eq[i].in[0] <== in;
             eq[i].in[1] <== value[i];
-            isEq[i+1] <== AND()(lt[i], OR()(isEq[i], eq[i].out));
+            isEq[i+1] <== OR()(isEq[i], AND()(eq[i].out, lt[i]));
         }
 
-        out <== isEq[valueArraySize];
+        out <== isEq[maxValueArraySize];
 }
 
 // As LessThan but for all possible numbers from field (not only 252-bit-max like LessThan)
