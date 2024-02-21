@@ -239,6 +239,24 @@ func Test_Between(t *testing.T) {
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/between_operator", utils.BETWEEN, &value, Sig)
 }
 
+func Test_NotBetween(t *testing.T) {
+	desc := "Not between operator"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+	value := []string{"1", "9"}
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/not_between_operator", utils.NOT_BETWEEN, &value, Mtp)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/not_between_operator", utils.NOT_BETWEEN, &value, Sig)
+}
+
+func Test_IN_10_In_Subj(t *testing.T) {
+	desc := "IN operator"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+	value := []string{"8", "9", "10"}
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/in_operator", utils.IN, &value, Mtp)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/in_operator", utils.IN, &value, Sig)
+}
+
 func Test_IN_0_In_Subj(t *testing.T) {
 	desc := "IN operator"
 	isUserIDProfile := false

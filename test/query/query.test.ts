@@ -19,6 +19,7 @@ const NEQ = "6"; // not equals
 const LTE = "7"; // less than or equal
 const GTE = "8"; // greater than or equal
 const BETWEEN = "9"; // between
+const NOT_BETWEEN = "10"; // not between
 
 
 describe("Test query", function () {
@@ -34,10 +35,11 @@ describe("Test query", function () {
             const inputs = {
                 in: "10",
                 operator: NOOP,
-                value: ["11", "0", "0"],
+                value: [0, 0, 0],
+                valueArraySize: 0,
             }
 
-            const expOut = { out: 1, value: ["11", "0", "0"] }
+            const expOut = { out: 1 };
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -49,9 +51,10 @@ describe("Test query", function () {
                 in: "0",
                 operator: NOOP,
                 value: ["0", "0", "0"],
+                valueArraySize: 0,
             }
 
-            const expOut = { out: 1, value: ["0", "0", "0"] }
+            const expOut = { out: 1 };
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -65,9 +68,10 @@ describe("Test query", function () {
                 in: "10",
                 operator: EQ,
                 value: ["11", "0", "0"],
+                valueArraySize: 1,
             }
 
-            const expOut = { out: 0, value: ["11", "0", "0"] }
+            const expOut = { out: 0 };
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -79,9 +83,10 @@ describe("Test query", function () {
                 in: "10",
                 operator: EQ,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }
 
-            const expOut = { out: 1, value: ["10", "0", "0"] }
+            const expOut = { out: 1 }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -93,9 +98,10 @@ describe("Test query", function () {
                 in: "0",
                 operator: EQ,
                 value: ["11", "0", "0"],
+                valueArraySize: 1,
             }
 
-            const expOut = { out: 0, value: ["11", "0", "0"] }
+            const expOut = { out: 0 }
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -107,9 +113,10 @@ describe("Test query", function () {
                 in: "10",
                 operator: EQ,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }
 
-            const expOut = { out: 0, value: ["0", "0", "0"] }
+            const expOut = { out: 0 };
 
             const w = await circuit.calculateWitness(inputs, true);
             await circuit.assertOut(w, expOut);
@@ -121,6 +128,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: EQ,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }
 
             const expOut = { out: 1, value: ["0", "0", "0"] }
@@ -138,6 +146,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: LT,
                 value: ["11", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["11", "0", "0"] }
@@ -152,6 +161,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: LT,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["10", "0", "0"] }
@@ -165,6 +175,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: LT,
                 value: ["9", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["9", "0", "0"] }
@@ -178,6 +189,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: LT,
                 value: ["11", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["11", "0", "0"] }
@@ -191,6 +203,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: LT,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["0", "0", "0"] }
@@ -204,6 +217,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: LT,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["0", "0", "0"] }
@@ -217,6 +231,7 @@ describe("Test query", function () {
                 in: "-1",
                 operator: LT,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = { out: 0, value: ["10", "0", "0"] }
@@ -230,6 +245,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: LT,
                 value: ["-1", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = {
@@ -246,6 +262,7 @@ describe("Test query", function () {
                 in: "-2",
                 operator: LT,
                 value: ["-1", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = {
@@ -262,6 +279,7 @@ describe("Test query", function () {
                 in: "-4294967290",
                 operator: LT,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = { out: 0, value: ["10", "0", "0"] }
@@ -277,6 +295,7 @@ describe("Test query", function () {
                 // 111111101110001001010110010010000101000011100001100000100111000000101101001001000010010000000110
                 operator: LT,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = { out: 0, value: ["10", "0", "0"] }
@@ -290,6 +309,7 @@ describe("Test query", function () {
                 in: "14651237294507013008273219182214280847718990358813499091232105186081237893131",
                 operator: LT,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = { out: 0, value: ["10", "0", "0"] }
@@ -305,6 +325,7 @@ describe("Test query", function () {
                 in: "11",
                 operator: GT,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["10", "0", "0"] }
@@ -319,6 +340,7 @@ describe("Test query", function () {
                 in: "11",
                 operator: GT,
                 value: ["11", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["11", "0", "0"] }
@@ -332,6 +354,7 @@ describe("Test query", function () {
                 in: "11",
                 operator: GT,
                 value: ["12", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["12", "0", "0"] }
@@ -345,6 +368,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: GT,
                 value: ["12", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["12", "0", "0"] }
@@ -358,6 +382,7 @@ describe("Test query", function () {
                 in: "12",
                 operator: GT,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["0", "0", "0"] }
@@ -371,6 +396,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: GT,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["0", "0", "0"] }
@@ -384,6 +410,7 @@ describe("Test query", function () {
                 in: "-1",
                 operator: GT,
                 value: ["-2", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = {
@@ -400,6 +427,7 @@ describe("Test query", function () {
                 in: "-2",
                 operator: GT,
                 value: ["-1", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = {
@@ -416,6 +444,7 @@ describe("Test query", function () {
                 in: "-1",
                 operator: GT,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["0", "0", "0"] }
@@ -432,6 +461,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: IN,
                 value: ["12", "11", "10"],
+                valueArraySize: 3,
             }
 
             const expOut = { out: 1, value: ["12", "11", "10"] }
@@ -446,6 +476,7 @@ describe("Test query", function () {
                 in: "11",
                 operator: IN,
                 value: ["10", "10", "0"],
+                valueArraySize: 3,
             }
 
             const expOut = { out: 0, value: ["10", "10", "0"] }
@@ -460,6 +491,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: IN,
                 value: ["0", "10", "0"],
+                valueArraySize: 3,
             }
 
             const expOut = { out: 1, value: ["0", "10", "0"] }
@@ -474,6 +506,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: IN,
                 value: ["10", "11", "12"],
+                valueArraySize: 3,
             }
 
             const expOut = { out: 0, value: ["10", "11", "12"] }
@@ -488,6 +521,7 @@ describe("Test query", function () {
                 in: "11",
                 operator: IN,
                 value: ["0", "0", "0"],
+                valueArraySize: 3,
             }
 
             const expOut = { out: 0, value: ["0", "0", "0"] }
@@ -502,6 +536,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: IN,
                 value: ["0", "0", "0"],
+                valueArraySize: 3,
             }
 
             const expOut = { out: 1, value: ["0", "0", "0"] }
@@ -519,6 +554,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: NIN,
                 value: ["12", "11", "13"],
+                valueArraySize: 3,
             }
 
             const expOut = { out: 1, value: ["12", "11", "13"] }
@@ -533,6 +569,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: NIN,
                 value: ["10", "10", "0"],
+                valueArraySize: 3,
             }
 
             const expOut = { out: 0, value: ["10", "10", "0"] }
@@ -547,6 +584,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: NIN,
                 value: ["10", "10", "10"],
+                valueArraySize: 3,
             }
 
             const expOut = { out: 1, value: ["10", "10", "10"] }
@@ -561,6 +599,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: NIN,
                 value: ["0", "0", "0"],
+                valueArraySize: 3,
             }
 
             const expOut = { out: 1, value: ["0", "0", "0"] }
@@ -575,6 +614,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: NIN,
                 value: ["0", "0", "0"],
+                valueArraySize: 3,
             }
 
             const expOut = { out: 0, value: ["0", "0", "0"] }
@@ -592,6 +632,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: NEQ,
                 value: ["11", "0", "0"],
+                valueArraySize: 1,
             }
 
             const expOut = { out: 1, value: ["11", "0", "0"] }
@@ -606,6 +647,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: NEQ,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }
 
             const expOut = { out: 0, value: ["10", "0", "0"] }
@@ -620,6 +662,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: NEQ,
                 value: ["11", "0", "0"],
+                valueArraySize: 1,
             }
 
             const expOut = { out: 1, value: ["11", "0", "0"] }
@@ -634,6 +677,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: NEQ,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }
 
             const expOut = { out: 1, value: ["0", "0", "0"] }
@@ -648,6 +692,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: NEQ,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }
 
             const expOut = { out: 0, value: ["0", "0", "0"] }
@@ -665,6 +710,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: LTE,
                 value: ["11", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["11", "0", "0"] }
@@ -679,6 +725,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: LTE,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["10", "0", "0"] }
@@ -692,6 +739,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: LTE,
                 value: ["9", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["9", "0", "0"] }
@@ -705,6 +753,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: LTE,
                 value: ["11", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["11", "0", "0"] }
@@ -718,6 +767,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: LTE,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["0", "0", "0"] }
@@ -731,6 +781,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: LTE,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["0", "0", "0"] }
@@ -744,6 +795,7 @@ describe("Test query", function () {
                 in: "-1",
                 operator: LTE,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = { out: 0, value: ["10", "0", "0"] }
@@ -757,6 +809,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: LTE,
                 value: ["-1", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = {
@@ -773,6 +826,7 @@ describe("Test query", function () {
                 in: "-2",
                 operator: LTE,
                 value: ["-1", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = {
@@ -789,6 +843,7 @@ describe("Test query", function () {
                 in: "-4294967290",
                 operator: LTE,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = { out: 0, value: ["10", "0", "0"] }
@@ -804,6 +859,7 @@ describe("Test query", function () {
                 // 111111101110001001010110010010000101000011100001100000100111000000101101001001000010010000000110
                 operator: LTE,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = { out: 0, value: ["10", "0", "0"] }
@@ -817,6 +873,7 @@ describe("Test query", function () {
                 in: "14651237294507013008273219182214280847718990358813499091232105186081237893131",
                 operator: LTE,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, false);
 
             const expOut = { out: 0, value: ["10", "0", "0"] }
@@ -832,6 +889,7 @@ describe("Test query", function () {
                 in: "11",
                 operator: GTE,
                 value: ["10", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["10", "0", "0"] }
@@ -846,6 +904,7 @@ describe("Test query", function () {
                 in: "11",
                 operator: GTE,
                 value: ["11", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["11", "0", "0"] }
@@ -859,6 +918,7 @@ describe("Test query", function () {
                 in: "11",
                 operator: GTE,
                 value: ["12", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["12", "0", "0"] }
@@ -872,6 +932,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: GTE,
                 value: ["12", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 0, value: ["12", "0", "0"] }
@@ -885,6 +946,7 @@ describe("Test query", function () {
                 in: "12",
                 operator: GTE,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["0", "0", "0"] }
@@ -898,6 +960,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: GTE,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["0", "0", "0"] }
@@ -911,6 +974,7 @@ describe("Test query", function () {
                 in: "-1",
                 operator: GTE,
                 value: ["-2", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = {
@@ -927,6 +991,7 @@ describe("Test query", function () {
                 in: "-2",
                 operator: GTE,
                 value: ["-1", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = {
@@ -943,6 +1008,7 @@ describe("Test query", function () {
                 in: "-1",
                 operator: GTE,
                 value: ["0", "0", "0"],
+                valueArraySize: 1,
             }, true);
 
             const expOut = { out: 1, value: ["0", "0", "0"] }
@@ -959,6 +1025,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: BETWEEN,
                 value: ["0", "10", "0"],
+                valueArraySize: 2,
             }, true);
 
             const expOut = { out: 1, value: ["0", "10", "0"] }
@@ -972,6 +1039,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: BETWEEN,
                 value: ["1", "10", "0"],
+                valueArraySize: 2,
             }, true);
 
             const expOut = { out: 0, value: ["1", "10", "0"] }
@@ -985,6 +1053,7 @@ describe("Test query", function () {
                 in: "10",
                 operator: BETWEEN,
                 value: ["1", "10", "0"],
+                valueArraySize: 2,
             }, true);
 
             const expOut = { out: 1, value: ["1", "10", "0"] }
@@ -998,6 +1067,7 @@ describe("Test query", function () {
                 in: "11",
                 operator: BETWEEN,
                 value: ["1", "10", "0"],
+                valueArraySize: 2,
             }, true);
 
             const expOut = { out: 0, value: ["1", "10", "0"] }
@@ -1011,6 +1081,7 @@ describe("Test query", function () {
                 in: "0",
                 operator: BETWEEN,
                 value: ["0", "0", "0"],
+                valueArraySize: 2,
             }, true);
 
             const expOut = { out: 1, value: ["0", "0", "0"] }
@@ -1024,6 +1095,7 @@ describe("Test query", function () {
                 in: "1",
                 operator: BETWEEN,
                 value: ["0", "0", "0"],
+                valueArraySize: 2,
             }, true);
 
             const expOut = { out: 0, value: ["0", "0", "0"] }
@@ -1037,6 +1109,7 @@ describe("Test query", function () {
                 in: "14",
                 operator: BETWEEN,
                 value: ["18", "60", "0"],
+                valueArraySize: 2,
             }, true);
 
             const expOut = { out: 0, value: ["18", "60", "0"] }
@@ -1050,9 +1123,125 @@ describe("Test query", function () {
                 in: "80",
                 operator: BETWEEN,
                 value: ["18", "60", "0"],
+                valueArraySize: 2,
             }, true);
 
             const expOut = { out: 0, value: ["18", "60", "0"] }
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+    });
+
+    describe("#NOT Between", function () {
+        it("#NOT Between - 0 [0, 10] (false)", async () => {
+            const w = await circuit.calculateWitness({
+                in: "0",
+                operator: NOT_BETWEEN,
+                value: ["0", "10", "0"],
+                valueArraySize: 2,
+            }, true);
+
+            const expOut = { out: 0 };
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("#NOT Between - 0 [1, 10] (true)", async () => {
+            const w = await circuit.calculateWitness({
+                in: "0",
+                operator: NOT_BETWEEN,
+                value: ["1", "10", "0"],
+                valueArraySize: 2,
+            }, true);
+
+            const expOut = { out: 1 };
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("#NOT Between - 10 [1, 10] (false)", async () => {
+            const w = await circuit.calculateWitness({
+                in: "10",
+                operator: NOT_BETWEEN,
+                value: ["1", "10", "0"],
+                valueArraySize: 2,
+            }, true);
+
+            const expOut = { out: 0 };
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("#NOT Between - 11 [1, 10] (true)", async () => {
+            const w = await circuit.calculateWitness({
+                in: "11",
+                operator: NOT_BETWEEN,
+                value: ["1", "10", "0"],
+                valueArraySize: 2,
+            }, true);
+
+            const expOut = { out: 1 };
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("#NOT Between - 0 [0, 0] (false)", async () => {
+            const w = await circuit.calculateWitness({
+                in: "0",
+                operator: NOT_BETWEEN,
+                value: ["0", "0", "0"],
+                valueArraySize: 2,
+            }, true);
+
+            const expOut = { out: 0 };
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("#NOT Between - 1 [0, 0] (true)", async () => {
+            const w = await circuit.calculateWitness({
+                in: "1",
+                operator: NOT_BETWEEN,
+                value: ["0", "0", "0"],
+                valueArraySize: 2,
+            }, true);
+
+            const expOut = { out: 1 };
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("#NOT Between - 14 [18, 60] (true)", async () => {
+            const w = await circuit.calculateWitness({
+                in: "14",
+                operator: NOT_BETWEEN,
+                value: ["18", "60", "0"],
+                valueArraySize: 2,
+            }, true);
+
+            const expOut = { out: 1 };
+
+            await circuit.assertOut(w, expOut);
+            await circuit.checkConstraints(w);
+        });
+
+        it("#NOT Between - 80 [18, 60] (true)", async () => {
+            const w = await circuit.calculateWitness({
+                in: "80",
+                operator: NOT_BETWEEN,
+                value: ["18", "60", "0"],
+                valueArraySize: 2,
+            }, true);
+
+            const expOut = { out: 1 };
 
             await circuit.assertOut(w, expOut);
             await circuit.checkConstraints(w);
@@ -1067,6 +1256,7 @@ describe("Test query", function () {
                     in: "0",
                     operator: op.toString(),
                     value: ["0", "0", "0"],
+                    valueArraySize: 2,
                 }, true)
 
                 const expOut = { out: 0, value: ["0", "0", "0"] }
@@ -1083,6 +1273,8 @@ describe("Test query", function () {
                 in: "0",
                 operator: "32",
                 value: ["0", "0", "0"],
+                
+                valueArraySize: 2,
             }, true).catch((err) => {
                 error = err;
             });
