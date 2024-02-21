@@ -19,6 +19,7 @@ include "comparators.circom";
       7 - less than or equal
       8 - greater than or equal
       9 - between
+      10 - not between
     Modifier/computation operators:
       16 - selective disclosure (16 = 10000 binary)
 */
