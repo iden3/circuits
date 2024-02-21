@@ -24,7 +24,7 @@ template IN (valueArraySize){
         out <== isEq[valueArraySize];
 }
 
-// Same as IN but stops checking on stopIndx
+// Same as IN but stops checking on valueArraySize
 template InWithDynamicArraySize (maxValueArraySize){
         signal input in;
         signal input value[maxValueArraySize];
