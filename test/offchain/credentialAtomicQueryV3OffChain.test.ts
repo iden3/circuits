@@ -69,7 +69,7 @@ describe("Test credentialAtomicQueryV3OffChain.circom", function () {
     const failTestCase = [
         require(`${sigBasePath}/revoked_claim_with_revocation_check.json`),
         require(`${mtpBasePath}/revoked_claim_with_revocation_check.json`),
-    ]
+    ];
 
     failTestCase.forEach(({ desc, inputs, expOut }) => {
         it(`${desc}`, async function () {
@@ -78,6 +78,21 @@ describe("Test credentialAtomicQueryV3OffChain.circom", function () {
                 error = err;
             });
             expect(error.message).to.include("Error in template checkClaimNotRevoked");
+        })
+    });
+
+    const failInTestCase = [
+        require(`${sigBasePath}/in_operator_failed_0.json`),
+        require(`${mtpBasePath}/in_operator_failed_0.json`),
+    ];
+
+    failInTestCase.forEach(({ desc, inputs, expOut }) => {
+        it(`${desc}`, async function () {
+            let error;
+            await circuit.calculateWitness(inputs, true).catch((err) => {
+                error = err;
+            });
+            expect(error.message).to.include("Error in template ProcessQueryWithModifiers");
         })
     });
 });

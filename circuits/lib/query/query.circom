@@ -28,6 +28,7 @@ template Query (maxValueArraySize) {
     // signals
     signal input in;
     signal input value[maxValueArraySize];
+    signal input valueArraySize;
     signal input operator;
     signal output out;
 
@@ -46,8 +47,8 @@ template Query (maxValueArraySize) {
     // gte
     signal gte <== NOT()(lt); // gte === !lt
 
-    // in
-    signal inComp <== IN(maxValueArraySize)(in, value);
+    // in           w/o - 65668, IN - 65860(+192), InWithStopIndx - 66372 (+512)
+    signal inComp <== InWithStopIndx(maxValueArraySize)(in, value, valueArraySize);
 
     // between (value[0] <= in <= value[1])
     signal gt2 <== GreaterThan254()([in, value[1]]);

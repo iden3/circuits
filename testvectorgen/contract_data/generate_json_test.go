@@ -305,7 +305,7 @@ func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, second
 		authMTProof = primaryEntity.AuthMTPStrign(t)
 
 		authNonRevMTProof, nodeAuxNonRev = primaryEntity.ClaimRevMTP(t, primaryEntity.AuthClaim)
-		primaryEntityClaim := utils.DefaultUserClaim(t, primaryEntity.ID)
+		primaryEntityClaim := utils.DefaultUserClaim(t, primaryEntity.ID, nil)
 		primaryEntity.AddClaim(t, primaryEntityClaim)
 	}
 

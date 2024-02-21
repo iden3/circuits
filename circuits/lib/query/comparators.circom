@@ -24,6 +24,28 @@ template IN (valueArraySize){
         out <== isEq[valueArraySize];
 }
 
+// Same as IN but stops checking on stopIndx
+template InWithStopIndx (valueArraySize){
+        signal input in;
+        signal input value[valueArraySize];
+        signal input stopIndx;
+        signal output out;
+
+        component eq[valueArraySize];
+        signal isEq[valueArraySize+1];
+        signal lt[valueArraySize];
+        isEq[0] <== 0;
+        for (var i=0; i<valueArraySize; i++) {
+            lt[i] <== LessThan(6)([i, stopIndx]);
+            eq[i] = IsEqual();
+            eq[i].in[0] <== in;
+            eq[i].in[1] <== value[i];
+            isEq[i+1] <== AND()(lt[i], OR()(isEq[i], eq[i].out));
+        }
+
+        out <== isEq[valueArraySize];
+}
+
 // As LessThan but for all possible numbers from field (not only 252-bit-max like LessThan)
 template LessThan254() {
     signal input in[2];

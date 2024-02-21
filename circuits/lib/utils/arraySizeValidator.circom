@@ -33,7 +33,7 @@ template ArraySizeValidator (maxValueArraySize) {
     signal sizeEqZero <== IsEqual()([valueArraySize, 0]);
     signal sizeEqOne <== IsEqual()([valueArraySize, 1]);
     signal sizeEqTwo <== IsEqual()([valueArraySize, 2]);
-    signal sizeLessOrEqMax <== LessThan254()([valueArraySize, maxValueArraySize + 1]);
+    signal sizeLessOrEqMax <== LessThan(7)([valueArraySize, maxValueArraySize + 1]);
 
     signal sizeNotEqZero <== NOT()(sizeEqZero);
     signal moreThanZeroLessOrEqMax <== AND()(sizeNotEqZero, sizeLessOrEqMax);

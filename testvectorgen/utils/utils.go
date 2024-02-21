@@ -61,8 +61,12 @@ func DefaultJSONUserClaim(t testing.TB, subject core.ID) (*merklize.Merklizer, *
 	return mz, claim
 }
 
-func DefaultUserClaim(t testing.TB, subject core.ID) *core.Claim {
-	dataSlotA, err := core.NewElemBytesFromInt(big.NewInt(10))
+func DefaultUserClaim(t testing.TB, subject core.ID, subjValue *big.Int) *core.Claim {
+	value := big.NewInt(10)
+	if subjValue != nil {
+		value = subjValue
+	}
+	dataSlotA, err := core.NewElemBytesFromInt(value)
 	if err != nil {
 		t.Fatalf("failed get NewElemBytesFromInt %v", err)
 	}
