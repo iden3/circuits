@@ -74,6 +74,7 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     signal querySatisfied <== Query(maxValueArraySize)(
         in <== fieldValue,
         value <== value,
+        valueArraySize <== valueArraySize,
         operator <== operator
     );
 

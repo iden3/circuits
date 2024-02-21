@@ -24,6 +24,30 @@ template IN (valueArraySize){
         out <== isEq[valueArraySize];
 }
 
+// Same as IN but stops checking on valueArraySize
+template InWithDynamicArraySize (maxValueArraySize){
+        signal input in;
+        signal input value[maxValueArraySize];
+        signal input valueArraySize;
+        signal output out;
+
+        assert(maxValueArraySize < 256);
+
+        component eq[maxValueArraySize];
+        signal isEq[maxValueArraySize+1];
+        signal lt[maxValueArraySize];
+        isEq[0] <== 0;
+        for (var i=0; i<maxValueArraySize; i++) {
+            lt[i] <== LessThan(8)([i, valueArraySize]);
+            eq[i] = IsEqual();
+            eq[i].in[0] <== in;
+            eq[i].in[1] <== value[i];
+            isEq[i+1] <== OR()(isEq[i], AND()(eq[i].out, lt[i]));
+        }
+
+        out <== isEq[maxValueArraySize];
+}
+
 // As LessThan but for all possible numbers from field (not only 252-bit-max like LessThan)
 template LessThan254() {
     signal input in[2];

@@ -33,12 +33,14 @@ template ArraySizeValidator (maxValueArraySize) {
     signal sizeEqZero <== IsEqual()([valueArraySize, 0]);
     signal sizeEqOne <== IsEqual()([valueArraySize, 1]);
     signal sizeEqTwo <== IsEqual()([valueArraySize, 2]);
-    signal sizeLessOrEqMax <== LessThan254()([valueArraySize, maxValueArraySize + 1]);
+    signal sizeLessOrEqMax <== LessThan(8)([valueArraySize, maxValueArraySize + 1]);
 
     signal sizeNotEqZero <== NOT()(sizeEqZero);
     signal moreThanZeroLessOrEqMax <== AND()(sizeNotEqZero, sizeLessOrEqMax);
 
     signal opBits[5] <== Num2Bits(5)(operator); // values 0-15 are query operators, 16-31 - modifiers/computations
+
+    assert(maxValueArraySize < 256);
 
     // query operator mux
     component mux = Mux4();
@@ -58,7 +60,7 @@ template ArraySizeValidator (maxValueArraySize) {
     mux.c[7] <== sizeEqOne; // lte
     mux.c[8] <== sizeEqOne; // gte
     mux.c[9] <== sizeEqTwo; // between
-    mux.c[10] <== sizeEqZero; // not used
+    mux.c[10] <== sizeEqTwo; // not between
     mux.c[11] <== sizeEqZero; // not used
     mux.c[12] <== sizeEqZero; // not used
     mux.c[13] <== sizeEqZero; // not used
