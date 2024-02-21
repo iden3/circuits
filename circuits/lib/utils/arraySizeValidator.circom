@@ -18,6 +18,7 @@ include "../query/comparators.circom";
       7 - less than or equal - 1 element 
       8 - greater than or equal - 1 element
       9 - between - 2 elements
+      10 - not between - 2 elements
     Modifier/computation operators:
       16 - selective disclosure (16 = 10000 binary) - 0 elements
       17-31 - 0 elements
