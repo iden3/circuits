@@ -4,8 +4,9 @@ include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "query.circom";
 include "modifiers.circom";
 include "../utils/claimUtils.circom";
+include "../utils/arraySizeValidator.circom";
 
-template ProcessQueryWithModifiers(claimLevels, valueArraySize){
+template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     signal input enabled; 
     signal input claimPathNotExists; // 0 for inclusion, 1 for non-inclusion
     signal input claimPathMtp[claimLevels];
@@ -16,7 +17,8 @@ template ProcessQueryWithModifiers(claimLevels, valueArraySize){
     signal input claimPathValue; // value in this path in merklized json-ld document
     signal input slotIndex;
     signal input operator;
-    signal input value[valueArraySize];
+    signal input value[maxValueArraySize];
+    signal input valueArraySize;
 
     signal input issuerClaim[8];
     signal input merklized;
@@ -55,11 +57,24 @@ template ProcessQueryWithModifiers(claimLevels, valueArraySize){
     // Query Operator Processing
     /////////////////////////////////////////////////////////////////
 
+    // verify value array length
+    // 802 constraints (ArraySizeValidator+ForceEqualIfEnabled)
+    signal arrSizeSatisfied <== ArraySizeValidator(maxValueArraySize)(
+        valueArraySize <== valueArraySize,
+        operator <== operator
+    );
+
+    ForceEqualIfEnabled()(
+        enabled,
+        [arrSizeSatisfied, 1]
+    );
+
     // verify query
     // 1756 constraints (Query+LessThan+ForceEqualIfEnabled)
-    signal querySatisfied <== Query(valueArraySize)(
+    signal querySatisfied <== Query(maxValueArraySize)(
         in <== fieldValue,
         value <== value,
+        valueArraySize <== valueArraySize,
         operator <== operator
     );
 

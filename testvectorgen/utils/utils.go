@@ -7,6 +7,8 @@ import (
 	"log"
 	"math/big"
 	"os"
+	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -59,8 +61,12 @@ func DefaultJSONUserClaim(t testing.TB, subject core.ID) (*merklize.Merklizer, *
 	return mz, claim
 }
 
-func DefaultUserClaim(t testing.TB, subject core.ID) *core.Claim {
-	dataSlotA, err := core.NewElemBytesFromInt(big.NewInt(10))
+func DefaultUserClaim(t testing.TB, subject core.ID, subjValue *big.Int) *core.Claim {
+	value := big.NewInt(10)
+	if subjValue != nil {
+		value = subjValue
+	}
+	dataSlotA, err := core.NewElemBytesFromInt(value)
 	if err != nil {
 		t.Fatalf("failed get NewElemBytesFromInt %v", err)
 	}
@@ -185,17 +191,25 @@ func AuthClaimFromPubKey(X, Y *big.Int) (*core.Claim, error) {
 
 func SaveTestVector(t *testing.T, fileName string, data string) {
 	t.Helper()
-	path := "testdata/" + fileName + ".json"
+	dir := "testdata"
 
-	f, err := os.Create(path)
-	defer f.Close()
+	fullFilePath := path.Join(dir, fileName+".json")
+	directoryPath := filepath.Dir(fullFilePath)
+
+	err := os.MkdirAll(directoryPath, 0777)
 	if err != nil {
-		t.Fatalf("Error writing to file %s: %s", path, err)
+		t.Fatal("Error creatind directory testdata", err)
 	}
 
-	_, err = f.WriteString(data)
+	file, err := os.Create(fullFilePath)
+
 	if err != nil {
-		t.Fatalf("Error writing to file %s: %s", path, err)
+		t.Fatalf("Error writing to file %s: %s", fileName, err)
+	}
+
+	_, err = file.WriteString(data)
+	if err != nil {
+		t.Fatalf("Error writing to file %s: %s", fileName, err)
 	}
 }
 
@@ -315,4 +329,31 @@ func CalculateNullify(genesisID, claimSubjectProfileNonce, claimSchema, verifier
 	}
 
 	return nullifier.String(), nil
+}
+
+func GetValueArraySizeForOperator(operator int) int {
+	result := 0
+	oneArrLengthOps := []int{1, 2, 3, 6, 7, 8}
+	twoArrLengthOps := []int{9, 10}
+	maxArrLengthOps := []int{4, 5}
+
+	if contains(oneArrLengthOps, operator) {
+		return 1
+	}
+	if contains(twoArrLengthOps, operator) {
+		return 2
+	}
+	if contains(maxArrLengthOps, operator) {
+		return 64
+	}
+	return result
+}
+
+func contains(s []int, e int) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

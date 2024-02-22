@@ -12,7 +12,7 @@ include "../lib/utils/nullify.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/utils/safeOne.circom";
 
-template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySize) {
+template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArraySize) {
     // common outputs for Sig and MTP
     signal output merklized;
     signal output userID;
@@ -50,8 +50,8 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     signal input claimPathValue; // value in this path in merklized json-ld document
     signal input slotIndex;
     signal input operator;
-    signal input value[valueArraySize];
-
+    signal input value[maxValueArraySize];
+    signal input valueArraySize;
     signal input issuerClaim[8];
 
     // MTP specific
@@ -210,8 +210,9 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     merklized <== merklize.flag;
 
     // check path/in node exists in merkletree specified by jsonldRoot
+    signal operatorNotNoop <== NOT()(IsZero()(operator));
     SMTVerifier(claimLevels)(
-        enabled <== merklize.flag,  // if merklize flag 0 skip MTP verification
+        enabled <== AND()(merklize.flag, operatorNotNoop),  // if merklize flag 0 or NOOP operator skip MTP verification
         fnc <== claimPathNotExists, // inclusion
         root <== merklize.out,
         siblings <== claimPathMtp,
@@ -237,7 +238,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
     // Process Query with Modifiers
     /////////////////////////////////////////////////////////////////
     // output value only if modifier operation was selected
-    operatorOutput <== ProcessQueryWithModifiers(claimLevels, valueArraySize)(
+    operatorOutput <== ProcessQueryWithModifiers(claimLevels, maxValueArraySize)(
         one,
         claimPathNotExists,
         claimPathMtp,
@@ -249,6 +250,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, valueArraySi
         slotIndex,
         operator,
         value,
+        valueArraySize,
         issuerClaim,
         merklized,
         merklize.out
