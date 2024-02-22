@@ -31,7 +31,7 @@ template InWithDynamicArraySize (maxValueArraySize){
         signal input valueArraySize;
         signal output out;
 
-        assert(maxValueArraySize < 256);
+        assert(maxValueArraySize <= 256);
 
         component eq[maxValueArraySize];
         signal isEq[maxValueArraySize+1];

@@ -41,7 +41,7 @@ template ArraySizeValidator (maxValueArraySize) {
 
     signal opBits[5] <== Num2Bits(5)(operator); // values 0-15 are query operators, 16-31 - modifiers/computations
 
-    assert(maxValueArraySize < 256);
+    assert(maxValueArraySize <= 256);
 
     // query operator mux
     component mux = Mux4();
