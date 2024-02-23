@@ -8,7 +8,7 @@ include "../lib/utils/safeOne.circom";
 include "../lib/utils/spongeHash.circom";
 
 // This circuit processes multiple query requests at once for a given claim using linked proof
-template LinkedMultiQuery(N, claimLevels, valueArraySize) {
+template LinkedMultiQuery(N, claimLevels, maxValueArraySize) {
 
     // linked proof signals
     signal input linkNonce;
@@ -26,7 +26,9 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
     signal input claimPathValue[N]; // value in this path in merklized json-ld document
     signal input slotIndex[N];
     signal input operator[N];
-    signal input value[N][valueArraySize];
+    signal input value[N][maxValueArraySize];
+    signal input valueArraySize[N];
+
 
     // Outputs
     signal output linkID;
@@ -71,7 +73,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
     for (var i=0; i<N; i++) {
 
         // output value only if modifier operation was selected
-        operatorOutput[i] <== ProcessQueryWithModifiers(claimLevels, valueArraySize)(
+        operatorOutput[i] <== ProcessQueryWithModifiers(claimLevels, maxValueArraySize)(
             enabled[i],
             claimPathNotExists[i],
             claimPathMtp[i],
@@ -83,6 +85,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
             slotIndex[i],
             operator[i],
             value[i],
+            valueArraySize[i],
             issuerClaim,
             merklized,
             merklize.out
@@ -92,7 +95,7 @@ template LinkedMultiQuery(N, claimLevels, valueArraySize) {
         // Calculate query hash
         /////////////////////////////////////////////////////////////////
         // 4950 constraints (SpongeHash+Poseidon)
-        valueHash[i] <== SpongeHash(valueArraySize, 6)(value[i]); // 6 - max size of poseidon hash available on-chain
+        valueHash[i] <== SpongeHash(maxValueArraySize, 6)(value[i]); // 6 - max size of poseidon hash available on-chain
         queryHash[i] <== Poseidon(6)([
             claimSchema,
             slotIndex[i],

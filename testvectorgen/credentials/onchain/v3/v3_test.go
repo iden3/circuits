@@ -569,7 +569,6 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		pathKey,
 		big.NewInt(0),
 		valuesHash,
-		big.NewInt(int64(valueArraySize)),
 	})
 	require.NoError(t, err)
 
@@ -805,7 +804,6 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		pathKey,
 		big.NewInt(1),
 		valuesHash,
-		big.NewInt(int64(valueArraySize)),
 	})
 	require.NoError(t, err)
 
