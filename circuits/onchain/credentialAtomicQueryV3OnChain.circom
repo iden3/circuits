@@ -268,8 +268,8 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
         claimPathKey,
         valueArraySize,
         merklized,
-        verifierID,
         isRevocationChecked,
+        verifierID,
         nullifierSessionID
     );
 

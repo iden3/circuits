@@ -9,8 +9,8 @@ template QueryHash(maxValueArraySize) {
     signal input claimPathKey;
     signal input valueArraySize;
     signal input merklized;
-    signal input verifierID;
     signal input isRevocationChecked;
+    signal input verifierID;
     signal input nullifierSessionID;
 
     signal output out;
