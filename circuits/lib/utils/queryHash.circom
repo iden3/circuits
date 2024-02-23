@@ -7,7 +7,6 @@ template QueryHash(maxValueArraySize) {
     signal input slotIndex;
     signal input operator;
     signal input claimPathKey;
-    signal input claimPathNotExists;
     signal input valueArraySize;
     signal input merklized;
     signal input verifierID;
@@ -15,6 +14,8 @@ template QueryHash(maxValueArraySize) {
     signal input nullifierSessionID;
 
     signal output out;
+
+    signal claimPathNotExists <== AND()(IsZero()(value[0]), IsEqual()([operator, 11]));
 
     /////////////////////////////////////////////////////////////////
     // Calculate query hash
@@ -34,8 +35,8 @@ template QueryHash(maxValueArraySize) {
         firstPartQueryHash,
         valueArraySize,
         merklized,
-        verifierID,
         isRevocationChecked,
+        verifierID,
         nullifierSessionID
     ]);
 }

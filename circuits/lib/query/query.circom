@@ -21,7 +21,6 @@ include "comparators.circom";
       9 - between
       10 - not between
       11 - exist
-      12 - not exist
     Modifier/computation operators:
       16 - selective disclosure (16 = 10000 binary)
 */
@@ -78,8 +77,8 @@ template Query (maxValueArraySize) {
     queryOpSatisfied.c[8] <== gte; // gte === !lt
     queryOpSatisfied.c[9] <== between; // between
     queryOpSatisfied.c[10] <== NOT()(between); // not between
-    queryOpSatisfied.c[11] <== 1; // exist; skip execution
-    queryOpSatisfied.c[12] <== 1; // not exist; skip execution
+    queryOpSatisfied.c[11] <== 1; // exists;
+    queryOpSatisfied.c[12] <== 0; // not used
     queryOpSatisfied.c[13] <== 0; // not used
     queryOpSatisfied.c[14] <== 0; // not used
     queryOpSatisfied.c[15] <== 0; // not used

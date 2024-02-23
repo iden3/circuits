@@ -15,6 +15,7 @@ const (
 	GTE
 	BETWEEN
 	NOT_BETWEEN
+	EXISTS
 	SD = 16
 )
 

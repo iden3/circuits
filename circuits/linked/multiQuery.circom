@@ -63,7 +63,6 @@ template LinkedMultiQuery(N, claimLevels, maxValueArraySize) {
 
 
     signal operatorNotNoop[N];
-    signal claimPathNotExists[N];
     /////////////////////////////////////////////////////////////////
     // Query Processing Loop
     /////////////////////////////////////////////////////////////////
@@ -92,14 +91,12 @@ template LinkedMultiQuery(N, claimLevels, maxValueArraySize) {
         // Calculate query hash
         /////////////////////////////////////////////////////////////////
         // 4950 constraints (SpongeHash+Poseidon)
-        claimPathNotExists[i] <== IsEqual()([operator[i], 12]); // for non-exist operator 1, else 0
         circuitQueryHash[i] <== QueryHash(maxValueArraySize)(
             value[i],
             claimSchema,
             slotIndex[i],
             operator[i],
             claimPathKey[i],
-            claimPathNotExists[i],
             valueArraySize[i],
             merklized,
             0,

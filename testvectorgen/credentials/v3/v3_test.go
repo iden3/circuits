@@ -60,13 +60,12 @@ type Inputs struct {
 
 	// Query
 	// JSON path
-	ClaimPathNotExists string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
-	ClaimPathMtp       []string `json:"claimPathMtp"`
-	ClaimPathMtpNoAux  string   `json:"claimPathMtpNoAux"` // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-	ClaimPathMtpAuxHi  string   `json:"claimPathMtpAuxHi"` // 0 for inclusion proof
-	ClaimPathMtpAuxHv  string   `json:"claimPathMtpAuxHv"` // 0 for inclusion proof
-	ClaimPathKey       string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
-	ClaimPathValue     string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
+	ClaimPathMtp      []string `json:"claimPathMtp"`
+	ClaimPathMtpNoAux string   `json:"claimPathMtpNoAux"` // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+	ClaimPathMtpAuxHi string   `json:"claimPathMtpAuxHi"` // 0 for inclusion proof
+	ClaimPathMtpAuxHv string   `json:"claimPathMtpAuxHv"` // 0 for inclusion proof
+	ClaimPathKey      string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
+	ClaimPathValue    string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
 
 	Operator       int      `json:"operator"`
 	SlotIndex      int      `json:"slotIndex"`
@@ -107,7 +106,6 @@ type Outputs struct {
 	SlotIndex              string   `json:"slotIndex"`
 	Operator               int      `json:"operator"`
 	ClaimPathKey           string   `json:"claimPathKey"`
-	ClaimPathNotExists     string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
 	Value                  []string `json:"value"`
 	ValueArraySize         int      `json:"valueArraySize"`
 	Timestamp              string   `json:"timestamp"`
@@ -483,7 +481,6 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
 		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
 		ClaimSchema:                     "180410020913331409885634153623124536270",
-		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
 		ClaimPathMtp:                    claimPathMtp,
 		ClaimPathMtpNoAux:               claimPathMtpNoAux,
 		ClaimPathMtpAuxHi:               claimPathMtpAuxHi,
@@ -565,7 +562,6 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		ClaimSchema:            "180410020913331409885634153623124536270",
 		SlotIndex:              strconv.Itoa(slotIndex),
 		ClaimPathKey:           claimPathKey,
-		ClaimPathNotExists:     "0", // 0 for inclusion, 1 for non-inclusion
 		Operator:               operator,
 		Value:                  valueInput,
 		ValueArraySize:         valueArrSize,
@@ -670,13 +666,12 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		IssuerAuthState:                 issuer.State(t).String(),
 		ClaimSchema:                     "180410020913331409885634153623124536270",
 
-		ClaimPathNotExists: "1", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:       claimJSONLDProof,
-		ClaimPathMtpNoAux:  claimJSONLDProofAux.NoAux, // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-		ClaimPathMtpAuxHi:  claimJSONLDProofAux.Key,   // 0 for inclusion proof
-		ClaimPathMtpAuxHv:  claimJSONLDProofAux.Value, // 0 for inclusion proof
-		ClaimPathKey:       pathKey.String(),          // hash of path in merklized json-ld document
-		ClaimPathValue:     "0",                       // value in this path in merklized json-ld document
+		ClaimPathMtp:      claimJSONLDProof,
+		ClaimPathMtpNoAux: claimJSONLDProofAux.NoAux, // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi: claimJSONLDProofAux.Key,   // 0 for inclusion proof
+		ClaimPathMtpAuxHv: claimJSONLDProofAux.Value, // 0 for inclusion proof
+		ClaimPathKey:      pathKey.String(),          // hash of path in merklized json-ld document
+		ClaimPathValue:    "0",                       // value in this path in merklized json-ld document
 		// value in this path in merklized json-ld document
 
 		Operator:            utils.NOOP,
@@ -712,7 +707,6 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		SlotIndex:              "0",
 		Operator:               utils.NOOP,
 		ClaimPathKey:           pathKey.String(),
-		ClaimPathNotExists:     "1",
 		Value:                  utils.PrepareStrArray([]string{}, 64),
 		ValueArraySize:         0,
 		Timestamp:              timestamp,

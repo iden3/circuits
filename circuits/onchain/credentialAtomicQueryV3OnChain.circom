@@ -259,7 +259,6 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
     /////////////////////////////////////////////////////////////////
     // Verify query hash matches
     /////////////////////////////////////////////////////////////////
-    signal claimPathNotExists <== IsEqual()([operator, 12]); // for non-exist operator 1, else 0
 
     circuitQueryHash <== QueryHash(maxValueArraySize)(
         value,

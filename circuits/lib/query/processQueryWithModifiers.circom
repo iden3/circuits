@@ -29,7 +29,7 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     signal operatorNotNoop <== NOT()(IsZero()(operator));
     signal merklizedAndEnabled <== AND()(enabled, merklized);
 
-    signal claimPathNotExists <== IsEqual()([operator, 12]); // for non-exist operator 1, else 0
+    signal claimPathNotExists <== AND()(IsZero()(value[0]), IsEqual()([operator, 11])); // for exist and value 0 operator 1, else 0
 
     // check path/in node exists in merkletree specified by jsonldRoot
     SMTVerifier(claimLevels)(

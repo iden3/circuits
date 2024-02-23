@@ -45,7 +45,7 @@ describe("Test credentialAtomicQueryV3OnChain.circom", function () {
         require(`${sigBasePath}/auth_check_disabled.json`),
         require(`${sigBasePath}/noop_operator.json`),
 
-        // mtp
+        // // mtp
         require(`${mtpBasePath}/claimIssuedOnProfileID.json`),
         require(`${mtpBasePath}/claimIssuedOnProfileID2.json`),
         require(`${mtpBasePath}/claimIssuedOnUserID.json`),
