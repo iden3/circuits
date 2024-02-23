@@ -9,6 +9,7 @@ include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/utils/spongeHash.circom";
 include "../offchain/credentialAtomicQueryV3OffChain.circom";
+include "../lib/utils/queryHash.circom";
 
 /**
 credentialAtomicQueryV3OnChain.circom - query claim value and verify claim issuer signature or mtp:
@@ -31,13 +32,6 @@ idOwnershipLevels - Merkle tree depth level for personal claims
 onChainLevels - Merkle tree depth level for Auth claim on-chain
 */
 template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArraySize, idOwnershipLevels, onChainLevels) {
-    // flag indicates if merklized flag set in issuer claim (if set MTP is used to verify that
-    // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed
-    // on root stored in the index or value slot
-    // if it is not set verification is performed on according to the slotIndex. Value selected from the
-    // provided slot. For example if slotIndex is `1` value gets from `i_1` slot. If `4` from `v_1`.
-    signal output merklized;
-
     // userID output signal will be assigned with ProfileID SelectProfile(UserGenesisID, nonce)
     // unless nonce == 0, in which case userID will be assigned with userGenesisID
     signal output userID;
@@ -113,7 +107,6 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
     /** Query */
     signal input claimSchema;
 
-    signal input claimPathNotExists; // 0 for inclusion, 1 for non-inclusion
     signal input claimPathMtp[claimLevels];
     signal input claimPathMtpNoAux; // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
     signal input claimPathMtpAuxHi; // 0 for inclusion proof
@@ -168,16 +161,23 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
     signal output operatorOutput;
 
     // Enabled/disable checkAuthV2 verification
-    signal input authEnabled;
+    signal input isBJJAuthEnabled;
+
+    // flag indicates if merklized flag set in issuer claim (if set MTP is used to verify that
+    // claimPathValue and claimPathKey are stored in the merkle tree) and verification is performed
+    // on root stored in the index or value slot
+    // if it is not set verification is performed on according to the slotIndex. Value selected from the
+    // provided slot. For example if slotIndex is `1` value gets from `i_1` slot. If `4` from `v_1`.
+    signal merklized;
 
     /////////////////////////////////////////////////////////////////
     // Auth check
     /////////////////////////////////////////////////////////////////
 
-    ForceEqualIfEnabled()(NOT()(authEnabled), [profileNonce, 0]);
+    ForceEqualIfEnabled()(NOT()(isBJJAuthEnabled), [profileNonce, 0]);
 
     checkAuthV2(idOwnershipLevels, onChainLevels)(
-        authEnabled, // enabled
+        isBJJAuthEnabled, // enabled
         userGenesisID,
         userState, // user state
         userClaimsTreeRoot,
@@ -222,7 +222,6 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
         issuerClaimNonRevState <== issuerClaimNonRevState,
         timestamp <== timestamp,
         claimSchema <== claimSchema,
-        claimPathNotExists <== claimPathNotExists,
         claimPathMtp <== claimPathMtp,
         claimPathMtpNoAux <== claimPathMtpNoAux,
         claimPathMtpAuxHi <== claimPathMtpAuxHi,
@@ -260,14 +259,20 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
     /////////////////////////////////////////////////////////////////
     // Verify query hash matches
     /////////////////////////////////////////////////////////////////
-    signal valueHash <== SpongeHash(maxValueArraySize, 6)(value); // 6 - max size of poseidon hash available on-chain
+    signal claimPathNotExists <== IsEqual()([operator, 12]); // for non-exist operator 1, else 0
 
-    circuitQueryHash <== Poseidon(6)([
+    circuitQueryHash <== QueryHash(maxValueArraySize)(
+        value,
         claimSchema,
         slotIndex,
         operator,
         claimPathKey,
         claimPathNotExists,
-        valueHash
-    ]);
+        valueArraySize,
+        merklized,
+        verifierID,
+        isRevocationChecked,
+        nullifierSessionID
+    );
+
 }

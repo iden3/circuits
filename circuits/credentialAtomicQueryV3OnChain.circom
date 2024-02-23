@@ -14,11 +14,8 @@ component main{public [requestID,
                        issuerID,
                        issuerClaimNonRevState,
                        timestamp,
-                       isRevocationChecked,
                        challenge,
                        gistRoot,
                        proofType,
-                       verifierID,
-                       nullifierSessionID,
-                       authEnabled
+                       isBJJAuthEnabled
                        ]} = credentialAtomicQueryV3OnChain(40, 32, 64, 40, 64);
