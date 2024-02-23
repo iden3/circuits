@@ -769,11 +769,11 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		ClaimPathValue:    "0",                       // value in this path in merklized json-ld document
 		// value in this path in merklized json-ld document
 
-		Operator:            utils.NOT_EXISTS,
+		Operator:            utils.EXISTS,
 		SlotIndex:           0,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
-		Value:               utils.PrepareStrArray([]string{}, 64),
+		Value:               utils.PrepareStrArray([]string{"0"}, 64),
 		ValueArraySize:      valueArraySize,
 
 		// additional mtp inputs

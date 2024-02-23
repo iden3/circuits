@@ -4,7 +4,7 @@ import {describe} from "mocha";
 const path = require("path");
 const wasmTester = require("circom_tester").wasm;
 
-describe("Test credentialAtomicQueryV3OnChain.circom", function () {
+describe.only("Test credentialAtomicQueryV3OnChain.circom", function () {
 
     this.timeout(600000);
 

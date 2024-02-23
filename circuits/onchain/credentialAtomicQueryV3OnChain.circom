@@ -266,7 +266,6 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
         slotIndex,
         operator,
         claimPathKey,
-        claimPathNotExists,
         valueArraySize,
         merklized,
         verifierID,
