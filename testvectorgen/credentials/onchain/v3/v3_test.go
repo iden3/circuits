@@ -710,7 +710,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
-	valueArraySize := utils.GetValueArraySizeForOperator(utils.NOOP)
+	valueArraySize := utils.GetValueArraySizeForOperator(utils.EXISTS)
 
 	inputs := Inputs{
 		RequestID:                       requestID.String(),

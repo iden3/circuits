@@ -56,10 +56,10 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     );
 
     // For non-merklized credentials exists / non-exist operators don't work
-    signal operatorNotEqExistOrNotExist <== NOT()(OR()(IsEqual()([operator, 11]), IsEqual()([operator, 12])));
+    signal operatorNotExists <== NOT()(IsEqual()([operator, 11]));
     ForceEqualIfEnabled()(
         AND()(enabled,  NOT()(merklized)),
-        [1, operatorNotEqExistOrNotExist]
+        [1, operatorNotExists]
     );
 
     /////////////////////////////////////////////////////////////////
