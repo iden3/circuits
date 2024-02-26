@@ -41,7 +41,6 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
     /** Query */
     signal input claimSchema;
 
-    signal input claimPathNotExists; // 0 for inclusion, 1 for non-inclusion
     signal input claimPathMtp[claimLevels];
     signal input claimPathMtpNoAux; // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
     signal input claimPathMtpAuxHi; // 0 for inclusion proof
@@ -209,38 +208,12 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
 
     merklized <== merklize.flag;
 
-    // check path/in node exists in merkletree specified by jsonldRoot
-    signal operatorNotNoop <== NOT()(IsZero()(operator));
-    SMTVerifier(claimLevels)(
-        enabled <== AND()(merklize.flag, operatorNotNoop),  // if merklize flag 0 or NOOP operator skip MTP verification
-        fnc <== claimPathNotExists, // inclusion
-        root <== merklize.out,
-        siblings <== claimPathMtp,
-        oldKey <== claimPathMtpAuxHi,
-        oldValue <== claimPathMtpAuxHv,
-        isOld0 <== claimPathMtpNoAux,
-        key <== claimPathKey,
-        value <== claimPathValue
-    ); // 9585 constraints
-
-    // select value from claim by slot index (0-7)
-    signal slotValue <== getValueByIndex()(issuerClaim, slotIndex);
-
-    // select value for query verification,
-    // if claim is merklized merklizeFlag = `1|2`, take claimPathValue
-    // if not merklized merklizeFlag = `0`, take value from selected slot
-    signal fieldValue <== Mux1()(
-        [slotValue, claimPathValue],
-        merklize.flag
-    );
-
     /////////////////////////////////////////////////////////////////
     // Process Query with Modifiers
     /////////////////////////////////////////////////////////////////
     // output value only if modifier operation was selected
     operatorOutput <== ProcessQueryWithModifiers(claimLevels, maxValueArraySize)(
         one,
-        claimPathNotExists,
         claimPathMtp,
         claimPathMtpNoAux,
         claimPathMtpAuxHi,

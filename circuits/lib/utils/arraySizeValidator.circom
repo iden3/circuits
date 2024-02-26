@@ -19,6 +19,7 @@ include "../query/comparators.circom";
       8 - greater than or equal - 1 element
       9 - between - 2 elements
       10 - not between - 2 elements
+      11 - exists - 1 elements (true/false)
     Modifier/computation operators:
       16 - selective disclosure (16 = 10000 binary) - 0 elements
       17-31 - 0 elements
@@ -62,7 +63,7 @@ template ArraySizeValidator (maxValueArraySize) {
     mux.c[8] <== sizeEqOne; // gte
     mux.c[9] <== sizeEqTwo; // between
     mux.c[10] <== sizeEqTwo; // not between
-    mux.c[11] <== sizeEqZero; // not used
+    mux.c[11] <== sizeEqOne; // exist
     mux.c[12] <== sizeEqZero; // not used
     mux.c[13] <== sizeEqZero; // not used
     mux.c[14] <== sizeEqZero; // not used

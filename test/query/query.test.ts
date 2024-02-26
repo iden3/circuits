@@ -1250,7 +1250,7 @@ describe("Test query", function () {
     });
 
     describe("#Invalid Query Ops", function () {
-        for (let op = 10; op < 32; op++) {
+        for (let op = 12; op < 32; op++) {
             it("#Invalid Query Op " + op + " (false)", async () => {
                 const w = await circuit.calculateWitness({
                     in: "0",

@@ -8,7 +8,6 @@ include "../utils/arraySizeValidator.circom";
 
 template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     signal input enabled; 
-    signal input claimPathNotExists; // 0 for inclusion, 1 for non-inclusion
     signal input claimPathMtp[claimLevels];
     signal input claimPathMtpNoAux; // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
     signal input claimPathMtpAuxHi; // 0 for inclusion proof
@@ -27,11 +26,14 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     // Modifier/Computation Operator output ($sd)
     signal output operatorOutput;
 
-    signal smtEnabled <== AND()(enabled, merklized);
+    signal operatorNotNoop <== NOT()(IsZero()(operator));
+    signal merklizedAndEnabled <== AND()(enabled, merklized);
+
+    signal claimPathNotExists <== AND()(IsZero()(value[0]), IsEqual()([operator, 11])); // for exist and value 0 operator 1, else 0
 
     // check path/in node exists in merkletree specified by jsonldRoot
     SMTVerifier(claimLevels)(
-        enabled <== smtEnabled,  // if merklize flag 0 or enabled 0 skip MTP verification
+        enabled <== AND()(merklizedAndEnabled, operatorNotNoop),  // if merklize flag 0 or enabled 0 or NOOP operation skip MTP verification
         fnc <== claimPathNotExists, // inclusion
         root <== merklizedRoot,
         siblings <== claimPathMtp,
@@ -51,6 +53,13 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     signal fieldValue <== Mux1()(
         [slotValue, claimPathValue],
         merklized
+    );
+
+    // For non-merklized credentials exists / non-exist operators don't work
+    signal operatorNotExists <== NOT()(IsEqual()([operator, 11]));
+    ForceEqualIfEnabled()(
+        AND()(enabled,  NOT()(merklized)),
+        [1, operatorNotExists]
     );
 
     /////////////////////////////////////////////////////////////////

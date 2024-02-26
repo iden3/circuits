@@ -333,7 +333,7 @@ func CalculateNullify(genesisID, claimSubjectProfileNonce, claimSchema, verifier
 
 func GetValueArraySizeForOperator(operator int) int {
 	result := 0
-	oneArrLengthOps := []int{1, 2, 3, 6, 7, 8}
+	oneArrLengthOps := []int{1, 2, 3, 6, 7, 8, 11}
 	twoArrLengthOps := []int{9, 10}
 	maxArrLengthOps := []int{4, 5}
 
