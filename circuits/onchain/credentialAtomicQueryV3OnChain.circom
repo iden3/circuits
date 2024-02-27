@@ -175,7 +175,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
     // Auth check
     /////////////////////////////////////////////////////////////////
 
-    signal {binary} safeIsBJJAuthEnabled <== ForceBinary()(isBJJAuthEnabled);
+    signal {binary} safeIsBJJAuthEnabled <== AddBinaryTag()(isBJJAuthEnabled);
 
     ForceEqualIfEnabled()(NOT()(safeIsBJJAuthEnabled), [profileNonce, 0]);
 

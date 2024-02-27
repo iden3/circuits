@@ -98,8 +98,6 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
     // get safe one values to be used in ForceEqualIfEnabled
     signal {binary} one <== SafeOne()(userGenesisID);
 
-    signal safeUserGenesisID <== ForceMaxbit(248)(userGenesisID);
-
     /////////////////////////////////////////////////////////////////
     // Claim Verification (id, schema, expiration, issuance, revocation)
     /////////////////////////////////////////////////////////////////
@@ -112,7 +110,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
         one,
         issuerClaim,
         issuerClaimHeader.claimFlags,
-        safeUserGenesisID,
+        userGenesisID,
         claimSubjectProfileNonce
     ); // 1236 constraints
 
@@ -175,7 +173,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
         claimIssuanceIdenState <== issuerState
     ); // 11184 constraints
 
-    signal {binary} safeIsRevocationChecked <== ForceBinary()(isRevocationChecked);
+    signal {binary} safeIsRevocationChecked <== AddBinaryTag()(isRevocationChecked);
 
     // check claim is not revoked
     checkClaimNotRevoked(issuerLevels)(
@@ -236,7 +234,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
 
     // nullifier calculation
     nullifier <== Nullify()(
-        safeUserGenesisID,
+        userGenesisID,
         claimSubjectProfileNonce,
         claimSchema,
         verifierID,
@@ -246,7 +244,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
     /////////////////////////////////////////////////////////////////
     // ProfileID calculation
     /////////////////////////////////////////////////////////////////
-    userID <== SelectProfile()(safeUserGenesisID, profileNonce); // 1231 constraints
+    userID <== SelectProfile()(userGenesisID, profileNonce); // 1231 constraints
 
     /////////////////////////////////////////////////////////////////
     // Link ID calculation

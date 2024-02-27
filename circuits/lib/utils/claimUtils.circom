@@ -7,7 +7,6 @@ include "../../../node_modules/circomlib/circuits/mux3.circom";
 include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/mux2.circom";
 include "./idUtils.circom";
-include "./tags-managing.circom";
 
 // getClaimSubjectOtherIden checks that a claim Subject is OtherIden and outputs the identity within.
 template getClaimSubjectOtherIden() {
@@ -288,13 +287,13 @@ template verifyExpirationTime() {
     signal input claim[8];
     signal input timestamp;
 
-    signal safeTimestamp <== ForceMaxbit(64)(timestamp); // allow max 64 bit number for timestamp
+    _ <== Num2Bits(64)(timestamp); // allow max 64 bit number for timestamp
 
     signal claimExpiration <== getClaimExpiration()(claim);
 
     // timestamp < claimExpiration
     signal lt <== LessEqThan(64)([
-        safeTimestamp,
+        timestamp,
         claimExpiration]
     );
 
