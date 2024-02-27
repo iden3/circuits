@@ -1,7 +1,8 @@
 pragma circom 2.1.5;
 
-include "../../../node_modules/circomlib/circuits/poseidon.circom";
 include "../../../node_modules/circomlib/circuits/comparators.circom";
+include "../../../node_modules/circomlib/circuits/mux1.circom";
+include "../../../node_modules/circomlib/circuits/poseidon.circom";
 
 template LinkID() {
     signal input claimHash;

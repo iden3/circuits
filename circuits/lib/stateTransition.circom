@@ -38,7 +38,7 @@ template StateTransition(IdOwnershipLevels) {
     signal input newRootsTreeRoot;
 
     // get safe one values to be used in ForceEqualIfEnabled
-    signal one <== SafeOne()(userID);
+    signal {binary} one <== SafeOne()(userID);
 
     signal cutId <== cutId()(userID);
 

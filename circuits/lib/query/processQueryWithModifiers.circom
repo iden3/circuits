@@ -14,10 +14,10 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     signal input claimPathMtpAuxHv; // 0 for inclusion proof
     signal input claimPathKey; // hash of path in merklized json-ld document
     signal input claimPathValue; // value in this path in merklized json-ld document
-    signal input slotIndex;
+    signal input slotIndex; // slot index with value to check for non-merklized credentials
     signal input operator;
     signal input value[maxValueArraySize];
-    signal input valueArraySize;
+    signal input valueArraySize; // actual size of value array - we don't want zero filled arrays to cause false positives for 0 as input to IN/NIN operators
 
     signal input issuerClaim[8];
     signal input merklized;
@@ -26,15 +26,17 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     // Modifier/Computation Operator output ($sd)
     signal output operatorOutput;
 
-    signal operatorNotNoop <== NOT()(IsZero()(operator));
+    signal isOpNoop <== IsZero()(operator);
     signal merklizedAndEnabled <== AND()(enabled, merklized);
 
-    signal claimPathNotExists <== AND()(IsZero()(value[0]), IsEqual()([operator, 11])); // for exist and value 0 operator 1, else 0
+    // if operator == exists and value[0] == 0 ($exists == false), then claimPathNotExists = 1 (check non-inclusion),
+    // otherwise claimPathNotExists = 0 (check inclusion)
+    signal claimPathNotExists <== AND()(IsEqual()([operator, 11]), IsZero()(value[0]));
 
-    // check path/in node exists in merkletree specified by jsonldRoot
+    // check path/in node exists in merkle tree specified by jsonldRoot
     SMTVerifier(claimLevels)(
-        enabled <== AND()(merklizedAndEnabled, operatorNotNoop),  // if merklize flag 0 or enabled 0 or NOOP operation skip MTP verification
-        fnc <== claimPathNotExists, // inclusion
+        enabled <== AND()(merklizedAndEnabled, NOT()(isOpNoop)),  // if merklize flag is 0 or enabled is 0 or it's NOOP operation --> skip MTP verification
+        fnc <== claimPathNotExists, // inclusion (or non-inclusion in case exists==false)
         root <== merklizedRoot,
         siblings <== claimPathMtp,
         oldKey <== claimPathMtpAuxHi,
@@ -55,11 +57,11 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
         merklized
     );
 
-    // For non-merklized credentials exists / non-exist operators don't work
-    signal operatorNotExists <== NOT()(IsEqual()([operator, 11]));
+    // For non-merklized credentials exists / non-exist operators should always fail
+    signal isOpExists <== IsEqual()([operator, 11]);
     ForceEqualIfEnabled()(
         AND()(enabled,  NOT()(merklized)),
-        [1, operatorNotExists]
+        [isOpExists, 0]
     );
 
     /////////////////////////////////////////////////////////////////

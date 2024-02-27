@@ -10,6 +10,7 @@ include "../lib/utils/idUtils.circom";
 include "../lib/utils/spongeHash.circom";
 include "../offchain/credentialAtomicQueryV3OffChain.circom";
 include "../lib/utils/queryHash.circom";
+include "../lib/utils/tags-managing.circom";
 
 /**
 credentialAtomicQueryV3OnChain.circom - query claim value and verify claim issuer signature or mtp:
@@ -168,16 +169,18 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
     // on root stored in the index or value slot
     // if it is not set verification is performed on according to the slotIndex. Value selected from the
     // provided slot. For example if slotIndex is `1` value gets from `i_1` slot. If `4` from `v_1`.
-    signal merklized;
+    signal {binary} merklized;
 
     /////////////////////////////////////////////////////////////////
     // Auth check
     /////////////////////////////////////////////////////////////////
 
-    ForceEqualIfEnabled()(NOT()(isBJJAuthEnabled), [profileNonce, 0]);
+    signal {binary} safeIsBJJAuthEnabled <== ForceBinary()(isBJJAuthEnabled);
+
+    ForceEqualIfEnabled()(NOT()(safeIsBJJAuthEnabled), [profileNonce, 0]);
 
     checkAuthV2(idOwnershipLevels, onChainLevels)(
-        isBJJAuthEnabled, // enabled
+        safeIsBJJAuthEnabled, // enabled
         userGenesisID,
         userState, // user state
         userClaimsTreeRoot,

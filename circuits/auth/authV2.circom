@@ -9,8 +9,8 @@ include "../lib/utils/safeOne.circom";
 
 template AuthV2(IdOwnershipLevels, onChainLevels) {
     signal input genesisID;
-    // random number, which should be stored by user
-    // if there is a need to generate the same userID (ProfileID) output for different proofs
+    // random number, which should be stored by user if there is a need to
+    // generate the same userID (ProfileID) output for different proofs
     signal input profileNonce;
 
     // user state
@@ -31,7 +31,7 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     signal input authClaimNonRevMtpAuxHi;
     signal input authClaimNonRevMtpAuxHv;
 
-    // challenge signature
+    // challenge and it's signature
     signal input challenge;
     signal input challengeSignatureR8x;
     signal input challengeSignatureR8y;
@@ -50,7 +50,7 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     signal output userID;
 
     // get safe zero and one values to be used in ForceEqualIfEnabled
-    signal one <== SafeOne()(genesisID);
+    signal {binary} one <== SafeOne()(genesisID);
 
     checkAuthV2(IdOwnershipLevels, onChainLevels)(
         one,
@@ -81,7 +81,7 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
 }
 
 template checkAuthV2(IdOwnershipLevels, onChainLevels) {
-    signal input enabled;
+    signal input {binary} enabled;
 
     signal input genesisID;
 
@@ -143,7 +143,7 @@ template checkAuthV2(IdOwnershipLevels, onChainLevels) {
 
     signal isStateGenesis <== IsEqual()([cutId, cutState]);
 
-    signal genesisIDhash <== Poseidon(1)([genesisID]);
+    signal genesisIDHash <== Poseidon(1)([genesisID]);
 
     SMTVerifier(onChainLevels)(
         enabled <== enabled,
@@ -153,7 +153,7 @@ template checkAuthV2(IdOwnershipLevels, onChainLevels) {
         oldKey <== gistMtpAuxHi,
         oldValue <== gistMtpAuxHv,
         isOld0 <== gistMtpNoAux,
-        key <== genesisIDhash,
+        key <== genesisIDHash,
         value <== state
     );
 }
