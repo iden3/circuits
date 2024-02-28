@@ -131,7 +131,6 @@ type Outputs struct {
 	CircuitQueryHash       string `json:"circuitQueryHash"`
 	GistRoot               string `json:"gistRoot"`
 	Timestamp              string `json:"timestamp"`
-	Merklized              string `json:"merklized"`
 	ProofType              string `json:"proofType"` // 1 for sig, 2 for mtp
 	Challenge              string `json:"challenge"`
 	IssuerState            string `json:"issuerState"`
@@ -580,25 +579,25 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		)
 		require.NoError(t, err)
 	}
+	merklizedBigInt, ok := big.NewInt(0).SetString(merklized, 10)
 
 	firstPartQueryHash, err := poseidon.Hash([]*big.Int{
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		pathKey,
-		big.NewInt(0),
+		merklizedBigInt,
 		valuesHash,
 	})
 	require.NoError(t, err)
-	merklizedBigInt, ok := big.NewInt(0).SetString(merklized, 10)
 	require.True(t, ok)
 	circuitQueryHash, err := poseidon.Hash([]*big.Int{
 		firstPartQueryHash,
 		big.NewInt(int64(valueArraySize)),
-		merklizedBigInt,
 		big.NewInt(int64(isRevocationChecked)),
 		verifierID,
 		nullifierSessionID_,
+		new(big.Int),
 	})
 	require.NoError(t, err)
 
@@ -622,7 +621,6 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		IssuerClaimNonRevState: issuer.State(t).String(),
 		CircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
-		Merklized:              merklized,
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
 		ProofType:              proofType,
@@ -805,7 +803,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		pathKey,
-		big.NewInt(1),
+		big.NewInt(1), // merklized
 		valuesHash,
 	})
 	require.NoError(t, err)
@@ -818,9 +816,9 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		firstPartQueryHash,
 		big.NewInt(int64(valueArraySize)),
 		big.NewInt(1),
-		big.NewInt(1),
 		verifierID,
 		nullifierSessionID_,
+		big.NewInt(0),
 	})
 	require.NoError(t, err)
 
@@ -830,7 +828,6 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
-		Merklized:              "1",
 		CircuitQueryHash:       circuitQueryHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
