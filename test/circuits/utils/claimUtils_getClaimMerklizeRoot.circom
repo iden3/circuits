@@ -9,11 +9,11 @@ template wrappedGetClaimMerklizeRoot() {
     signal output flag;
     signal output out;
 
-    component getClaimMerklizeRoot = GetClaimMerklizeRoot();
-    getClaimMerklizeRoot.claim <== claim;
-    getClaimMerklizeRoot.claimFlags <== AddBinaryArrayTag()(claimFlags);
-    flag <== getClaimMerklizeRoot.flag;
-    out <== getClaimMerklizeRoot.out;
+    component check = getClaimMerklizeRoot();
+    check.claim <== claim;
+    check.claimFlags <== AddBinaryArrayTag(32)(claimFlags);
+    flag <== check.flag;
+    out <== check.out;
 }
 
 component main = wrappedGetClaimMerklizeRoot();
