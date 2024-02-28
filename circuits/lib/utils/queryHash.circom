@@ -15,8 +15,6 @@ template QueryHash(maxValueArraySize) {
 
     signal output out;
 
-    signal claimPathNotExists <== AND()(IsZero()(value[0]), IsEqual()([operator, 11]));
-
     /////////////////////////////////////////////////////////////////
     // Calculate query hash
     /////////////////////////////////////////////////////////////////
@@ -27,16 +25,16 @@ template QueryHash(maxValueArraySize) {
         slotIndex,
         operator,
         claimPathKey,
-        claimPathNotExists,
+        merklized,
         valueHash
     ]);
 
      out <== Poseidon(6)([
         firstPartQueryHash,
         valueArraySize,
-        merklized,
         isRevocationChecked,
         verifierID,
-        nullifierSessionID
+        nullifierSessionID,
+        0
     ]);
 }
