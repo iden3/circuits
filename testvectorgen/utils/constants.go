@@ -14,6 +14,8 @@ const (
 	LTE
 	GTE
 	BETWEEN
+	NOT_BETWEEN
+	EXISTS
 	SD = 16
 )
 

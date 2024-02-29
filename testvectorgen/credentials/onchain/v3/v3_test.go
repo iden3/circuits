@@ -87,18 +87,18 @@ type Inputs struct {
 
 	// Query
 	// JSON path
-	ClaimPathNotExists string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
-	ClaimPathMtp       []string `json:"claimPathMtp"`
-	ClaimPathMtpNoAux  string   `json:"claimPathMtpNoAux"` // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-	ClaimPathMtpAuxHi  string   `json:"claimPathMtpAuxHi"` // 0 for inclusion proof
-	ClaimPathMtpAuxHv  string   `json:"claimPathMtpAuxHv"` // 0 for inclusion proof
-	ClaimPathKey       string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
-	ClaimPathValue     string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
+	ClaimPathMtp      []string `json:"claimPathMtp"`
+	ClaimPathMtpNoAux string   `json:"claimPathMtpNoAux"` // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+	ClaimPathMtpAuxHi string   `json:"claimPathMtpAuxHi"` // 0 for inclusion proof
+	ClaimPathMtpAuxHv string   `json:"claimPathMtpAuxHv"` // 0 for inclusion proof
+	ClaimPathKey      string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
+	ClaimPathValue    string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
 
-	Operator  int      `json:"operator"`
-	SlotIndex int      `json:"slotIndex"`
-	Timestamp string   `json:"timestamp"`
-	Value     []string `json:"value"`
+	Operator       int      `json:"operator"`
+	SlotIndex      int      `json:"slotIndex"`
+	Timestamp      string   `json:"timestamp"`
+	Value          []string `json:"value"`
+	ValueArraySize int      `json:"valueArraySize"`
 
 	// additional sig inputs
 	IssuerClaimSignatureR8X       string      `json:"issuerClaimSignatureR8x"`
@@ -123,7 +123,7 @@ type Inputs struct {
 	VerifierID         string `json:"verifierID"`
 	NullifierSessionID string `json:"nullifierSessionID"`
 
-	AuthEnabled int `json:"authEnabled"`
+	IsBJJAuthEnabled int `json:"isBJJAuthEnabled"`
 }
 
 type Outputs struct {
@@ -134,17 +134,13 @@ type Outputs struct {
 	CircuitQueryHash       string `json:"circuitQueryHash"`
 	GistRoot               string `json:"gistRoot"`
 	Timestamp              string `json:"timestamp"`
-	Merklized              string `json:"merklized"`
 	ProofType              string `json:"proofType"` // 1 for sig, 2 for mtp
-	IsRevocationChecked    string `json:"isRevocationChecked"`
 	Challenge              string `json:"challenge"`
 	IssuerState            string `json:"issuerState"`
 	LinkID                 string `json:"linkID"`
-	VerifierID             string `json:"verifierID"`
-	NullifierSessionID     string `json:"nullifierSessionID"`
 	OperatorOutput         string `json:"operatorOutput"`
 	Nullifier              string `json:"nullifier"`
-	AuthEnabled            string `json:"authEnabled"`
+	IsBJJAuthEnabled       string `json:"isBJJAuthEnabled"`
 }
 
 type TestData struct {
@@ -241,7 +237,7 @@ func Test_Nullify(t *testing.T) {
 	desc := "Nullify"
 	isUserIDProfile := true
 	isSubjectIDProfile := true
-	value := utils.PrepareStrArray([]string{"94313"}, 64)
+	value := []string{}
 	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "123", "mtp/nullify", utils.NOOP, &value, false, 1, false, Mtp, 1)
 	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "123", "sig/nullify", utils.NOOP, &value, false, 1, false, Sig, 1)
 }
@@ -250,7 +246,7 @@ func Test_Selective_Disclosure(t *testing.T) {
 	desc := "Selective Disclosure modifier"
 	isUserIDProfile := true
 	isSubjectIDProfile := true
-	value := utils.PrepareStrArray([]string{}, 64)
+	value := []string{}
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/selective_disclosure", utils.SD, &value, Mtp, 1)
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/selective_disclosure", utils.SD, &value, Sig, 1)
 }
@@ -259,7 +255,7 @@ func Test_Between(t *testing.T) {
 	desc := "Between operator"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
-	value := utils.PrepareStrArray([]string{"8", "10"}, 64)
+	value := []string{"8", "10"}
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/between_operator", utils.BETWEEN, &value, Mtp, 1)
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/between_operator", utils.BETWEEN, &value, Sig, 1)
 }
@@ -277,9 +273,18 @@ func Test_Less_Than_Eq(t *testing.T) {
 	desc := "LTE operator"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
-	value := utils.PrepareStrArray([]string{"10"}, 64)
+	value := []string{"10"}
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/less_than_eq_operator", utils.LTE, &value, Mtp, 1)
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/less_than_eq_operator", utils.LTE, &value, Sig, 1)
+}
+
+func Test_Noop(t *testing.T) {
+	desc := "NOOP operator"
+	isUserIDProfile := false
+	isSubjectIDProfile := false
+	value := []string{}
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/noop_operator", utils.NOOP, &value, Mtp, 1)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/noop_operator", utils.NOOP, &value, Sig, 1)
 }
 
 func generateTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
@@ -293,8 +298,8 @@ func generateRevokedTestData(t *testing.T, desc string, isUserIDProfile, isSubje
 }
 
 func generateTestDataWithOperator(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
-	linkNonce string, fileName string, operator int, value *[]string, proofType ProofType, authEnabled int) {
-	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, operator, value, false, 1, false, proofType, authEnabled)
+	linkNonce string, fileName string, operator int, value *[]string, proofType ProofType, isBJJAuthEnabled int) {
+	generateTestDataWithOperatorAndRevCheck(t, desc, isUserIDProfile, isSubjectIDProfile, linkNonce, "0", fileName, operator, value, false, 1, false, proofType, isBJJAuthEnabled)
 }
 
 func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool, fileName string, proofType ProofType) {
@@ -303,22 +308,26 @@ func generateJSONLDTestData(t *testing.T, desc string, isUserIDProfile, isSubjec
 
 func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserIDProfile, isSubjectIDProfile bool,
 	linkNonce, nullifierSessionID, fileName string, operator int, value *[]string, isRevoked bool, isRevocationChecked int, isJSONLD bool, testProofType ProofType,
-	authEnabled int) {
+	isBJJAuthEnabled int) {
 	var err error
 
-	valueInput := utils.PrepareStrArray([]string{"10"}, 64)
+	valueInput := []string{"10"}
 	if value != nil {
 		valueInput = *value
 	}
 
 	var user *utils.IdentityTest
 
-	if authEnabled == 1 {
+	if isBJJAuthEnabled == 1 {
 		user = utils.NewIdentity(t, userPK)
 	} else {
 		// generate onchain identity
 		user = utils.NewEthereumBasedIdentity(t, ethAddress)
 	}
+	valueArraySize := len(valueInput)
+
+	valueInput = utils.PrepareStrArray(valueInput, 64)
+
 	issuer := utils.NewIdentity(t, issuerPK)
 
 	userProfileID := user.ID
@@ -368,7 +377,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		merklized = "1"
 
 	} else {
-		claim = utils.DefaultUserClaim(t, subjectID)
+		claim = utils.DefaultUserClaim(t, subjectID, nil)
 		claimPathMtp = utils.PrepareStrArray([]string{}, 32)
 		claimPathMtpNoAux = "0"
 		claimPathMtpAuxHi = "0"
@@ -549,7 +558,6 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
 		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
 		ClaimSchema:                     "180410020913331409885634153623124536270",
-		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
 		ClaimPathMtp:                    claimPathMtp,
 		ClaimPathMtpNoAux:               claimPathMtpNoAux,
 		ClaimPathMtpAuxHi:               claimPathMtpAuxHi,
@@ -561,6 +569,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		SlotIndex:                       slotIndex,
 		Timestamp:                       timestamp,
 		Value:                           valueInput,
+		ValueArraySize:                  valueArraySize,
 
 		IssuerClaimSignatureR8X:       issuerClaimSignatureR8X,
 		IssuerClaimSignatureR8Y:       issuerClaimSignatureR8Y,
@@ -582,36 +591,25 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 
 		VerifierID:         "21929109382993718606847853573861987353620810345503358891473103689157378049",
 		NullifierSessionID: nullifierSessionID,
-		AuthEnabled:        authEnabled,
+		IsBJJAuthEnabled:   isBJJAuthEnabled,
 	}
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
 	require.True(t, ok)
-	circuitQueryHash, err := poseidon.Hash([]*big.Int{
-		claimSchemaInt,
-		big.NewInt(int64(inputs.SlotIndex)),
-		big.NewInt(int64(inputs.Operator)),
-		pathKey,
-		big.NewInt(0),
-		valuesHash,
-	})
-	require.NoError(t, err)
 
 	linkID, err := utils.CalculateLinkID(linkNonce, claim)
 	require.NoError(t, err)
 
 	operatorOutput := "0"
 	nullifier := "0"
+	verifierID, ok := big.NewInt(0).SetString(inputs.VerifierID, 10)
+	require.True(t, ok)
+	nullifierSessionID_, ok := big.NewInt(0).SetString(inputs.NullifierSessionID, 10)
+	require.True(t, ok)
 	if inputs.NullifierSessionID != "0" {
 		claimSchema, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
-		require.True(t, ok)
-
-		verifierID, ok := big.NewInt(0).SetString(inputs.VerifierID, 10)
-		require.True(t, ok)
-
-		nullifierSessionID_, ok := big.NewInt(0).SetString(inputs.NullifierSessionID, 10)
 		require.True(t, ok)
 
 		nullifier, err = utils.CalculateNullify(
@@ -623,6 +621,27 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		)
 		require.NoError(t, err)
 	}
+	merklizedBigInt, ok := big.NewInt(0).SetString(merklized, 10)
+
+	firstPartQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		pathKey,
+		merklizedBigInt,
+		valuesHash,
+	})
+	require.NoError(t, err)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		firstPartQueryHash,
+		big.NewInt(int64(valueArraySize)),
+		big.NewInt(int64(isRevocationChecked)),
+		verifierID,
+		nullifierSessionID_,
+		new(big.Int),
+	})
+	require.NoError(t, err)
 
 	if operator == utils.SD {
 		operatorOutput = big.NewInt(10).String()
@@ -644,18 +663,14 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		IssuerClaimNonRevState: issuer.State(t).String(),
 		CircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
-		Merklized:              merklized,
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
-		IsRevocationChecked:    strconv.Itoa(isRevocationChecked),
 		ProofType:              proofType,
 		IssuerState:            issuerState,
 		LinkID:                 linkID,
 		OperatorOutput:         operatorOutput,
-		VerifierID:             inputs.VerifierID,
-		NullifierSessionID:     inputs.NullifierSessionID,
 		Nullifier:              nullifier,
-		AuthEnabled:            strconv.Itoa(authEnabled),
+		IsBJJAuthEnabled:       strconv.Itoa(isBJJAuthEnabled),
 	}
 
 	jsonData, err := json.Marshal(TestData{
@@ -700,6 +715,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 	require.NoError(t, err)
 
 	jsonP, _, err := mz.Proof(context.Background(), path)
+	require.NoError(t, err)
 
 	claimJSONLDProof, claimJSONLDProofAux := utils.PrepareProof(jsonP, utils.ClaimLevels)
 
@@ -733,6 +749,8 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
+
+	valueArraySize := utils.GetValueArraySizeForOperator(utils.EXISTS)
 
 	inputs := Inputs{
 		RequestID:                       requestID.String(),
@@ -783,20 +801,20 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		IssuerAuthState:                 issuer.State(t).String(),
 		ClaimSchema:                     "180410020913331409885634153623124536270",
 
-		ClaimPathNotExists: "1", // 0 for inclusion, 1 for non-inclusion
-		ClaimPathMtp:       claimJSONLDProof,
-		ClaimPathMtpNoAux:  claimJSONLDProofAux.NoAux, // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-		ClaimPathMtpAuxHi:  claimJSONLDProofAux.Key,   // 0 for inclusion proof
-		ClaimPathMtpAuxHv:  claimJSONLDProofAux.Value, // 0 for inclusion proof
-		ClaimPathKey:       pathKey.String(),          // hash of path in merklized json-ld document
-		ClaimPathValue:     "0",                       // value in this path in merklized json-ld document
+		ClaimPathMtp:      claimJSONLDProof,
+		ClaimPathMtpNoAux: claimJSONLDProofAux.NoAux, // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+		ClaimPathMtpAuxHi: claimJSONLDProofAux.Key,   // 0 for inclusion proof
+		ClaimPathMtpAuxHv: claimJSONLDProofAux.Value, // 0 for inclusion proof
+		ClaimPathKey:      pathKey.String(),          // hash of path in merklized json-ld document
+		ClaimPathValue:    "0",                       // value in this path in merklized json-ld document
 		// value in this path in merklized json-ld document
 
-		Operator:            utils.NOOP,
+		Operator:            utils.EXISTS,
 		SlotIndex:           0,
 		Timestamp:           timestamp,
 		IsRevocationChecked: 1,
-		Value:               utils.PrepareStrArray([]string{}, 64),
+		Value:               utils.PrepareStrArray([]string{"0"}, 64),
+		ValueArraySize:      valueArraySize,
 
 		// additional mtp inputs
 		IssuerClaimIdenState:      "0",
@@ -812,7 +830,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		VerifierID:         "21929109382993718606847853573861987353620810345503358891473103689157378049",
 		NullifierSessionID: "0",
 
-		AuthEnabled: 1,
+		IsBJJAuthEnabled: 1,
 	}
 
 	issuerAuthState := issuer.State(t)
@@ -821,13 +839,28 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 	require.NoError(t, err)
 	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
 	require.True(t, ok)
-	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+
+	firstPartQueryHash, err := poseidon.Hash([]*big.Int{
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		pathKey,
-		big.NewInt(1),
+		big.NewInt(1), // merklized
 		valuesHash,
+	})
+	require.NoError(t, err)
+	verifierID, ok := big.NewInt(0).SetString(inputs.VerifierID, 10)
+	require.True(t, ok)
+	nullifierSessionID_, ok := big.NewInt(0).SetString(inputs.NullifierSessionID, 10)
+	require.True(t, ok)
+
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		firstPartQueryHash,
+		big.NewInt(int64(valueArraySize)),
+		big.NewInt(1),
+		verifierID,
+		nullifierSessionID_,
+		big.NewInt(0),
 	})
 	require.NoError(t, err)
 
@@ -837,19 +870,15 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
-		Merklized:              "1",
 		CircuitQueryHash:       circuitQueryHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
 		IssuerState:            issuerAuthState.String(),
-		IsRevocationChecked:    "1",
 		ProofType:              "1",
 		LinkID:                 "0",
-		VerifierID:             inputs.VerifierID,
-		NullifierSessionID:     inputs.NullifierSessionID,
 		OperatorOutput:         "0",
 		Nullifier:              "0",
-		AuthEnabled:            "1",
+		IsBJJAuthEnabled:       "1",
 	}
 
 	jsonData, err := json.Marshal(TestData{

@@ -105,7 +105,7 @@ func generateAuthTestData(t *testing.T, genesis bool, desc, fileName string) {
 
 		authNonRevMTProof, nodeAuxNonRev = user.ClaimRevMTP(t, user.AuthClaim)
 
-		claim1 := utils.DefaultUserClaim(t, user.ID)
+		claim1 := utils.DefaultUserClaim(t, user.ID, nil)
 
 		user.AddClaim(t, claim1)
 	}

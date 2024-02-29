@@ -19,15 +19,18 @@ include "comparators.circom";
       7 - less than or equal
       8 - greater than or equal
       9 - between
+      10 - not between
+      11 - exist
     Modifier/computation operators:
       16 - selective disclosure (16 = 10000 binary)
 */
 
 // Query template works only with Query operators (0-15), for the rest returns 0
-template Query (valueArraySize) {
+template Query (maxValueArraySize) {
     // signals
     signal input in;
-    signal input value[valueArraySize];
+    signal input value[maxValueArraySize];
+    signal input valueArraySize;
     signal input operator;
     signal output out;
 
@@ -46,8 +49,8 @@ template Query (valueArraySize) {
     // gte
     signal gte <== NOT()(lt); // gte === !lt
 
-    // in
-    signal inComp <== IN(valueArraySize)(in, value);
+    // in           w/o - 65668, IN - 65860( 192), InWithDynamicArraySize - 66372 (704)
+    signal inComp <== InWithDynamicArraySize(maxValueArraySize)(in, value, valueArraySize);
 
     // between (value[0] <= in <= value[1])
     signal gt2 <== GreaterThan254()([in, value[1]]);
@@ -73,8 +76,8 @@ template Query (valueArraySize) {
     queryOpSatisfied.c[7] <== lte; // lte === !gt
     queryOpSatisfied.c[8] <== gte; // gte === !lt
     queryOpSatisfied.c[9] <== between; // between
-    queryOpSatisfied.c[10] <== 0; // not used
-    queryOpSatisfied.c[11] <== 0; // not used
+    queryOpSatisfied.c[10] <== NOT()(between); // not between
+    queryOpSatisfied.c[11] <== 1; // exists;
     queryOpSatisfied.c[12] <== 0; // not used
     queryOpSatisfied.c[13] <== 0; // not used
     queryOpSatisfied.c[14] <== 0; // not used

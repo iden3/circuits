@@ -21,6 +21,9 @@ jobs:
     - name: Setup Circom
       run: wget https://github.com/iden3/circom/releases/latest/download/circom-linux-amd64 && sudo mv ./circom-linux-amd64 /usr/bin/circom && sudo chmod +x /usr/bin/circom
 
+    - name: Generate testvectors
+      run: cd testvectorgen && go test ./...
+
     - name: Install node_modules
       if: steps.modules-cache.outputs.cache-hit != 'true'
       run: npm install
