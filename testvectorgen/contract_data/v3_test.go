@@ -86,7 +86,7 @@ func Test_Generate_Test_CasesV3(t *testing.T) {
 	}, true, false, true, false, "v3/valid_bjj_user_first_issuer_genesis_v3", verifiable.BJJSignatureProofType, 1)
 }
 
-func generateData(t *testing.T, desc string, gistData []*gistData, userFirstState bool, userSecondState bool, issuetGenesisState bool, issuerSecondState bool, fileName string, testProofType verifiable.ProofType, authEnabled int) {
+func generateData(t *testing.T, desc string, gistData []*gistData, userFirstState bool, userSecondState bool, issuetGenesisState bool, issuerSecondState bool, fileName string, testProofType verifiable.ProofType, isBJJAuthEnabled int) {
 
 	var linkNonce = "18"
 	var nullifierSessionID string = "1234569"
@@ -102,7 +102,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 
 	var user *utils.IdentityTest
 
-	if authEnabled == 1 {
+	if isBJJAuthEnabled == 1 {
 		user = utils.NewIdentity(t, UserPK)
 	} else {
 		// generate onchain identity
@@ -117,7 +117,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 	subjectID := user.ID
 
 	var nonceSubject = new(big.Int)
-	if isSubjectIDProfile && authEnabled == 1 {
+	if isSubjectIDProfile && isBJJAuthEnabled == 1 {
 		nonceSubject = big.NewInt(999)
 		subjectID, err = core.ProfileID(user.ID, nonceSubject)
 		require.NoError(t, err)
@@ -156,7 +156,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		merklized = "1"
 
 	} else {
-		claim = utils.DefaultUserClaim(t, subjectID)
+		claim = utils.DefaultUserClaim(t, subjectID, nil)
 		claimPathMtp = utils.PrepareStrArray([]string{}, 32)
 		claimPathMtpNoAux = "0"
 		claimPathMtpAuxHi = "0"
@@ -173,7 +173,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		user.AddClaim(t, claim1)
 
 		if userSecondState {
-			claim2 := utils.DefaultUserClaim(t, user.ID)
+			claim2 := utils.DefaultUserClaim(t, user.ID, nil)
 			user.AddClaim(t, claim2)
 		}
 	}
@@ -216,7 +216,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 
 	// add another claim to issuer if it is a second state
 	if issuerSecondState {
-		primaryEntityClaim := utils.DefaultUserClaim(t, issuer.ID)
+		primaryEntityClaim := utils.DefaultUserClaim(t, issuer.ID, nil)
 		issuer.AddClaim(t, primaryEntityClaim)
 	}
 
@@ -281,9 +281,11 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 	var gistProof []string
 	var gistNodeAux utils.NodeAuxValue
 
+	addr := common.HexToAddress(ethAddress)
+	challenge = new(big.Int).SetBytes(merkletree.SwapEndianness(addr.Bytes()))
+
 	// user
-	if authEnabled == 1 {
-		challenge = big.NewInt(12345)
+	if isBJJAuthEnabled == 1 {
 		authMTProof = user.AuthMTPStrign(t)
 		userAuthNonRevMTProof, userNodeAuxNonRev = user.ClaimRevMTP(t, user.AuthClaim)
 		sig = user.Sign(challenge)
@@ -293,8 +295,6 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		gistProof, gistNodeAux = utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
 	} else {
-		addr := common.HexToAddress(ethAddress)
-		challenge = new(big.Int).SetBytes(merkletree.SwapEndianness(addr.Bytes()))
 
 		emptyArr := make([]*merkletree.Hash, 0)
 		authMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
@@ -323,6 +323,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		user.AuthClaim = &core.Claim{}
 	}
 	t.Log(issuer.State(t).String())
+	valueArraySize := utils.GetValueArraySizeForOperator(operator)
 
 	inputs := Inputs{
 		RequestID:                       requestID,
@@ -364,7 +365,6 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		IssuerClaimNonRevMtpAuxHv:       issuerClaimNonRevAux.Value,
 		IssuerClaimNonRevMtpNoAux:       issuerClaimNonRevAux.NoAux,
 		ClaimSchema:                     "267831521922558027206082390043321796944",
-		ClaimPathNotExists:              "0", // 0 for inclusion, 1 for non-inclusion
 		ClaimPathMtp:                    claimPathMtp,
 		ClaimPathMtpNoAux:               claimPathMtpNoAux,
 		ClaimPathMtpAuxHi:               claimPathMtpAuxHi,
@@ -376,20 +376,20 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		SlotIndex:                       slotIndex,
 		Timestamp:                       timestamp,
 		Value:                           valueInput,
-
-		IssuerClaimSignatureR8X:       issuerClaimSignatureR8X,
-		IssuerClaimSignatureR8Y:       issuerClaimSignatureR8Y,
-		IssuerClaimSignatureS:         issuerClaimSignatureS,
-		IssuerAuthClaim:               issuerAuthClaim,
-		IssuerAuthClaimMtp:            issuerAuthClaimMtp,
-		IssuerAuthClaimNonRevMtp:      issuerAuthClaimNonRevMtp,
-		IssuerAuthClaimNonRevMtpAuxHi: issuerAuthClaimNonRevMtpAuxHi,
-		IssuerAuthClaimNonRevMtpAuxHv: issuerAuthClaimNonRevMtpAuxHv,
-		IssuerAuthClaimNonRevMtpNoAux: issuerAuthClaimNonRevMtpNoAux,
-		IssuerAuthClaimsTreeRoot:      issuerAuthClaimsTreeRoot,
-		IssuerAuthRevTreeRoot:         issuerAuthRevTreeRoot,
-		IssuerAuthRootsTreeRoot:       issuerAuthRootsTreeRoot,
-		IssuerAuthState:               issuerAuthState,
+		ValueArraySize:                  valueArraySize,
+		IssuerClaimSignatureR8X:         issuerClaimSignatureR8X,
+		IssuerClaimSignatureR8Y:         issuerClaimSignatureR8Y,
+		IssuerClaimSignatureS:           issuerClaimSignatureS,
+		IssuerAuthClaim:                 issuerAuthClaim,
+		IssuerAuthClaimMtp:              issuerAuthClaimMtp,
+		IssuerAuthClaimNonRevMtp:        issuerAuthClaimNonRevMtp,
+		IssuerAuthClaimNonRevMtpAuxHi:   issuerAuthClaimNonRevMtpAuxHi,
+		IssuerAuthClaimNonRevMtpAuxHv:   issuerAuthClaimNonRevMtpAuxHv,
+		IssuerAuthClaimNonRevMtpNoAux:   issuerAuthClaimNonRevMtpNoAux,
+		IssuerAuthClaimsTreeRoot:        issuerAuthClaimsTreeRoot,
+		IssuerAuthRevTreeRoot:           issuerAuthRevTreeRoot,
+		IssuerAuthRootsTreeRoot:         issuerAuthRootsTreeRoot,
+		IssuerAuthState:                 issuerAuthState,
 
 		LinkNonce: linkNonce,
 
@@ -397,36 +397,25 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 
 		VerifierID:         "21929109382993718606847853573861987353620810345503358891473103689157378049",
 		NullifierSessionID: nullifierSessionID,
-		AuthEnabled:        authEnabled,
+		IsBJJAuthEnabled:   isBJJAuthEnabled,
 	}
 
 	valuesHash, err := utils.PoseidonHashValue(utils.FromStringArrayToBigIntArray(inputs.Value))
 	require.NoError(t, err)
 	claimSchemaInt, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
 	require.True(t, ok)
-	circuitQueryHash, err := poseidon.Hash([]*big.Int{
-		claimSchemaInt,
-		big.NewInt(int64(inputs.SlotIndex)),
-		big.NewInt(int64(inputs.Operator)),
-		pathKey,
-		big.NewInt(0),
-		valuesHash,
-	})
-	require.NoError(t, err)
 
 	linkID, err := utils.CalculateLinkID(linkNonce, claim)
 	require.NoError(t, err)
 
 	operatorOutput := "0"
 	nullifier := "0"
+	verifierID, ok := big.NewInt(0).SetString(inputs.VerifierID, 10)
+	require.True(t, ok)
+	nullifierSessionID_, ok := big.NewInt(0).SetString(inputs.NullifierSessionID, 10)
+	require.True(t, ok)
 	if inputs.NullifierSessionID != "0" {
 		claimSchema, ok := big.NewInt(0).SetString(inputs.ClaimSchema, 10)
-		require.True(t, ok)
-
-		verifierID, ok := big.NewInt(0).SetString(inputs.VerifierID, 10)
-		require.True(t, ok)
-
-		nullifierSessionID_, ok := big.NewInt(0).SetString(inputs.NullifierSessionID, 10)
 		require.True(t, ok)
 
 		nullifier, err = utils.CalculateNullify(
@@ -438,6 +427,27 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		)
 		require.NoError(t, err)
 	}
+	merklizedBigInt, ok := big.NewInt(0).SetString(merklized, 10)
+
+	firstPartQueryHash, err := poseidon.Hash([]*big.Int{
+		claimSchemaInt,
+		big.NewInt(int64(inputs.SlotIndex)),
+		big.NewInt(int64(inputs.Operator)),
+		pathKey,
+		merklizedBigInt,
+		valuesHash,
+	})
+	require.NoError(t, err)
+	require.True(t, ok)
+	circuitQueryHash, err := poseidon.Hash([]*big.Int{
+		firstPartQueryHash,
+		big.NewInt(int64(valueArraySize)),
+		big.NewInt(int64(isRevocationChecked)),
+		verifierID,
+		nullifierSessionID_,
+		new(big.Int),
+	})
+	require.NoError(t, err)
 
 	if operator == utils.SD {
 		operatorOutput = big.NewInt(10).String()
@@ -462,15 +472,12 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		Merklized:              merklized,
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
-		IsRevocationChecked:    strconv.Itoa(isRevocationChecked),
 		ProofType:              proofType,
 		IssuerState:            issuerState,
 		LinkID:                 linkID,
 		OperatorOutput:         operatorOutput,
-		VerifierID:             inputs.VerifierID,
-		NullifierSessionID:     inputs.NullifierSessionID,
 		Nullifier:              nullifier,
-		AuthEnabled:            strconv.Itoa(authEnabled),
+		IsBJJAuthEnabled:       strconv.Itoa(isBJJAuthEnabled),
 	}
 
 	jsonData, err := json.Marshal(TestData{
@@ -535,18 +542,18 @@ type Inputs struct {
 
 	// Query
 	// JSON path
-	ClaimPathNotExists string   `json:"claimPathNotExists"` // 0 for inclusion, 1 for non-inclusion
-	ClaimPathMtp       []string `json:"claimPathMtp"`
-	ClaimPathMtpNoAux  string   `json:"claimPathMtpNoAux"` // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
-	ClaimPathMtpAuxHi  string   `json:"claimPathMtpAuxHi"` // 0 for inclusion proof
-	ClaimPathMtpAuxHv  string   `json:"claimPathMtpAuxHv"` // 0 for inclusion proof
-	ClaimPathKey       string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
-	ClaimPathValue     string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
+	ClaimPathMtp      []string `json:"claimPathMtp"`
+	ClaimPathMtpNoAux string   `json:"claimPathMtpNoAux"` // 1 if aux node is empty, 0 if non-empty or for inclusion proofs
+	ClaimPathMtpAuxHi string   `json:"claimPathMtpAuxHi"` // 0 for inclusion proof
+	ClaimPathMtpAuxHv string   `json:"claimPathMtpAuxHv"` // 0 for inclusion proof
+	ClaimPathValue    string   `json:"claimPathValue"`    // value in this path in merklized json-ld document
+	ClaimPathKey      string   `json:"claimPathKey"`      // hash of path in merklized json-ld document
 
-	Operator  int      `json:"operator"`
-	SlotIndex int      `json:"slotIndex"`
-	Timestamp string   `json:"timestamp"`
-	Value     []string `json:"value"`
+	Operator       int      `json:"operator"`
+	SlotIndex      int      `json:"slotIndex"`
+	Timestamp      string   `json:"timestamp"`
+	Value          []string `json:"value"`
+	ValueArraySize int      `json:"valueArraySize"`
 
 	// additional sig inputs
 	IssuerClaimSignatureR8X       string      `json:"issuerClaimSignatureR8x"`
@@ -571,7 +578,7 @@ type Inputs struct {
 	VerifierID         string `json:"verifierID"`
 	NullifierSessionID string `json:"nullifierSessionID"`
 
-	AuthEnabled int `json:"authEnabled"`
+	IsBJJAuthEnabled int `json:"isBJJAuthEnabled"`
 }
 
 type Outputs struct {
@@ -584,15 +591,12 @@ type Outputs struct {
 	Timestamp              string `json:"timestamp"`
 	Merklized              string `json:"merklized"`
 	ProofType              string `json:"proofType"` // 1 for sig, 2 for mtp
-	IsRevocationChecked    string `json:"isRevocationChecked"`
 	Challenge              string `json:"challenge"`
 	IssuerState            string `json:"issuerState"`
 	LinkID                 string `json:"linkID"`
-	VerifierID             string `json:"verifierID"`
-	NullifierSessionID     string `json:"nullifierSessionID"`
 	OperatorOutput         string `json:"operatorOutput"`
 	Nullifier              string `json:"nullifier"`
-	AuthEnabled            string `json:"authEnabled"`
+	IsBJJAuthEnabled       string `json:"isBJJAuthEnabled"`
 }
 
 type TestData struct {

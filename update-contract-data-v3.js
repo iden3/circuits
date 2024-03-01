@@ -16,7 +16,7 @@ for (const file of files) {
     circuitName = 'stateTransition'
     destinationFolder = 'common-data'
   } else {
-    circuitName = 'credentialAtomicQueryV3OnChain'
+    circuitName = 'credentialAtomicQueryV3OnChain-beta.1'
     destinationFolder = 'v3/data'
   }
   const buildPath = `./build/${circuitName}/${circuitName}_js/`;
@@ -43,13 +43,5 @@ for (const file of files) {
   }), 'utf-8');
 
 }
-//
-// console.log('UPDATE verifiers');
-// for (const part of ['MTP', 'Sig']) {
-//   const circuitName = `credentialAtomicQuery${part}V2OnChain`;
-//   const contractName = `${buildFolder}${circuitName}/verifier.sol`;
-//   const contractContent = fs.readFileSync(contractName).toString();
-//   const newContractContent = contractContent.replace('pragma solidity ^0.6.11;', 'pragma solidity ^0.8.0;').replace('contract Verifier', 'contract Verifier' + part);
-//   fs.writeFileSync(`../contracts/contracts/lib/verifier${part}.sol`, newContractContent, 'utf-8');
-// }
+
 console.log('Done');

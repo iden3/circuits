@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/iden3/go-iden3-crypto/babyjub"
 	"test/utils"
 
@@ -264,7 +265,7 @@ func Test_OnchainIdentity(t *testing.T) {
 	desc := "Skip Auth V2 check. Onchain identity (based on ethereum address)"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
-	value := utils.PrepareStrArray([]string{"11"}, 64)
+	value := []string{"11"}
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/onchainIdentity", utils.LT, &value, Mtp, 0)
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/onchainIdentity", utils.LT, &value, Sig, 0)
 }
@@ -481,7 +482,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 	var gistProof []string
 	var gistNodeAux utils.NodeAuxValue
 	// user
-	if authEnabled == 1 {
+	if isBJJAuthEnabled == 1 {
 		challenge = big.NewInt(12345)
 		authMTProof = user.AuthMTPStrign(t)
 		authNonRevMTProof, nodeAuxNonRev = user.ClaimRevMTP(t, user.AuthClaim)
@@ -494,8 +495,12 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 	} else {
 
 		emptyArr := make([]*merkletree.Hash, 0)
+		addr := common.HexToAddress(ethAddress)
+		challenge = new(big.Int).SetBytes(merkletree.SwapEndianness(addr.Bytes()))
 		authMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
 		authNonRevMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
+		user.AuthClaim, err = core.NewClaim(core.AuthSchemaHash)
+		require.NoError(t, err)
 		nodeAuxNonRev = utils.NodeAuxValue{
 			Key:   merkletree.HashZero.String(),
 			Value: merkletree.HashZero.String(),
