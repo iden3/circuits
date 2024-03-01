@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rm -fR dist",
     "build": "npm run clean && ./node_modules/.bin/tsc --strictNullChecks",
-    "test": "./node_modules/.bin/mocha --timeout 5000  -r ts-node/register 'test/**/*.test.ts'"
+    "test": "./node_modules/.bin/mocha --timeout 5000 -p -r ts-node/register 'test/**/*.test.ts'"
   },
   "license": "GPL-3.0",
   "dependencies": {
