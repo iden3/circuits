@@ -4,7 +4,7 @@ import {describe} from "mocha";
 const path = require("path");
 const wasmTester = require("circom_tester").wasm;
 
-describe.only("Test credentialAtomicQueryV3OnChain.circom", function () {
+describe("Test credentialAtomicQueryV3OnChain.circom", function () {
 
     this.timeout(600000);
 
@@ -30,35 +30,35 @@ describe.only("Test credentialAtomicQueryV3OnChain.circom", function () {
     const tests = [
 
         // sig
-        // require(`${sigBasePath}/claimIssuedOnProfileID.json`),
-        // require(`${sigBasePath}/claimIssuedOnProfileID2.json`),
-        // require(`${sigBasePath}/claimIssuedOnUserID.json`),
-        // require(`${sigBasePath}/profileID_subject_userid.json`),
-        // require(`${sigBasePath}/claimNonMerklized.json`),
-        // require(`${sigBasePath}/claimWithLinkNonce.json`),
-        // require(`${sigBasePath}/between_operator.json`),
-        // require(`${sigBasePath}/less_than_eq_operator.json`),
-        // require(`${sigBasePath}/selective_disclosure.json`),
-        // require(`${sigBasePath}/nullify.json`),
-        // require(`${sigBasePath}/revoked_claim_without_revocation_check.json`),
-        // require(`${sigBasePath}/jsonld_non_inclusion.json`),
-        // require(`${sigBasePath}/noop_operator.json`),
+        require(`${sigBasePath}/claimIssuedOnProfileID.json`),
+        require(`${sigBasePath}/claimIssuedOnProfileID2.json`),
+        require(`${sigBasePath}/claimIssuedOnUserID.json`),
+        require(`${sigBasePath}/profileID_subject_userid.json`),
+        require(`${sigBasePath}/claimNonMerklized.json`),
+        require(`${sigBasePath}/claimWithLinkNonce.json`),
+        require(`${sigBasePath}/between_operator.json`),
+        require(`${sigBasePath}/less_than_eq_operator.json`),
+        require(`${sigBasePath}/selective_disclosure.json`),
+        require(`${sigBasePath}/nullify.json`),
+        require(`${sigBasePath}/revoked_claim_without_revocation_check.json`),
+        require(`${sigBasePath}/jsonld_non_inclusion.json`),
+        require(`${sigBasePath}/noop_operator.json`),
         require(`${sigBasePath}/onchainIdentity.json`),
 
         // mtp
-        // require(`${mtpBasePath}/claimIssuedOnProfileID.json`),
-        // require(`${mtpBasePath}/claimIssuedOnProfileID2.json`),
-        // require(`${mtpBasePath}/claimIssuedOnUserID.json`),
-        // require(`${mtpBasePath}/profileID_subject_userid.json`),
-        // require(`${mtpBasePath}/claimNonMerklized.json`),
-        // require(`${mtpBasePath}/claimWithLinkNonce.json`),
-        // require(`${mtpBasePath}/between_operator.json`),
-        // require(`${mtpBasePath}/less_than_eq_operator.json`),
-        // require(`${mtpBasePath}/selective_disclosure.json`),
-        // require(`${mtpBasePath}/nullify.json`),
-        // require(`${mtpBasePath}/revoked_claim_without_revocation_check.json`),
-        // require(`${mtpBasePath}/noop_operator.json`),
-        // require(`${mtpBasePath}/onchainIdentity.json`),
+        require(`${mtpBasePath}/claimIssuedOnProfileID.json`),
+        require(`${mtpBasePath}/claimIssuedOnProfileID2.json`),
+        require(`${mtpBasePath}/claimIssuedOnUserID.json`),
+        require(`${mtpBasePath}/profileID_subject_userid.json`),
+        require(`${mtpBasePath}/claimNonMerklized.json`),
+        require(`${mtpBasePath}/claimWithLinkNonce.json`),
+        require(`${mtpBasePath}/between_operator.json`),
+        require(`${mtpBasePath}/less_than_eq_operator.json`),
+        require(`${mtpBasePath}/selective_disclosure.json`),
+        require(`${mtpBasePath}/nullify.json`),
+        require(`${mtpBasePath}/revoked_claim_without_revocation_check.json`),
+        require(`${mtpBasePath}/noop_operator.json`),
+        require(`${mtpBasePath}/onchainIdentity.json`),
     ];
 
     tests.forEach(({ desc, inputs, expOut }) => {
