@@ -108,7 +108,7 @@ template ForceBinaryArray(n) {
 }
 
 /*
-*** AddMaxbitTag(n): template that adds the constraints needed to ensure that a signal can be expressed using n bits(that is, that is value is in [0, 2**n)) and adds the tag maxbit = n to the input
+*** AddMaxbitTag(n): template that adds the constraints needed to ensure that a signal can be expressed using n bits(that is value is in [0, 2**n)) and adds the tag maxbit = n to the input
         - Inputs: in -> field value
         - Output: out -> same value as in, but including maxbit tag with out.maxbit = n
                          satisfies tag out.maxbit = n
