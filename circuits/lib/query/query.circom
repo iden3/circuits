@@ -23,6 +23,7 @@ include "comparators.circom";
       11 - exist
     Modifier/computation operators:
       16 - selective disclosure (16 = 10000 binary)
+      17 - value commitment (17 = 10001 binary)
 */
 
 // Query template works only with Query operators (0-15), for the rest returns 0
