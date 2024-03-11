@@ -3,6 +3,7 @@ pragma circom 2.1.1;
 include "../../../node_modules/circomlib/circuits/bitify.circom";
 include "../../../node_modules/circomlib/circuits/poseidon.circom";
 include "../../../node_modules/circomlib/circuits/mux1.circom";
+include "./safeOne.circom";
 
 template ProfileID(){
     signal input in;
@@ -29,7 +30,7 @@ template SplitID() {
     signal output genesis;
     signal output checksum;
 
-    component bs = Num2Bits(254);
+    component bs = Num2Bits(248);
     bs.in <== id;
 
     // checksum bytes are swapped in ID. 31-th byte is first and 30-th is second.
@@ -52,7 +53,7 @@ template SplitID() {
     typ <== typBits.out;
 
     // explicitly state that some of these signals are not used and it's ok
-    for (var i=0; i<254; i++) {
+    for (var i=0; i<248; i++) {
         _ <== bs.out[i];
     }
 }

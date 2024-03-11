@@ -10,7 +10,7 @@ include "claimUtils.circom";
 
 // checkClaimExists verifies that claim is included into the claim tree root
 template checkClaimExists(IssuerLevels) {
-    signal input enabled;
+    signal input {binary} enabled;
 	signal input claimHi;
 	signal input claimHv;
 	signal input claimMTP[IssuerLevels];
@@ -30,7 +30,7 @@ template checkClaimExists(IssuerLevels) {
 }
 
 template checkClaimNotRevoked(treeLevels) {
-	signal input enabled;
+	signal input {binary} enabled;
     signal input claim[8];
     signal input claimNonRevMTP[treeLevels];
     signal input treeRoot;
@@ -56,7 +56,7 @@ template checkClaimNotRevoked(treeLevels) {
 // checkIdenStateMatchesRoots checks that a hash of 3 tree
 // roots is equal to expected identity state
 template checkIdenStateMatchesRoots() {
-    signal input enabled;
+    signal input {binary} enabled;
 	signal input claimsTreeRoot;
 	signal input revTreeRoot;
 	signal input rootsTreeRoot;
@@ -76,7 +76,7 @@ template checkIdenStateMatchesRoots() {
 
 // verifyClaimIssuance verifies that claim is issued by the issuer
 template verifyClaimIssuance(IssuerLevels) {
-    signal input enabled;
+    signal input {binary} enabled;
 	signal input claimHi;
 	signal input claimHv;
 	signal input claimIssuanceMtp[IssuerLevels];
@@ -105,7 +105,7 @@ template verifyClaimIssuance(IssuerLevels) {
 }
 
 template VerifyAuthClaimAndSignature(nLevels) {
-    signal input enabled;
+    signal input {binary} enabled;
 
 	signal input claimsTreeRoot;
 	signal input authClaimMtp[nLevels];
