@@ -29,9 +29,11 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     signal isOpNoop <== IsZero()(operator);
     signal merklizedAndEnabled <== AND()(enabled, merklized);
 
+    signal isOpExists <== IsEqual()([operator, 11]);
+
     // if operator == exists and value[0] == 0 ($exists == false), then claimPathNotExists = 1 (check non-inclusion),
     // otherwise claimPathNotExists = 0 (check inclusion)
-    signal claimPathNotExists <== AND()(IsEqual()([operator, 11]), IsZero()(value[0]));
+    signal claimPathNotExists <== AND()(isOpExists, IsZero()(value[0]));
 
     // check path/in node exists in merkle tree specified by jsonldRoot
     SMTVerifier(claimLevels)(
@@ -58,11 +60,17 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     );
 
     // For non-merklized credentials exists / non-exist operators should always fail
-    signal isOpExists <== IsEqual()([operator, 11]);
     ForceEqualIfEnabled()(
         AND()(enabled,  NOT()(merklized)),
         [isOpExists, 0]
     );
+
+    // Restrict exists operator input values to 0 and 1
+    ForceEqualIfEnabled()(
+        AND()(enabled,  isOpExists),
+        [value[0] * (value[0] - 1), 0]
+    );
+
 
     /////////////////////////////////////////////////////////////////
     // Query Operator Processing
