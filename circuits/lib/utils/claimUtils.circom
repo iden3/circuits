@@ -7,6 +7,7 @@ include "../../../node_modules/circomlib/circuits/mux3.circom";
 include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/mux2.circom";
 include "./idUtils.circom";
+include "./babyjubjub.circom";
 
 // getClaimSubjectOtherIden checks that a claim Subject is OtherIden and outputs the identity within.
 template getClaimSubjectOtherIden() {
@@ -213,6 +214,8 @@ template verifyClaimSignature() {
     signal input pubKeyX;
     signal input pubKeyY;
 
+    ForceBabyCheckIfEnabled()(enabled, sigR8x, sigR8y);
+
     // signature verification
     EdDSAPoseidonVerifier()(
         enabled <== enabled,
@@ -235,6 +238,8 @@ template checkDataSignatureWithPubKeyInClaim() {
 
     component getPubKey = getPubKeyFromClaim();
     getPubKey.claim <== claim;
+
+    ForceBabyCheckIfEnabled()(enabled, signatureR8X, signatureR8Y);
 
     EdDSAPoseidonVerifier()(
         enabled <== enabled,
