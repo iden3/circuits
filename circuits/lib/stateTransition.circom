@@ -55,8 +55,8 @@ template StateTransition(IdOwnershipLevels) {
     ForceEqualIfEnabled()(one, [stateIsNotZero, 0]);
 
     // old & new state checks
-    signal oldNewNotEqual <== IsEqual()([oldUserState, newUserState]);
-    ForceEqualIfEnabled()(one, [oldNewNotEqual, 0]);
+    signal oldNewEqual <== IsEqual()([oldUserState, newUserState]);
+    ForceEqualIfEnabled()(one, [oldNewEqual, 0]);
 
     // check userID ownership by correct signature of a hash of old state and new state
     signal challenge <== Poseidon(2)([oldUserState, newUserState]);

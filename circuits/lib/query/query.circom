@@ -20,7 +20,7 @@ include "comparators.circom";
       8 - greater than or equal
       9 - between (value[0] <= in <= value[1])
       10 - not between
-      11 - exist (true / false)
+      11 - exists (true / false)
     Modifier/computation operators:
       16 - selective disclosure (16 = 10000 binary)
 */
