@@ -89,7 +89,7 @@ template getClaimHeader() {
     signal output schema;
     signal output {binary} claimFlags[32];
 
-    component i0Bits = Num2Bits(254);
+    component i0Bits = Num2Bits_strict();
     i0Bits.in <== claim[0];
 
     component schemaNum = Bits2Num(128);
@@ -120,7 +120,7 @@ template getClaimRevNonce() {
 
     component claimRevNonce = Bits2Num(64);
 
-    component v0Bits = Num2Bits(254);
+    component v0Bits = Num2Bits_strict();
     v0Bits.in <== claim[4];
     for (var i=0; i<64; i++) {
         claimRevNonce.in[i] <== v0Bits.out[i];
@@ -311,7 +311,7 @@ template getClaimExpiration() {
 
     component expirationBits = Bits2Num(64);
 
-    component v0Bits = Num2Bits(254);
+    component v0Bits = Num2Bits_strict();
     v0Bits.in <== claim[4];
     for (var i=0; i<64; i++) {
         expirationBits.in[i] <== v0Bits.out[i+64];
