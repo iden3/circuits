@@ -27,8 +27,10 @@ describe("Test linkedMultiQuery10.circom", function () {
 
     const basePath = '../../testvectorgen/credentials/linked/testdata/linked'
     const tests = [
-        // sig
+
         require(`${basePath}/one_query.json`),
+        require(`${basePath}/two_queries.json`),
+
     ];
 
     tests.forEach(({ desc, inputs, expOut }) => {

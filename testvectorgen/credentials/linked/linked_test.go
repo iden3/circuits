@@ -56,11 +56,26 @@ func Test_OneQuery(t *testing.T) {
 
 	queries := []Query{
 		{
-			Operator: 2, // lt
+			Operator: utils.LT, // lt
 			Values:   []*big.Int{new(big.Int).SetInt64(20020101)},
 		},
 	}
-	generate(t, desc, "linked/one_query", 2, queries)
+	generate(t, desc, "linked/one_query", queries)
+}
+func Test_TwoQueries(t *testing.T) {
+	desc := "Linked query count: 2,  operator: LT , NE"
+
+	queries := []Query{
+		{
+			Operator: utils.LT,
+			Values:   []*big.Int{new(big.Int).SetInt64(20020101)},
+		},
+		{
+			Operator: utils.NE,
+			Values:   []*big.Int{new(big.Int).SetInt64(20030101)},
+		},
+	}
+	generate(t, desc, "linked/two_queries", queries)
 }
 
 // Query represents basic request to claim field with MTP and without
@@ -69,7 +84,7 @@ type Query struct {
 	Values   []*big.Int
 }
 
-func generate(t *testing.T, desc string, fileName string, operator int, queries []Query) {
+func generate(t *testing.T, desc string, fileName string, queries []Query) {
 	var err error
 
 	isJSONLD := true
