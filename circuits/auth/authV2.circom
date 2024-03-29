@@ -136,18 +136,28 @@ template checkAuthV2(IdOwnershipLevels, onChainLevels) {
         challengeSignatureS
     );
 
-    /* Check on-chain SMT inclusion existence */
-    signal cutId <== cutId()(genesisID);
+    /* Check if state is genesis and if genesisId is valid */
 
     signal cutState <== cutState()(state);
 
-    signal isStateGenesis <== IsEqual()([cutId, cutState]);
+    component genesisIdParts = SplitID();
+    genesisIdParts.id <== genesisID;
+
+    signal calculatedChecksum <== CalculateIdChecksum()(genesisIdParts.typ, genesisIdParts.genesis);
+    ForceEqualIfEnabled()(
+        enabled,
+        [genesisIdParts.checksum, calculatedChecksum]
+    );
+
+    signal isStateGenesis <== IsEqual()([genesisIdParts.genesis, cutState]);
+
+    /* Check on-chain SMT inclusion existence */
 
     signal genesisIDHash <== Poseidon(1)([genesisID]);
 
     SMTVerifier(onChainLevels)(
         enabled <== enabled,
-        fnc <== isStateGenesis, // non-inclusion in case if genesis state, otherwise inclusion
+        fnc <== isStateGenesis, // non-inclusion in case of genesis state, otherwise inclusion
         root <== gistRoot,
         siblings <== gistMtp,
         oldKey <== gistMtpAuxHi,
