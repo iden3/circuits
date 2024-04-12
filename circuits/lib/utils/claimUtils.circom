@@ -286,7 +286,7 @@ template getValueByIndex(){
     value <== mux.out;
 }
 
-// verify that the claim has expiration time and it is less then timestamp
+// verify that provided timestamp is less than claim expiration time
 template verifyExpirationTime() {
     signal input {binary} expirationFlag; // claimFlags[3] (expiration flag) is set
     signal input claim[8];

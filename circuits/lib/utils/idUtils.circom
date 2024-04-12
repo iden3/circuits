@@ -102,6 +102,9 @@ template GatherID() {
 template TakeNBits(n) {
     signal input in;
     signal output out;
+
+    assert(n <= 254);
+
     // We take only n least significant bits from 254 bit number.
     component bits = Num2Bits_strict();
     bits.in <== in;
