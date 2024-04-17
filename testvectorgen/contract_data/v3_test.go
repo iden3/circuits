@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"testing"
 
+	"test/utils"
+
 	"github.com/ethereum/go-ethereum/common"
 	core "github.com/iden3/go-iden3-core/v2"
 	"github.com/iden3/go-iden3-crypto/babyjub"
@@ -16,12 +18,56 @@ import (
 	"github.com/iden3/go-schema-processor/v2/merklize"
 	"github.com/iden3/go-schema-processor/v2/verifiable"
 	"github.com/stretchr/testify/require"
-	"test/utils"
 )
 
 const (
 	ethAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	UserPK     = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
+	IssuerPK   = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
+	timestamp  = "1642074362"
+	requestID  = "32"
 )
+
+type StateTransitionInputs struct {
+	AuthClaim               *core.Claim `json:"authClaim"`
+	AuthClaimMtp            []string    `json:"authClaimMtp"`
+	AuthClaimNonRevMtp      []string    `json:"authClaimNonRevMtp"`
+	AuthClaimNonRevMtpAuxHi string      `json:"authClaimNonRevMtpAuxHi"`
+	AuthClaimNonRevMtpAuxHv string      `json:"authClaimNonRevMtpAuxHv"`
+	AuthClaimNonRevMtpNoAux string      `json:"authClaimNonRevMtpNoAux"`
+	ClaimsTreeRoot          string      `json:"claimsTreeRoot"`
+	IsOldStateGenesis       string      `json:"isOldStateGenesis"`
+	NewUserState            string      `json:"newUserState"`
+	OldUserState            string      `json:"oldUserState"`
+	RevTreeRoot             string      `json:"revTreeRoot"`
+	RootsTreeRoot           string      `json:"rootsTreeRoot"`
+	SignatureR8X            string      `json:"signatureR8x"`
+	SignatureR8Y            string      `json:"signatureR8y"`
+	SignatureS              string      `json:"signatureS"`
+	UserID                  string      `json:"userID"`
+	NewAuthClaimMtp         []string    `json:"newAuthClaimMtp"`
+	NewClaimsTreeRoot       string      `json:"newClaimsTreeRoot"`
+	NewRevTreeRoot          string      `json:"newRevTreeRoot"`
+	NewRootsTreeRoot        string      `json:"newRootsTreeRoot"`
+}
+
+type StateTransitionOutputs struct {
+	ID                string `json:"userID"`
+	NewUserState      string `json:"newUserState"`
+	OldUserState      string `json:"oldUserState"`
+	IsOldStateGenesis string `json:"isOldStateGenesis"`
+}
+
+type TestDataStateTransition struct {
+	Desc string                 `json:"desc"`
+	In   StateTransitionInputs  `json:"inputs"`
+	Out  StateTransitionOutputs `json:"expOut"`
+}
+
+type gistData struct {
+	id    *big.Int
+	state *big.Int
+}
 
 func Test_Generate_Test_CasesV3(t *testing.T) {
 
@@ -84,6 +130,113 @@ func Test_Generate_Test_CasesV3(t *testing.T) {
 	generateData(t, "BJJ: Issuer genesis state / user - first state", []*gistData{
 		{userId, userFirstState},
 	}, true, false, true, false, "v3/valid_bjj_user_first_issuer_genesis_v3", verifiable.BJJSignatureProofType, 1)
+}
+
+func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, secondaryPK, desc, fileName string, isSubjectIDProfile bool, isEthBased bool) (*big.Int, *big.Int) {
+
+	var err error
+	primaryEntity := utils.NewIdentity(t, primaryPK)
+
+	var secondaryEntity *utils.IdentityTest
+
+	if !isEthBased {
+		secondaryEntity = utils.NewIdentity(t, secondaryPK)
+	} else {
+		// generate onchain identity
+		secondaryEntity = utils.NewEthereumBasedIdentity(t, ethAddress)
+	}
+
+	isGenesis := "1"
+	// user
+	authMTProof := primaryEntity.AuthMTPStrign(t)
+
+	authNonRevMTProof, nodeAuxNonRev := primaryEntity.ClaimRevMTP(t, primaryEntity.AuthClaim)
+
+	oldState := primaryEntity.State(t) // old state is genesis
+	oldCltRoot := primaryEntity.Clt.Root().BigInt().String()
+	oldRevRoot := primaryEntity.Ret.Root().BigInt().String()
+	oldRotRoot := primaryEntity.Rot.Root().BigInt().String()
+
+	//if genesis == false {
+	// extract pubKey
+
+	subjectID := secondaryEntity.ID
+	if isSubjectIDProfile {
+		nonceSubject := big.NewInt(999)
+		subjectID, err = core.ProfileID(secondaryEntity.ID, nonceSubject)
+		require.NoError(t, err)
+	}
+
+	_, secondaryEntityClaim := utils.DefaultJSONNormalUserClaim(t, subjectID)
+	primaryEntity.AddClaim(t, secondaryEntityClaim)
+
+	if nextState {
+		isGenesis = "0"
+		// add claim just to change the state
+
+		oldState = primaryEntity.State(t) // old state is genesis
+		oldCltRoot = primaryEntity.Clt.Root().BigInt().String()
+		oldRevRoot = primaryEntity.Ret.Root().BigInt().String()
+		oldRotRoot = primaryEntity.Rot.Root().BigInt().String()
+		authMTProof = primaryEntity.AuthMTPStrign(t)
+
+		authNonRevMTProof, nodeAuxNonRev = primaryEntity.ClaimRevMTP(t, primaryEntity.AuthClaim)
+		primaryEntityClaim := utils.DefaultUserClaim(t, primaryEntity.ID, nil)
+		primaryEntity.AddClaim(t, primaryEntityClaim)
+	}
+
+	hashOldAndNewStates, err := poseidon.Hash(
+		[]*big.Int{oldState, primaryEntity.State(t)})
+	require.NoError(t, err)
+
+	sig := primaryEntity.Sign(hashOldAndNewStates)
+	require.NoError(t, err)
+
+	newAuthMTProof := primaryEntity.AuthMTPStrign(t)
+	newCltRoot := primaryEntity.Clt.Root().BigInt().String()
+	newRevRoot := primaryEntity.Ret.Root().BigInt().String()
+	newRotRoot := primaryEntity.Rot.Root().BigInt().String()
+
+	inputs := StateTransitionInputs{
+		AuthClaim:               primaryEntity.AuthClaim,
+		AuthClaimMtp:            authMTProof,
+		AuthClaimNonRevMtp:      authNonRevMTProof,
+		AuthClaimNonRevMtpAuxHi: nodeAuxNonRev.Key,
+		AuthClaimNonRevMtpAuxHv: nodeAuxNonRev.Value,
+		AuthClaimNonRevMtpNoAux: nodeAuxNonRev.NoAux,
+		ClaimsTreeRoot:          oldCltRoot,
+		RevTreeRoot:             oldRevRoot,
+		RootsTreeRoot:           oldRotRoot,
+		IsOldStateGenesis:       isGenesis,
+		NewUserState:            primaryEntity.State(t).String(),
+		OldUserState:            oldState.String(),
+		SignatureR8X:            sig.R8.X.String(),
+		SignatureR8Y:            sig.R8.Y.String(),
+		SignatureS:              sig.S.String(),
+		UserID:                  primaryEntity.ID.BigInt().String(),
+		NewAuthClaimMtp:         newAuthMTProof,
+		NewClaimsTreeRoot:       newCltRoot,
+		NewRevTreeRoot:          newRevRoot,
+		NewRootsTreeRoot:        newRotRoot,
+	}
+
+	out := StateTransitionOutputs{
+		ID:                primaryEntity.ID.BigInt().String(),
+		NewUserState:      primaryEntity.State(t).String(),
+		OldUserState:      oldState.String(),
+		IsOldStateGenesis: isGenesis,
+	}
+
+	json_, err := json.Marshal(TestDataStateTransition{
+		Desc: desc,
+		In:   inputs,
+		Out:  out,
+	})
+	require.NoError(t, err)
+
+	utils.SaveTestVector(t, fileName, string(json_))
+
+	return primaryEntity.ID.BigInt(), primaryEntity.State(t)
 }
 
 func generateData(t *testing.T, desc string, gistData []*gistData, userFirstState bool, userSecondState bool, issuetGenesisState bool, issuerSecondState bool, fileName string, testProofType verifiable.ProofType, isBJJAuthEnabled int) {
