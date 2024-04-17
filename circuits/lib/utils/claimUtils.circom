@@ -7,6 +7,7 @@ include "../../../node_modules/circomlib/circuits/mux3.circom";
 include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/mux2.circom";
 include "./idUtils.circom";
+include "./babyjubjub.circom";
 
 // getClaimSubjectOtherIden checks that a claim Subject is OtherIden and outputs the identity within.
 template getClaimSubjectOtherIden() {
@@ -89,7 +90,7 @@ template getClaimHeader() {
     signal output schema;
     signal output {binary} claimFlags[32];
 
-    component i0Bits = Num2Bits(254);
+    component i0Bits = Num2Bits_strict();
     i0Bits.in <== claim[0];
 
     component schemaNum = Bits2Num(128);
@@ -120,7 +121,7 @@ template getClaimRevNonce() {
 
     component claimRevNonce = Bits2Num(64);
 
-    component v0Bits = Num2Bits(254);
+    component v0Bits = Num2Bits_strict();
     v0Bits.in <== claim[4];
     for (var i=0; i<64; i++) {
         claimRevNonce.in[i] <== v0Bits.out[i];
@@ -213,6 +214,8 @@ template verifyClaimSignature() {
     signal input pubKeyX;
     signal input pubKeyY;
 
+    ForceBabyCheckIfEnabled()(enabled, sigR8x, sigR8y);
+
     // signature verification
     EdDSAPoseidonVerifier()(
         enabled <== enabled,
@@ -235,6 +238,8 @@ template checkDataSignatureWithPubKeyInClaim() {
 
     component getPubKey = getPubKeyFromClaim();
     getPubKey.claim <== claim;
+
+    ForceBabyCheckIfEnabled()(enabled, signatureR8X, signatureR8Y);
 
     EdDSAPoseidonVerifier()(
         enabled <== enabled,
@@ -281,7 +286,7 @@ template getValueByIndex(){
     value <== mux.out;
 }
 
-// verify that the claim has expiration time and it is less then timestamp
+// verify that provided timestamp is less than claim expiration time
 template verifyExpirationTime() {
     signal input {binary} expirationFlag; // claimFlags[3] (expiration flag) is set
     signal input claim[8];
@@ -311,7 +316,7 @@ template getClaimExpiration() {
 
     component expirationBits = Bits2Num(64);
 
-    component v0Bits = Num2Bits(254);
+    component v0Bits = Num2Bits_strict();
     v0Bits.in <== claim[4];
     for (var i=0; i<64; i++) {
         expirationBits.in[i] <== v0Bits.out[i+64];

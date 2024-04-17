@@ -59,10 +59,10 @@ template LessThan254() {
     signal input in[2];
     signal output out;
 
-    component n0b = Num2Bits(254);
+    component n0b = Num2Bits_strict();
     n0b.in <== in[0];
 
-    component n1b = Num2Bits(254);
+    component n1b = Num2Bits_strict();
     n1b.in <== in[1];
 
     // numbers for high 4 bits

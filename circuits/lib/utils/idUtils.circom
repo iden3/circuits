@@ -102,8 +102,11 @@ template GatherID() {
 template TakeNBits(n) {
     signal input in;
     signal output out;
+
+    assert(n <= 254);
+
     // We take only n least significant bits from 254 bit number.
-    component bits = Num2Bits(254);
+    component bits = Num2Bits_strict();
     bits.in <== in;
 
     component outBits = Bits2Num(n);
@@ -178,10 +181,10 @@ template cutId() {
 	signal input in;
 	signal output out;
 
-	signal idBits[256] <== Num2Bits(256)(in);
+	signal idBits[248] <== Num2Bits(248)(in);
 
-	component cut = Bits2Num(256-16-16-8);
-	for (var i=16; i<256-16-8; i++) {
+	component cut = Bits2Num(216);
+	for (var i=16; i<248-16; i++) {
 		cut.in[i-16] <== idBits[i];
 	}
 	out <== cut.out;
@@ -191,12 +194,15 @@ template cutState() {
 	signal input in;
 	signal output out;
 
-	signal stateBits[256] <== Num2Bits(256)(in);
+	signal stateBits[254] <== Num2Bits_strict()(in);
 
-	component cut = Bits2Num(256-16-16-8);
-	for (var i=0; i<256-16-16-8; i++) {
+	component cut = Bits2Num(216);
+	// two most significant bits of 256-bit number are always 0, because we have 254-bit prime field
+	for (var i=0; i<216-2; i++) {
 		cut.in[i] <== stateBits[i+16+16+8];
 	}
+	cut.in[214] <== 0;
+	cut.in[215] <== 0;
 	out <== cut.out;
 }
 
