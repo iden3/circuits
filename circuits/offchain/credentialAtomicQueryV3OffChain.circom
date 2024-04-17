@@ -5,7 +5,7 @@ include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/mux4.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
-include "../auth/authV2.circom";
+include "../auth/authV3.circom";
 include "../lib/linked/linkId.circom";
 include "../lib/query/processQueryWithModifiers.circom";
 include "../lib/utils/nullify.circom";

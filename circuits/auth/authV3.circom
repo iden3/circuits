@@ -7,7 +7,7 @@ include "../lib/idOwnership.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/utils/safeOne.circom";
 
-template AuthV2(IdOwnershipLevels, onChainLevels) {
+template AuthV3(IdOwnershipLevels, onChainLevels) {
     signal input genesisID;
     // random number, which should be stored by user if there is a need to
     // generate the same userID (ProfileID) output for different proofs
@@ -52,7 +52,7 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     // get safe zero and one values to be used in ForceEqualIfEnabled
     signal {binary} one <== SafeOne()(genesisID);
 
-    checkAuthV2(IdOwnershipLevels, onChainLevels)(
+    checkAuthV3(IdOwnershipLevels, onChainLevels)(
         one,
         genesisID,
         state,
@@ -80,7 +80,7 @@ template AuthV2(IdOwnershipLevels, onChainLevels) {
     userID <== SelectProfile()(genesisID, profileNonce);
 }
 
-template checkAuthV2(IdOwnershipLevels, onChainLevels) {
+template checkAuthV3(IdOwnershipLevels, onChainLevels) {
     signal input {binary} enabled;
 
     signal input genesisID;

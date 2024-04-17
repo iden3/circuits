@@ -4,7 +4,7 @@ include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 include "../lib/query/comparators.circom";
-include "../auth/authV2.circom";
+include "../auth/authV3.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/utils/spongeHash.circom";
@@ -160,7 +160,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
     // Modifier/Computation Operator output ($sd, $nullify)
     signal output operatorOutput;
 
-    // Enabled/disable checkAuthV2 verification
+    // Enabled/disable checkAuthV3 verification
     signal input isBJJAuthEnabled;
 
     // flag indicates if merklized flag set in issuer claim (if set MTP is used to verify that
@@ -178,7 +178,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
 
     ForceEqualIfEnabled()(NOT()(safeIsBJJAuthEnabled), [profileNonce, 0]);
 
-    checkAuthV2(idOwnershipLevels, onChainLevels)(
+    checkAuthV3(idOwnershipLevels, onChainLevels)(
         safeIsBJJAuthEnabled, // enabled
         userGenesisID,
         userState, // user state
