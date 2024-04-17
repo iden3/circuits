@@ -22,7 +22,7 @@ const (
 	timestamp = "1642074362"
 )
 
-type AuthV2Inputs struct {
+type AuthV3Inputs struct {
 	UserGenesisID               string      `json:"genesisID"`
 	Nonce                       string      `json:"profileNonce"`
 	UserAuthClaim               *core.Claim `json:"authClaim"`
@@ -46,16 +46,16 @@ type AuthV2Inputs struct {
 	GistMtpNoAux                string      `json:"gistMtpNoAux"`
 }
 
-type AuthV2Outputs struct {
+type AuthV3Outputs struct {
 	ID        string `json:"userID"`
 	GistRoot  string `json:"gistRoot"`
 	Challenge string `json:"challenge"`
 }
 
-type TestDataAuthV2 struct {
+type TestDataAuthV3 struct {
 	Desc string        `json:"desc"`
-	In   AuthV2Inputs  `json:"inputs"`
-	Out  AuthV2Outputs `json:"expOut"`
+	In   AuthV3Inputs  `json:"inputs"`
+	Out  AuthV3Outputs `json:"expOut"`
 }
 
 func Test_UserID_Subject(t *testing.T) {
@@ -156,7 +156,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 	gistRoot := gisTree.Root()
 	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
-	inputs := AuthV2Inputs{
+	inputs := AuthV3Inputs{
 		UserGenesisID:               user.ID.BigInt().String(),
 		Nonce:                       nonce.String(),
 		UserAuthClaim:               user.AuthClaim,
@@ -180,13 +180,13 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 		GistMtpNoAux:                gistNodAux.NoAux,
 	}
 
-	out := AuthV2Outputs{
+	out := AuthV3Outputs{
 		ID:        userProfile.BigInt().String(),
 		Challenge: challenge.String(),
 		GistRoot:  gistRoot.BigInt().String(),
 	}
 
-	json, err := json2.Marshal(TestDataAuthV2{
+	json, err := json2.Marshal(TestDataAuthV3{
 		desc,
 		inputs,
 		out,
