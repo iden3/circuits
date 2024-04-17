@@ -181,10 +181,10 @@ template cutId() {
 	signal input in;
 	signal output out;
 
-	signal idBits[254] <== Num2Bits_strict()(in);
+	signal idBits[248] <== Num2Bits(248)(in);
 
 	component cut = Bits2Num(216);
-	for (var i=16; i<256-16-8; i++) {
+	for (var i=16; i<248-16; i++) {
 		cut.in[i-16] <== idBits[i];
 	}
 	out <== cut.out;
