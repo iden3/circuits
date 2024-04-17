@@ -18,6 +18,6 @@ template SafeOne() {
     signal tmp <== IsZero()(inputSignal);
     signal tmp2 <== NOT()(tmp);
     signal zero <== IsEqual()([tmp, tmp2]);
-    signal output one <== IsZero()(zero);
+    signal output {binary} one <== IsZero()(zero);
     zero * one === 0;
 }

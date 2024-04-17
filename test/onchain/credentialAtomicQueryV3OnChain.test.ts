@@ -42,8 +42,8 @@ describe("Test credentialAtomicQueryV3OnChain.circom", function () {
         require(`${sigBasePath}/nullify.json`),
         require(`${sigBasePath}/revoked_claim_without_revocation_check.json`),
         require(`${sigBasePath}/jsonld_non_inclusion.json`),
-        require(`${sigBasePath}/auth_check_disabled.json`),
         require(`${sigBasePath}/noop_operator.json`),
+        require(`${sigBasePath}/onchainIdentity.json`),
 
         // mtp
         require(`${mtpBasePath}/claimIssuedOnProfileID.json`),
@@ -57,8 +57,8 @@ describe("Test credentialAtomicQueryV3OnChain.circom", function () {
         require(`${mtpBasePath}/selective_disclosure.json`),
         require(`${mtpBasePath}/nullify.json`),
         require(`${mtpBasePath}/revoked_claim_without_revocation_check.json`),
-        require(`${mtpBasePath}/auth_check_disabled.json`),
         require(`${mtpBasePath}/noop_operator.json`),
+        require(`${mtpBasePath}/onchainIdentity.json`),
     ];
 
     tests.forEach(({ desc, inputs, expOut }) => {

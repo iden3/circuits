@@ -3,9 +3,12 @@ pragma circom 2.1.1;
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "../../../node_modules/circomlib/circuits/gates.circom";
 
-// nElements - number of value elements
-// Example nElements = 3, '1' in ['12', '1231', '9999'], 1 not in array of values
-template IN (valueArraySize){
+// Checks if value `in` is included is in value array
+// Returns 1 if at least one value is equal to `in`, 0 otherwise
+// valueArraySize - size of value array
+// Example: IN(3)(1, [12, 1231, 9999]) ==> 0 (1 is not in array of values)
+// Example: IN(3)(1231, [12, 1231, 9999]) ==> 1 (1231 is in array of values)
+template IN(valueArraySize){
 
         signal input in;
         signal input value[valueArraySize];
@@ -25,7 +28,8 @@ template IN (valueArraySize){
 }
 
 // Same as IN but stops checking on valueArraySize
-template InWithDynamicArraySize (maxValueArraySize){
+// Example: InWithDynamicArraySize(5)(0, [12, 1231, 9999, 0, 0], 3) ==> 0 (0 is not in the first 3 elements of value array)
+template InWithDynamicArraySize(maxValueArraySize){
         signal input in;
         signal input value[maxValueArraySize];
         signal input valueArraySize;
@@ -38,7 +42,7 @@ template InWithDynamicArraySize (maxValueArraySize){
         signal lt[maxValueArraySize];
         isEq[0] <== 0;
         for (var i=0; i<maxValueArraySize; i++) {
-            lt[i] <== LessThan(8)([i, valueArraySize]);
+            lt[i] <== LessThan(9)([i, valueArraySize]);
             eq[i] = IsEqual();
             eq[i].in[0] <== in;
             eq[i].in[1] <== value[i];
@@ -48,15 +52,17 @@ template InWithDynamicArraySize (maxValueArraySize){
         out <== isEq[maxValueArraySize];
 }
 
+// Checks if first number is less than second
 // As LessThan but for all possible numbers from field (not only 252-bit-max like LessThan)
+// Treats numbers as non-negative 254-bit numbers
 template LessThan254() {
     signal input in[2];
     signal output out;
 
-    component n0b = Num2Bits(254);
+    component n0b = Num2Bits_strict();
     n0b.in <== in[0];
 
-    component n1b = Num2Bits(254);
+    component n1b = Num2Bits_strict();
     n1b.in <== in[1];
 
     // numbers for high 4 bits

@@ -7,9 +7,12 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/iden3/go-iden3-crypto/babyjub"
 	"test/utils"
 
 	core "github.com/iden3/go-iden3-core/v2"
+
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
@@ -18,9 +21,10 @@ import (
 )
 
 const (
-	userPK    = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
-	issuerPK  = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
-	timestamp = "1642074362"
+	userPK     = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69e"
+	issuerPK   = "28156abe7fe2fd433dc9df969286b96666489bac508612d0e16593e944c4f69d"
+	timestamp  = "1642074362"
+	ethAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 )
 
 var requestID = big.NewInt(41)
@@ -131,7 +135,6 @@ type Outputs struct {
 	CircuitQueryHash       string `json:"circuitQueryHash"`
 	GistRoot               string `json:"gistRoot"`
 	Timestamp              string `json:"timestamp"`
-	Merklized              string `json:"merklized"`
 	ProofType              string `json:"proofType"` // 1 for sig, 2 for mtp
 	Challenge              string `json:"challenge"`
 	IssuerState            string `json:"issuerState"`
@@ -258,13 +261,13 @@ func Test_Between(t *testing.T) {
 	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/between_operator", utils.BETWEEN, &value, Sig, 1)
 }
 
-func Test_No_AuthV2_Check(t *testing.T) {
-	desc := "Skip Auth V2 check"
+func Test_OnchainIdentity(t *testing.T) {
+	desc := "Skip Auth V2 check. Onchain identity (based on ethereum address)"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
-	value := []string{"8", "10"}
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/auth_check_disabled", utils.BETWEEN, &value, Mtp, 0)
-	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/auth_check_disabled", utils.BETWEEN, &value, Sig, 0)
+	value := []string{"11"}
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "mtp/onchainIdentity", utils.LT, &value, Mtp, 0)
+	generateTestDataWithOperator(t, desc, isUserIDProfile, isSubjectIDProfile, "0", "sig/onchainIdentity", utils.LT, &value, Sig, 0)
 }
 
 func Test_Less_Than_Eq(t *testing.T) {
@@ -314,11 +317,18 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		valueInput = *value
 	}
 
+	var user *utils.IdentityTest
+
+	if isBJJAuthEnabled == 1 {
+		user = utils.NewIdentity(t, userPK)
+	} else {
+		// generate onchain identity
+		user = utils.NewEthereumBasedIdentity(t, ethAddress)
+	}
 	valueArraySize := len(valueInput)
 
 	valueInput = utils.PrepareStrArray(valueInput, 64)
 
-	user := utils.NewIdentity(t, userPK)
 	issuer := utils.NewIdentity(t, issuerPK)
 
 	userProfileID := user.ID
@@ -458,24 +468,60 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 
 	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
 
-	challenge := big.NewInt(12345)
-
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
 	require.Nil(t, err)
 	err = gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 	require.NoError(t, err)
+
+	var authMTProof []string
+	var challenge *big.Int
+	var authNonRevMTProof []string
+	var nodeAuxNonRev utils.NodeAuxValue
+	var sig *babyjub.Signature
+	var gistRoot *merkletree.Hash
+	var gistProof []string
+	var gistNodeAux utils.NodeAuxValue
 	// user
-	authMTProof := user.AuthMTPStrign(t)
+	if isBJJAuthEnabled == 1 {
+		challenge = big.NewInt(12345)
+		authMTProof = user.AuthMTPStrign(t)
+		authNonRevMTProof, nodeAuxNonRev = user.ClaimRevMTP(t, user.AuthClaim)
+		sig = user.Sign(challenge)
+		gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
+		require.NoError(t, err)
+		gistRoot = gisTree.Root()
+		gistProof, gistNodeAux = utils.PrepareProof(gistProofRaw, utils.GistLevels)
 
-	authNonRevMTProof, nodeAuxNonRev := user.ClaimRevMTP(t, user.AuthClaim)
+	} else {
 
-	sig := user.Sign(challenge)
+		emptyArr := make([]*merkletree.Hash, 0)
+		addr := common.HexToAddress(ethAddress)
+		challenge = new(big.Int).SetBytes(merkletree.SwapEndianness(addr.Bytes()))
+		authMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
+		authNonRevMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
+		user.AuthClaim, err = core.NewClaim(core.AuthSchemaHash)
+		require.NoError(t, err)
+		nodeAuxNonRev = utils.NodeAuxValue{
+			Key:   merkletree.HashZero.String(),
+			Value: merkletree.HashZero.String(),
+			NoAux: "0",
+		}
+		sig = &babyjub.Signature{
+			R8: &babyjub.Point{
+				X: new(big.Int),
+				Y: new(big.Int),
+			},
+			S: new(big.Int),
+		}
 
-	gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
-	require.NoError(t, err)
-
-	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
+		gistRoot = &merkletree.HashZero
+		gistProof = utils.PrepareSiblingsStr(emptyArr, utils.GistLevels)
+		gistNodeAux = utils.NodeAuxValue{
+			Key:   merkletree.HashZero.String(),
+			Value: merkletree.HashZero.String(),
+			NoAux: "0",
+		}
+	}
 
 	inputs := Inputs{
 		RequestID:                       requestID.String(),
@@ -497,9 +543,9 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		UserState:                       user.State(t).String(),
 		GistRoot:                        gistRoot.BigInt().String(),
 		GistMtp:                         gistProof,
-		GistMtpAuxHi:                    gistNodAux.Key,
-		GistMtpAuxHv:                    gistNodAux.Value,
-		GistMtpNoAux:                    gistNodAux.NoAux,
+		GistMtpAuxHi:                    gistNodeAux.Key,
+		GistMtpAuxHv:                    gistNodeAux.Value,
+		GistMtpNoAux:                    gistNodeAux.NoAux,
 		ClaimSubjectProfileNonce:        nonceSubject.String(),
 		IssuerID:                        issuer.ID.BigInt().String(),
 		IssuerClaim:                     claim,
@@ -580,25 +626,25 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		)
 		require.NoError(t, err)
 	}
+	merklizedBigInt, ok := big.NewInt(0).SetString(merklized, 10)
 
 	firstPartQueryHash, err := poseidon.Hash([]*big.Int{
 		claimSchemaInt,
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		pathKey,
-		big.NewInt(0),
+		merklizedBigInt,
 		valuesHash,
 	})
 	require.NoError(t, err)
-	merklizedBigInt, ok := big.NewInt(0).SetString(merklized, 10)
 	require.True(t, ok)
 	circuitQueryHash, err := poseidon.Hash([]*big.Int{
 		firstPartQueryHash,
 		big.NewInt(int64(valueArraySize)),
-		merklizedBigInt,
 		big.NewInt(int64(isRevocationChecked)),
 		verifierID,
 		nullifierSessionID_,
+		new(big.Int),
 	})
 	require.NoError(t, err)
 
@@ -622,7 +668,6 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		IssuerClaimNonRevState: issuer.State(t).String(),
 		CircuitQueryHash:       circuitQueryHash.String(),
 		Timestamp:              timestamp,
-		Merklized:              merklized,
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),
 		ProofType:              proofType,
@@ -805,7 +850,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		big.NewInt(int64(inputs.SlotIndex)),
 		big.NewInt(int64(inputs.Operator)),
 		pathKey,
-		big.NewInt(1),
+		big.NewInt(1), // merklized
 		valuesHash,
 	})
 	require.NoError(t, err)
@@ -818,9 +863,9 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		firstPartQueryHash,
 		big.NewInt(int64(valueArraySize)),
 		big.NewInt(1),
-		big.NewInt(1),
 		verifierID,
 		nullifierSessionID_,
+		big.NewInt(0),
 	})
 	require.NoError(t, err)
 
@@ -830,7 +875,6 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
 		Timestamp:              timestamp,
-		Merklized:              "1",
 		CircuitQueryHash:       circuitQueryHash.String(),
 		Challenge:              challenge.String(),
 		GistRoot:               gistRoot.BigInt().String(),

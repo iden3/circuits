@@ -9,7 +9,7 @@ include "comparators.circom";
 /*
   Operators:
     Query operators:
-      0 - noop, skip execution. Ignores all `in` and `value` passed to query, out 1
+      0 - noop. Ignores all `in` and `value` passed to query, out 1
       1 - equals
       2 - less than
       3 - greater than
@@ -18,15 +18,17 @@ include "comparators.circom";
       6 - not equals
       7 - less than or equal
       8 - greater than or equal
-      9 - between
+      9 - between (value[0] <= in <= value[1])
       10 - not between
-      11 - exist
+      11 - exists (true / false)
     Modifier/computation operators:
       16 - selective disclosure (16 = 10000 binary)
       17 - value commitment (17 = 10001 binary)
 */
 
-// Query template works only with Query operators (0-15), for the rest returns 0
+// Query template works only with Query operators (0-15).
+// Returns 1 if query operator is satisfied, 0 otherwise.
+// For modifier/computation operators (16-31) it always returns 0.
 template Query (maxValueArraySize) {
     // signals
     signal input in;
@@ -67,7 +69,7 @@ template Query (maxValueArraySize) {
     // modifier/computation operator. It's used in the final mux.
     _ <== opBits[4];
 
-    queryOpSatisfied.c[0] <== 1; // noop; skip execution
+    queryOpSatisfied.c[0] <== 1; // noop; always succeeds
     queryOpSatisfied.c[1] <== eq;
     queryOpSatisfied.c[2] <== lt;
     queryOpSatisfied.c[3] <== gt;
@@ -78,7 +80,7 @@ template Query (maxValueArraySize) {
     queryOpSatisfied.c[8] <== gte; // gte === !lt
     queryOpSatisfied.c[9] <== between; // between
     queryOpSatisfied.c[10] <== NOT()(between); // not between
-    queryOpSatisfied.c[11] <== 1; // exists;
+    queryOpSatisfied.c[11] <== 1; // exists(true/false) - actual check is done by checking inclusion/non-inclusion of claimPathKey in merklized root by SMTVerifier outside
     queryOpSatisfied.c[12] <== 0; // not used
     queryOpSatisfied.c[13] <== 0; // not used
     queryOpSatisfied.c[14] <== 0; // not used

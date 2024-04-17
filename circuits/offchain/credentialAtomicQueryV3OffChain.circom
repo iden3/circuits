@@ -5,16 +5,17 @@ include "../../node_modules/circomlib/circuits/mux1.circom";
 include "../../node_modules/circomlib/circuits/mux4.circom";
 include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
-include "../auth/authV2.circom";
+include "../auth/authV3.circom";
 include "../lib/linked/linkId.circom";
 include "../lib/query/processQueryWithModifiers.circom";
 include "../lib/utils/nullify.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/utils/safeOne.circom";
+include "../lib/utils/tags-managing.circom";
 
 template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArraySize) {
     // common outputs for Sig and MTP
-    signal output merklized;
+    signal output {binary} merklized;
     signal output userID;
 
     // common inputs for Sig and MTP
@@ -96,7 +97,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
     signal output operatorOutput;
 
     // get safe one values to be used in ForceEqualIfEnabled
-    signal one <== SafeOne()(userGenesisID);
+    signal {binary} one <== SafeOne()(userGenesisID);
 
     /////////////////////////////////////////////////////////////////
     // Claim Verification (id, schema, expiration, issuance, revocation)
@@ -120,8 +121,8 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
     // verify issuerClaim expiration time
     verifyExpirationTime()(issuerClaimHeader.claimFlags[3], issuerClaim, timestamp); // 322 constraints
     
-    signal isSig  <== IsEqual()([proofType, 1]);
-    signal isMTP <== IsEqual()([proofType, 2]);
+    signal {binary} isSig  <== IsEqual()([proofType, 1]);
+    signal {binary} isMTP <== IsEqual()([proofType, 2]);
     signal validProofType <== OR()(isSig, isMTP);
     ForceEqualIfEnabled()(one, [validProofType, 1]);
 
@@ -173,9 +174,11 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
         claimIssuanceIdenState <== issuerState
     ); // 11184 constraints
 
+    signal {binary} safeIsRevocationChecked <== AddBinaryTag()(isRevocationChecked);
+
     // check claim is not revoked
     checkClaimNotRevoked(issuerLevels)(
-        enabled <== isRevocationChecked,
+        enabled <== safeIsRevocationChecked,
         claim <== issuerClaim,
         claimNonRevMTP <== issuerClaimNonRevMtp,
         noAux <== issuerClaimNonRevMtpNoAux,
@@ -188,7 +191,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
     // 1. if Sig proof is provided we need to check non revocation of authClaim always
     // AND non revocation of issuerClaim only if isRevocationChecked = 1
     // 2. if MTP proof is provided we need to check non revocation of claim only if isRevocationChecked = 1
-    signal checkIssuerClaimNonRevState <== OR()(isSig, isRevocationChecked);
+    signal {binary} checkIssuerClaimNonRevState <== OR()(isSig, safeIsRevocationChecked);
 
     // verify issuer state for claim non-revocation proof
     checkIdenStateMatchesRoots()(
@@ -252,7 +255,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
 }
 
 template sigFlow(issuerLevels) {
-    signal input enabled;
+    signal input {binary} enabled;
     signal input issuerAuthClaim[8];
     signal input issuerAuthClaimNonRevMtp[issuerLevels];
     signal input issuerAuthClaimNonRevMtpNoAux;

@@ -12,7 +12,7 @@ include "utils/claimUtils.circom";
 include "utils/treeUtils.circom";
 
 template IdOwnership(nLevels) {
-    signal input enabled;
+    signal input {binary} enabled;
 
     signal input userState;
 

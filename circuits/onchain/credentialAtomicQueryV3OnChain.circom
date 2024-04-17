@@ -4,12 +4,13 @@ include "../../node_modules/circomlib/circuits/bitify.circom";
 include "../../node_modules/circomlib/circuits/comparators.circom";
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 include "../lib/query/comparators.circom";
-include "../auth/authV2.circom";
+include "../auth/authV3.circom";
 include "../lib/query/query.circom";
 include "../lib/utils/idUtils.circom";
 include "../lib/utils/spongeHash.circom";
 include "../offchain/credentialAtomicQueryV3OffChain.circom";
 include "../lib/utils/queryHash.circom";
+include "../lib/utils/tags-managing.circom";
 
 /**
 credentialAtomicQueryV3OnChain.circom - query claim value and verify claim issuer signature or mtp:
@@ -28,7 +29,6 @@ issuerLevels - Merkle tree depth level for claims issued by the issuer
 claimLevels - Merkle tree depth level for claim JSON-LD document
 maxValueArraySize - Number of elements in comparison array for in/notin operation if level = 3 number of values for
 comparison ["1", "2", "3"]
-idOwnershipLevels - Merkle tree depth level for personal claims
 onChainLevels - Merkle tree depth level for Auth claim on-chain
 */
 template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArraySize, idOwnershipLevels, onChainLevels) {
@@ -161,7 +161,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
     // Modifier/Computation Operator output ($sd, $nullify)
     signal output operatorOutput;
 
-    // Enabled/disable checkAuthV2 verification
+    // Enabled/disable checkAuthV3 verification
     signal input isBJJAuthEnabled;
 
     // flag indicates if merklized flag set in issuer claim (if set MTP is used to verify that
@@ -169,16 +169,18 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
     // on root stored in the index or value slot
     // if it is not set verification is performed on according to the slotIndex. Value selected from the
     // provided slot. For example if slotIndex is `1` value gets from `i_1` slot. If `4` from `v_1`.
-    signal merklized;
+    signal {binary} merklized;
 
     /////////////////////////////////////////////////////////////////
     // Auth check
     /////////////////////////////////////////////////////////////////
 
-    ForceEqualIfEnabled()(NOT()(isBJJAuthEnabled), [profileNonce, 0]);
+    signal {binary} safeIsBJJAuthEnabled <== AddBinaryTag()(isBJJAuthEnabled);
 
-    checkAuthV2(idOwnershipLevels, onChainLevels)(
-        isBJJAuthEnabled, // enabled
+    ForceEqualIfEnabled()(NOT()(safeIsBJJAuthEnabled), [profileNonce, 0]);
+
+    checkAuthV3(idOwnershipLevels, onChainLevels)(
+        safeIsBJJAuthEnabled, // enabled
         userGenesisID,
         userState, // user state
         userClaimsTreeRoot,

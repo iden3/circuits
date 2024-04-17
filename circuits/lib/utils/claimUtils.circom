@@ -7,28 +7,32 @@ include "../../../node_modules/circomlib/circuits/mux3.circom";
 include "../../../node_modules/circomlib/circuits/mux1.circom";
 include "../../../node_modules/circomlib/circuits/mux2.circom";
 include "./idUtils.circom";
+include "./babyjubjub.circom";
 
 // getClaimSubjectOtherIden checks that a claim Subject is OtherIden and outputs the identity within.
 template getClaimSubjectOtherIden() {
     signal input claim[8];
-    signal input claimFlags[32];
+    signal input {binary} claimFlags[32];
     signal output id;
 
     // get subject location from header flags.
     component subjectLocation = getSubjectLocation();
     subjectLocation.claimFlags <== claimFlags;
 
-    component mux = Mux2();
-    component n2b = Num2Bits(2);
+    component mux = Mux3();
+    component n2b = Num2Bits(3);
     n2b.in <== subjectLocation.out;
 
-    mux.s[0] <== n2b.out[0];
-    mux.s[1] <== n2b.out[1];
+    mux.s <== n2b.out;
 
     mux.c[0] <== 0;
     mux.c[1] <== 0;
     mux.c[2] <== claim[0*4 + 1];
     mux.c[3] <== claim[1*4 + 1];
+    mux.c[4] <== 0;
+    mux.c[5] <== 0;
+    mux.c[6] <== 0;
+    mux.c[7] <== 0;
 
     id <== mux.out;
 
@@ -41,8 +45,8 @@ template getClaimSubjectOtherIden() {
 // getClaimMerkilizeFlag checks that a claim flag is set and return merklized slot.
 template getClaimMerklizeRoot() {
     signal input claim[8];
-    signal input claimFlags[32];
-    signal output flag; // 0 non merklized, 1 merklized
+    signal input {binary} claimFlags[32];
+    signal output {binary} flag; // 0 non merklized, 1 merklized
 
     // merklizeFlag = 0 out = 0 , non merkilized
     // merklizeFlag = 1 out=claim_i_2, root is stored in index slot 2 (i_2)
@@ -52,26 +56,26 @@ template getClaimMerklizeRoot() {
     // get subject location from header flags.
     signal merklizeLocation <== getMerklizeLocation()(claimFlags);
 
-    component mux = Mux2();
-    component n2b = Num2Bits(2);
+    component mux = Mux3();
+    component n2b = Num2Bits(3);
     n2b.in <== merklizeLocation;
 
-    mux.s[0] <== n2b.out[0];
-    mux.s[1] <== n2b.out[1];
+    mux.s <== n2b.out;
 
     mux.c[0] <== 0;
     mux.c[1] <== claim[0*4 +2];
     mux.c[2] <== claim[1*4 +2];
     mux.c[3] <== 0;
+    mux.c[4] <== 0;
+    mux.c[5] <== 0;
+    mux.c[6] <== 0;
+    mux.c[7] <== 0;
 
     out <== mux.out;
 
-    component gt = GreaterThan(3); // there's only 3 bits in merklizeLocation
-    gt.in[0] <== merklizeLocation;
-    gt.in[1] <== 0;
-    flag <== gt.out;
+    flag <== GreaterThan(3)([merklizeLocation, 0]); // there's only 3 bits in merklizeLocation
 
-    // explicitly state that these signals are not used and it's ok
+    // explicitly state that some signals are not used and it's ok
     for (var i=0; i<8; i++) {
         _ <== claim[i];
     }
@@ -84,9 +88,9 @@ template getClaimHeader() {
     signal input claim[8];
 
     signal output schema;
-    signal output claimFlags[32];
+    signal output {binary} claimFlags[32];
 
-    component i0Bits = Num2Bits(254);
+    component i0Bits = Num2Bits_strict();
     i0Bits.in <== claim[0];
 
     component schemaNum = Bits2Num(128);
@@ -117,7 +121,7 @@ template getClaimRevNonce() {
 
     component claimRevNonce = Bits2Num(64);
 
-    component v0Bits = Num2Bits(254);
+    component v0Bits = Num2Bits_strict();
     v0Bits.in <== claim[4];
     for (var i=0; i<64; i++) {
         claimRevNonce.in[i] <== v0Bits.out[i];
@@ -169,9 +173,9 @@ template getClaimHash() {
 // verifyCredentialSubject verifies that claim is issued to a specified identity or identity profile
 // if nonce 0 is used, the claim should be issued to the genesis identity
 template verifyCredentialSubjectProfile() {
-    signal input enabled;
+    signal input {binary} enabled;
     signal input claim[8];
-    signal input claimFlags[32];
+    signal input {binary} claimFlags[32];
     signal input id;
     signal input nonce;
 
@@ -190,7 +194,7 @@ template verifyCredentialSubjectProfile() {
 
 // verifyCredentialSchema verifies that claim matches provided schema
 template verifyCredentialSchema() {
-    signal input enabled;
+    signal input {binary} enabled;
     signal input claimSchema;
     signal input schema;
 
@@ -202,13 +206,15 @@ template verifyCredentialSchema() {
 
 // verifyClaimSignature verifies that claim is signed with the provided public key
 template verifyClaimSignature() {
-    signal input enabled;
+    signal input {binary} enabled;
     signal input claimHash;
     signal input sigR8x;
     signal input sigR8y;
     signal input sigS;
     signal input pubKeyX;
     signal input pubKeyY;
+
+    ForceBabyCheckIfEnabled()(enabled, sigR8x, sigR8y);
 
     // signature verification
     EdDSAPoseidonVerifier()(
@@ -223,7 +229,7 @@ template verifyClaimSignature() {
 }
 
 template checkDataSignatureWithPubKeyInClaim() {
-    signal input enabled;
+    signal input {binary} enabled;
     signal input claim[8];
     signal input signatureS;
     signal input signatureR8X;
@@ -232,6 +238,8 @@ template checkDataSignatureWithPubKeyInClaim() {
 
     component getPubKey = getPubKeyFromClaim();
     getPubKey.claim <== claim;
+
+    ForceBabyCheckIfEnabled()(enabled, signatureR8X, signatureR8Y);
 
     EdDSAPoseidonVerifier()(
         enabled <== enabled,
@@ -278,11 +286,13 @@ template getValueByIndex(){
     value <== mux.out;
 }
 
-// verify that the claim has expiration time and it is less then timestamp
+// verify that provided timestamp is less than claim expiration time
 template verifyExpirationTime() {
-    signal input expirationFlag; // claimFlags[3] (expiration flag) is set
+    signal input {binary} expirationFlag; // claimFlags[3] (expiration flag) is set
     signal input claim[8];
     signal input timestamp;
+
+    _ <== Num2Bits(64)(timestamp); // allow max 64 bit number for timestamp
 
     signal claimExpiration <== getClaimExpiration()(claim);
 
@@ -302,15 +312,16 @@ template verifyExpirationTime() {
 template getClaimExpiration() {
     signal input claim[8];
 
-    signal output expiration;
+    signal output {maxbit} expiration;
 
     component expirationBits = Bits2Num(64);
 
-    component v0Bits = Num2Bits(254);
+    component v0Bits = Num2Bits_strict();
     v0Bits.in <== claim[4];
     for (var i=0; i<64; i++) {
         expirationBits.in[i] <== v0Bits.out[i+64];
     }
+    expiration.maxbit = 64;
     expiration <== expirationBits.out;
 
     // explicitly state that some of these signals are not used and it's ok
@@ -324,7 +335,7 @@ template getClaimExpiration() {
 
 // getSubjectLocation extract subject from claim flags.
 template getSubjectLocation() {
-    signal input claimFlags[32];
+    signal input {binary} claimFlags[32];
     signal output out;
 
     component subjectBits = Bits2Num(3);
@@ -344,7 +355,7 @@ template getSubjectLocation() {
 // getMerklizeLocation extract merklize from claim flags.
 // 0 - not merklized, 1 - root in index slot i_2[root], 2 - root in value slot v_2[root]
 template getMerklizeLocation() {
-    signal input claimFlags[32];
+    signal input {binary} claimFlags[32];
     signal output out;
 
     component mtBits = Bits2Num(3);
@@ -363,7 +374,7 @@ template getMerklizeLocation() {
 
 // isExpirable return 1 if expiration flag is set otherwise 0.
 template isExpirable() {
-        signal input claimFlags[32];
+        signal input {binary} claimFlags[32];
         signal output out;
 
         out <== claimFlags[3];
@@ -371,8 +382,8 @@ template isExpirable() {
 
 // isUpdatable return 1 if updatable flag is set otherwise 0.
 template isUpdatable() {
-        signal input claimFlags[32];
-        signal output out;
+        signal input {binary} claimFlags[32];
+        signal output {binary} out;
 
         out <== claimFlags[4];
 }
