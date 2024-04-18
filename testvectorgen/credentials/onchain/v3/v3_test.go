@@ -7,12 +7,11 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/iden3/go-iden3-crypto/babyjub"
 	"test/utils"
 
+	"github.com/ethereum/go-ethereum/common"
 	core "github.com/iden3/go-iden3-core/v2"
-
+	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 	"github.com/iden3/go-merkletree-sql/v2"
 	"github.com/iden3/go-merkletree-sql/v2/db/memory"
@@ -262,7 +261,7 @@ func Test_Between(t *testing.T) {
 }
 
 func Test_OnchainIdentity(t *testing.T) {
-	desc := "Skip Auth V2 check. Onchain identity (based on ethereum address)"
+	desc := "Skip Auth V3 check. Onchain identity (based on ethereum address)"
 	isUserIDProfile := false
 	isSubjectIDProfile := false
 	value := []string{"11"}
