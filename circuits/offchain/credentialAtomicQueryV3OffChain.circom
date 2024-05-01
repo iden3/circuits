@@ -52,6 +52,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
     signal input operator;
     signal input value[maxValueArraySize];
     signal input valueArraySize;
+    signal input commitNonce;
     signal input issuerClaim[8];
 
     // MTP specific
@@ -227,6 +228,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
         operator,
         value,
         valueArraySize,
+        commitNonce,
         issuerClaim,
         merklized,
         merklize.out

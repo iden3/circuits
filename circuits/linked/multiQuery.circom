@@ -26,6 +26,7 @@ template LinkedMultiQuery(N, claimLevels, maxValueArraySize) {
     signal input operator[N];
     signal input value[N][maxValueArraySize];
     signal input valueArraySize[N];
+    signal input commitNonce[N];
 
     // Outputs
     signal output linkID;
@@ -68,7 +69,7 @@ template LinkedMultiQuery(N, claimLevels, maxValueArraySize) {
     /////////////////////////////////////////////////////////////////
     for (var i=0; i<N; i++) {
         operatorNotNoop[i] <== NOT()(IsZero()(operator[i]));
-       
+
         // output value only if modifier operation was selected
         operatorOutput[i] <== ProcessQueryWithModifiers(claimLevels, maxValueArraySize)(
             operatorNotNoop[i], // enabled
@@ -82,6 +83,7 @@ template LinkedMultiQuery(N, claimLevels, maxValueArraySize) {
             operator[i],
             value[i],
             valueArraySize[i],
+            commitNonce[i],
             issuerClaim,
             merklized,
             merklize.out

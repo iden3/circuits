@@ -6,7 +6,7 @@ include "../../../node_modules/circomlib/circuits/poseidon.circom";
 
 template LinkID() {
     signal input claimHash;
-    signal input linkNonce;
+    signal input linkNonce; // private random nonce to make the commitment unique and secure
 
     signal output out;
 

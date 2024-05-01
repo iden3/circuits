@@ -118,6 +118,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
     signal input operator;
     signal input value[maxValueArraySize];
     signal input valueArraySize;
+    signal input commitNonce;
 
     // MTP specific
     signal input issuerClaimMtp[issuerLevels];
@@ -234,6 +235,7 @@ template credentialAtomicQueryV3OnChain(issuerLevels, claimLevels, maxValueArray
         operator <== operator,
         value <== value,
         valueArraySize <== valueArraySize,
+        commitNonce <== commitNonce,
         issuerClaim <== issuerClaim,
         issuerClaimMtp <== issuerClaimMtp,
         issuerClaimClaimsTreeRoot <== issuerClaimClaimsTreeRoot,

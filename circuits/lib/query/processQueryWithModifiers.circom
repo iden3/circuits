@@ -3,6 +3,7 @@ pragma circom 2.1.1;
 include "../../../node_modules/circomlib/circuits/comparators.circom";
 include "query.circom";
 include "modifiers.circom";
+include "valueCommitment.circom";
 include "../utils/claimUtils.circom";
 include "../utils/arraySizeValidator.circom";
 
@@ -18,6 +19,7 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     signal input operator;
     signal input value[maxValueArraySize];
     signal input valueArraySize; // actual size of value array - we don't want zero filled arrays to cause false positives for 0 as input to IN/NIN operators
+    signal input commitNonce;
 
     signal input issuerClaim[8];
     signal input merklized;
@@ -111,6 +113,9 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
     // selective disclosure
     // no need to calc anything, fieldValue is just passed as an output
 
+    // value commitment
+    signal valueCommitment <== ValueCommitment()(fieldValue, commitNonce);
+
     /////////////////////////////////////////////////////////////////
     // Modifier Operator Validation & Output Preparation
     /////////////////////////////////////////////////////////////////
@@ -120,7 +125,8 @@ template ProcessQueryWithModifiers(claimLevels, maxValueArraySize){
         operator <== operator,
         modifierOutputs <== [
             fieldValue, // 16 - selective disclosure (16-16 = index 0)
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 17-31 - not used
+            valueCommitment, // 17 - value commitment (17-16 = index 1)
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 // 18-31 - not used
         ]
     );
 }
