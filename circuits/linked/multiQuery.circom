@@ -38,7 +38,7 @@ template LinkedMultiQuery(N, claimLevels, maxValueArraySize) {
     /////////////////////////////////////////////////////////////////
 
     // get safe one values to be used in ForceEqualIfEnabled
-    signal one <== SafeOne()(linkNonce); // 7 constraints
+    signal {binary} one <== SafeOne()(linkNonce); // 7 constraints
 
     // get claim header
     component issuerClaimHeader = getClaimHeader(); // 300 constraints
