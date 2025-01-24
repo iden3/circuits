@@ -98,7 +98,7 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
     // get safe one values to be used in ForceEqualIfEnabled
     signal {binary} one <== SafeOne()(userGenesisID);
 
-    /////////////////////////////////////////////////////////////////
+   /////////////////////////////////////////////////////////////////
     // Claim Verification (id, schema, expiration, issuance, revocation)
     /////////////////////////////////////////////////////////////////
 
@@ -250,6 +250,10 @@ template credentialAtomicQueryV3OffChain(issuerLevels, claimLevels, maxValueArra
     // Link ID calculation
     /////////////////////////////////////////////////////////////////
     linkID <== LinkID()(issuerClaimHash, linkNonce); // 243 constraints
+
+    // dummy constraints
+    signal tmp <== requestID * requestID;
+    signal tmp2 <== issuerID * issuerID;
 }
 
 template sigFlow(issuerLevels) {
