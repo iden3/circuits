@@ -13,7 +13,7 @@ describe("Test stateTransition.circom", function() {
 
     before(async () => {
         circuit = await wasmTester(
-            path.join(__dirname, "../circuits/", "stateTransition.circom"),
+            path.join(__dirname, "../circuits/", "stateTransitionV3.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,
