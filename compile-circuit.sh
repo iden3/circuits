@@ -23,28 +23,28 @@ compile_and_ts() {
     mv "${CIRCUIT}.r1cs" circuit.r1cs
     mv "${CIRCUIT}_js/${CIRCUIT}.wasm" circuit.wasm
     mv "${CIRCUIT}.sym" circuit.sym
-    snarkjs r1cs info circuit.r1cs
-    #snarkjs r1cs export json circuit.r1cs circuit.r1cs.json
+    npx snarkjs r1cs info circuit.r1cs
+    #npx snarkjs r1cs export json circuit.r1cs circuit.r1cs.json
 
-#    time snarkjs setup -r circuit.r1cs --pk proving_key.json --vk verification_key.json
-    time snarkjs groth16 setup circuit.r1cs "$PTAU" circuit_0000.zkey
+#    time npx snarkjs setup -r circuit.r1cs --pk proving_key.json --vk verification_key.json
+    time npx snarkjs groth16 setup circuit.r1cs "$PTAU" circuit_0000.zkey
 
     ENTROPY1=$(head -c 64 /dev/urandom | od -An -tx1 -v | tr -d ' \n')
     ENTROPY2=$(head -c 64 /dev/urandom | od -An -tx1 -v | tr -d ' \n')
     ENTROPY3=$(head -c 64 /dev/urandom | od -An -tx1 -v | tr -d ' \n')
 
-#    time snarkjs zkey contribute circuit_0000.zkey circuit_0001.zkey --name="1st Contribution" -v -e="$ENTROPY1"
-#    time snarkjs zkey contribute circuit_0001.zkey circuit_0002.zkey --name="2nd Contribution" -v -e="$ENTROPY2"
-#    time snarkjs zkey contribute circuit_0002.zkey circuit_0003.zkey --name="3rd Contribution" -v -e="$ENTROPY3"
-#    time snarkjs zkey verify circuit.r1cs "$PTAU" circuit_0003.zkey
+#    time npx snarkjs zkey contribute circuit_0000.zkey circuit_0001.zkey --name="1st Contribution" -v -e="$ENTROPY1"
+#    time npx snarkjs zkey contribute circuit_0001.zkey circuit_0002.zkey --name="2nd Contribution" -v -e="$ENTROPY2"
+#    time npx snarkjs zkey contribute circuit_0002.zkey circuit_0003.zkey --name="3rd Contribution" -v -e="$ENTROPY3"
+#    time npx snarkjs zkey verify circuit.r1cs "$PTAU" circuit_0003.zkey
 #    time snarkjs zkey beacon circuit_0003.zkey circuit_final.zkey 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10 -n="Final Beacon phase2"
 
-    time snarkjs zkey contribute circuit_0000.zkey circuit_final.zkey --name="1st Contribution" -v -e="$ENTROPY1"
-#    time snarkjs zkey verify circuit.r1cs "$PTAU" circuit_final.zkey
-    time snarkjs zkey export verificationkey circuit_final.zkey verification_key.json
-    #time snarkjs zkey export json circuit_final.zkey circuit_final.zkey.json
+    time npx snarkjs zkey contribute circuit_0000.zkey circuit_final.zkey --name="1st Contribution" -v -e="$ENTROPY1"
+#    time npx snarkjs zkey verify circuit.r1cs "$PTAU" circuit_final.zkey
+    time npx snarkjs zkey export verificationkey circuit_final.zkey verification_key.json
+    #time npx snarkjs zkey export json circuit_final.zkey circuit_final.zkey.json
 
-    time snarkjs zkey export solidityverifier circuit_final.zkey verifier.sol
+    time npx snarkjs zkey export solidityverifier circuit_final.zkey verifier.sol
     set +x
 }
 
