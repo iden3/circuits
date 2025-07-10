@@ -77,3 +77,6 @@ node s3_util.js rm v1
           image: ghcr.io/iden3/circom:<version>
     ...
     ```
+
+## Security Audits
+1. [Trail of Bits](https://github.com/trailofbits/publications/tree/master/reviews) has performed a security audit of our circuits and compiled a report on May 3, 2024: [2024-05-polygonlabs-iden3circuits-securityreview.pdf](https://raw.githubusercontent.com/iden3/audits/adc81d1bce9a7bde9577eb4389998d60cfac9619/circuits/2024-05-polygonlabs-iden3circuits-securityreview.pdf)
