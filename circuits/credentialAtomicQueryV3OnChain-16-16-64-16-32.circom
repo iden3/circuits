@@ -18,4 +18,4 @@ component main{public [requestID,
                        gistRoot,
                        proofType,
                        isBJJAuthEnabled
-                       ]} = credentialAtomicQueryV3OnChain(40, 32, 64, 40, 64); // issuerLevels, claimLevels, maxValueArraySize, idOwnershipLevels, onChainLevels
+                       ]} = credentialAtomicQueryV3OnChain(16, 16, 64, 16, 32); // issuerLevels, claimLevels, maxValueArraySize, idOwnershipLevels, onChainLevels
