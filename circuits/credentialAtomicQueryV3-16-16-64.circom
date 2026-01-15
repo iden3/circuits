@@ -24,4 +24,4 @@ component main{public [requestID,
                        proofType,
                        verifierID,
                        nullifierSessionID
-                       ]} = credentialAtomicQueryV3OffChain(40, 32, 64); // issuerLevels, claimLevels, maxValueArraySize
+                       ]} = credentialAtomicQueryV3OffChain(16, 16, 64); // issuerLevels, claimLevels, maxValueArraySize

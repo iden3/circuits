@@ -13,4 +13,4 @@ include "auth/authV3.circom";
     - challenge
     - gistRoot
 */
-component main {public [challenge, gistRoot]} = AuthV3(40, 64); // IdOwnershipLevels, onChainLevels
+component main {public [challenge, gistRoot]} = AuthV3(8, 32); // IdOwnershipLevels, onChainLevels

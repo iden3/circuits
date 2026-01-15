@@ -10,7 +10,7 @@ include "../../node_modules/circomlib/circuits/smt/smtprocessor.circom";
 include "utils/safeOne.circom";
 include "idOwnership.circom";
 
-template StateTransition(IdOwnershipLevels) {
+template StateTransitionV3(IdOwnershipLevels) {
     signal input userID;
     signal input oldUserState;
     signal input newUserState;
