@@ -122,7 +122,7 @@ template credentialAtomicQueryV3Universal(issuerLevels, claimLevels, maxValueArr
     // on root stored in the index or value slot
     // if it is not set verification is performed on according to the slotIndex. Value selected from the
     // provided slot. For example if slotIndex is `1` value gets from `i_1` slot. If `4` from `v_1`.
-signal {binary} merklized;
+    signal {binary} merklized;
     
     /////////////////////////////////////////////////////////////////
     // Claim checks

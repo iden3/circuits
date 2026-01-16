@@ -4,7 +4,7 @@ import {describe} from "mocha";
 const path = require("path");
 const wasmTester = require("circom_tester").wasm;
 
-describe("Test linkedMultiQuery10.circom", function () {
+describe("Test linkedMultiQuery.circom", function () {
 
     this.timeout(600000);
 
@@ -12,7 +12,7 @@ describe("Test linkedMultiQuery10.circom", function () {
 
     before(async () => {
         circuit = await wasmTester(
-            path.join(__dirname, "../../circuits", "linkedMultiQuery10.circom"),
+            path.join(__dirname, "../../circuits", "linkedMultiQuery.circom"),
             {
                 output: path.join(__dirname, "circuits", "build"),
                 recompile: true,

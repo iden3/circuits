@@ -14,15 +14,6 @@ circuitQueryHash - hash of the query
 component main{public [requestID,
     issuerID,
     issuerClaimNonRevState,
-    claimSchema,
-    slotIndex,
-    claimPathKey,
-    operator,
-    value,
-    valueArraySize,
     timestamp,
-    isRevocationChecked,
-    proofType,
-    verifierID,
-    nullifierSessionID
+    proofType
 ]} = credentialAtomicQueryV3Universal(40, 32, 64); // issuerLevels, claimLevels, maxValueArraySize

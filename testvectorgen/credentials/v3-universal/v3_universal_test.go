@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"math/big"
-	"strconv"
 	"testing"
 
 	"test/utils"
@@ -99,27 +98,17 @@ type Inputs struct {
 }
 
 type Outputs struct {
-	RequestID              string   `json:"requestID"`
-	UserID                 string   `json:"userID"`
-	IssuerID               string   `json:"issuerID"`
-	IssuerClaimNonRevState string   `json:"issuerClaimNonRevState"`
-	ClaimSchema            string   `json:"claimSchema"`
-	SlotIndex              string   `json:"slotIndex"`
-	Operator               int      `json:"operator"`
-	ClaimPathKey           string   `json:"claimPathKey"`
-	Value                  []string `json:"value"`
-	ValueArraySize         int      `json:"valueArraySize"`
-	Timestamp              string   `json:"timestamp"`
-	Merklized              string   `json:"merklized"`
-	ProofType              string   `json:"proofType"` // 1 for sig, 2 for mtp
-	IsRevocationChecked    string   `json:"isRevocationChecked"`
-	IssuerState            string   `json:"issuerState"`
-	LinkID                 string   `json:"linkID"`
-	VerifierID             string   `json:"verifierID"`
-	NullifierSessionID     string   `json:"nullifierSessionID"`
-	OperatorOutput         string   `json:"operatorOutput"`
-	Nullifier              string   `json:"nullifier"`
-	CircuitQueryHash       string   `json:"circuitQueryHash"`
+	RequestID              string `json:"requestID"`
+	UserID                 string `json:"userID"`
+	IssuerID               string `json:"issuerID"`
+	IssuerClaimNonRevState string `json:"issuerClaimNonRevState"`
+	Timestamp              string `json:"timestamp"`
+	ProofType              string `json:"proofType"` // 1 for sig, 2 for mtp
+	IssuerState            string `json:"issuerState"`
+	LinkID                 string `json:"linkID"`
+	OperatorOutput         string `json:"operatorOutput"`
+	Nullifier              string `json:"nullifier"`
+	CircuitQueryHash       string `json:"circuitQueryHash"`
 }
 
 type TestData struct {
@@ -564,21 +553,11 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimNonRevState: issuer.State(t).String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              strconv.Itoa(slotIndex),
-		ClaimPathKey:           claimPathKey,
-		Operator:               operator,
-		Value:                  valueInput,
-		ValueArraySize:         valueArrSize,
 		Timestamp:              timestamp,
-		Merklized:              merklized,
-		IsRevocationChecked:    strconv.Itoa(isRevocationChecked),
 		ProofType:              proofType,
 		IssuerState:            issuerState,
 		LinkID:                 linkID,
 		OperatorOutput:         operatorOutput,
-		VerifierID:             inputs.VerifierID,
-		NullifierSessionID:     inputs.NullifierSessionID,
 		Nullifier:              nullifier,
 		CircuitQueryHash:       circuitQueryHash,
 	}
@@ -713,20 +692,10 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 		UserID:                 userProfileID.BigInt().String(),
 		IssuerID:               issuer.ID.BigInt().String(),
 		IssuerClaimNonRevState: issuerClaimNonRevState.String(),
-		ClaimSchema:            "180410020913331409885634153623124536270",
-		SlotIndex:              "0",
-		Operator:               utils.NOOP,
-		ClaimPathKey:           pathKey.String(),
-		Value:                  utils.PrepareStrArray([]string{}, 64),
-		ValueArraySize:         0,
 		Timestamp:              timestamp,
-		Merklized:              "1",
 		IssuerState:            issuerAuthState.String(),
-		IsRevocationChecked:    "1",
 		ProofType:              "1",
 		LinkID:                 "0",
-		VerifierID:             inputs.VerifierID,
-		NullifierSessionID:     inputs.NullifierSessionID,
 		OperatorOutput:         "0",
 		Nullifier:              "0",
 		CircuitQueryHash:       circuitQueryHash,
@@ -740,7 +709,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 	require.NoError(t, err)
 
 	utils.SaveTestVector(t, fileName, string(jsonData))
-}	
+}
 
 func calculateCircuitQueryHash(t *testing.T, inputs Inputs, merklized string, pathKey *big.Int) (string, error) {
 	merklizedBigInt, ok := big.NewInt(0).SetString(merklized, 10)
