@@ -87,7 +87,15 @@ const TestNormalClaimDocument = `
   }}`
 
 const (
-	IdentityTreeLevels = 40
-	GistLevels         = 64
-	ClaimLevels        = 32
+	IssuerLevels      = 40
+	ClaimLevels       = 32
+	MaxValueArraySize = 64
+	IdOwnershipLevels = 40
+	OnChainLevels     = 64
+
+	IssuerLevels2      = 16
+	ClaimLevels2       = 16
+	MaxValueArraySize2 = 64
+	IdOwnershipLevels2 = 16
+	OnChainLevels2     = 32
 )

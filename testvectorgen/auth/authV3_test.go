@@ -102,8 +102,8 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 	nonce := big.NewInt(0)
 
-	challenge := big.NewInt(12345)
-
+	challenge, ok := new(big.Int).SetString("5212973139745638668633720237501954966656555739014896868936311397139229290378", 10)
+	require.True(t, ok)
 	user := utils.NewIdentity(t, userPK)
 
 	var err error
@@ -117,7 +117,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 40)
 	require.Nil(t, err)
-	gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
+	//gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 
 	if genesis == false {
 		// extract pubKey
@@ -154,7 +154,7 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.OnChainLevels)
 
 	inputs := AuthV3Inputs{
 		UserGenesisID:               user.ID.BigInt().String(),

@@ -6,13 +6,19 @@ The circuits of this repository are compatible with the [go-iden3-core implement
 
 # Building and trusted setup
 
-First install the npm dependencies:
+1. Install the npm dependencies:
 
 ```bash
 npm ci
 ```
 
-Then build the circuit and do the "trusted" setup:
+2. Download corresponding powersOfTau file to be able to compile circuits:
+
+```bash
+wget https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_18.ptau
+```
+
+3. Then build the circuit and do the "trusted" setup:
 
 ```bash
 ./compile-circuit.sh CIRCUIT_PATH PTAU_FILE_PATH
@@ -21,8 +27,8 @@ Then build the circuit and do the "trusted" setup:
 Examples:
 
 ```bash
-./compile-circuit.sh circuits/auth.circom build/powersOfTau28_hez_final_16.ptau
-./compile-circuit.sh circuits/stateTransition.circom build/powersOfTau28_hez_final_16.ptau
+./compile-circuit.sh circuits/auth.circom build/powersOfTau28_hez_final_18.ptau
+./compile-circuit.sh circuits/stateTransition.circom build/powersOfTau28_hez_final_18.ptau
 ```
 
 ## Work with `s3_util.js` script
@@ -77,6 +83,30 @@ node s3_util.js rm v1
           image: ghcr.io/iden3/circom:<version>
     ...
     ```
+
+## Generate data folders with JSON files with proofs for contracts repo validators testing
+
+Scripts for generating the data with proofs for contracts repo for testing are placed in folders `testvectorgen` and `update-contract-data`.
+Example: Generate data for v3 tests in contracts repo (you should have the repo cloned in local)
+
+1. Go to folder `testvectorgen/contract_data/v3`
+    ```bash
+    cd testvectorgen/contract_data/v3
+    ```
+2. Generate executable for v3
+    ```bash
+    go test -c -o v3_test
+    ```
+3. Execute inputs data generation for generating proofs
+    ```bash
+    ./v3_test
+    ```
+4. You will see a folder `testdata` generated in the same folder with files with inputs for generating the different proofs.
+5. In root folder of the repo you can execute the Node script to generate the JSON files with proofs that will be copied to contracts repo
+    ```bash
+    node update-contract-data/update-contract-data-v3-stable.js
+    ```
+6. You will see in your `../contracts/test/validators/v3/data` and `../contracts/test/validators/common-data` the JSON files generated with the proofs needed for the validators tests in contracts.
 
 ## Security Audits
 1. [Trail of Bits](https://github.com/trailofbits/publications/tree/master/reviews) has performed a security audit of our circuits and compiled a report on May 3, 2024: [2024-05-polygonlabs-iden3circuits-securityreview.pdf](https://raw.githubusercontent.com/iden3/audits/adc81d1bce9a7bde9577eb4389998d60cfac9619/circuits/2024-05-polygonlabs-iden3circuits-securityreview.pdf)
