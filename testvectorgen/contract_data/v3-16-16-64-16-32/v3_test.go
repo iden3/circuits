@@ -72,64 +72,64 @@ type gistData struct {
 func Test_Generate_Test_CasesV3(t *testing.T) {
 
 	// genesis => first => second
-	issuerId, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition", "v3/issuer_from_genesis_state_to_first_transition_v3", true, false)
-	userId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "v3/user_from_genesis_state_to_first_transition_v3", false, false)
+	issuerId, issuerFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition", "v3-16-16-64-16-32/issuer_from_genesis_state_to_first_transition_v3", true, false)
+	userId, userFirstState := generateStateTransitionData(t, false, UserPK, IssuerPK, "User from genesis transition", "v3-16-16-64-16-32/user_from_genesis_state_to_first_transition_v3", false, false)
 
-	_, issuerSecondState := generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer from first to second transition", "v3/issuer_from_first_state_to_second_transition_v3", true, false)
-	_, userSecondState := generateStateTransitionData(t, true, UserPK, IssuerPK, "User from first to second transition", "v3/user_from_first_state_to_second_transition_v3", false, false)
+	_, issuerSecondState := generateStateTransitionData(t, true, IssuerPK, UserPK, "Issuer from first to second transition", "v3-16-16-64-16-32/issuer_from_first_state_to_second_transition_v3", true, false)
+	_, userSecondState := generateStateTransitionData(t, true, UserPK, IssuerPK, "User from first to second transition", "v3-16-16-64-16-32/user_from_first_state_to_second_transition_v3", false, false)
 
-	_, issuerAuthDisabledFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition auth disabled", "v3/issuer_from_genesis_state_to_first_auth_disabled_transition_v3", false, true)
+	_, issuerAuthDisabledFirstState := generateStateTransitionData(t, false, IssuerPK, UserPK, "Issuer from genesis to first state transition auth disabled", "v3-16-16-64-16-32/issuer_from_genesis_state_to_first_auth_disabled_transition_v3", false, true)
 
 	generateData(t, "BJJ: Issuer first state / user - genesis state", []*gistData{
 		{issuerId, issuerFirstState},
-	}, false, false, false, false, "v3/valid_bjj_user_genesis_v3", verifiable.BJJSignatureProofType, 1)
+	}, false, false, false, false, "v3-16-16-64-16-32/valid_bjj_user_genesis_v3", verifiable.BJJSignatureProofType, 1)
 
 	generateData(t, "BJJ: Issuer first state / user first state - valid proof", []*gistData{
 		{issuerId, issuerFirstState},
 		{userId, userFirstState},
-	}, true, false, false, false, "v3/valid_bjj_user_first_v3", verifiable.BJJSignatureProofType, 1)
+	}, true, false, false, false, "v3-16-16-64-16-32/valid_bjj_user_first_v3", verifiable.BJJSignatureProofType, 1)
 
 	generateData(t, "BJJ: Issuer second state / user first state - valid proof", []*gistData{
 		{userId, userFirstState},
 		{issuerId, issuerSecondState},
-	}, true, false, false, true, "v3/valid_bjj_user_first_issuer_second_v3", verifiable.BJJSignatureProofType, 1)
+	}, true, false, false, true, "v3-16-16-64-16-32/valid_bjj_user_first_issuer_second_v3", verifiable.BJJSignatureProofType, 1)
 
 	generateData(t, "BJJ: Issuer first state / user second state - valid proof", []*gistData{
 		{userId, userSecondState},
 		{issuerId, issuerSecondState},
-	}, true, true, false, false, "v3/valid_bjj_user_second_issuer_first_v3", verifiable.BJJSignatureProofType, 1)
+	}, true, true, false, false, "v3-16-16-64-16-32/valid_bjj_user_second_issuer_first_v3", verifiable.BJJSignatureProofType, 1)
 
 	generateData(t, "BJJ: Issuer first state / user - genesis state - Auth Disabled", []*gistData{
 		{issuerId, issuerAuthDisabledFirstState},
-	}, false, false, false, false, "v3/valid_bjj_user_genesis_auth_disabled_v3", verifiable.BJJSignatureProofType, 0)
+	}, false, false, false, false, "v3-16-16-64-16-32/valid_bjj_user_genesis_auth_disabled_v3", verifiable.BJJSignatureProofType, 0)
 
 	// MTP Data:
 	generateData(t, "MTP: Issuer first state / user - genesis state", []*gistData{
 		{issuerId, issuerFirstState},
-	}, false, false, false, false, "v3/valid_mtp_user_genesis_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
+	}, false, false, false, false, "v3-16-16-64-16-32/valid_mtp_user_genesis_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
 
 	generateData(t, "MTP: Issuer first state / user first state - valid proof", []*gistData{
 		{issuerId, issuerFirstState},
 		{userId, userFirstState},
-	}, true, false, false, false, "v3/valid_mtp_user_first_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
+	}, true, false, false, false, "v3-16-16-64-16-32/valid_mtp_user_first_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
 
 	generateData(t, "MTP: Issuer second state / user first state - valid proof", []*gistData{
 		{userId, userFirstState},
 		{issuerId, issuerSecondState},
-	}, true, false, false, true, "v3/valid_mtp_user_first_issuer_second_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
+	}, true, false, false, true, "v3-16-16-64-16-32/valid_mtp_user_first_issuer_second_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
 
 	generateData(t, "MTP: Issuer first state / user second state - valid proof", []*gistData{
 		{userId, userSecondState},
 		{issuerId, issuerSecondState},
-	}, true, true, false, false, "v3/valid_mtp_user_second_issuer_first_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
+	}, true, true, false, false, "v3-16-16-64-16-32/valid_mtp_user_second_issuer_first_v3", verifiable.Iden3SparseMerkleTreeProofType, 1)
 
 	generateData(t, "MTP: Issuer first state / user - genesis state - Auth Disabled", []*gistData{
 		{issuerId, issuerAuthDisabledFirstState},
-	}, false, false, false, false, "v3/valid_mtp_user_genesis_auth_disabled_v3", verifiable.Iden3SparseMerkleTreeProofType, 0)
+	}, false, false, false, false, "v3-16-16-64-16-32/valid_mtp_user_genesis_auth_disabled_v3", verifiable.Iden3SparseMerkleTreeProofType, 0)
 
 	generateData(t, "BJJ: Issuer genesis state / user - first state", []*gistData{
 		{userId, userFirstState},
-	}, true, false, true, false, "v3/valid_bjj_user_first_issuer_genesis_v3", verifiable.BJJSignatureProofType, 1)
+	}, true, false, true, false, "v3-16-16-64-16-32/valid_bjj_user_first_issuer_genesis_v3", verifiable.BJJSignatureProofType, 1)
 }
 
 func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, secondaryPK, desc, fileName string, isSubjectIDProfile bool, isEthBased bool) (*big.Int, *big.Int) {
@@ -150,7 +150,7 @@ func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, second
 	// user
 	authMTProof := primaryEntity.AuthMTPStrign(t)
 
-	authNonRevMTProof, nodeAuxNonRev := primaryEntity.ClaimRevMTP(t, primaryEntity.AuthClaim)
+	authNonRevMTProof, nodeAuxNonRev := primaryEntity.ClaimRevMTPLevels(t, primaryEntity.AuthClaim, utils.IdOwnershipLevels2)
 
 	oldState := primaryEntity.State(t) // old state is genesis
 	oldCltRoot := primaryEntity.Clt.Root().BigInt().String()
@@ -180,7 +180,7 @@ func generateStateTransitionData(t *testing.T, nextState bool, primaryPK, second
 		oldRotRoot = primaryEntity.Rot.Root().BigInt().String()
 		authMTProof = primaryEntity.AuthMTPStrign(t)
 
-		authNonRevMTProof, nodeAuxNonRev = primaryEntity.ClaimRevMTP(t, primaryEntity.AuthClaim)
+		authNonRevMTProof, nodeAuxNonRev = primaryEntity.ClaimRevMTPLevels(t, primaryEntity.AuthClaim, utils.IdOwnershipLevels2)
 		primaryEntityClaim := utils.DefaultUserClaim(t, primaryEntity.ID, nil)
 		primaryEntity.AddClaim(t, primaryEntityClaim)
 	}
@@ -251,7 +251,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 	const isRevoked = false
 	const isSubjectIDProfile = true
 
-	valueInput := utils.PrepareStrArray([]string{"20010101"}, 64)
+	valueInput := utils.PrepareStrArray([]string{"20010101"}, utils.MaxValueArraySize2)
 
 	var user *utils.IdentityTest
 
@@ -296,7 +296,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		claimPathValue = valueKey.String()
 
 		var claimJSONLDProofAux utils.NodeAuxValue
-		claimPathMtp, claimJSONLDProofAux = utils.PrepareProof(jsonP, utils.ClaimLevels)
+		claimPathMtp, claimJSONLDProofAux = utils.PrepareProof(jsonP, utils.ClaimLevels2)
 		claimPathMtpNoAux = claimJSONLDProofAux.NoAux
 		claimPathMtpAuxHi = claimJSONLDProofAux.Key
 		claimPathMtpAuxHv = claimJSONLDProofAux.Value
@@ -310,7 +310,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 
 	} else {
 		claim = utils.DefaultUserClaim(t, subjectID, nil)
-		claimPathMtp = utils.PrepareStrArray([]string{}, 32)
+		claimPathMtp = utils.PrepareStrArray([]string{}, utils.ClaimLevels2)
 		claimPathMtpNoAux = "0"
 		claimPathMtpAuxHi = "0"
 		claimPathMtpAuxHv = "0"
@@ -353,13 +353,13 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 
 	issuerAuthState = issuer.State(t).String()
 
-	issuerAuthClaimMtp, _ = issuer.ClaimMTP(t, issuer.AuthClaim)
+	issuerAuthClaimMtp, _ = issuer.ClaimMTPLevels(t, issuer.AuthClaim, utils.IssuerLevels2)
 
 	if !issuetGenesisState {
 		issuer.AddClaim(t, claim)
 	}
 
-	issuerClaimMtp, _ = issuer.ClaimMTP(t, claim)
+	issuerClaimMtp, _ = issuer.ClaimMTPLevels(t, claim, utils.IssuerLevels2)
 	require.NoError(t, err)
 	issuerClaimIdenState = issuer.State(t).String()
 
@@ -374,9 +374,9 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 	}
 
 	// prove revocation on latest state of the issuer
-	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTP(t, claim)
+	issuerClaimNonRevMtp, issuerClaimNonRevAux := issuer.ClaimRevMTPLevels(t, claim, utils.IssuerLevels2)
 
-	issuerAuthClaimNonRevMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTP(t, issuer.AuthClaim)
+	issuerAuthClaimNonRevMtp, issuerAuthClaimNodeAux := issuer.ClaimRevMTPLevels(t, issuer.AuthClaim, utils.IssuerLevels2)
 	issuerAuthClaimNonRevMtpNoAux = issuerAuthClaimNodeAux.NoAux
 	issuerAuthClaimNonRevMtpAuxHi = issuerAuthClaimNodeAux.Key
 	issuerAuthClaimNonRevMtpAuxHv = issuerAuthClaimNodeAux.Value
@@ -402,7 +402,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		issuerAuthClaimNonRevMtpAuxHv = "0"
 		issuerAuthClaimNonRevMtpNoAux = "0"
 
-		issuerAuthClaimMtp = utils.PrepareStrArray([]string{}, 40)
+		issuerAuthClaimMtp = utils.PrepareStrArray([]string{}, utils.IssuerLevels2)
 
 		issuerAuthClaim = &core.Claim{}
 
@@ -416,7 +416,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		proofType = "2"
 	}
 
-	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 64)
+	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), utils.OnChainLevels2)
 	require.Nil(t, err)
 
 	for _, data := range gistData {
@@ -439,19 +439,19 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 
 	// user
 	if isBJJAuthEnabled == 1 {
-		authMTProof = user.AuthMTPStrign(t)
-		userAuthNonRevMTProof, userNodeAuxNonRev = user.ClaimRevMTP(t, user.AuthClaim)
+		authMTProof = user.AuthMTPStrignLevels(t, utils.IdOwnershipLevels2)
+		userAuthNonRevMTProof, userNodeAuxNonRev = user.ClaimRevMTPLevels(t, user.AuthClaim, utils.IdOwnershipLevels2)
 		sig = user.Sign(challenge)
 		gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
 		require.NoError(t, err)
 		gistRoot = gisTree.Root()
-		gistProof, gistNodeAux = utils.PrepareProof(gistProofRaw, utils.GistLevels)
+		gistProof, gistNodeAux = utils.PrepareProof(gistProofRaw, utils.OnChainLevels2)
 
 	} else {
 
 		emptyArr := make([]*merkletree.Hash, 0)
-		authMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
-		userAuthNonRevMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
+		authMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IssuerLevels2)
+		userAuthNonRevMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IssuerLevels2)
 		userNodeAuxNonRev = utils.NodeAuxValue{
 			Key:   merkletree.HashZero.String(),
 			Value: merkletree.HashZero.String(),
@@ -466,7 +466,7 @@ func generateData(t *testing.T, desc string, gistData []*gistData, userFirstStat
 		}
 
 		gistRoot = &merkletree.HashZero
-		gistProof = utils.PrepareSiblingsStr(emptyArr, utils.GistLevels)
+		gistProof = utils.PrepareSiblingsStr(emptyArr, utils.OnChainLevels2)
 		gistNodeAux = utils.NodeAuxValue{
 			Key:   merkletree.HashZero.String(),
 			Value: merkletree.HashZero.String(),
