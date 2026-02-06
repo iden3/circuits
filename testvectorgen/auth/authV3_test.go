@@ -117,7 +117,6 @@ func generateAuthTestData(t *testing.T, profile, genesis, isSecondAuthClaim bool
 
 	gisTree, err := merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), 40)
 	require.Nil(t, err)
-	//gisTree.Add(context.Background(), big.NewInt(1), big.NewInt(1))
 
 	if genesis == false {
 		// extract pubKey

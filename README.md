@@ -27,8 +27,8 @@ wget https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_18.ptau
 Examples:
 
 ```bash
-./compile-circuit.sh circuits/auth.circom build/powersOfTau28_hez_final_18.ptau
-./compile-circuit.sh circuits/stateTransition.circom build/powersOfTau28_hez_final_18.ptau
+./compile-circuit.sh circuits/auth.circom powersOfTau28_hez_final_18.ptau
+./compile-circuit.sh circuits/stateTransition.circom powersOfTau28_hez_final_18.ptau
 ```
 
 ## Work with `s3_util.js` script
@@ -104,7 +104,7 @@ Example: Generate data for v3 tests in contracts repo (you should have the repo 
 4. You will see a folder `testdata` generated in the same folder with files with inputs for generating the different proofs.
 5. In root folder of the repo you can execute the Node script to generate the JSON files with proofs that will be copied to contracts repo
     ```bash
-    node update-contract-data/update-contract-data-v3-stable.js
+    node update-contract-data/update-contract-data-v3.js
     ```
 6. You will see in your `../contracts/test/validators/v3/data` and `../contracts/test/validators/common-data` the JSON files generated with the proofs needed for the validators tests in contracts.
 

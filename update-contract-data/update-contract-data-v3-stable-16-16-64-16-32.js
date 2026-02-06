@@ -14,15 +14,13 @@ for (const file of files) {
 
   if (file.includes('state')) {
     continue;
-    //circuitName = 'stateTransition'
-    //destinationFolder = 'common-data'
   } else {
-    circuitName = 'credentialAtomicQueryV3OnChain-16-16-64-16-32'
-    destinationFolder = 'v3-stable/data-16-16-64-16-32'
+    circuitName = 'credentialAtomicQueryV3OnChain-16-16-64-16-32';
+    destinationFolder = 'v3-stable/data-16-16-64-16-32';
   }
   const buildPath = `${buildFolder}${circuitName}/${circuitName}_js/`;
   ['input.json', 'public.json', 'proof.json'].forEach((f) => {
-    const p = path.join(`${buildFolder}${circuitName}/${circuitName}_js`, f)
+    const p = path.join(`${buildFolder}${circuitName}/${circuitName}_js`, f);
     fs.existsSync(p) &&
       fs.unlinkSync(p);
     console.log(`Deleted file: ${p}`);

@@ -10,18 +10,16 @@ const files = fs.readdirSync(dataFolder);
 let circuitName = null;
 let destinationFolder = null;
 for (const file of files) {
-
-
   if (file.includes('state')) {
-    circuitName = 'stateTransition'
-    destinationFolder = 'common-data'
+    circuitName = 'stateTransition';
+    destinationFolder = 'common-data';
   } else {
-    circuitName = 'credentialAtomicQueryV3OnChain'
-    destinationFolder = 'v3-stable/data'
+    circuitName = 'credentialAtomicQueryV3OnChain';
+    destinationFolder = 'v3-stable/data';
   }
   const buildPath = `${buildFolder}${circuitName}/${circuitName}_js/`;
   ['input.json', 'public.json', 'proof.json'].forEach((f) => {
-    const p = path.join(`${buildFolder}${circuitName}/${circuitName}_js`, f)
+    const p = path.join(`${buildFolder}${circuitName}/${circuitName}_js`, f);
     fs.existsSync(p) &&
       fs.unlinkSync(p);
     console.log(`Deleted file: ${p}`);
