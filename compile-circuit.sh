@@ -51,7 +51,7 @@ compile_and_ts() {
 if [ "$#" -ne 2 ]
 then
     echo "Usage:   $0 CIRCUIT_PATH $1 PTAU_PATH">&2
-    echo "Example: ./compile-circuit.sh example.circom powersOfTau28_hez_final_15.ptau" >&2
+    echo "Example: ./compile-circuit.sh example.circom powersOfTau28_hez_final_18.ptau" >&2
     exit 1
 fi
 

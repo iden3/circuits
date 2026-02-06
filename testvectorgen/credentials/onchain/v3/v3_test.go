@@ -489,15 +489,15 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		gistProofRaw, _, err := gisTree.GenerateProof(context.Background(), user.IDHash(t), nil)
 		require.NoError(t, err)
 		gistRoot = gisTree.Root()
-		gistProof, gistNodeAux = utils.PrepareProof(gistProofRaw, utils.GistLevels)
+		gistProof, gistNodeAux = utils.PrepareProof(gistProofRaw, utils.OnChainLevels)
 
 	} else {
 
 		emptyArr := make([]*merkletree.Hash, 0)
 		addr := common.HexToAddress(ethAddress)
 		challenge = new(big.Int).SetBytes(merkletree.SwapEndianness(addr.Bytes()))
-		authMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
-		authNonRevMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IdentityTreeLevels)
+		authMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IssuerLevels)
+		authNonRevMTProof = utils.PrepareSiblingsStr(emptyArr, utils.IssuerLevels)
 		user.AuthClaim, err = core.NewClaim(core.AuthSchemaHash)
 		require.NoError(t, err)
 		nodeAuxNonRev = utils.NodeAuxValue{
@@ -514,7 +514,7 @@ func generateTestDataWithOperatorAndRevCheck(t *testing.T, desc string, isUserID
 		}
 
 		gistRoot = &merkletree.HashZero
-		gistProof = utils.PrepareSiblingsStr(emptyArr, utils.GistLevels)
+		gistProof = utils.PrepareSiblingsStr(emptyArr, utils.OnChainLevels)
 		gistNodeAux = utils.NodeAuxValue{
 			Key:   merkletree.HashZero.String(),
 			Value: merkletree.HashZero.String(),
@@ -752,7 +752,7 @@ func generateJSONLD_NON_INCLUSION_TestData(t *testing.T, isUserIDProfile, isSubj
 	require.NoError(t, err)
 
 	gistRoot := gisTree.Root()
-	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.GistLevels)
+	gistProof, gistNodAux := utils.PrepareProof(gistProofRaw, utils.OnChainLevels)
 
 	valueArraySize := utils.GetValueArraySizeForOperator(utils.EXISTS)
 

@@ -1,27 +1,25 @@
-const dataFolder = './testvectorgen/contract_data/testdata/v3';
-const contractDataBaseFolder = '../contracts/test/validators/';
-const buildFolder = './build/';
+const dataFolder = '../testvectorgen/contract_data/v3/testdata/v3';
+const contractDataBaseFolder = '../../contracts/test/validators/';
+const buildFolder = '../build/';
 const fs = require('fs');
 const path = require('path');
-const { execSync, execFileSync } = require('child_process');
+const { execSync } = require('child_process');
 
 const files = fs.readdirSync(dataFolder);
 
 let circuitName = null;
 let destinationFolder = null;
 for (const file of files) {
-
-
   if (file.includes('state')) {
-    circuitName = 'stateTransition'
-    destinationFolder = 'common-data'
+    circuitName = 'stateTransition';
+    destinationFolder = 'common-data';
   } else {
-    circuitName = 'credentialAtomicQueryV3OnChain-beta.1'
-    destinationFolder = 'v3/data'
+    circuitName = 'credentialAtomicQueryV3OnChain-beta.1';
+    destinationFolder = 'v3/data';
   }
-  const buildPath = `./build/${circuitName}/${circuitName}_js/`;
+  const buildPath = `${buildFolder}${circuitName}/${circuitName}_js/`;
   ['input.json', 'public.json', 'proof.json'].forEach((f) => {
-    const p = path.join(`./build/${circuitName}/${circuitName}_js`, f)
+    const p = path.join(`${buildFolder}${circuitName}/${circuitName}_js`, f);
     fs.existsSync(p) &&
       fs.unlinkSync(p);
     console.log(`Deleted file: ${p}`);
@@ -31,7 +29,7 @@ for (const file of files) {
 
   console.log(`Creating file: ${buildPath}/input.json`);
   fs.writeFileSync(`${buildPath}/input.json`, JSON.stringify(inputs), 'utf-8');
-  const child = execSync(`./generate.sh ${circuitName}`);
+  const child = execSync(`../generate.sh ${circuitName}`);
   console.log(`execution completed`, new TextDecoder().decode(child));
   const pub_signals = JSON.parse(fs.readFileSync(`${buildPath}/public.json`).toString());
   console.log(pub_signals);

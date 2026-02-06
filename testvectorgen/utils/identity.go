@@ -36,7 +36,12 @@ func (it *IdentityTest) State(t testing.TB) *big.Int {
 
 func (it *IdentityTest) AuthMTPStrign(t testing.TB) []string {
 	p, _ := it.ClaimMTPRaw(t, it.AuthClaim)
-	return PrepareSiblingsStr(p.AllSiblings(), IdentityTreeLevels)
+	return PrepareSiblingsStr(p.AllSiblings(), IssuerLevels)
+}
+
+func (it *IdentityTest) AuthMTPStrignLevels(t testing.TB, levels int) []string {
+	p, _ := it.ClaimMTPRaw(t, it.AuthClaim)
+	return PrepareSiblingsStr(p.AllSiblings(), levels)
 }
 
 func (it *IdentityTest) SignClaim(t testing.TB, claim *core.Claim) *babyjub.Signature {
@@ -79,7 +84,22 @@ func (it *IdentityTest) ClaimMTP(t testing.TB, claim *core.Claim) (sibling []str
 		t.Fatalf("can't generate proof %v", err)
 	}
 
-	return PrepareProof(proof, IdentityTreeLevels)
+	return PrepareProof(proof, IssuerLevels)
+}
+
+func (it *IdentityTest) ClaimMTPLevels(t testing.TB, claim *core.Claim, levels int) (sibling []string, nodeAux NodeAuxValue) {
+	// add auth claim to claimsMT
+	hi, _, err := claim.HiHv()
+	if err != nil {
+		t.Fatalf("can't get claim index hash %v", err)
+	}
+
+	proof, _, err := it.Clt.GenerateProof(context.Background(), hi, nil)
+	if err != nil {
+		t.Fatalf("can't generate proof %v", err)
+	}
+
+	return PrepareProof(proof, levels)
 }
 
 func (it *IdentityTest) ClaimRevMTPRaw(t testing.TB, claim *core.Claim) (*merkletree.Proof, *big.Int) {
@@ -102,7 +122,20 @@ func (it *IdentityTest) ClaimRevMTP(t testing.TB, claim *core.Claim) (sibling []
 		t.Fatalf("can't generate proof %v", err)
 	}
 
-	return PrepareProof(proof, IdentityTreeLevels)
+	return PrepareProof(proof, IssuerLevels)
+
+}
+
+func (it *IdentityTest) ClaimRevMTPLevels(t testing.TB, claim *core.Claim, levels int) (sibling []string, nodeAux NodeAuxValue) {
+	// add auth claim to claimsMT
+	revNonce := claim.GetRevocationNonce()
+
+	proof, _, err := it.Ret.GenerateProof(context.Background(), new(big.Int).SetUint64(revNonce), nil)
+	if err != nil {
+		t.Fatalf("can't generate proof %v", err)
+	}
+
+	return PrepareProof(proof, levels)
 
 }
 
@@ -134,15 +167,15 @@ func NewIdentity(t testing.TB, privKHex string) *IdentityTest {
 
 	// init claims tree
 
-	it.Clt, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IdentityTreeLevels)
+	it.Clt, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IssuerLevels)
 	if err != nil {
 		t.Fatalf("Error creating Claims merkle tree: %v", err)
 	}
-	it.Ret, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IdentityTreeLevels)
+	it.Ret, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IssuerLevels)
 	if err != nil {
 		t.Fatalf("Error creating Revocation merkle tree: %v", err)
 	}
-	it.Rot, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IdentityTreeLevels)
+	it.Rot, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IssuerLevels)
 	if err != nil {
 		t.Fatalf("Error creating Roots merkle tree: %v", err)
 	}
@@ -179,15 +212,15 @@ func NewEthereumBasedIdentity(t testing.TB, ethAddr string) *IdentityTest {
 
 	// init claims tree
 
-	it.Clt, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IdentityTreeLevels)
+	it.Clt, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IssuerLevels)
 	if err != nil {
 		t.Fatalf("Error creating Claims merkle tree: %v", err)
 	}
-	it.Ret, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IdentityTreeLevels)
+	it.Ret, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IssuerLevels)
 	if err != nil {
 		t.Fatalf("Error creating Revocation merkle tree: %v", err)
 	}
-	it.Rot, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IdentityTreeLevels)
+	it.Rot, err = merkletree.NewMerkleTree(context.Background(), memory.NewMemoryStorage(), IssuerLevels)
 	if err != nil {
 		t.Fatalf("Error creating Roots merkle tree: %v", err)
 	}
